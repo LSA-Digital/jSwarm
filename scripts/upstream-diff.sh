@@ -17,7 +17,9 @@ if ! "$py" -c "import yaml" >/dev/null 2>&1; then
 fi
 
 "$py" - "$common" "$prov" "$mode" <<'PY'
-import subprocess, sys
+import re
+import subprocess
+import sys
 import yaml
 
 common, prov, mode = sys.argv[1:4]
@@ -29,7 +31,23 @@ except FileNotFoundError:
     print(f"error: {prov} not found. Run this from a copied jSwarm checkout that has PROVENANCE.yaml.", file=sys.stderr)
     sys.exit(1)
 
-base = data["source_commit"]
+SHA_RE = re.compile(r"^[0-9a-fA-F]{40}$")
+
+raw_base = data.get("source_commit")
+base = str(raw_base) if raw_base is not None else ""
+if not SHA_RE.match(base):
+    print(
+        f"error: {prov} has an invalid source_commit ({raw_base!r}).\n"
+        'Expected a 40-character hex commit sha, e.g. "3c36c4dbe5dc6c4662c1ff96916bba2cd4082d17".\n'
+        "If you hand-authored this file, quote the value (source_commit: \"...\") so YAML does not "
+        "parse an all-digit sha as a number.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
+for e in data["files"]:
+    e["source"] = str(e["source"])
+    e["target"] = str(e["target"])
 
 is_repo = subprocess.run(
     ["git", "-C", common, "rev-parse", "--is-inside-work-tree"],
@@ -65,7 +83,7 @@ for e in data["files"]:
     args = ["git", "-C", common, "diff"] + (["--stat"] if mode == "--stat" else []) + [f"{base}..HEAD", "--", e["source"]]
     out = subprocess.run(args, capture_output=True, text=True).stdout.strip()
     if out:
-        target_dir = e["target"].rsplit("/", 1)[0] if "/" in e["target"] else "."
+        target_dir = e["target"].rsplit("/", 1)[0] if "/" in e["target"] else "(repo root)"
         groups.setdefault(target_dir, []).append((e, out))
 
 for target_dir in sorted(groups):

@@ -132,6 +132,64 @@ def test_upstream_path_not_a_git_repo_gives_clear_message(tmp_path):
     assert "Traceback" not in result.stderr
 
 
+def test_hand_authored_octal_source_commit_gives_clear_message(tmp_path):
+    # PyYAML's default resolver parses an unquoted string of only octal digits
+    # (e.g. 40 zeros) as an int, not a str. A hand-authored PROVENANCE.yaml
+    # (as opposed to one written with yaml.safe_dump, which always quotes)
+    # can trigger this. The script must catch it, not crash.
+    up, _sha = _make_upstream(tmp_path)
+    repo = tmp_path / "repo"
+    _install_script(repo)
+    (repo / "PROVENANCE.yaml").write_text(
+        "source_commit: 0000000000000000000000000000000000000000\n"
+        "files:\n"
+        "  - source: a.py\n"
+        "    target: jswarm/a.py\n"
+        "    sha256: x\n"
+    )
+    result = subprocess.run(
+        ["bash", "scripts/upstream-diff.sh", str(up)], cwd=repo, capture_output=True, text=True
+    )
+    assert result.returncode != 0
+    assert "Traceback" not in result.stderr
+    assert "source_commit" in result.stderr
+    assert "invalid" in result.stderr.lower()
+
+
+def test_hand_authored_non_sha_source_commit_gives_clear_message(tmp_path):
+    up, _sha = _make_upstream(tmp_path)
+    repo = tmp_path / "repo"
+    _install_script(repo)
+    (repo / "PROVENANCE.yaml").write_text(
+        "source_commit: not-a-real-sha\n"
+        "files:\n"
+        "  - source: a.py\n"
+        "    target: jswarm/a.py\n"
+        "    sha256: x\n"
+    )
+    result = subprocess.run(
+        ["bash", "scripts/upstream-diff.sh", str(up)], cwd=repo, capture_output=True, text=True
+    )
+    assert result.returncode != 0
+    assert "Traceback" not in result.stderr
+    assert "source_commit" in result.stderr
+    assert "invalid" in result.stderr.lower()
+
+
+def test_bare_target_groups_under_repo_root_label(tmp_path):
+    up, sha = _make_upstream(tmp_path)
+    repo = tmp_path / "repo"
+    _install_script(repo)
+    (repo / "PROVENANCE.yaml").write_text(
+        yaml.safe_dump({"source_commit": sha, "files": [{"source": "a.py", "target": "a.py", "sha256": "x"}]})
+    )
+    out = subprocess.run(
+        ["bash", "scripts/upstream-diff.sh", str(up)], cwd=repo, capture_output=True, text=True
+    ).stdout
+    assert "# (repo root)" in out
+    assert "# .\n" not in out
+
+
 def test_deleted_upstream_file_reported_separately(tmp_path):
     up = tmp_path / "common"
     up.mkdir()
