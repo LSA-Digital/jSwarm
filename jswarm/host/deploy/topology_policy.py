@@ -19,7 +19,7 @@ try:
 except ImportError:  # pragma: no cover - exercised only in broken local envs
     yaml = None  # type: ignore[assignment]
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 COMPONENTS_REL = Path("docs") / "_JarviSWARM" / "components"
 
 

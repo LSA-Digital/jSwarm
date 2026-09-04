@@ -697,7 +697,7 @@ def _cleanup_probe(plan: ProbePlan) -> None:
 
 # --- command-injection renderer proof (spec §3:372 — no claude subprocess needed) -----------------
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 # Allowlisted managed-command name the probe renders under (see _stage_injection_probe_root).
 INJECTION_PROBE_COMMAND_NAME = "test.md"
 

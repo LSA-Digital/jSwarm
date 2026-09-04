@@ -1619,7 +1619,7 @@ def run_runtime_smoke(*, surface: str, manifest_path: str | Path, home_root: str
             f"sequence; refusing the unattended engine path (fail-closed)"
         )
         return False
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = Path(__file__).resolve().parents[3]
     nonce = f"engine-{_new_run_id()}"
     plan = _runner.build_probe_plan(
         surface=runner_surface,
