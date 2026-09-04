@@ -239,7 +239,7 @@ If a source worktree exists (`.claude/worktrees/<ticket-lower>/`), run the sourc
 
 1. **Classify uncommitted files in source worktree** using the 5-class taxonomy (above).
 2. **Legacy zero-commits check (NEW — added 2026-05-11 Fix #5b):** if `git rev-list --count origin/main..HEAD` returns `0` (source branch has zero commits beyond main's base) AND working tree has any Class D dirt → route to **Step 0b.L Legacy migration commit flow** below. Skip the rest of Step 0b's auto-handle steps.
-3. **Auto-handle (normal post-/implement state):**
+3. **Auto-handle (normal post-/jGo state):**
    - **Class A** (gitignored): ignore silently
    - **Class B** (Feature plans, doc plans): auto-commit with synthesized message `chore(${SOURCE_TICKET}): /jMerge auto-commit of plan + doc updates`
    - **Class C** (append-only logs/retros): same as B
@@ -316,7 +316,7 @@ Then re-run /jClose ${SOURCE_TICKET} or /jMerge --source ${SOURCE_TICKET} --targ
 - Option B/C preserve developer control when they want it
 
 **Anti-patterns:**
-- Treating legacy migration as the *normal* Step 0b path — it's only triggered by zero-commits AND Class D dirt; normal post-/implement tickets follow standard Step 0b
+- Treating legacy migration as the *normal* Step 0b path — it's only triggered by zero-commits AND Class D dirt; normal post-/jGo tickets follow standard Step 0b
 - Silently bundling without the prompt — Class D auto-commit without consent is the failure mode this safeguards against
 - Forgetting to log to `lean-rejection-log.md` — calibration data tracks how often legacy migration fires; over time this should approach zero as old tickets close out
 

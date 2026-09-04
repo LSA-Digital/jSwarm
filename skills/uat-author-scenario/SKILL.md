@@ -17,7 +17,7 @@ level: 2
 
 # uat-author-scenario — mid-ticket guided scenario authoring + runbook + test scaffolding
 
-Option 3 of the `/uat` menu (COM-194). It lets a developer, **while another ticket is mid-`/jGo`**, add UAT coverage for newly-discovered behavior without leaving the flow: author a brand-new scenario (or update an existing one), generate that scenario's executable `.uat-test.md` runbook, and scaffold the unit/integration test stubs it implies — then continue with `/jGo` to author the real assertions.
+Option 3 of the `/jUAT` menu (COM-194). It lets a developer, **while another ticket is mid-`/jGo`**, add UAT coverage for newly-discovered behavior without leaving the flow: author a brand-new scenario (or update an existing one), generate that scenario's executable `.uat-test.md` runbook, and scaffold the unit/integration test stubs it implies — then continue with `/jGo` to author the real assertions.
 
 This skill is a **thin orchestration** over the existing COM-122 UAT-scenario engine. It does not reimplement validation, rendering, or the preview gate — it drives the engine scripts. Two hard rules:
 
@@ -91,7 +91,7 @@ This skill is a **thin orchestration** over the existing COM-122 UAT-scenario en
 
 ## Boundaries
 
-- **Thin menu only.** The `/uat` command file gains one row + one routing bullet; all workflow logic lives here and in the scripts.
+- **Thin menu only.** The `/jUAT` command file gains one row + one routing bullet; all workflow logic lives here and in the scripts.
 - **Path confinement.** Writes are limited to the active ticket folder (`.jswarm/plans/<KEY>/`) and the selected scenarios JSON + project test dir. Nothing else is touched; the final report lists every changed path and leaks no secrets.
 - **JSON canonical / Markdown derived.** Edit the JSON (via the tools), then regenerate the Markdown — never hand-edit the derived `.md`.
 - **No overreach.** This skill scaffolds stubs and a runbook; it does not author full runnable tests, auto-join scenarios to groupings/PE2E clusters, or run browser/Playwright UAT.

@@ -122,7 +122,7 @@ Apply the checklist in [`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/close-ticket/vali
 | **1 — Implementation completeness** | A/C checkboxes, A/C-to-Test matrix, all lifecycle-maintained evidence surfaces, plan status already reconciled to `5.closed.ready_for_merge` | A/C/test/evidence gaps → `/jGo TICKET-XXX` or the relevant closeout doc-update step. Missing/invalid/planning/implementation/all-A-C-met plan_status values, including `3.implementation.phase_*` and `4.closed.all_ac_met`, block closeout and route back to `/jGo TICKET-XXX`; `4.closed.all_ac_met` is not ready for merge. Legacy pre-2026-05-11 plans may use the explicit escape hatch `proceed anyway? [yes/no]`. **Commit/push state is NOT checked here** — `/jMerge` Step 0b is authoritative; uncommitted/unpushed source is `/jMerge`'s concern, not `/jClose`'s (Fix #5a, 2026-05-11). |
 | **2 — Worktree state** (OpenCode) | safe-to-cleanup check + typed confirmation + STATUS=0 + `[STATE] CLEANUP_OK` | Run `/worktree-cleanup` from main checkout |
 | **3 — UAT completeness** (when `Automated UAT: yes`) | UAT report, mode/driver declaration, overlay/runtime monitor evidence, per-phase UAT gate, script freshness | `/jGo` (Plan Completion reruns mode-correct UAT) |
-| **3a — UAT round tracking readiness** (when `UAT round tracking: on`) | Bug Master Ledger has no `1.OPEN` rows remaining; the round file (`TICKET-XXX.UAT-CURRENT-ROUND.md`) is terminal, or absent if never opened; every deferral has a named home (ticket or destination) per the `2.DEFERRED→TICKET` grammar | route back to `/fix TICKET-XXX` to close remaining `1.OPEN` rows or name a deferral home |
+| **3a — UAT round tracking readiness** (when `UAT round tracking: on`) | Bug Master Ledger has no `1.OPEN` rows remaining; the round file (`TICKET-XXX.UAT-CURRENT-ROUND.md`) is terminal, or absent if never opened; every deferral has a named home (ticket or destination) per the `2.DEFERRED→TICKET` grammar | route back to `/jFix TICKET-XXX` to close remaining `1.OPEN` rows or name a deferral home |
 | **4 — Regression / E2E policy** | per-ticket promotion artifact OR explicit deferral note; deterministic test data | `/jGo` |
 | **5 — Catalog freshness** | TEST_CATALOG validate mode; `Relevant UAT` per Regression row | `/jGo` Step 3.1 catalog regen |
 | **5a — Test completeness** | close-time test-catalog completeness gate for touched-but-uncited tests; `completeness_gate.py --stage close` must BLOCK on any orphan unless the plan records an explicit deferral | cite the test in catalog/traceability or add the explicit deferral before close |
@@ -343,7 +343,7 @@ When the Feature uses Governance Rings methodology (presence of `.jswarm/plans/H
 | §Tactical Tickets row (closing Story) | 🔵 PLAN DETAILED → 🟢 **Merged YYYY-MM-DD** with merge SHA |
 | §Sequencing View Mermaid | `:::business` → `:::done` for the closing Story's node + label suffix `(merged YYYY-MM-DD)` |
 | §Sequencing View Gantt | `:crit` → `:crit, done` (or default → `done`) for the closing Story's bar |
-| §Phase Boundary Acceptance | Status field updates **but ONLY** to 🟡 Pre-graduation when AC requires post-/merge verification; full ✅ Met flips belong to `/feature-reconcile` |
+| §Phase Boundary Acceptance | Status field updates **but ONLY** to 🟡 Pre-graduation when AC requires post-/jMerge verification; full ✅ Met flips belong to `/feature-reconcile` |
 
 **`/feature-reconcile` owns** (post-merge formal — *verify the substrate + record the event*):
 

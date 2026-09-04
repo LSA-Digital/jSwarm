@@ -4,13 +4,13 @@ Use this companion only after every planned task in the active phase is complete
 
 1. Confirm task/A-C completion and run only applicable planned gates: tests,
     smoke/demo, UAT, NFR, feature boundary work, and infrastructure currency.
-    Their current owners are `/test`, `/uat`, `/nfr`, `/feature-reconcile`, and
+    Their current owners are `/jTest`, `/jUAT`, `/nfr`, `/feature-reconcile`, and
     [`/jInfra`](../jInfra/SKILL.md); self-skip only when the plan makes a gate
     inapplicable.
    When the plan carries `## UAT Execution Trigger`, consume its extracted and
    validated document through `jswarm/uat_trigger.py::evaluate_phase_exit`.
    `BLOCK` halts acceptance with its typed reason. `DISPATCH` invokes
-   `/test uat prepare <TICKET>` and keeps acceptance blocked until the current
+   `/jTest uat prepare <TICKET>` and keeps acceptance blocked until the current
    package/script/build PASS receipt has all six freshness fields and matching
    identities. `SKIP` records its reason without dispatch; `PROCEED` continues.
    Plans without this section retain the existing gate behavior.

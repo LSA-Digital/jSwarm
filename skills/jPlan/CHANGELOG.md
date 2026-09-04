@@ -24,7 +24,7 @@
 | 2026-04-15 | Claude | Added qa-tester-uat for post-implementation UAT verification. |
 | 2026-04-14 | Claude | Worktree for branch isolation. |
 | 2026-04-06 | Claude | Q6: execution agent team pattern (Full TDD vs Orchestrator+Critic). |
-| 2026-04-04 | Claude | Added /fix guidance. |
+| 2026-04-04 | Claude | Added /jFix guidance. |
 | 2026-05-08 | — | Retro filenames per `close-ticket`. |
 | 2026-04-03 | Claude | Updated retro references. |
 | 2026-04-01 | Claude | Added Tool Failure Reports section. |

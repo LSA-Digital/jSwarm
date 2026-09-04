@@ -17,7 +17,7 @@ level: 2
 
 # uat-populate-content — preview-gated scenario content authoring
 
-Turn source material into drafted UAT scenario content **with a mandatory human-review preview before anything is committed** to the canonical scenarios JSON. This skill is option 2 of the `/uat` menu (COM-129 RD-22). It pairs with option 1 (`uat-extract-assets`): option 1 injects each slide's image + PDF-extracted text into `scenario.image.source.extracted_text`; this skill can use that extracted text (and/or a source doc) to draft the scenario's *content*.
+Turn source material into drafted UAT scenario content **with a mandatory human-review preview before anything is committed** to the canonical scenarios JSON. This skill is option 2 of the `/jUAT` menu (COM-129 RD-22). It pairs with option 1 (`uat-extract-assets`): option 1 injects each slide's image + PDF-extracted text into `scenario.image.source.extracted_text`; this skill can use that extracted text (and/or a source doc) to draft the scenario's *content*.
 
 The hard rule: **never call `apply` before a `preview` has been produced and approved by the developer.** The preview is rendered by the real engine renderer, so the developer sees exactly what will ship. A schema-invalid draft fails loud in both modes — the gate cannot be bypassed.
 

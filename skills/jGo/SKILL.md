@@ -24,7 +24,7 @@ description: Symlink to the global /jGo command that executes a plan through pro
 /jGo TICKET-XXX --continuous   # continue through accepted phases
 ```
 
-`/jGo` is the canonical executor. `/implement` remains a separate, thin compatibility alias that passes arguments verbatim to `/jGo`.
+`/jGo` is the canonical executor. `/jGo` remains a separate, thin compatibility alias that passes arguments verbatim to `/jGo`.
 
 ## Localization and plan resolution
 

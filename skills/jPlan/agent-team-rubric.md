@@ -10,11 +10,11 @@
 
 **Owner rule, verbatim: "any defect that touches pipeline build logic is automatic xhigh call."**
 
-Scope: this is an EFFORT-SCORING rule for the jArchitect call the fix methodology ALREADY intends (the `/fix` cycle is architect-first by design — this rule adds no new step and mandates no extra architect launch). When that existing intended jArchitect call concerns a defect whose mechanism or fix touches pipeline build logic (build rails, dispatch/harvest/park machinery, revision persistence, Temporal build workflows and replay semantics), score it **xhigh automatically** — no per-case rubric scoring, no owner prompt. Execute via the governed jAgentLaunch effort override (never raw effort params on a named core) and verify `servedEffort=xhigh` on the [OUTCOME] line. Rulings already delivered and accepted at lower effort stand (owner 2026-08-30: existing advice usable, don't relaunch).
+Scope: this is an EFFORT-SCORING rule for the jArchitect call the fix methodology ALREADY intends (the `/jFix` cycle is architect-first by design — this rule adds no new step and mandates no extra architect launch). When that existing intended jArchitect call concerns a defect whose mechanism or fix touches pipeline build logic (build rails, dispatch/harvest/park machinery, revision persistence, Temporal build workflows and replay semantics), score it **xhigh automatically** — no per-case rubric scoring, no owner prompt. Execute via the governed jAgentLaunch effort override (never raw effort params on a named core) and verify `servedEffort=xhigh` on the [OUTCOME] line. Rulings already delivered and accepted at lower effort stand (owner 2026-08-30: existing advice usable, don't relaunch).
 
 Skipping the methodology's intended architect call entirely remains a process error under the existing fix methodology — not something this rule adds or governs. Non-pipeline-build defects continue to score through the ordinary tiers below.
 
-This is the **single source of truth** for deciding **whether independent review activates at all** (§ Review activation), for choosing the review tier (`critic` vs `critic-xhigh`) once it does, and for the architecture tier (`none` / `architect` / `architect-master`) on a ticket. It is referenced by `/jPlan` (Q6), `/jGo` (plan-header parse), and `/fix` (when a ticket plan exists). Do not duplicate this rubric into those commands — they point here.
+This is the **single source of truth** for deciding **whether independent review activates at all** (§ Review activation), for choosing the review tier (`critic` vs `critic-xhigh`) once it does, and for the architecture tier (`none` / `architect` / `architect-master`) on a ticket. It is referenced by `/jPlan` (Q6), `/jGo` (plan-header parse), and `/jFix` (when a ticket plan exists). Do not duplicate this rubric into those commands — they point here.
 
 **Why this exists:** the legacy Q6 guidance ("use critic-xhigh for complex multi-file/multi-component/architecture-aligned work") matched almost every ticket, so agents over-escalated to `critic-xhigh`, and `architect-master` — the most expensive agent in the fleet — was ungoverned and self-escalated ad hoc. This rubric makes the **lean tier the default** and requires a **named, falsifiable trigger** (recorded in the plan) to escalate. The discipline mirrors `/jMerge`'s lean-default + CHK-AM gate.
 
@@ -22,7 +22,7 @@ This is the **single source of truth** for deciding **whether independent review
 
 ## The inherited plan-header line
 
-`/jPlan` writes exactly one line into the plan header; `/jGo` and `/fix` read it verbatim and MUST NOT escalate beyond it without surfacing a new trigger to the user:
+`/jPlan` writes exactly one line into the plan header; `/jGo` and `/jFix` read it verbatim and MUST NOT escalate beyond it without surfacing a new trigger to the user:
 
 ```
 **Recommended agent team:** Pattern <1|2> · review:<critic|critic-xhigh> · arch:<none|architect|architect-master> · escalation-trigger:<verbatim trigger or "none">
@@ -47,7 +47,7 @@ This is the **single source of truth** for deciding **whether independent review
 
 ### COM-393 two-stage composition
 
-A ticketed qualifying broad `/fix` may make both the pre-implementation contract
+A ticketed qualifying broad `/jFix` may make both the pre-implementation contract
 challenge and the post-implementation code review acceptance criteria. They
 compose through existing condition 4; this does not add condition 5. The
 pre-implementation stage returns exactly
@@ -102,7 +102,7 @@ If none hold → `review:critic` · `escalation-trigger:none`.
 
 ---
 
-## Consumer contract (how `/jGo` and `/fix` read this)
+## Consumer contract (how `/jGo` and `/jFix` read this)
 
 **Replace-immediately with a dual-format parser during transition (COM-128 TQ3).** `/jPlan` writes only the new `Recommended agent team` line going forward. Consumers accept BOTH formats while in-flight plans drain:
 
@@ -110,7 +110,7 @@ If none hold → `review:critic` · `escalation-trigger:none`.
 2. Else if it has the legacy **`Execution team pattern`** line → parse `Pattern` + critic tier; default `arch:none`, `escalation-trigger:none`.
 3. Else (no header) → ask once using this rubric and append the new line.
 
-Remove the legacy-format branch after one release cycle / once all in-flight plans close. **`/fix`** consumes the same line when operating on a ticket that has a plan, and applies the same escalation constraints; for ad-hoc `/fix` with no plan, it uses its own jDebugger→jOracle→jCritic discipline and escalates to `architect` only under the architecture-tier rules above.
+Remove the legacy-format branch after one release cycle / once all in-flight plans close. **`/jFix`** consumes the same line when operating on a ticket that has a plan, and applies the same escalation constraints; for ad-hoc `/jFix` with no plan, it uses its own jDebugger→jOracle→jCritic discipline and escalates to `architect` only under the architecture-tier rules above.
 
 **Parsing convention (so the line never silently misparses).** Fields are separated by ` · ` (U+00B7 middle dot with surrounding spaces); parse with the regex `\s+·\s+`. The first field is literal `Pattern <1|2>` (no colon); the remaining `review`, `arch`, and `escalation-trigger` fields are order-free `key:value` pairs. The `escalation-trigger:` value is free-form to end of line, **double-quoted** if it contains the ` · ` separator. A consumer that cannot parse the line MUST fail loud (ask the user) rather than guess a tier — never silently default to `critic-xhigh`/`architect`.
 

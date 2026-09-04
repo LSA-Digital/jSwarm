@@ -79,10 +79,10 @@ Jarvi callout behavior: Jarvi callout leads explanation turns, including the rec
 Legacy-safe: plans with no ceremony selection / no-selection recorded remain valid and may continue through the existing Q5–Q9 fields.
 
 5. Planning depth? `[1=Quick / 2=Standard / 3=Deep]`
-6. **Ticket execution agent team + review/architecture tiers** (for `/jGo` and `/fix`). Reply with Pattern `1` or `2`. The review tier and architecture tier are decided by **rubric, not by gut feel** — this is what stops overuse of `jCritic` at xhigh effort / `jArchitect` at xhigh effort.
+6. **Ticket execution agent team + review/architecture tiers** (for `/jGo` and `/jFix`). Reply with Pattern `1` or `2`. The review tier and architecture tier are decided by **rubric, not by gut feel** — this is what stops overuse of `jCritic` at xhigh effort / `jArchitect` at xhigh effort.
 
    **STOP. Before answering Q6, read `docs/jplan/agent-team-rubric.md` in full and apply its rubric to determine the review tier and the architecture tier.** Use the `agent-team-advisor` skill with `lifecycle_stage: plan` to select dynamic topology and staffing: read the agent-team catalog index first and use its fallback on failure; never block.
-   - **Step 5 writes the inherited plan-header line** (consumed verbatim by `/jGo` and `/fix`):
+   - **Step 5 writes the inherited plan-header line** (consumed verbatim by `/jGo` and `/jFix`):
      `**Recommended agent team:** Pattern <1|2> · review:<critic|critic-xhigh> · arch:<none|architect|architect-master> · escalation-trigger:<verbatim trigger or "none">`
    - **Immediately after the `Recommended agent team` line, the planner emits:**
      `**Agent-team catalog selection:** ATP-NNN@V`
@@ -220,10 +220,10 @@ comment: "Plan: .jswarm/plans/TICKET-XXX.plan.<descriptive>.md\nSpec: .jswarm/pl
 **Next steps:**
 - `/jGo TICKET-XXX` — Execute the plan with TDD (will flip status to READY_FOR_MERGE at Plan Completion)
 - After implementation: UAT runs per declared mode; `/jClose` then invokes `/jMerge` and flips to DONE
-- `/fix "<description>"` — If ticket is a bug fix and you want investigate + fix in one pass instead of formal planning
+- `/jFix "<description>"` — If ticket is a bug fix and you want investigate + fix in one pass instead of formal planning
 ```
 
-> **When to use `/fix` instead of `/jPlan` + `/jGo`:** If work is a bug fix with clear symptom (error message, failing test, broken behavior) and you want investigation + fix in one pass rather than formal plan first, use `/fix --full "<description>"` directly. `/fix` does its own investigation, jOracle synthesis, TDD cycle, verification. Use `/jPlan` when bug requires formal planning, multiple phases, or coordination with other tickets.
+> **When to use `/jFix` instead of `/jPlan` + `/jGo`:** If work is a bug fix with clear symptom (error message, failing test, broken behavior) and you want investigation + fix in one pass rather than formal plan first, use `/jFix --full "<description>"` directly. `/jFix` does its own investigation, jOracle synthesis, TDD cycle, verification. Use `/jPlan` when bug requires formal planning, multiple phases, or coordination with other tickets.
 
 ## Auto-context management
 

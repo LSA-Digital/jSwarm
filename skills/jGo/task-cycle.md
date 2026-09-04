@@ -8,12 +8,12 @@ Use this companion only for the next incomplete task in an admitted session.
    a behavior change.
 2. Route governance and delegation through
    [`subagent-environment`](../subagent-environment/SKILL.md), tests through
-   [`/test`](../test/SKILL.md), and check-ins through
+   [`/jTest`](../jTest/SKILL.md), and check-ins through
    [`/jCheckin`](../jCheckin/SKILL.md). The jPlan rubric owns whether review
    activates and its tier. Do not duplicate their long procedures or create
    typed receipts.
 3. Use the planned implementation lane and normal verification. For an
-   unexpected defect or blocked environment, stop or use the existing `/fix`
+   unexpected defect or blocked environment, stop or use the existing `/jFix`
    route rather than inventing a fallback.
 4. Verify returned claims against disk and the actual command output before
    accepting the task. Update the plan's task and A/C state, validation, and
