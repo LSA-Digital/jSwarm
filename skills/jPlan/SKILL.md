@@ -1,6 +1,6 @@
 ---
 name: jPlan
-description: Initialize a Jira ticket, technical design spec, and plan file (full or --lite/briefing mode).
+description: Initialize a work item (tracker key or local slug), technical design spec, and plan file (full or --lite/briefing mode).
 ---
 <!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/jPlan/SKILL.md
      Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
@@ -24,7 +24,7 @@ Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with
 
 | # | Output | Required when | Owner |
 |---|---|---|---|
-| 1 | **Jira ticket created/fetched** | Always | `mode-lite.md` Lite Step 2 or `operations.md` Step 2A |
+| 1 | **Work item identified (tracker key or slug), local state written** | Always | `mode-lite.md` Lite Step 2 or `operations.md` Step 2A |
 | 2 | **Session renamed** | Always unless Feature-orchestrator carve-out | `mode-lite.md` Lite Step 2 or `operations.md` Step 2B |
 | 3 | **Technical design spec written** | Standard + Deep | `step-4-spec.md` |
 | 4 | **Plan file written** | Always | `mode-lite.md` or `step-5-assemble-plan.md` |
@@ -105,3 +105,7 @@ Ticket state for `checkin-review@1` (canonical contract: `skills/jCheckin/refere
 - `reference.rationale.md` — invocation-optional rationale and lifecycle reference.
 - `pattern.rapid-vibe-ui.md` — owner-approved existing-UI rapid-feedback trigger, living-contract record, browser acceptance loop, and close reconciliation.
 - `CHANGELOG.md` — historical changes.
+
+## Next
+
+Once the plan file exists and Step 6's outputs are done, run `/jGo` in this project's agent session to execute it.

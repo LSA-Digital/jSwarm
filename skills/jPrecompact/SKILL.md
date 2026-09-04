@@ -770,10 +770,12 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
   sweep-certain --caller precompact --worktree "$PWD" --max-targets 3 --json || true
 
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/colgrep_index_lifecycle.py \
-  check --command precompact --json
+  check --command precompact --json || echo '{"note": "ColGREP unavailable, continuing"}'
 ```
 
-- `question` null or `suppressed: true` → proceed silently; no action needed.
+ColGREP is optional; an uninstalled or erroring check must never block the checkpoint.
+
+- `question` null or `suppressed: true`, or the command itself failed to run → proceed silently; no action needed.
 - `question` present → surface its `prompt` + each `candidate` (with its `reasons`) using the actions **keep-protect / delete-now / defer / inspect-details**. Advisory only — never block the checkpoint, and never auto-`--apply` cleanup from a lifecycle command (deletion stays operator-gated; dry-run is the default).
 
 After the eviction check, run the **ticket-scoped ColGREP index-health check** (COM-233) so the checkpoint records whether *this ticket's* index is fresh, lagging, or stalled — scoped to the resolved ticket, never a blanket all-index scan:

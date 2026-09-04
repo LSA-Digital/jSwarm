@@ -20,15 +20,18 @@ executable context or one clear blocker; do not start a task here.
    `--lifecycle-boundary --caller jGo`, and record/warn/continue. It is
    advisory and has no dispatch authority; `/jCheckin` owns evaluator wiring,
    state, recovery, and outcomes.
-5. Before task work, run the read-only ColGREP lifecycle check:
+5. Before task work, run the read-only ColGREP lifecycle check. ColGREP is
+   optional; an uninstalled or erroring check must never block the loop:
 
    ```bash
    ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/colgrep_index_lifecycle.py \
-     check --command implement --json
+     check --command implement --json || echo '{"note": "ColGREP unavailable, continuing"}'
    ```
 
-   Continue silently when there is no unsuppressed question. Surface a single
-   advisory operator choice for ambiguous candidates; never auto-apply cleanup.
+   Continue silently when there is no unsuppressed question, or when the
+   command itself failed to run. Surface a single advisory operator choice
+   for ambiguous candidates; never auto-apply cleanup, and never block on
+   this check.
 6. Only after admission succeeds, call the existing dashboard `started`
    mechanism. Preserve the command's `dashboard-facts` contract and
    `implement_progress_contract`; append/fold/compose/check remains owned by

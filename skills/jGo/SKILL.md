@@ -82,7 +82,11 @@ last phase is accepted.
 ## Status and completion summary
 
 Report the resolved plan, current phase, next task or blocker, selected mode,
-and applicable gates concisely. At completion, report A/C and validation state,
-the ready transition, and hand off to `/jClose`; do not duplicate the owners of
-testing, review, checkpoints, infrastructure, dashboard mechanics, or ticket
-status.
+and applicable gates concisely. `/jGo` builds and stops: it does not run tests
+beyond what the plan's own phases already required, and it does not issue a
+UAT round. At completion, report A/C and validation state and the ready
+transition; do not duplicate the owners of testing, review, checkpoints,
+infrastructure, dashboard mechanics, or ticket status.
+
+**Next:** run `/jTest` in this project's agent session to run automated tests
+and the agent smoke walk.

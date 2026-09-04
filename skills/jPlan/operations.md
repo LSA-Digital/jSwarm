@@ -13,11 +13,11 @@ Run main-sync portion of [`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/merge/preflight
 Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with the user stating Lite intent (**"lite"** / **"briefing only"** / **"ticket + context only"**) or explicit rapid existing-UI intent (**"rapid-vibe-ui"**).
 
 > **Point-of-impact reminders (COM-133 — migrated from auto-memory):**
-> - **Ticket → plan (Step 2A):** after creating ANY Jira ticket — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/TICKET.plan.<slug>.md`. For a side-task inside another ticket's active session, do NOT rename the session away from the parent ticket.
+> - **Work item → plan (Step 2A):** after creating ANY work item — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
 
 | # | Output | Required When | Tool/Method | DONE? |
 |---|---|---|---|---|
-| 1 | **Jira ticket created/fetched** | Always | Connected MCP's create/fetch tool (Step 2A key resolution + tool table) | ? |
+| 1 | **Work item identified and local state written** | Always | Step 2A identity resolution + `.jswarm/work/<id>/` | ? |
 | 2 | **Session renamed** | Always | See Step 2B | ? |
 | 3 | **Technical design spec written** | Standard + Deep (skipped in Lite) | Write to `.jswarm/plans/TICKET-XXX/TICKET-XXX.specs.<descriptive>.md` (per canonical doc `agent-write-permissions.md`) | ? |
 | 4 | **Plan file written** | Always | Write master to `.jswarm/plans/TICKET-XXX.plan.<descriptive>.md` (frontmatter `status: ACTIVE` per state machine; per-ticket artifact subfolder `.jswarm/plans/TICKET-XXX/` auto-created on first artifact write) | ? |
@@ -120,42 +120,58 @@ Legacy-safe: plans with no ceremony selection / no-selection recorded remain val
 
 **Wait for user response before proceeding.**
 
-## Step 2 — Jira and session
+## Step 2 — Work item and session
 
-### Step 2A — Jira ticket
+### Step 2A — Work item identity (tracker-optional)
 
-**Resolve the project key first (COM-398).** Run:
+`/jPlan <work-item>` accepts either identity form (`jswarm.workitem.identity.parse`):
+
+- a tracker key, `^[A-Z][A-Z0-9]+-\d+$` (e.g. `PS-14`) — only meaningful when a tracker is configured;
+- a slug, `^[a-z0-9][a-z0-9-]*$` (e.g. `add-csv-export`) — always available.
+
+An argument that parses as neither is a usage error; show both accepted shapes.
+
+**Check the tracker before anything else is created:**
 
 ```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/devops_command_injection.py jira-key --project-root <PROJECT_ROOT>
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli is-configured --repo "$PROJECT_ROOT"
 ```
 
-It prints the key from `managed_commands.jPlan.md.parameters.jira_project_key` in `.claude/project-command-injections.yaml`, else the built-in project identity table, else `UNRESOLVED`. On `UNRESOLVED`, ask the user for the key before creating anything. Never assume `COM`.
+**The one hard stop:** if the argument looks like a tracker key (matches the tracker-key pattern above) and `is-configured` prints `{"configured": false}`, STOP:
 
-**Use whichever Atlassian MCP is connected.** The tool names differ; the intent is identical.
-
-| Intent | Hosted Atlassian MCP (`mcp.atlassian.com`) | Self-hosted mcp-atlassian (Advanced) |
-|---|---|---|
-| Create issue | `createJiraIssue` (`projectKey`, `issueTypeName`, `summary`, `description`) | `jira_create_issue` (`project_key`, `issue_type`, `summary`, `description`) |
-| Fetch issue | `getJiraIssue` (`issueIdOrKey`) | `jira_get_issue` (`issue_key`) |
-| Comment | `addOrEditJiraIssueComment` (`issueIdOrKey`, `commentBody`) | `jira_add_comment` (`issue_key`, `comment`) |
-| Transition | `transitionJiraIssue` after `listJiraIssueTransitions` | `jira_transition_issue` |
-
-Follow the connected server's tool schema for exact parameter names; the table is the mapping, not the schema.
-
-**New ticket:**
 ```
-create issue in project <RESOLVED_KEY>:
-  summary:     "<user description>"
-  issue type:  "<user choice>"
-  description: "<initial description>"
+This looks like a tracker key (<ARG>), but no tracker is configured for this repo.
+
+Run `./install.sh adopt --jira-key <KEY>` from the jSwarm clone to configure one, or
+re-run `/jPlan` with a slug instead (e.g. `/jPlan add-csv-export`) to plan this
+work locally with no tracker.
 ```
 
-**Existing ticket:** fetch `TICKET-XXX` with the fetch tool.
+Do not invent a placeholder key and do not silently fall back to a slug — ask the user to choose.
 
-> **Record the ticket key.** Needed for all subsequent steps.
+**Otherwise, write local state before touching the tracker:**
 
-> **Point-of-impact reminder (COM-133):** after creating ANY Jira ticket — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/TICKET.plan.<slug>.md`. For a side-task inside another ticket's active session, do NOT rename the session away from the parent ticket.
+```bash
+mkdir -p ".jswarm/work/<ID>"
+```
+
+Record the work item's identity, kind, and plan-file path in `.jswarm/work/<ID>/state.json` (create fresh, or update if it already exists from a prior `/jPlan` pass on this item):
+
+```json
+{"id": "<ID>", "kind": "tracker-key|slug", "plan_file": ".jswarm/plans/<ID>.plan.<slug>.md", "created_at": "<UTC ISO-8601>"}
+```
+
+**Then, only when a tracker is configured, resolve or create the tracked issue.** With a tracker key argument, resolve it:
+
+```bash
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli resolve <ID> --repo "$PROJECT_ROOT"
+```
+
+There is no tracker `create` verb at the boundary in v0.1.0 (only `resolve`/`comment`/`transition`) — when the user wants a brand-new tracked issue rather than an existing key or a local slug, create it directly with the connected tracker's own tool (for Jira: the connected Atlassian MCP's create-issue tool) using the project key from `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/devops_command_injection.py jira-key --project-root <PROJECT_ROOT>`, then treat the returned key as `<ID>` for the rest of this step. With a slug argument, or with no tracker configured at all, there is nothing to create upstream — local state is the whole of it.
+
+`resolve` returning `null` (issue not found, or `is-configured` was already false) is not a hard stop for an otherwise-valid slug flow; it only matters for a tracker-key argument, and the hard stop above already covers "no tracker at all". A tracker-key argument that a *configured* tracker cannot resolve is reported to the user as a normal not-found condition, not this skill inventing a substitute id.
+
+> **Point-of-impact reminder (COM-133):** after establishing ANY work item — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
 
 ### Step 2B — Session rename
 
@@ -190,15 +206,27 @@ All Playwright screenshot evidence goes in **LOCAL PLAN FILE** using rendered ma
 ![AC-1: Feature works](./screenshots/TICKET-XXX/ac1-feature.png)
 ```
 
-**NEVER embed screenshots or image links in Jira tickets.** Jira gets text-only comments. Plan file is source of truth for visual evidence.
+**NEVER embed screenshots or image links in a tracker comment.** A tracker (when configured) gets text-only comments. Plan file is source of truth for visual evidence.
 
-## Step 6 — Update Jira and show summary
+## Step 6 — Sync the tracker and show summary
 
-**Full-plan mode — Jira comment:** add a comment with the connected MCP's comment tool (table in Step 2A):
+**Full-plan mode — tracker comment (skipped cleanly when no tracker is configured):**
+
+```bash
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli comment <ID> --repo "$PROJECT_ROOT" --text "$(cat <<'EOF'
+Plan: .jswarm/plans/ID.plan.<descriptive>.md
+Spec: .jswarm/plans/ID/ID.specs.<descriptive>.md (if applicable)
+Local UAT scenarios: .jswarm/plans/ID/ID.uat-scenarios.md (if Automated UAT)
+Depth: [Quick/Standard/Deep]
+jOracle: [Yes/No/N/A]
+Execution team: [Pattern 1 / Pattern 2; review tier]
+UAT: [jQATester enabled | N/A]
+Status: ACTIVE
+EOF
+)"
 ```
-issue: TICKET-XXX
-comment: "Plan: .jswarm/plans/TICKET-XXX.plan.<descriptive>.md\nSpec: .jswarm/plans/TICKET-XXX/TICKET-XXX.specs.<descriptive>.md (if applicable)\nLocal UAT scenarios: .jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md (if Automated UAT)\nDepth: [Quick/Standard/Deep]\njOracle: [Yes/No/N/A]\nExecution team: [Pattern 1 / Pattern 2; review tier]\nUAT: [jQATester enabled | N/A]\nStatus: ACTIVE"
-```
+
+Print the result's `message` once. `skipped: true` (no tracker configured) and `ok: false` (tracker reachable but the call failed) are both non-blocking here — local state was already written in Step 2A; continue to the summary either way.
 
 **Full-plan mode summary:**
 ```markdown
@@ -206,24 +234,22 @@ comment: "Plan: .jswarm/plans/TICKET-XXX.plan.<descriptive>.md\nSpec: .jswarm/pl
 
 | Output | Status |
 |---|---|
-| **Jira** | [TICKET-XXX](https://lsadigital.atlassian.net/browse/TICKET-XXX) |
-| **Session** | Renamed to TICKET-XXX-DESCRIPTION |
-| **Technical Design Spec** | .jswarm/plans/TICKET-XXX/TICKET-XXX.specs.<descriptive>.md (or N/A for Quick) |
-| **Plan** | .jswarm/plans/TICKET-XXX.plan.<descriptive>.md (status: ACTIVE) |
-| **Local UAT Scenarios** | .jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md (or N/A) |
+| **Work item** | ID (tracker-key: [link] / slug: local only) |
+| **Session** | Renamed to ID-DESCRIPTION |
+| **Technical Design Spec** | .jswarm/plans/ID/ID.specs.<descriptive>.md (or N/A for Quick) |
+| **Plan** | .jswarm/plans/ID.plan.<descriptive>.md (status: ACTIVE) |
+| **Local UAT Scenarios** | .jswarm/plans/ID/ID.uat-scenarios.md (or N/A) |
 | **jOracle Review** | Complete / Skipped / N/A |
 | **Execution team** | Pattern 1 / Pattern 2 + review tier |
 | **UAT verification** | jQATester enabled / N/A |
+| **Tracker sync** | commented / skipped (no tracker) / failed — see message above |
 
-**Move ticket to "In Progress"?** [yes/no]
+**Move the tracked issue to "In Progress"?** [yes/no/N/A — no tracker] — on yes, `python -m jswarm.tracker.cli transition <ID> --repo "$PROJECT_ROOT" --state "In Progress"`.
 
-**Next steps:**
-- `/jGo TICKET-XXX` — Execute the plan with TDD (will flip status to READY_FOR_MERGE at Plan Completion)
-- After implementation: UAT runs per declared mode; `/jClose` then invokes `/jMerge` and flips to DONE
-- `/jFix "<description>"` — If ticket is a bug fix and you want investigate + fix in one pass instead of formal planning
+**Next:** run `/jGo` in this project's agent session to execute the plan with TDD.
 ```
 
-> **When to use `/jFix` instead of `/jPlan` + `/jGo`:** If work is a bug fix with clear symptom (error message, failing test, broken behavior) and you want investigation + fix in one pass rather than formal plan first, use `/jFix --full "<description>"` directly. `/jFix` does its own investigation, jOracle synthesis, TDD cycle, verification. Use `/jPlan` when bug requires formal planning, multiple phases, or coordination with other tickets.
+> **When to use `/jFix` instead of `/jPlan` + `/jGo`:** If work is a bug fix with clear symptom (error message, failing test, broken behavior) and you want investigation + fix in one pass rather than formal plan first, use `/jFix "<description>"` directly instead of `/jPlan`. Use `/jPlan` when the bug requires formal planning, multiple phases, or coordination with other work items.
 
 ## Auto-context management
 
@@ -246,14 +272,14 @@ State file: `.jswarm/plans/TICKET-XXX/TICKET-XXX.new-work-state.md` (≤200 line
 
 ## ColGREP Index Lifecycle Check (COM-204 — no-badgering)
 
-During **plan setup (before dispatching implementation)**, run the read-only ColGREP lifecycle check. It silently lets the certain-only evictor handle stale/orphan indices and surfaces ONE consolidated question only for genuinely ambiguous candidates — and only once per unchanged set (receipt-backed; no badgering):
+During **plan setup (before dispatching implementation)**, run the read-only ColGREP lifecycle check. It silently lets the certain-only evictor handle stale/orphan indices and surfaces ONE consolidated question only for genuinely ambiguous candidates — and only once per unchanged set (receipt-backed; no badgering). ColGREP is optional; an uninstalled or erroring check must never block planning:
 
 ```bash
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/colgrep_index_lifecycle.py \
-  check --command jPlan --json
+  check --command jPlan --json || echo '{"note": "ColGREP unavailable, continuing"}'
 ```
 
-- `question` null or `suppressed: true` → proceed silently; no action needed.
+- `question` null or `suppressed: true`, or the command itself failed to run → proceed silently; no action needed.
 - `question` present → surface its `prompt` + each `candidate` (with its `reasons`) using the actions **keep-protect / delete-now / defer / inspect-details**. Advisory only — never block planning, and never auto-`--apply` cleanup from a lifecycle command (deletion stays operator-gated; dry-run is the default).
 
 ---

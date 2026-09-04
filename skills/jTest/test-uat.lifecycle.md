@@ -29,38 +29,25 @@ A finding or other recorded confirmation that changes expected behavior returns 
 ## Diagram 1 — DevOps lifecycle with the UAT overlay
 
 ```text
-You and the agent follow the canonical DevOps spine:
+You type each command in this loop yourself; none of them runs the next one
+for you. jPrecompact is a checkpoint you can invoke at any point inside
+/jGo, not a loop stage.
 
- [jPlan] ----------> [jGo] ----------> [jPrecompact] ---> [jClose] ---> [jMerge]
-    |                    |                     |                |             |
-    |                    |                     |                |             +-- Integrate only
-    |                    |                     |                |                 when feature-branch flow
-    |                    |                     |                |                 applies. In common, close
-    |                    |                     |                |                 directly on main instead.
-    |                    |                     |                |
-    |                    |                     |                +-- Reconcile acceptance criteria,
-    |                    |                     |                    traceability ledger, and closure.
-    |                    |                     |
-    |                    |                     +-- Checkpoint the current UAT truth:
-    |                    |                         sealed package, receipts, and ledger.
-    |                    |
-    |                    +-- Agent evaluates phase exit:
-    |                        PROCEED | DISPATCH /jTest uat prepare <TICKET>
-    |                        BLOCK   | SKIP
-    |                        Prepare, pre-walk, issuance, owner feedback, and
-    |                        the fix loop run inside this execution window.
-    |
-    +-- Agent compiles the UAT Execution Trigger from applicability,
-        obligations, and receipt source into the plan.
+ [jPlan] -> [jGo] -> [jTest] -> [jUAT] -> [jFix, if the round finds something]
+                                              |                    |
+                                              |                    +-- back to [jTest]
+                                              v
+                                         [jClose] -> [jMerge]
 ```
 
 `jswarm/uat_trigger.py::compose_trigger_section` renders the jPlan trigger;
-`evaluate_phase_exit` returns only `PROCEED`, `DISPATCH`, `BLOCK`, or `SKIP` and
-dispatches `/jTest uat prepare <TICKET>` when current proof is absent or stale
-(`jswarm/uat_trigger.py:162-177,180-235`). The canonical order is **jPlan →
-jGo → jPrecompact → jClose → jMerge**: jClose invokes jMerge when that flow
-applies; do not reverse those two stages
-(`skills/jClose/SKILL.md`).
+`evaluate_phase_exit` (invoked from within `/jGo`'s own phase-exit companion,
+not as a separately typed command) returns only `PROCEED`, `DISPATCH`,
+`BLOCK`, or `SKIP` and dispatches `/jTest uat prepare <TICKET>` when current
+proof is absent or stale (`jswarm/uat_trigger.py:162-177,180-235`). The
+canonical loop order is **jPlan -> jGo -> jTest -> jUAT -> jFix (when the
+round finds something) -> jClose -> jMerge**. Each stage is typed by the
+user; `/jClose` does not invoke `/jMerge` (`skills/jClose/SKILL.md`).
 
 ## Diagram 2 — Level 1 UAT is a cycle
 

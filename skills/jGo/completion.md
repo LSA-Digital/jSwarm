@@ -27,4 +27,5 @@ Use this companion only after every phase is accepted.
    `implement_progress_contract` owner contract. Do not create a receipt schema
    or write legacy dashboard machine cells.
 
-Report concise completion state and hand off to `/jClose TICKET-XXX`.
+Report concise completion state. `/jGo` builds and stops here. **Next:** run
+`/jTest` in this project's agent session.

@@ -10,7 +10,7 @@
 
 **Forbidden in Lite (non-exhaustive):** Technical design spec (`*.specs.md`); Step 3 codebase/test research (no required ColGREP or `TEST_CATALOG` trawling); Oracle; implementation phases; task/checkbox work breakdown; A/C-to-test traceability matrices; testing strategy / execution-team / UAT / E2E / test-data header blocks; `*.uat-scenarios.md` / `*.uat-test.md`; Feature `integr-fixes` / `pe2e-fixes`; any prose prescribing *how* to build beyond restating goals.
 
-**Required in Lite:** Same as always — Jira, session rename intent (Step 2B), and a master plan file at `.jswarm/plans/TICKET-{NUMBER}.plan.{short-description}.md` using the Lite plan shape below.
+**Required in Lite:** Same as always — work item identity (tracker key or slug), session rename intent (Step 2B), and a master plan file at `.jswarm/plans/ID.plan.{short-description}.md` using the Lite plan shape below.
 
 **Step 1 (Lite) — one message, minimal questions:**
 
@@ -31,7 +31,7 @@
 > **⚡ ORCHESTRATOR EFFORT:** run this orchestrator on **[claude-fable-5 | claude-opus-4-8] at [HIGH | XHIGH]**. [List phase escalations, or "No escalation."] At each escalation boundary the orchestrator MUST remind the owner to switch the session effort, and back afterwards. Source of truth: [parent feature plan] §Orchestrator model routing. — delete this block only if the project has no orchestrator-routing policy
 
 **Last Updated:** YYYY-MM-DD
-**Jira:** [link]
+**Work item:** ID (tracker: [link] | local slug — no tracker)
 **Planning mode:** Lite (briefing only — no implementation plan in this file)
 **Orchestrator model & effort:** [FABL claude-fable-5 | OPUS claude-opus-4-8] · [HIGH | XHIGH throughout | HIGH with phase escalations — list them] — routes the ORCHESTRATOR session only; named j-cores stay route-pinned
 
@@ -61,11 +61,11 @@ Full technical design, phases, tasks, tests/UAT plan, and `/jGo` scaffolding. Cr
 [e.g. Re-run `/jPlan` Standard/Deep after discovery]
 ```
 
-After Step 2 (Jira + rename intent), jump to Step 5 Lite (this shape only), then Step 6 (Lite Jira comment variant below).
+After Step 2 (work item identity + rename intent), jump to Step 5 Lite (this shape only), then Step 6 (Lite tracker-comment variant below).
 
-## Lite Step 2 — Jira ticket and session rename intent
+## Lite Step 2 — Work item identity and session rename intent
 
-Resolve the key and create or fetch the ticket exactly as in operations.md Step 2A (COM-398 key resolution + connected-MCP tool table).
+Resolve identity, check the hard stop, write local state, and (when a tracker is configured) resolve or create the tracked issue exactly as in operations.md Step 2A.
 
 **Record the ticket key.** For session rename, use `TICKET-{NUMBER}-{DESCRIPTION}` — UPPERCASE, hyphens, ~40 chars max. In Claude Code, write the title as one line to `.jswarm/state/pending-session-rename`; hooks / user submit apply `sessionTitle`. Do NOT claim you ran `/rename`. In OpenCode, set `OPENCODE_SERVER_URL`, then `PATCH /session/:id` with `{"title": "..."}`. A user may run `/rename TICKET-XXX-DESCRIPTION` as fallback.
 
@@ -75,23 +75,29 @@ Resolve the key and create or fetch the ticket exactly as in operations.md Step 
 
 When the ticket is a **defect** (Bug issue type, or a Story chartering a bug/defect follow-up — e.g. filed from a triage, review finding, or UAT report), the filing is NOT complete until a **reproduction-evidence pack** exists at `<plans-root>/TICKET-XXX/design-inputs/` per [`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/templates/BUG_EVIDENCE_PACK_TEMPLATE.md`](../../docs/templates/BUG_EVIDENCE_PACK_TEMPLATE.md): frozen COPIES (or source-headed excerpts) of the diagnosis/triage material, symptom artifacts (screenshots, log slices), and an indexed `README.md` carrying **reproduction anchors** (sessions/commands/ids, trigger condition, code anchors with verbatim failure signatures, environment state) and **boundary notes** mirroring the plan's non-goals. Pointers to origin-ticket evidence are allowed IN ADDITION, never INSTEAD — origin folders evaporate at close (worktree teardown, log rotation, context compaction). Commit plan + pack together. Non-defect lite tickets (features, enablers, docs) skip this step with no annotation.
 
-## Lite Step 6 — Jira comment and summary
+## Lite Step 6 — Tracker comment and summary
 
-Add a comment with the connected MCP's comment tool (table in Step 2A):
-```text
-Lite briefing plan: .jswarm/plans/TICKET-XXX.plan.<descriptive>.md
+Comment through the tracker boundary (skipped cleanly when no tracker is configured):
+
+```bash
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli comment <ID> --repo "$PROJECT_ROOT" --text "$(cat <<'EOF'
+Lite briefing plan: .jswarm/plans/ID.plan.<descriptive>.md
 Planning mode: Lite (briefing only)
 Depth / execution team / UAT: N/A — deferred until full /jPlan
+EOF
+)"
 ```
+
+Print the result's `message` once; `skipped` and a failed `ok` are both non-blocking — local state is already written.
 
 ```markdown
 ## Work Initialized (Lite)
 
 | Output | Status |
 |---|---|
-| **Jira** | [TICKET-XXX](https://lsadigital.atlassian.net/browse/TICKET-XXX) |
-| **Session** | Renamed to TICKET-XXX-DESCRIPTION |
-| **Briefing plan** | .jswarm/plans/TICKET-XXX.plan.<descriptive>.md (status: ACTIVE) |
+| **Work item** | ID (tracker: [link] / slug: local only) |
+| **Session** | Renamed to ID-DESCRIPTION |
+| **Briefing plan** | .jswarm/plans/ID.plan.<descriptive>.md (status: ACTIVE) |
 
-**Next steps:** Run `/jPlan` without Lite when ready for Quick/Standard/Deep planning. Do NOT expect `/jGo` until then.
+**Next:** run `/jPlan` again without Lite when ready for Quick/Standard/Deep planning. Do NOT run `/jGo` until then.
 ```

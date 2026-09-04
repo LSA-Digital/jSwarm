@@ -102,4 +102,5 @@ End every `/jTest` run with:
 - command(s) run or handoff created
 - evidence/report paths
 - PASS/FAIL/BLOCKED status
-- next required action
+- the next command to type: typically `/jUAT` once a round is ready to issue;
+  otherwise the specific option (`/jTest <option>`) still outstanding
