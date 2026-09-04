@@ -56,3 +56,6 @@ class ClaudeCodeHost:
 
     def register_mcp_hint(self) -> str:
         return _MCP_HINT
+
+    def mcp_add_argv(self, name: str, command: str, args: list[str], *, scope: str = "user") -> list[str]:
+        return ["claude", "mcp", "add", "--scope", scope, name, command, *args]

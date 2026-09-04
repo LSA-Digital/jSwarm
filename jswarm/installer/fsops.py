@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import subprocess
 from pathlib import Path
 
 import yaml
@@ -93,3 +94,22 @@ class WriteContext:
         if self.dry_run:
             return
         shutil.rmtree(path, ignore_errors=True)
+
+    def run(self, argv: list[str], **kwargs) -> "subprocess.CompletedProcess[str] | None":
+        """Run an external command as a write action (installing a binary,
+        registering an MCP server, ...). Prints what it does (or would do)
+        the same way every other method here does; in dry-run, nothing is
+        executed and this returns None.
+        """
+        prefix = "would run" if self.dry_run else "run"
+        line = f"  {prefix}: {' '.join(argv)}"
+        self.actions.append(line)
+        print(line)
+        if self.dry_run:
+            return None
+        try:
+            return subprocess.run(argv, capture_output=True, text=True, **kwargs)
+        except OSError as exc:
+            # The executable itself is missing or not runnable -- report it the same
+            # way a non-zero exit is reported (an actionable message), not a traceback.
+            return subprocess.CompletedProcess(argv, 127, "", str(exc))

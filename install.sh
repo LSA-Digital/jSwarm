@@ -126,7 +126,10 @@ cmd_install() {
       echo "  would run  : skills -> ~/.claude/skills"
       echo "  would run  : portal_config -> ~/.jswarm/decision-review/config.json"
       if [[ "$colgrep" -eq 1 ]]; then
-        echo "  colgrep    : NOT IMPLEMENTED in this release; --with-colgrep sets up nothing. See docs/getting-started.md."
+        echo "  would run  : cargo install colgrep (skipped if already on PATH)"
+        echo "  would run  : register the colgrep MCP server (colgrep_search, colgrep_list_dev_indices) with the agent host"
+        echo "  would run  : colgrep-search, code-overview -> ~/.claude/skills"
+        echo "  colgrep    : requires a Rust toolchain (cargo); check reports it, run: $(basename "$0") check"
       fi
       ok "DRY-RUN complete. Re-run without --dry-run to apply."
       echo "Next: $(basename "$0") install   (here, in the jSwarm clone) to apply it."

@@ -44,9 +44,9 @@ def _cmd_check(args: argparse.Namespace) -> int:
     width = max((len(c.name) for c in checks), default=0)
     missing = False
     for c in checks:
-        status = "ok  " if c.ok else "miss"
+        status = "ok  " if c.ok else ("opt " if c.optional else "miss")
         print(f"  [{status}] {c.name.ljust(width)}" + ("" if c.ok else f"   fix: {c.remedy}"))
-        missing = missing or not c.ok
+        missing = missing or (not c.ok and not c.optional)
 
     print()
     if not plat.is_supported():
@@ -63,7 +63,7 @@ def _cmd_check(args: argparse.Namespace) -> int:
 
 
 # ------------------------------------------------------------------- install
-def _install_skills(ctx, home: Path, source: Path, timestamp: str) -> None:
+def _install_skills(ctx, home: Path, source: Path, timestamp: str, *, with_colgrep: bool = False) -> None:
     from jswarm.host import current as current_host
     from jswarm.installer import backup as backup_mod
 
@@ -75,23 +75,24 @@ def _install_skills(ctx, home: Path, source: Path, timestamp: str) -> None:
         print(f"  skills: {skills_source} not found, skipping")
         return
 
-    # ColGREP is not implemented in this release (a decision on shipping it for v0.1.0
-    # is pending with the owner). colgrep-search and code-overview both depend on MCP
-    # tools (colgrep_search, colgrep_list_dev_indices, ...) that nothing in this
-    # installer sets up, so installing them would leave a silently non-functional
-    # command sitting in the user's command surface -- unacceptable, per the same
-    # standard --with-colgrep is held to. Excluded rather than installed with a
-    # "not available" banner: colgrep-search is `user-invocable: false`, designed to
-    # be copied verbatim into other skills' subagent-dispatch prompts, so a banner at
-    # its own top would not stop that reliance.
-    _NOT_YET_AVAILABLE_SKILLS = {"colgrep-search", "code-overview"}
+    # colgrep-search and code-overview both lean on the colgrep_search /
+    # colgrep_list_dev_indices MCP tools that only exist once ColGREP is actually
+    # installed and registered (see _install_colgrep). Installing them without that
+    # would leave a silently non-functional command sitting in the user's command
+    # surface -- unacceptable, per the same standard --with-colgrep is held to.
+    # Excluded rather than installed with a "not available" banner: colgrep-search is
+    # `user-invocable: false`, designed to be copied verbatim into other skills'
+    # subagent-dispatch prompts, so a banner at its own top would not stop that
+    # reliance.
+    _COLGREP_DEPENDENT_SKILLS = {"colgrep-search", "code-overview"}
+    excluded = set() if with_colgrep else _COLGREP_DEPENDENT_SKILLS
     real_skill_dirs = sorted(
         p for p in skills_source.iterdir()
-        if p.is_dir() and p.name != "_shims" and p.name not in _NOT_YET_AVAILABLE_SKILLS
+        if p.is_dir() and p.name != "_shims" and p.name not in excluded
     )
-    for name in sorted(_NOT_YET_AVAILABLE_SKILLS):
+    for name in sorted(excluded):
         if (skills_source / name).is_dir():
-            print(f"  skills: {name} skipped -- requires ColGREP, not implemented in this release")
+            print(f"  skills: {name} skipped (requires --with-colgrep)")
     real_names_lower = {p.name.lower() for p in real_skill_dirs}
 
     # Real skills first, shims second: a rename that only changed case (e.g.
@@ -155,22 +156,60 @@ def _install_portal_config(ctx, home: Path, source: Path, timestamp: str) -> Non
     ctx.write_text(dest, text)
 
 
-def _install_colgrep(args: argparse.Namespace) -> bool:
-    if not args.with_colgrep:
-        print("  colgrep: skipped (pass --with-colgrep to enable)")
+def _install_colgrep(ctx, source: Path) -> bool:
+    """Install (or verify) the `colgrep` CLI and register the bundled MCP
+    server with the agent host. Returns True only when ColGREP is actually
+    ready to use -- that, not the `--with-colgrep` flag alone, is what gates
+    installing the two skills that depend on it (see `_install_skills`).
+    """
+    import shutil
+
+    from jswarm.colgrep_mcp_server import _colgrep_binary
+
+    binary = _colgrep_binary()
+    if binary:
+        print(f"  colgrep: found existing binary at {binary}")
+    else:
+        if shutil.which("cargo") is None:
+            print(
+                "  colgrep: Rust toolchain not found (no `cargo` on PATH). Install it: "
+                "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+            )
+            print("  colgrep: skipped -- install the Rust toolchain and re-run ./install.sh install --with-colgrep")
+            return False
+
+        print("  colgrep: installing (cargo install colgrep)")
+        result = ctx.run(["cargo", "install", "colgrep"])
+        if result is not None and result.returncode != 0:
+            detail = (result.stderr or result.stdout or "").strip()[:400]
+            print(f"  colgrep: `cargo install colgrep` failed (exit {result.returncode}): {detail}")
+            return False
+        if ctx.dry_run:
+            binary = "colgrep"  # nothing was actually installed to verify
+        else:
+            binary = _colgrep_binary()
+            if not binary:
+                print(
+                    "  colgrep: `cargo install colgrep` reported success but the binary is "
+                    "still not on PATH; add ~/.cargo/bin to PATH and re-run"
+                )
+                return False
+
+    from jswarm import paths as jswarm_paths
+    from jswarm.host import current as current_host
+
+    host = current_host()
+    mcp_server = source / "jswarm" / "colgrep_mcp_server.py"
+    argv = host.mcp_add_argv("colgrep", str(jswarm_paths.python()), [str(mcp_server)])
+    print(f"  colgrep: registering the MCP server with {host.name}")
+    result = ctx.run(argv)
+    if result is not None and result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()[:400]
+        print(f"  colgrep: MCP registration failed (exit {result.returncode}): {detail}")
         return False
-    # Honest status, not a readiness check: this does not install ColGREP, does not
-    # configure a service, and does not register the colgrep_search /
-    # colgrep_list_dev_indices / colgrep_search_content MCP tools the colgrep-search
-    # skill calls. ripgrep presence (the old check here) is not what ColGREP needs --
-    # it just happened to be what this stub tested, which is exactly the false
-    # signal this message replaces. Never reports success and never completes a step.
-    print(
-        "  colgrep: NOT IMPLEMENTED in this release. --with-colgrep sets up nothing: "
-        "no ColGREP install, no service, no colgrep_search / colgrep_list_dev_indices / "
-        "colgrep_search_content MCP tools. See docs/getting-started.md for current status."
-    )
-    return False
+
+    print("  colgrep: ready -- colgrep_search and colgrep_list_dev_indices are registered")
+    return True
 
 
 def _cmd_install(args: argparse.Namespace) -> int:
@@ -201,11 +240,29 @@ def _cmd_install(args: argparse.Namespace) -> int:
 
     timestamp = backup_mod.utc_timestamp()
 
+    # colgrep is optional and never gates completeness, but it runs before "skills"
+    # so _install_skills knows whether ColGREP actually ended up ready --
+    # installing colgrep-search/code-overview without a working ColGREP would leave
+    # a silently non-functional command sitting in the user's command surface.
+    if "colgrep" in steps:
+        print("install: colgrep (already done)")
+        colgrep_ready = True
+    elif not args.with_colgrep:
+        print("install: colgrep")
+        print("  colgrep: skipped (pass --with-colgrep to enable)")
+        colgrep_ready = False
+    else:
+        print("install: colgrep")
+        colgrep_ready = _install_colgrep(ctx, source)
+        if colgrep_ready:
+            steps.append("colgrep")
+            _save("partial")
+
     if "skills" in steps:
         print("install: skills (already done)")
     else:
         print("install: skills")
-        _install_skills(ctx, home, source, timestamp)
+        _install_skills(ctx, home, source, timestamp, with_colgrep=colgrep_ready)
         steps.append("skills")
         _save("partial")
 
@@ -216,16 +273,6 @@ def _cmd_install(args: argparse.Namespace) -> int:
         _install_portal_config(ctx, home, source, timestamp)
         steps.append("portal_config")
         _save("partial")
-
-    # colgrep is optional and never gates completeness: a missing ripgrep
-    # is reported with its own remedy, but the rest of the install still
-    # finishes rather than being stuck "partial" over an optional extra.
-    if "colgrep" in steps:
-        print("install: colgrep (already done)")
-    else:
-        print("install: colgrep")
-        if _install_colgrep(args) and "colgrep" not in steps:
-            steps.append("colgrep")
 
     required = set(REQUIRED_INSTALL_STEPS)
     state = "complete" if required.issubset(steps) else "partial"
@@ -349,7 +396,7 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
         return 0
 
     timestamp = backup_mod.utc_timestamp()
-    _install_skills(ctx, home, source, timestamp)
+    _install_skills(ctx, home, source, timestamp, with_colgrep="colgrep" in lock.steps_completed)
     steps = list(lock.steps_completed)
     for step in ("venv", "skills"):
         if step not in steps:

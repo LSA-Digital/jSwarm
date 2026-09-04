@@ -33,6 +33,7 @@ class MacOSPlatform:
             self._git_check(),
             self._gh_check(),
             self._agent_host_check(),
+            self._rust_toolchain_check(),
         ]
 
     def _xcode_command_line_tools_check(self) -> Check:
@@ -64,6 +65,13 @@ class MacOSPlatform:
 
         host = _current_host()
         return Check(host.name, host.is_present(), "npm install -g @anthropic-ai/claude-code")
+
+    def _rust_toolchain_check(self) -> Check:
+        # Only `--with-colgrep` needs this (`cargo install colgrep`); the core
+        # loop does not, so this is optional -- see Check.optional.
+        ok = shutil.which("cargo") is not None
+        remedy = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+        return Check("Rust toolchain (for --with-colgrep)", ok, remedy, optional=True)
 
     def daemon_install(self, plist: Path) -> None:
         target = Path.home() / "Library" / "LaunchAgents" / plist.name

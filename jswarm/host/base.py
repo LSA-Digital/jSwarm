@@ -36,3 +36,9 @@ class Host(Protocol):
     def register_mcp_hint(self) -> str:
         """The command line that registers an MCP server with this host, for messages."""
         ...
+
+    def mcp_add_argv(self, name: str, command: str, args: list[str], *, scope: str = "user") -> list[str]:
+        """The argv that registers a stdio MCP server named `name`, running
+        `command args...`, with this host at the given scope.
+        """
+        ...

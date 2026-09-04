@@ -2,3 +2,4 @@ pyyaml>=6.0
 pytest>=8.0
 jsonschema>=4.0
 jinja2>=3.0
+mcp>=1.29,<2

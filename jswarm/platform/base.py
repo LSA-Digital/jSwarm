@@ -16,6 +16,10 @@ class Check:
     name: str
     ok: bool
     remedy: str
+    # True for a prerequisite an optional component needs (e.g. the Rust
+    # toolchain for `--with-colgrep`): reported like any other check, but
+    # `check` never fails the whole run over it -- only over a required one.
+    optional: bool = False
 
 
 class UnsupportedPlatformError(Exception):
