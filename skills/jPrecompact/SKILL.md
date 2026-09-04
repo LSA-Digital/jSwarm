@@ -5,14 +5,14 @@ description: Symlink to the global /jPrecompact command that runs the 4-surface 
 
 # /jPrecompact — Execute Pre-Compaction Protocol
 
-## Safety contract (COM-219 — destructive skill, agent-invocable)
+## Safety contract (destructive skill, agent-invocable)
 
 - **Default is read-only / no-write.** Invoked with no args (or `--help`/`status`), this skill only inspects and reports; it performs NO write, apply, push, delete, remote, or trim.
 - **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation — or run an approved preview/dry-run first and act only on that approved plan.
 - **Agents are NOT locked out** (no `disable-model-invocation`); this contract — not frontmatter — is what gates writes, so the read-only path is freely usable and a mutation requires approval.
 
 
-Execute the full checkpoint protocol before context compaction. Full mode first runs a mandatory promotion-review gate so the developer can approve, deny, or request changes for plan items that are ready to move forward; only after that decision is reconciled may the command write checkpoint surfaces. **Also** persist durable lessons into the **same canonical retros** as `/jClose` **Step 3.5 — Retrospective** (see `close-ticket.md`), then include those edits in the checkpoint commit.
+Execute the full checkpoint protocol before context compaction. Full mode first runs a mandatory promotion-review gate so the developer can approve, deny, or request changes for plan items that are ready to move forward; only after that decision is reconciled may the command write checkpoint surfaces. **Also** persist durable lessons into the **same canonical retros** as `/jClose` **Step 2 — Write the retro** (see `skills/jClose/SKILL.md`), then include those edits in the checkpoint commit.
 
 Lite mode is intentionally narrow: it records session-continuity state, a scoped plan Status Updates row, and retros for this session's activity. When its jStatus currency gate fires, it runs `/jStatus --lite`, never a full `/jStatus`. It does not run promotion review, matrix reconcile, a full checkpoint commit, TaskList, broad plan maintenance, or artifact dispatch.
 
@@ -42,7 +42,7 @@ ls .jswarm/plans/TICKET-XXX/TICKET-XXX.state.md 2>/dev/null
 # Check no-ticket carry-forward state only when no ticket signal exists
 ls .jswarm/state/precompact-state.md 2>/dev/null
 
-# Check recent plan files (COM-91: prefer .jswarm/plans/ for new tickets; fall back to docs/plans/ for legacy)
+# Check recent plan files (prefer .jswarm/plans/ for new tickets; fall back to docs/plans/ for legacy)
 ls -lt .jswarm/plans/*.plan.*.md 2>/dev/null | head -5
 ls -lt docs/plans/TICKET-*.md docs/plans/*-*.md 2>/dev/null | head -5
 ```
@@ -53,7 +53,7 @@ ls -lt docs/plans/TICKET-*.md docs/plans/*-*.md 2>/dev/null | head -5
 3. Git branch name matching ticket pattern (`feat/KEY-NNN`, `KEY-NNN-...`).
 4. If a current ticket signal is found but `.jswarm/plans/TICKET-XXX/TICKET-XXX.state.md` is missing, do **not** fall back to any other ticket's state file; checkpoint/recover that ticket explicitly.
 5. No-ticket carry-forward state `.jswarm/state/precompact-state.md`, only when no ticket signal exists.
-6. Most recent plan file in `.jswarm/plans/` (COM-91; preferred) or `docs/plans/` (legacy fallback), only as a plan-discovery aid after the state/ticket checks above.
+6. Most recent plan file in `.jswarm/plans/` (preferred) or `docs/plans/` (legacy fallback), only as a plan-discovery aid after the state/ticket checks above.
 
 **No ticket found:** Proceed with generic checkpoint (skip plan-file surface).
 
@@ -151,9 +151,8 @@ Lite mode is for continuity when the developer wants a small session checkpoint 
 **Allowed writes only:**
 1. **State file** — write or refresh `.jswarm/plans/TICKET-XXX/TICKET-XXX.state.md` (or `.jswarm/state/precompact-state.md` when no ticket) with current phase/task, completed work this session, next action, pending A/C/NFR/UAT notes, background/open agent runs, and timestamp. Keep it under 200 lines. Apply the jStatus currency gate above: link `.jstatus.quick.latest.md`; no duplication.
 2. **Master plan Status Updates row** — if a plan exists, add one lean row summarizing this session's activity and current next step. Update the checkpoint marker only if it directly describes this session boundary.
-3. **Canonical retros** — file the ticket retro and any standing feature-feedback retros using the Retrospective checkpoint location, naming, template, and evidence rules. Refresh the project symlink for each touched retro. Skip silently when there is nothing to record (`N/A — no new lessons this interval` in the state file). Do **not** run the full-mode jCheckin ledger/telemetry re-extract or append a changelog-only "no new activity" row.
+3. **Canonical retros** — file the ticket retro and any standing feature-feedback retros using the Retrospective checkpoint location, naming, template, and evidence rules. Refresh the project symlink for each touched retro. Skip silently when there is nothing to record (`N/A — no new lessons this interval` in the state file).
 4. **Scoped retro-only commit** — when this lite run wrote retro content, commit those retro real files (and project symlinks) per the dual-repo order in Surface 3. Do not create an empty checkpoint commit, and do not widen the commit to promotion, matrix, TaskList, or artifact work.
-5. **jCheckin lifecycle boundary** — ensure this checkout's enrollment, append the boundary event, and repair the project read-only views through the canonical writer. This is a direct runtime write to `common/logs.jCheckin/`, not a planning-artifact write, so it does not widen lite's plan/artifact scope; it remains nonblocking and is the only jCheckin *runtime* write lite mode adds. A jCheckin *feedback retro* is a separate retro write under the standing directive.
 
 **Forbidden in lite mode:**
 - promotion recommendation or sign-off harness
@@ -165,12 +164,8 @@ Lite mode is for continuity when the developer wants a small session checkpoint 
 - TaskList rewrite
 - artifact subagent dispatch
 - full `/jStatus` (standard-mode render of `.jstatus.latest.md`); lite refreshes status only via `/jStatus --lite`
-- full-mode jCheckin ledger/telemetry re-extract or changelog-only "no new activity" rows
-- any jCheckin write other than the lifecycle boundary — no seam evaluation, no `--force`, no hold resolution, no untrap, no hand-edit of `.jswarm/state/`, and no project-local telemetry spool
 
-**Then file retros** — after the two continuity surfaces, before the lifecycle boundary. Use the Retrospective checkpoint authoring flow (resolve the canonical file, append or create, refresh the project symlink). Apply the **Standing feature-feedback retro directive**. When retro content changed, run the scoped retro-only commit. When there are no ticket lessons and no feature feedback, record `N/A` in the state file and do not create empty files.
-
-**Then run the jCheckin lifecycle boundary** — it runs after the lite surfaces and retros are written and before the lite banner. It ensures enrollment, appends the caller boundary event, and repairs read-only views in one nonblocking operation.
+**Then file retros** — after the two continuity surfaces. Use the Retrospective checkpoint authoring flow (resolve the canonical file, append or create, refresh the project symlink). Apply the **Standing feature-feedback retro directive**. When retro content changed, run the scoped retro-only commit. When there are no ticket lessons and no feature feedback, record `N/A` in the state file and do not create empty files.
 
 **Lite banner:**
 
@@ -179,7 +174,6 @@ Lite mode is for continuity when the developer wants a small session checkpoint 
 Done:   state file updated; plan Status Updates row added/updated (if plan exists); retro filed / N/A; jStatus --lite refreshed / current / N/A (no quick template)
 Skipped: promotion review, matrix reconcile, checkpoint commit, TaskList, broad plan maintenance, full /jStatus
 Retro:  ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md updated / N/A; project symlink OK / N/A
-jCheckin: lifecycle boundary recorded / warned; workflow continues
 Next:   <immediate next action>
 State:  <state-file> (N lines)
 Recommend /compact now only if this lite checkpoint is enough for resume.
@@ -198,9 +192,7 @@ When filing retros, write a **separate** kind-file for each recently updated Dev
 
 | Feature | Kind file | Write when |
 |---------|-----------|------------|
-| jGuardrail (`jGuardrails`) | `TICKET-XXX.retro.jGuardrail.md` | You dispatched or were gated by jGuardrails this interval and have feedback |
-| jCheckin | `TICKET-XXX.retro.jCheckin.md` | You used `/jCheckin` or a check-in seam this interval and have feedback |
-| test UAT lifecycle | `TICKET-XXX.retro.test-uat-lifecycle.md` | You ran or were steered by the Level 1 UAT cycle (`test/test-uat.lifecycle.md`) this interval and have feedback |
+| test UAT lifecycle | `TICKET-XXX.retro.test-uat-lifecycle.md` | You ran or were steered by the Level 1 UAT cycle (`jTest/test-uat.lifecycle.md`) this interval and have feedback |
 | fix cycle (`/jFix` methodology, incl. orchestrator-driven Diagnose→Contract→Repair→Prove) | `TICKET-XXX.retro.fix-cycle.md` (or fold into `test-uat-lifecycle` when the interval's fix and UAT narrative is one arc — cross-link, don't duplicate) | Fix cycles ran this interval and you have feedback (review verdicts, architect placement, contract mechanics) |
 | fix-uat portal (decision-review publications, round registration/cutover, delivery) | `TICKET-XXX.retro.fix-uat-portal.md` (same fold-in option as above) | Portal machinery was exercised this interval and you have feedback |
 
@@ -221,7 +213,7 @@ This roster is a named exception to "prefer one ticket retro until a second narr
 
 Every full checkpoint writes to **all four** surfaces. No single surface is sufficient — they cross-reference each other. Lite mode is the only exception and must stop before this section.
 
-**Execution order** (do not reorder): Surface 1 (state draft) → Surface 2 (planning artifacts) → **Retrospective checkpoint (close-ticket–aligned)** → Surface 3 (git commit, includes retro + plans + state) → Surface 4 (TaskList) → finalize state file with recorded commit SHA. The Step 2.0-rules-tools maintenance window is an explicit background exception: launch it during Surface 2, record its task ID, and continue this order without waiting for its result.
+**Execution order** (do not reorder): Surface 1 (state draft) → Surface 2 (planning artifacts) → **Retrospective checkpoint (jClose-aligned)** → Surface 3 (git commit, includes retro + plans + state) → Surface 4 (TaskList) → finalize state file with recorded commit SHA. The Step 2.0-rules-tools maintenance window is an explicit background exception: launch it during Surface 2, record its task ID, and continue this order without waiting for its result.
 
 ### Surface 1: State File
 
@@ -229,7 +221,7 @@ Every full checkpoint writes to **all four** surfaces. No single surface is suff
 
 **jStatus currency gate (full mode):** verify `.jstatus.latest.md` is accurate first; if stale or missing, run full `/jStatus` before writing the state file, then link `.jstatus.latest.md` from the state file and do not repeat its content (owner ruling 2026-08-30). Lite mode uses the separate Lite Checkpoint Protocol gate: `/jStatus --lite` against `.jstatus.quick.latest.md`, never this full render.
 
-This state file is the post-compaction resume anchor. It is separate from the COM-23 standards include `.jswarm/plans/TICKET-XXX/.precompact.md`: `<KEY>.state.md` records volatile WHERE-we-are carry-forward state; `.precompact.md` remains the stable HOW-to-checkpoint standards file.
+This state file is the post-compaction resume anchor. It is separate from the standards include `.jswarm/plans/TICKET-XXX/.precompact.md`: `<KEY>.state.md` records volatile WHERE-we-are carry-forward state; `.precompact.md` remains the stable HOW-to-checkpoint standards file.
 
 **Contents (≤200 lines):**
 - Ticket identifier
@@ -238,14 +230,14 @@ This state file is the post-compaction resume anchor. It is separate from the CO
 - Pending A/C (not yet verified)
 - Pending NFR validation (when the project is NFR-adopted + plan `NFR catalog: applicable`): applicable NFRs not yet 🟢 in the A/C↔NFR matrix, and the ticket NFR working-slice / proposals-sidecar paths (`TICKET-XXX.nfr.md` / `TICKET-XXX.nfr-proposals.json`) — so the NFR authoring/promotion state survives compaction. Non-adopted projects skip (fail-open).
 - Background agent task IDs (critical — prevents orphaning across compaction)
-- Open agent runs + resume pointers (COM-197 continuity, fail-open): when the project has the agent-run ledger (`jswarm/agent_run_ledger.py` present), fold any **open** sub-agent runs and their resume pointers into the state so an in-flight run survives main-session compaction. Run it fail-open — never let it block the checkpoint:
+- Open agent runs + resume pointers (continuity, fail-open): when the project has the agent-run ledger (`jswarm/agent_run_ledger.py` present), fold any **open** sub-agent runs and their resume pointers into the state so an in-flight run survives main-session compaction. Run it fail-open — never let it block the checkpoint:
 
   ```bash
   .venv/bin/python jswarm/agent_run_ledger.py list-open 2>/dev/null || true
   ```
 
   Paste the summary lines under `## Open Agent Runs` below. Absent ledger / `JSWARM_AGENT_RUN_LEDGER=0` / any error ⇒ skip silently (omit the section). Records are redaction-safe (digest, no raw prompt).
-- Harness-health line (COM-246 AC-7, fail-open): every checkpoint carries the harness-health state so degradation is visible at the resume boundary. Run and paste the one-line summary under `## Harness Health`:
+- Harness-health line (AC-7, fail-open): every checkpoint carries the harness-health state so degradation is visible at the resume boundary. Run and paste the one-line summary under `## Harness Health`:
 
   ```bash
   PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.harness_health --fast 2>/dev/null || true
@@ -283,7 +275,7 @@ This state file is the post-compaction resume anchor. It is separate from the CO
 | [name] | [id] | [running/completed] | [description] |
 
 ## Open Agent Runs
-<!-- COM-197 continuity (fail-open): output of `agent_run_ledger.py list-open`; omit this section entirely if the ledger is absent/disabled/errors. -->
+<!-- continuity (fail-open): output of `agent_run_ledger.py list-open`; omit this section entirely if the ledger is absent/disabled/errors. -->
 - [run_id] [subagent_type] attempts=[n] resume<-[checkpoint path or "(no checkpoint — bounded cold restart)"]
 
 ## Notes
@@ -325,12 +317,12 @@ task(subagent_type="jOps", load_skills=[], run_in_background=true,
   prompt="BACKGROUND / NO WAIT: reconcile docs/architecture/rules/ and docs/architecture/tools/ against the current pipeline. Add architecture cards for newly introduced rules/tools, mark retired entries, flag code/registry/runtime rules and LLM-usable tools without architecture catalog cards, and refresh docs/architecture/rules/rules_pipeline_summary.json. When project ColGREP indexing support is healthy, refresh the project code index/worktree overlay; otherwise record the degraded state and continue. Read jDebug/pipeline-trace.md and, only when an orchestration mechanism changed, validate/regenerate architecture.v3.pipeline-trace.matrix.json plus rendered architecture.v3.pipeline-trace.md. Fail open; do not block or slow precompact; do not spawn further agents; return a compact changed-files/gaps summary when finished.")
 ```
 
-**Step 2.0a — Auto-migrate legacy assets to current standards (COM-167 AC-16, fail-open).** `/jPrecompact` does not require an agent to "figure anything out": it first self-heals a legacy ticket so it behaves as though the current lifecycle assets existed at creation. Idempotently SEEDS a missing slice index (`## UAT Scenario Index` / `## A/C-to-NFR Index` / `## A/C-to-Test Index`) from the plan's (possibly hand-authored) matrix rows, and ADDS a missing plan matrix section when a slice index exists without one. Regression A/C-to-Test seeding is **matrix-present only** — `/jPrecompact` never auto-scaffolds a regression slice for a ticket that has no `## A/C-to-Test Traceability Matrix`:
+**Step 2.0a — Auto-migrate legacy assets to current standards (AC-16, fail-open).** `/jPrecompact` does not require an agent to "figure anything out": it first self-heals a legacy ticket so it behaves as though the current lifecycle assets existed at creation. Idempotently SEEDS a missing slice index (`## UAT Scenario Index` / `## A/C-to-NFR Index` / `## A/C-to-Test Index`) from the plan's (possibly hand-authored) matrix rows, and ADDS a missing plan matrix section when a slice index exists without one. Regression A/C-to-Test seeding is **matrix-present only** — `/jPrecompact` never auto-scaffolds a regression slice for a ticket that has no `## A/C-to-Test Traceability Matrix`:
 
 ```bash
-# COM-201: /jPrecompact delegates the deterministic plan-maintenance chain to /update-ticket,
+# /jPrecompact delegates the deterministic plan-maintenance chain to /update-ticket,
 # which orchestrates migrate → rebuild-rows → reconcile-status → count in canonical order over
-# the SAME COM-167 engines (byte/exit parity proven by jswarm/tests/test_update_ticket_*).
+# the same engines (byte/exit parity proven by jswarm/tests/test_update_ticket_*).
 # The wrapper is common-owned and invoked by ABSOLUTE COMMON PATH (it resolves its engines from
 # common, not the target project), with --repo-root . naming the project — so this works in every
 # project. Steps 2.0a–2.1 below describe each section's behavior; all four run from this ONE
@@ -339,21 +331,21 @@ task(subagent_type="jOps", load_skills=[], run_in_background=true,
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/update_ticket/cli.py --ticket TICKET-XXX --repo-root . --sections migrate,rebuild-rows,reconcile-status,count || true
 ```
 
-It never re-seeds or clobbers an existing index/matrix (idempotent), and creates `TICKET-XXX.nfr.md` / `TICKET-XXX.regression-tests.md` / appends to `TICKET-XXX.uat-scenarios.md` only when seeding is needed. **AC-16** seeds from an existing hand-authored matrix; **AC-17** scaffolds empty UAT/NFR matrix sections + starter slice index files for a *declared-applicable* ticket that has neither matrix nor slice (e.g. a legacy COM-141) — applicability is read from the plan headers (`**NFR catalog:** applicable` / `**Automated UAT:** yes`), never guessed. Regression tests are excluded from AC-17 auto-scaffold; they seed only from an existing A/C-to-Test matrix. After this, the slice index is the source of truth and the rebuild (2.0b) is a no-op delta on an already-migrated ticket. Fail-open (`|| true`). **To upgrade an existing in-flight ticket, see `docs/agent-system/upgrade-existing-ticket.md`.**
+It never re-seeds or clobbers an existing index/matrix (idempotent), and creates `TICKET-XXX.nfr.md` / `TICKET-XXX.regression-tests.md` / appends to `TICKET-XXX.uat-scenarios.md` only when seeding is needed. **AC-16** seeds from an existing hand-authored matrix; **AC-17** scaffolds empty UAT/NFR matrix sections + starter slice index files for a *declared-applicable* ticket that has neither matrix nor slice (e.g. a legacy ticket) — applicability is read from the plan headers (`**NFR catalog:** applicable` / `**Automated UAT:** yes`), never guessed. Regression tests are excluded from AC-17 auto-scaffold; they seed only from an existing A/C-to-Test matrix. After this, the slice index is the source of truth and the rebuild (2.0b) is a no-op delta on an already-migrated ticket. Fail-open (`|| true`). **To upgrade an existing in-flight ticket, see `docs/agent-system/upgrade-existing-ticket.md`.**
 
-**Step 2.0b — Rebuild the count-bearing matrices' ROWS from the ticket-local working slices (COM-167 AC-11, fail-open).** After migration (2.0a) and before reconciling statuses (2.0c) or counting (2.1), regenerate each matrix's *rows* from the working slices so an agent never hand-authors them — the **UAT-Scenario matrix** from `TICKET-XXX.uat-scenarios.md`, the **A/C-to-NFR matrix** from `TICKET-XXX.nfr.md`, and the **A/C-to-Test traceability matrix** from `TICKET-XXX.regression-tests.md` when that regression slice exists. Each slice carries a fixed-format **index table** under a canonical heading (`## UAT Scenario Index`, `## A/C-to-NFR Index`, `## A/C-to-Test Index`) whose columns are exactly the matrix columns minus Status (defined by `docs/templates/UAT_SCENARIO_EXTRACT_TEMPLATE.md` / `NFR_CATALOG_EXTRACT_TEMPLATE.md` / `TEST_EXTRACT_TEMPLATE.md` — the same templates `/jPlan` instantiates):
+**Step 2.0b — Rebuild the count-bearing matrices' ROWS from the ticket-local working slices (AC-11, fail-open).** After migration (2.0a) and before reconciling statuses (2.0c) or counting (2.1), regenerate each matrix's *rows* from the working slices so an agent never hand-authors them — the **UAT-Scenario matrix** from `TICKET-XXX.uat-scenarios.md`, the **A/C-to-NFR matrix** from `TICKET-XXX.nfr.md`, and the **A/C-to-Test traceability matrix** from `TICKET-XXX.regression-tests.md` when that regression slice exists. Each slice carries a fixed-format **index table** under a canonical heading (`## UAT Scenario Index`, `## A/C-to-NFR Index`, `## A/C-to-Test Index`) whose columns are exactly the matrix columns minus Status (defined by `docs/templates/UAT_SCENARIO_EXTRACT_TEMPLATE.md` / `NFR_CATALOG_EXTRACT_TEMPLATE.md` / `TEST_EXTRACT_TEMPLATE.md` — the same templates `/jPlan` instantiates):
 
 *(The `rebuild-rows` section — runs within the single `/update-ticket` delegation in Step 2.0a above, not as a separate invocation.)*
 
 It **adds** rows newly in an index, **drops** rows no longer present, and **preserves** the Status cell of a surviving row (so a row already reconciled to 🟢 is not reset; a brand-new row defaults to 🔴 — never green). Regression rows are keyed by the full `(A/C, Test path, Test name / evidence check)` tuple; path-only or partial matches are rejected. **Discipline:** an EMPTY/absent index (missing slice) leaves that matrix **unchanged** — a missing slice never wipes rows; idempotent; fail-open (`|| true`). This is the "rebuild the matrices" step behind 2.0b/2.1 — without it rows drift from the local source-of-truth slices.
 
-**Step 2.0c — Reconcile the count-bearing matrices' STATUSES from ticket-local results (COM-167 AC-10, fail-open).** `/jPrecompact` runs *repeatedly* across a ticket's life (unlike one-shot `/jGo`), so it is the checkpoint that keeps the **NFR**, **UAT-scenario**, and **regression A/C-to-Test** traceability matrices truthful. **After** the row-rebuild (2.0b) and **before** the count in Step 2.1, feed those matrices' Status cells from the ticket-local result docs (`.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-test.md`, `TICKET-XXX.nfr-test.md`, `TICKET-XXX.regression-test.md`) using the deterministic reconciler — kept **separate** from update-plan so update-plan stays count-only:
+**Step 2.0c — Reconcile the count-bearing matrices' STATUSES from ticket-local results (AC-10, fail-open).** `/jPrecompact` runs *repeatedly* across a ticket's life (unlike one-shot `/jGo`), so it is the checkpoint that keeps the **NFR**, **UAT-scenario**, and **regression A/C-to-Test** traceability matrices truthful. **After** the row-rebuild (2.0b) and **before** the count in Step 2.1, feed those matrices' Status cells from the ticket-local result docs (`.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-test.md`, `TICKET-XXX.nfr-test.md`, `TICKET-XXX.regression-test.md`) using the deterministic reconciler — kept **separate** from update-plan so update-plan stays count-only:
 
 *(The `reconcile-status` section — runs within the single `/update-ticket` delegation in Step 2.0a above, not as a separate invocation.)*
 
 It maps each result-doc row (`UAT-<n>` / `NFR-<descriptor>` / regression full tuple → PASS/FAIL, text or 🟢/🔴) onto the matching plan matrix row (UAT matrix keyed by scenario id; A/C-to-NFR matrix keyed by the NFR ref; regression matrix keyed by `(A/C, Test path, Test name / evidence check)` from `TICKET-XXX.regression-test.md`). **Discipline:** a row with no local result is left **unchanged — never silently flipped green** (fail-safe = under-report); idempotent; fail-open (`|| true`, never blocks the checkpoint). A project whose result docs are non-structured falls back to an agent-driven update of the matrix Status cells (still **before** Step 2.1).
 
-**Step 2.1 — Normalize + archive hygiene + HUD-refresh the master plan (COM-167, fail-open).** Now that the matrices reflect the latest results, run the deterministic `/update-plan` module entrypoint so the plan's frontmatter is normalized (frontmatter hoisted to line 1; `status`/`phase`/`ac_complete` **and the AC-9 `nfr_complete`/`uat_complete` counts** derived from `plan_status` + the `## Acceptance Criteria` section + the freshly-reconciled traceability matrices), explicitly eligible old sections are moved into the ticket `_archive/`, explicit tech-spec sections are relocated to specs, and the HUD's single source of truth is refreshed:
+**Step 2.1 — Normalize + archive hygiene + HUD-refresh the master plan (fail-open).** Now that the matrices reflect the latest results, run the deterministic `/update-plan` module entrypoint so the plan's frontmatter is normalized (frontmatter hoisted to line 1; `status`/`phase`/`ac_complete` **and the AC-9 `nfr_complete`/`uat_complete` counts** derived from `plan_status` + the `## Acceptance Criteria` section + the freshly-reconciled traceability matrices), explicitly eligible old sections are moved into the ticket `_archive/`, explicit tech-spec sections are relocated to specs, and the HUD's single source of truth is refreshed:
 
 *(The `count` section — runs within the single `/update-ticket` delegation in Step 2.0a above, not as a separate invocation. It reuses the `update-plan` normalize/count/hygiene engine, `--apply`.)*
 
@@ -369,7 +361,7 @@ if [ -f ".jswarm/plans/TICKET-XXX/TICKET-XXX.regression-tests.md" ]; then
 fi
 ```
 
-**Step 2.1b — Bind THIS session to its ticket (COM-174 per-session HUD, fail-open).** `normalize` (above) refreshes the HUD's *metrics*; this refreshes the HUD's *identity* so a session whose terminal HUD would otherwise fall back to the global-freshest plan shows ITS OWN ticket. The `bind` subcommand writes the per-session `active-ticket.json` binding **without** recording a transition — so it works at every checkpoint regardless of `plan_status` state (e.g. a registry that lags the plan). Keyed by `CLAUDE_CODE_SESSION_ID` (== the statusline payload `session_id`); a no-op outside a Claude Code session or for a ticket not in this project:
+**Step 2.1b — Bind THIS session to its ticket (per-session HUD, fail-open).** `normalize` (above) refreshes the HUD's *metrics*; this refreshes the HUD's *identity* so a session whose terminal HUD would otherwise fall back to the global-freshest plan shows ITS OWN ticket. The `bind` subcommand writes the per-session `active-ticket.json` binding **without** recording a transition — so it works at every checkpoint regardless of `plan_status` state (e.g. a registry that lags the plan). Keyed by `CLAUDE_CODE_SESSION_ID` (== the statusline payload `session_id`); a no-op outside a Claude Code session or for a ticket not in this project:
 
 ```bash
 .venv/bin/python jswarm/plan_status/cli.py bind TICKET-XXX || true
@@ -377,9 +369,9 @@ fi
 
 This reuses `normalize_plan_file` (no reimplementation) and prints a summary line (`… ac=… nfr=… uat=… normalized=…`). It is **fail-open** (`|| true`) so it never blocks the checkpoint. **Determinism boundary:** update-plan only *counts* the matrices already in the plan — never the local slices/test files; keeping those matrices accurate is Steps 2.0a–2.0c's job (AC-16 migrate + AC-11 row-rebuild + AC-10 status reconcile). The regression A/C-to-Test slice/result are reconciled before this point when present, but a ticket with no regression slice remains unaffected. Pull-render semantics: the next ccstatusline render reflects the refreshed frontmatter — there is no push/redraw. `--apply` is intentional in `/jPrecompact`: it moves only explicitly eligible sections/markers, leaves anchored discoverability links, and still never moves Acceptance Criteria, active blockers, unresolved decisions, current verification requirements, Scope, Changelog, Required Reading, or semantically ambiguous content. (Skill facade: `.claude/skills/update-plan/SKILL.md`; a bare `/update-plan` remains propose-only, but `/jPrecompact` applies hygiene so old checkpoint content does not accumulate in the live plan.)
 
-**Discover existing files (COM-91 dual-path):**
+**Discover existing files (dual-path):**
 ```bash
-# COM-91 — new tickets (>= 2026-05-22): master + per-ticket artifact subfolder
+# new tickets (>= 2026-05-22): master + per-ticket artifact subfolder
 ls .jswarm/plans/TICKET-XXX.plan.*.md 2>/dev/null         # master
 ls .jswarm/plans/TICKET-XXX/TICKET-XXX.*.md 2>/dev/null   # artifacts
 
@@ -409,8 +401,8 @@ Every full checkpoint must bring the **master plan file** to a **current, lean e
 | **Critical Files** | Add/remove paths when the file map changed | Path list only |
 | **Scope** (In/Out) | Only when user **approved** a scope change — brief bullet delta | No speculative expansion |
 | **Last Updated** | Set to checkpoint calendar date | — |
-| Frontmatter `status` / `revisions` | Only when COM-84 state machine flipped (`ACTIVE` → `READY_FOR_MERGE`, etc.) | Per `/jGo` + plan-status rules |
-| Frontmatter `phase` / `ac_complete` (COM-138) | **Do NOT hand-edit** — DERIVED by the reconcile hook (`normalize_plan_file`) from `plan_status` + the `## Acceptance Criteria` section; the checkpoint reads them, the hook maintains them, frontmatter stays at line 1 | Read-only; never manually set |
+| Frontmatter `status` / `revisions` | Only when state machine flipped (`ACTIVE` → `READY_FOR_MERGE`, etc.) | Per `/jGo` + plan-status rules |
+| Frontmatter `phase` / `ac_complete` | **Do NOT hand-edit** — DERIVED by the reconcile hook (`normalize_plan_file`) from `plan_status` + the `## Acceptance Criteria` section; the checkpoint reads them, the hook maintains them, frontmatter stays at line 1 | Read-only; never manually set |
 
 **Checkpoint marker:** add `<!-- checkpoint: [ISO timestamp] phase N complete -->` adjacent to the phase that finished (or the phase in progress when pausing mid-flight).
 
@@ -452,7 +444,7 @@ task(subagent_type="jOps", load_skills=[], run_in_background=true,
 ```
 
 <!-- uat-scenarios:write-integration -->
-When a project has adopted the COM-122 UAT-scenario engine, WRITE scenario changes (merge-back / overlay) as a structured **JSON-patch sidecar** applied via `jswarm/uat-scenarios/apply_uat_patch.py` (RFC-6902 ops; `base_sha256` for optimistic-concurrency conflict detection) → it updates the canonical JSON and regenerates the generated Markdown. Never hand-edit the generated `.md` or the canonical JSON directly. On a conflict (stale `base_sha256` or failed `test` op) the apply aborts without writing — rebase the patch on the current canonical and retry. Non-adopted projects keep the markdown merge-back path.
+When a project has adopted the UAT-scenario engine, WRITE scenario changes (merge-back / overlay) as a structured **JSON-patch sidecar** applied via `jswarm/uat-scenarios/apply_uat_patch.py` (RFC-6902 ops; `base_sha256` for optimistic-concurrency conflict detection) → it updates the canonical JSON and regenerates the generated Markdown. Never hand-edit the generated `.md` or the canonical JSON directly. On a conflict (stale `base_sha256` or failed `test` op) the apply aborts without writing — rebase the patch on the current canonical and retry. Non-adopted projects keep the markdown merge-back path.
 
 **Dispatch rules:**
 - Only dispatch agents for files that **exist** — skip non-existent artifacts
@@ -464,23 +456,23 @@ When a project has adopted the COM-122 UAT-scenario engine, WRITE scenario chang
 
 ### Retrospective checkpoint (before Git commit)
 
-**Authoritative procedure:** `/jClose` **Step 3.5 — Retrospective (MANDATORY)** in `close-ticket.md` (global command copy: `~/.claude/skills/jClose/SKILL.md`). Precompact applies the **same location, naming, template shape, and evidence discipline** as closeout, but typically as an **append** for this session interval (phase N). Full formal closeout still runs `/jClose` when the ticket completes. Lite uses this authoring flow and the **Standing feature-feedback retro directive** without running the surrounding 4-surface work; when lite writes retro content it commits those files only.
+**Authoritative procedure:** `/jClose` **Step 2 — Write the retro (mandatory, autonomous)** in `skills/jClose/SKILL.md`. Precompact applies the **same location, naming, template shape, and evidence discipline** as closeout, but typically as an **append** for this session interval (phase N). Full formal closeout still runs `/jClose` when the ticket completes. Lite uses this authoring flow and the **Standing feature-feedback retro directive** without running the surrounding 4-surface work; when lite writes retro content it commits those files only.
 
 **Canonical write path (single rule — common archive + project symlink):**
 
-The retro's **real file** always lives in the common archive `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md` (committed in the `common` repo). The project repo holds only an **absolute symlink** at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md` → that file. **Never** write a real retro file under `.jswarm/plans/` (or anywhere in the project), and **never** put a retro symlink in the project root (close-ticket §3.5 / §3.5a).
+The retro's **real file** always lives in the common archive `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md` (committed in the `common` repo). The project repo holds only an **absolute symlink** at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md` → that file. **Never** write a real retro file under `.jswarm/plans/` (or anywhere in the project), and **never** put a retro symlink in the project root.
 
 **Resolution rule:** check `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro*.md`. If a file exists for the ticket → **append** this interval's section there. Else → **create** `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro.md`. Then create/refresh the project symlink (rule 6 + Surface 3).
 
-**Authoring flow (same 3 steps as close-ticket §3.5 — do not reorder):**
+**Authoring flow (same 3 steps `/jClose` uses — do not reorder):**
 
-1. **Resolve the canonical file** — append to an existing common retro or create `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro.md` from the close-ticket §3.5 template when this interval has meaningful findings.
+1. **Resolve the canonical file** — append to an existing common retro or create `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro.md` from the `/jClose` retro template when this interval has meaningful findings.
 2. **Commit the real file in the `common` repo** when retro content changed this interval (`docs/retros/TICKET-XXX.retro*.md`).
-3. From the **project repo** (when an application checkout is in play), create/refresh the **absolute** symlink at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md` → the common file (§3.5a below), and commit the symlink in the project repo.
+3. From the **project repo** (when an application checkout is in play), create/refresh the **absolute** symlink at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md` → the common file (below), and commit the symlink in the project repo.
 
 > **Never** write a real retro file under `.jswarm/plans/` (or anywhere in the project), and **never** put a retro symlink in the project root. Both are violations of the canonical retro convention (`${JSWARM_HOME:-$HOME/dev/jswarm}/.claude/skills/retros/SKILL.md`; `/retros --apply <project>` repairs drift). A **common-only** ticket has no project symlink — the common real file is the whole deliverable.
 
-**Naming (same as close-ticket §3.5):**
+**Naming (same as `/jClose`):**
 
 | Use | Common real file (authoritative) | Project symlink (absolute → common) |
 |-----|----------------------------------|-------------------------------------|
@@ -491,7 +483,7 @@ Prefer **one** `TICKET-XXX.retro.md` until a **second** narrative is clearly war
 
 **Plan path** in the retro body links to the ticket's plan file — `.jswarm/plans/TICKET-XXX.plan.<desc>.md` (new) or `docs/plans/TICKET-XXX-DESCRIPTION.md` (legacy).
 
-**Gather evidence** (same sources as close-ticket §3.5 — use what is available this interval):
+**Gather evidence** (same sources as `/jClose` — use what is available this interval):
 
 1. Plan file — phases, scope changes, status updates, deferrals  
 2. `git log --oneline` for commits touching this ticket  
@@ -500,28 +492,14 @@ Prefer **one** `TICKET-XXX.retro.md` until a **second** narrative is clearly war
 5. Feature defect logs — `TICKET-XXX-integr-fixes.md` / `TICKET-XXX-pe2e-fixes.md` (legacy) or `.jswarm/plans/TICKET-XXX/TICKET-XXX.integr-fixes.md` / `.pe2e-fixes.md` (new) if they exist  
 6. Conversation / session — stalls, rework, surprises  
 
-**Writing rules (close-ticket–compliant):**
+**Writing rules (`/jClose`-compliant):**
 
-1. **If the canonical retro file already exists:** **UPDATE only** — append new findings; add a **Changelog** row (`YYYY-MM-DD`, author, `Precompact checkpoint — phase N`); **never** overwrite existing body. For a precompact boundary, add a section such as `## Precompact — YYYY-MM-DD (phase N)` and, under **Retrospective**, include only categories with new material this interval (close-ticket: *skip categories with no findings* — do not pad with N/A). Use the same **table shape** as close-ticket: `+` / `-` / `Δ` per category row.  
-2. **If no file exists yet** and this interval has **meaningful** findings: **create** the file using the **full markdown template in close-ticket §3.5**. Use **`TICKET-XXX.retro.md`** unless this interval is **only** about an orthogonal “kind” (then `TICKET-XXX.retro.<kind>.md` and link to/from any sibling retro). Populate **Depth** appropriately (often `Quick` for a mid-flight precompact). Leave follow-up polish for final `/jClose` if the ticket is not done.  
+1. **If the canonical retro file already exists:** **UPDATE only** — append new findings; add a **Changelog** row (`YYYY-MM-DD`, author, `Precompact checkpoint — phase N`); **never** overwrite existing body. For a precompact boundary, add a section such as `## Precompact — YYYY-MM-DD (phase N)` and, under **Retrospective**, include only categories with new material this interval (skip categories with no findings — do not pad with N/A). Use the same **table shape** as `/jClose`: `+` / `-` / `Δ` per category row.  
+2. **If no file exists yet** and this interval has **meaningful** findings: **create** the file using the **full markdown template `/jClose` uses**. Use **`TICKET-XXX.retro.md`** unless this interval is **only** about an orthogonal “kind” (then `TICKET-XXX.retro.<kind>.md` and link to/from any sibling retro). Populate **Depth** appropriately (often `Quick` for a mid-flight precompact). Leave follow-up polish for final `/jClose` if the ticket is not done.  
 3. **If no meaningful findings** this interval: **do not** create an empty file. Record in the state file **Retro** section: `N/A — no new lessons this interval`.  
-4. **Categories** when you do write: use the close-ticket list (Project / Domain Knowledge, Planning, Testing & QA, AI Agent Effectiveness, Tooling, Architecture / Infrastructure, UAT ↔ E2E Alignment, Other) — include a category only when there is something worth recording.  
+4. **Categories** when you do write: use the `/jClose` list (Project / Domain Knowledge, Planning, Testing & QA, AI Agent Effectiveness, Tooling, Architecture / Infrastructure, UAT ↔ E2E Alignment, Other) — include a category only when there is something worth recording.  
 5. **Action items:** If precompact surfaces concrete follow-ups, add rows to **Action Items** (or reference existing open rows).  
-5a. **Check-in review transcription (`checkin-review@1`).** Precompact does not evaluate the check-in contract, run a seam, force a check-in, or open or resolve a hold (canonical: `skills/jCheckin/references/checkin-review.md`). Its one active obligation is the enrolment refresh in **Step 3.5**, which keeps the evaluator's declared facts current; here in the retro it only **records** into the dedicated retro type a check-in already completed and read from ticket evidence — the check-in review row in `.jswarm/plans/TICKET-XXX/TICKET-XXX.state.md`, already captured at check-in time, rather than by reconstructing anything from conversation memory. (Do **not** call `/jCheckin checkpoint` for it: `checkpoint` is deferred, not implemented, and not callable — the evidence is already on disk.) Follow `## Recording`: verify every completed state row has its JSON record, then transcribe the recorded narrative in full, including inputs and course corrections, not only the verdict. Never recompute metrics from conversation memory. The check-in result is persisted as ticket evidence at check-in time regardless. When a retro is written this interval (full or lite), transcribe that row rather than re-deriving it. Lite still skips the full-mode ledger/telemetry re-extract; if the only jCheckin material is a completed review row plus feedback, file `TICKET-XXX.retro.jCheckin.md` under the standing directive.
-
-#### jCheckin retro (separate canonical retro)
-
-Apply the **Standing feature-feedback retro directive** first: if this interval used jCheckin and has feedback, file `TICKET-XXX.retro.jCheckin.md` in both full and lite. Weigh benefits (re-work and risk avoided) against costs (time and tokens).
-
-At every **full** checkpoint, if the ticket has any jCheckin / architect check-in activity — runtime-ledgered `architect-checkin-*` rows in `.jswarm/plans/TICKET-XXX/gate-ledger.ndjson` or orchestrator-run check-ins via `SendMessage` that were not ledgered — also maintain these files separately from the main ticket retro:
-
-- **Report:** `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro.jCheckin.md` — append one instance row per check-in (date, seam/trigger, verdict, one-line outcome), benefits/cost notes where observable (label estimates when not instrumented), and one Changelog row per refresh. Append only; never overwrite the existing body.
-- **Telemetry breakout:** `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro.jCheckin.telemetry.jsonl` — re-extract every `architect-checkin-*` gate-ledger row **verbatim**, then append one constructed JSONL object for each unledgered check-in, marked `"actor": "orchestrator transcription"` with a source citation. Keep valid JSONL, one object per line; never reconstruct or paraphrase captured evidence. Constructed records are labeled transcriptions, not recovered captures, consistent with the no-reconstruction rule in `jCheckin/references/checkin-review.md` `## Recording`.
-- **Project symlinks and commit:** maintain absolute, worktree-safe symlinks for both files, co-located in `.jswarm/plans/TICKET-XXX/` per the standards below, and include them in Surface 3 with the other retro edits.
-
-No activity since the last refresh means, **in full mode only**, append only a Changelog row: `no new check-in activity this interval`. No activity ever means skip silently without creating files. Lite does not write changelog-only refreshes or the telemetry JSONL; it files the jCheckin kind-file only when the standing directive's used-and-have-feedback gate is met. A ticket-local `.precompact.md` may override this naming or shape (for example, an established beta-report variant).
-
-6. **Project symlink (close-ticket §3.5a) — worktree-safe.** When the working tree is an **application repo** and you created/appended a common retro this interval, ensure **each** touched retro has an **absolute** symlink co-located with the ticket's plan artifacts:
+6. **Project symlink — worktree-safe.** When the working tree is an **application repo** and you created/appended a common retro this interval, ensure **each** touched retro has an **absolute** symlink co-located with the ticket's plan artifacts:
 
    ```bash
    mkdir -p .jswarm/plans/TICKET-XXX
@@ -546,10 +524,6 @@ ls -l .jswarm/plans/TICKET-XXX/TICKET-XXX.retro*.md 2>/dev/null
 **No ticket** (generic precompact): record **Retro: N/A** in `.jswarm/state/precompact-state.md` unless the session produced a portfolio-wide lesson that belongs in an existing common retro by explicit user/repo convention; do not invent orphan filenames.
 
 Retro edits must be **committed in their target repo before the banner** — never leave a touched retro real file or project symlink unstaged. When both repos changed, **both** commits are required (see table below).
-
-### jCheckin canonical lifecycle boundary (full and lite)
-
-After state, plan, and matrix surfaces are current, invoke `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/joptimize/checkin_runtime.py --lifecycle-boundary --caller jPrecompact --project-root "$PWD" --context-file "$CHECKIN_CONTEXT" --common-root "$COMMON_ROOT" --boundary-id "$BOUNDARY_ID" --format json`. The single operation ensures this checkout's enrollment, appends the caller boundary event directly to canonical `common/logs.jCheckin/`, and repairs the absolute project symlink views. If common is unavailable, it returns typed event loss; record/warn/continue without creating local telemetry or a copy attempt, and never make it a commit prerequisite.
 
 ### Surface 3: Git Commit
 
@@ -631,7 +605,6 @@ After writing all surfaces, emit this fixed-format banner:
 Done:   <bulleted list of deliverables + file paths + commit SHAs>
 Artifacts updated: <list of planning files>; plan sections: <A/C, matrix, phases, Required Reading, …>
 Retro:  ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md updated / N/A; project symlink .jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md (absolute → common): OK / N/A
-jCheckin: lifecycle boundary recorded / warned; workflow continues
 Next:   <bulleted list of immediate next actions>
 State:  .jswarm/plans/TICKET-XXX/TICKET-XXX.state.md (N lines)
 Commit: <sha> <subject>  (dual-repo: Common <sha> + Project <sha>)
@@ -655,10 +628,9 @@ Before declaring the checkpoint complete, verify ALL:
 2. ☐ **Master plan lean maintenance:** A/C checkboxes, A/C-to-Test / UAT matrix rows, phase tasks + exit criteria, Testing Strategy status, Status Updates row, Required Reading (added/removed load-bearing docs), Critical Files, and `Last Updated` reflect this interval — **no new prose blocks** added
 3. ☐ Other planning artifacts updated (specs, UAT scenarios, UAT test doc, defect trackers — or note absence of each)
 3a. ☐ **Rules/tools maintenance window:** Step 2.0-rules-tools launched in background when applicable; task ID recorded; checkpoint did not wait for it or let it delay later surfaces/commit/banner
-4. ☐ **Retro (close-ticket §3.5; full and lite):** real file written/appended at `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md` (full template on create, **Changelog** row on append, **no overwrite** of existing body) or state records `N/A — no new lessons`; standing feature-feedback kind-files written only when used-and-have-feedback; **common retro committed in `common` when content changed**; project symlink at `.jswarm/plans/TICKET-XXX/` is absolute + resolves (§3.5a) or N/A; **no real retro file in the project, no symlink in the project root**; nothing left unstaged in either repo for touched retros
+4. ☐ **Retro (`/jClose`-aligned; full and lite):** real file written/appended at `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md` (full template on create, **Changelog** row on append, **no overwrite** of existing body) or state records `N/A — no new lessons`; standing feature-feedback kind-files written only when used-and-have-feedback; **common retro committed in `common` when content changed**; project symlink at `.jswarm/plans/TICKET-XXX/` is absolute + resolves or N/A; **no real retro file in the project, no symlink in the project root**; nothing left unstaged in either repo for touched retros
 5. ☐ Git commit(s) capture working-tree changes (no uncommitted state in the repo(s) touched). Lite: this applies only to touched retros (scoped retro-only commit); state and plan Status Updates may remain uncommitted
 6. ☐ TaskList matches reality (no false `in_progress` items). Lite skips this guarantee
-6a. ☐ **jCheckin lifecycle boundary (full and lite):** canonical enrollment and caller event are recorded, project views are repaired, or typed event loss is warned without blocking
 7. ☐ Checkpoint banner emitted to user
 
 **If any guarantee fails → fix it before emitting the banner.**
@@ -679,7 +651,7 @@ Then announce:
 
 **If state file is missing or stale:**
 1. `git log --oneline -20` — see recent commits
-2. Check expected files (COM-91 dual-path):
+2. Check expected files (dual-path):
    ```bash
    ls .jswarm/plans/TICKET-XXX.plan.*.md .jswarm/plans/TICKET-XXX/ 2>/dev/null   # new location
    ls docs/plans/TICKET-XXX-*                                        2>/dev/null   # legacy
@@ -733,7 +705,7 @@ Never silently assume state after a compaction. Confirm.
 
 | Can automate | Cannot automate |
 |-------------|----------------|
-| Writing state files, plan updates, canonical retros (`TICKET-XXX.retro.md` / `TICKET-XXX.retro.<kind>.md` per `close-ticket` §3.5) | **Invoking `/compact`** — only user can type it |
+| Writing state files, plan updates, canonical retros (`TICKET-XXX.retro.md` / `TICKET-XXX.retro.<kind>.md` per `/jClose`) | **Invoking `/compact`** — only user can type it |
 | Running `git commit` at boundaries | Knowing exact token usage |
 | Updating TaskList status | Preventing tool-result payload loss (write to disk before compact) |
 | Emitting checkpoint banner | Recovering background agent state across compaction (write agent IDs to state file) |
@@ -750,12 +722,12 @@ Never silently assume state after a compaction. Confirm.
 3. **Commit SHA goes in the state file for full mode.** Cross-reference is mandatory after a full checkpoint commit. In lite mode, record `Commit: N/A — lite mode (no checkpoint commit)` unless this lite run made a scoped retro-only commit (record that SHA) or an earlier commit SHA is being carried forward as context.
 4. **Background agent IDs go in the state file.** Orphaned agents = lost work.
 5. **Banner is mandatory.** User needs to see what was saved and what's next.
-6. **Retro (close-ticket–aligned, single rule; full and lite).** The real file always lives in the common archive `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md`; the project holds an **absolute, worktree-safe** symlink at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md`. Append-only with a Changelog row when the file exists, full template when creating; then create/refresh the project symlink (§3.5a — absolute target, never the project root, never a real retro file in the project). Or record **`N/A — no new lessons`** in the state file — never silent skip. Also apply the **Standing feature-feedback retro directive**: separate kind-files for recently updated features (jGuardrail, jCheckin, test UAT lifecycle) only when used this interval and you have feedback, weighing benefits (re-work and risk avoided) against costs (time and tokens). Precompact does **not** replace final `/jClose` Jira/plan polish (§3.5b). Lite files retros and may make a scoped retro-only commit; it does not run the full-mode jCheckin telemetry re-extract.
+6. **Retro (`/jClose`-aligned, single rule; full and lite).** The real file always lives in the common archive `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md`; the project holds an **absolute, worktree-safe** symlink at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md`. Append-only with a Changelog row when the file exists, full template when creating; then create/refresh the project symlink (absolute target, never the project root, never a real retro file in the project). Or record **`N/A — no new lessons`** in the state file — never silent skip. Also apply the **Standing feature-feedback retro directive**: separate kind-files for recently updated features (see the standing roster) only when used this interval and you have feedback, weighing benefits (re-work and risk avoided) against costs (time and tokens). Precompact does **not** replace final `/jClose` tracker/plan polish. Lite files retros and may make a scoped retro-only commit.
 7. **Plan lean maintenance (Surface 2; full mode).** Every full checkpoint updates the master plan execution snapshot: A/C, traceability matrix, UAT matrix, phases/tasks, Testing Strategy, Status Updates, **Required Reading**, Critical Files, Last Updated — status deltas only. No new A/C/tasks/phases without user approval; no Overview/Risk rewrites; no retro duplication in the plan. Lite mode writes only a scoped Status Updates row.
 
 ---
 
-## ColGREP Index Lifecycle Check (COM-204 — no-badgering)
+## ColGREP Index Lifecycle Check (no-badgering)
 
 During checkpoint (after the plan/state is written; full mode), run the read-only ColGREP lifecycle check. It silently lets the certain-only evictor handle stale/orphan indices and surfaces ONE consolidated question only for genuinely ambiguous candidates — and only once per unchanged set (receipt-backed; no badgering):
 
@@ -772,7 +744,7 @@ ColGREP is optional; an uninstalled or erroring check must never block the check
 - `question` null or `suppressed: true`, or the command itself failed to run → proceed silently; no action needed.
 - `question` present → surface its `prompt` + each `candidate` (with its `reasons`) using the actions **keep-protect / delete-now / defer / inspect-details**. Advisory only — never block the checkpoint, and never auto-`--apply` cleanup from a lifecycle command (deletion stays operator-gated; dry-run is the default).
 
-After the eviction check, run the **ticket-scoped ColGREP index-health check** (COM-233) so the checkpoint records whether *this ticket's* index is fresh, lagging, or stalled — scoped to the resolved ticket, never a blanket all-index scan:
+After the eviction check, run the **ticket-scoped ColGREP index-health check** so the checkpoint records whether *this ticket's* index is fresh, lagging, or stalled — scoped to the resolved ticket, never a blanket all-index scan:
 
 ```bash
 # Substitute $TICKET with the ACTIVE ticket key (from Step 1a). If the active
@@ -800,12 +772,12 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
 | 2026-08-12 | Opus 5 | **jCheckin enrolment freshness (Step 3.5) — full and lite.** `/jGo` enrols once and nothing re-enrolled, so the frozen evaluator kept answering truthfully against expired facts and the check-in gate never fired. `/jPrecompact` is the surface that actually recurs and has just reconciled the plan/state, so it now refreshes enrolment before the banner: eligibility/enrolment check, mandatory untrap-marker check first (a marker means report `suspended` and do NOT call `start` — re-enrolment is the only thing that clears a marker), quiet-boundary requirement with an explicit carve-out for the declared no-wait Step 2.0-rules-tools lane, then `/jCheckin start` with facts rebuilt from the current plan (identical = no-op, changed = deliberate revision bump, refusal blocks the banner). Added the outcome line to both banners, a lite allowed-write plus a matching lite prohibition on every other jCheckin write, discipline guarantee 6a, and corrected the retro step's now-false claim that precompact does nothing for jCheckin. Same pass, same defect class (documentation instructing a command that does not exist): the retro step no longer instructs calling the deferred, non-callable `/jCheckin checkpoint` — the check-in review row is read from the ticket evidence already captured at check-in time — and the telemetry breakout re-attributes the no-reconstruction rule to its real home, `checkin-review.md` `## Recording`. |
 | 2026-07-13 | GPT-5.6 | **Fail-open rules/tools maintenance window.** Full-mode Surface 2 now launches a background/no-wait jOps lane to reconcile architecture rule/tool cards and the rules summary, flag catalog gaps, refresh healthy ColGREP project indexing, and mirror pipeline-trace matrix/render maintenance when mechanisms changed. The checkpoint never waits for this lane and helpers may not spawn further agents. |
 | 2026-06-22 | GPT-5.5 | **Full-mode promotion gate + lite mode.** Promoted Step 1d from advisory UAT/NFR note to a blocking pre-surface promotion-review harness covering UAT, NFR, A/C-to-Test, and A/C checkboxes: developer must approve all, approve selected, deny, request changes, or abort before any full checkpoint surface is written. Added `/jPrecompact --lite` and `--fast` alias as a narrow continuity checkpoint that writes only the state file and a scoped plan Status Updates row; it skips promotion review, matrix reconcile, retro, commit, TaskList, artifact dispatch, and broad plan maintenance. Removed `--force`; the proceed confirmation and full-mode promotion harness are mandatory. Updated full-mode surface rules to make lite the explicit exception. |
-| 2026-06-21 | COM-194 | **Early UAT/NFR sign-off recommendation (Step 1d).** Added a read-only, non-blocking step at the start of the checkpoint that **adjudicates each** ceiling row (UAT 🟡 Ready, A/C-to-NFR 🟡, `Automated NFR: no` static-proof rows) by inspecting its cited evidence and giving a **per-item ✅ Promote / ⏸ Hold verdict** with the reason — not just a list — fail-safe to ⏸ Hold when evidence can't be confirmed (no false-green). Includes the "counts read 0/N until you sign off — DoD ladder caps automation at 🟡 and counts only 🟢" explanation and optional same-turn flip + Step 2.1 re-normalize on explicit sign-off. Surfaces the promote/hold call early instead of only at `/jClose`. |
-| 2026-06-06 | COM-136 | Repointed post-compaction carry-forward state to `.jswarm/plans/TICKET-XXX/TICKET-XXX.state.md` (ticket) / `.jswarm/state/precompact-state.md` (no ticket), and removed the legacy fallback so command state handling is `.jswarm`-only. Added memory-body one-line distillation rule for local includes. |
-| 2026-06-05 | COM-23 | **Local precompact include layering.** Added runtime discovery for optional project-local and ticket-local precompact includes, with precedence `global → project → ticket`, additive merge semantics, later-layer override for ordinary defaults, and non-weakenable safety/retro/plan-maintenance boundaries. |
+| 2026-06-21 | —        | **Early UAT/NFR sign-off recommendation (Step 1d).** Added a read-only, non-blocking step at the start of the checkpoint that **adjudicates each** ceiling row (UAT 🟡 Ready, A/C-to-NFR 🟡, `Automated NFR: no` static-proof rows) by inspecting its cited evidence and giving a **per-item ✅ Promote / ⏸ Hold verdict** with the reason — not just a list — fail-safe to ⏸ Hold when evidence can't be confirmed (no false-green). Includes the "counts read 0/N until you sign off — DoD ladder caps automation at 🟡 and counts only 🟢" explanation and optional same-turn flip + Step 2.1 re-normalize on explicit sign-off. Surfaces the promote/hold call early instead of only at `/jClose`. |
+| 2026-06-06 | —        | Repointed post-compaction carry-forward state to `.jswarm/plans/TICKET-XXX/TICKET-XXX.state.md` (ticket) / `.jswarm/state/precompact-state.md` (no ticket), and removed the legacy fallback so command state handling is `.jswarm`-only. Added memory-body one-line distillation rule for local includes. |
+| 2026-06-05 | —        | **Local precompact include layering.** Added runtime discovery for optional project-local and ticket-local precompact includes, with precedence `global → project → ticket`, additive merge semantics, later-layer override for ordinary defaults, and non-weakenable safety/retro/plan-maintenance boundaries. |
 | 2026-06-02 | Cursor | **Plan lean maintenance contract (Surface 2).** Mandatory master-plan checklist: A/C, A/C-to-Test matrix, UAT matrix, phases/tasks, Testing Strategy, Status Updates, Required Reading (+/− load-bearing docs such as architecture specs), Critical Files, Last Updated — table/checkbox deltas only, no prose bloat. Fixed flash-tasker prompt (was incorrectly forbidding A/C updates). State template + banner + Rule #7 + discipline guarantee #2; lean prompts for specs/UAT artifacts. |
-| 2026-06-02 | Cursor | **Dual-repo commit workflow aligned with `/jClose` §3.5.** Added explicit 3-step authoring flow (write in common → commit common → symlink + commit project), `/retros --apply` drift repair pointer, repo-aware Surface 3 table (common-first order when both repos touch retro), dual SHA fields in state template + banner, and discipline guarantees for unstaged cross-repo retro work. Fixes the Surface 3 contradiction that implied a single commit could cover retro real files outside the cwd. |
-| 2026-06-01 | Claude Opus 4.8 | **Retro model unified (supersedes the 2026-05-22 COM-91 dual-location split).** Retro real file ALWAYS lives in `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/`; project ALWAYS holds an **absolute, worktree-safe** symlink at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md` → the common file. Removed the new-location-real-file branch and the project-root-symlink branch across the state-file template, Surface-2/3, Rule #6, banner, discipline checklist, and discovery helpers (§3.5a now `ln -sfn "$HOME/..."`). Matches `/retros` + `close-ticket.md`; worktree merges carry the absolute symlink unchanged. Authority doc `docs/agent-system/agent-write-permissions.md` updated in lockstep. |
-| 2026-05-22 | COM-91 Phase 3b | Dual-path plan resolution (`.jswarm/plans/TICKET-XXX.plan.*.md` master + `.jswarm/plans/TICKET-XXX/` artifacts for tickets ≥ 2026-05-22; `docs/plans/` legacy fallback). Retro destination flipped: NEW tickets write retros to `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro.md`; LEGACY tickets (retro already exists in `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/`) keep appending there. Banner + Rule #6 + state-file template updated. Discovery helpers expanded for dual locations. Per canonical doc `docs/agent-system/agent-write-permissions.md`. |
-| 2026-05-08 | —        | Retro naming aligned with `close-ticket.md`: `TICKET-XXX.retro.md` default, `TICKET-XXX.retro.<kind>.md` for split narratives; multi-symlink §3.5a. |
+| 2026-06-02 | Cursor | **Dual-repo commit workflow aligned with `/jClose`.** Added explicit 3-step authoring flow (write in common → commit common → symlink + commit project), `/retros --apply` drift repair pointer, repo-aware Surface 3 table (common-first order when both repos touch retro), dual SHA fields in state template + banner, and discipline guarantees for unstaged cross-repo retro work. Fixes the Surface 3 contradiction that implied a single commit could cover retro real files outside the cwd. |
+| 2026-06-01 | Claude Opus 4.8 | **Retro model unified (supersedes the 2026-05-22 dual-location split).** Retro real file ALWAYS lives in `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/`; project ALWAYS holds an **absolute, worktree-safe** symlink at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md` → the common file. Removed the new-location-real-file branch and the project-root-symlink branch across the state-file template, Surface-2/3, Rule #6, banner, discipline checklist, and discovery helpers (project-symlink step now `ln -sfn "$HOME/..."`). Matches `/retros` + `/jClose`; worktree merges carry the absolute symlink unchanged. Authority doc `docs/agent-system/agent-write-permissions.md` updated in lockstep. |
+| 2026-05-22 | —        | Dual-path plan resolution (`.jswarm/plans/TICKET-XXX.plan.*.md` master + `.jswarm/plans/TICKET-XXX/` artifacts for tickets ≥ 2026-05-22; `docs/plans/` legacy fallback). Retro destination flipped: NEW tickets write retros to `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro.md`; LEGACY tickets (retro already exists in `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/`) keep appending there. Banner + Rule #6 + state-file template updated. Discovery helpers expanded for dual locations. Per canonical doc `docs/agent-system/agent-write-permissions.md`. |
+| 2026-05-08 | —        | Retro naming aligned with `/jClose`: `TICKET-XXX.retro.md` default, `TICKET-XXX.retro.<kind>.md` for split narratives; multi-symlink. |
 | 2026-04-21 | Sisyphus | Initial version — extracted from `/jGo` Auto-Context Management checkpoint protocol. Expanded Surface 2 from plan-file-only to all planning artifacts (specs, UAT scenarios, UAT test doc, defect trackers) with parallel agent dispatch. `/jGo` and `/jPlan` now reference this command instead of duplicating the protocol. |
