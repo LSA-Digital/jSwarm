@@ -21,3 +21,9 @@ def test_claude_code_host_paths():
     assert h.skills_dir() == Path.home() / ".claude" / "skills"
     assert h.memory_path(Path("/x")) == Path("/x/CLAUDE.md")
     assert "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" == h.hook_interpreter()
+
+
+def test_claude_code_host_mcp_add_argv():
+    h = current()
+    argv = h.mcp_add_argv("colgrep", "/path/to/python", ["/path/to/server.py"])
+    assert argv == ["claude", "mcp", "add", "--scope", "user", "colgrep", "/path/to/python", "/path/to/server.py"]

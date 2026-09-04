@@ -38,12 +38,13 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 SHIM_NAMES = {"close-ticket", "fix", "implement", "jsetup", "merge", "new-work", "test", "uat"}
 
-# colgrep-search and code-overview both depend on ColGREP MCP tools (colgrep_search,
-# colgrep_list_dev_indices, ...) this installer does not set up -- ColGREP is not
-# implemented in this release (a decision on shipping it for v0.1.0 is pending with the
-# owner). jswarm.installer.cli._install_skills deliberately excludes both rather than
-# installing a silently non-functional command; see test_neither_colgrep_dependent_skill_is_installed.
-NOT_YET_AVAILABLE_SKILLS = {"colgrep-search", "code-overview"}
+# colgrep-search and code-overview both lean on the colgrep_search /
+# colgrep_list_dev_indices MCP tools, which only exist once ColGREP is actually
+# installed and its MCP server registered (jswarm.installer.cli._install_colgrep).
+# Without --with-colgrep (or if that install fails), _install_skills excludes both
+# rather than installing a silently non-functional command; see
+# test_neither_colgrep_dependent_skill_is_installed and, below, installed_home_with_colgrep.
+COLGREP_DEPENDENT_SKILLS = {"colgrep-search", "code-overview"}
 
 
 def _real_skill_names() -> set[str]:
@@ -51,7 +52,7 @@ def _real_skill_names() -> set[str]:
     return {
         p.name
         for p in skills_dir.iterdir()
-        if p.is_dir() and p.name != "_shims" and p.name not in NOT_YET_AVAILABLE_SKILLS
+        if p.is_dir() and p.name != "_shims" and p.name not in COLGREP_DEPENDENT_SKILLS
     }
 
 
@@ -91,8 +92,56 @@ def test_neither_colgrep_dependent_skill_is_installed(installed_home):
     # not exist without ColGREP) is not acceptable, so the installer excludes them
     # entirely rather than installing them with a "requires X" banner.
     dest = installed_home / ".claude" / "skills"
-    for name in NOT_YET_AVAILABLE_SKILLS:
-        assert not (dest / name).exists(), f"'{name}' should not be installed (requires ColGREP)"
+    for name in COLGREP_DEPENDENT_SKILLS:
+        assert not (dest / name).exists(), f"'{name}' should not be installed (requires --with-colgrep)"
+
+
+@pytest.fixture(scope="module")
+def installed_home_with_colgrep(tmp_path_factory):
+    """Run `./install.sh install --with-colgrep` once against a throwaway HOME.
+
+    A stub `colgrep` binary goes on PATH so this is deterministic regardless of
+    whether the machine running the tests happens to have Rust/colgrep installed
+    (see tests/test_install_colgrep.py for the missing-toolchain path, and for
+    the real MCP-registration assertion against a stub `claude`).
+    """
+    home = tmp_path_factory.mktemp("jswarm-install-home-colgrep")
+    bindir = tmp_path_factory.mktemp("jswarm-install-bin")
+    for name in ("colgrep", "claude"):
+        stub = bindir / name
+        stub.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        stub.chmod(0o755)
+    env = {
+        "HOME": str(home),
+        "JSWARM_HOME": str(REPO_ROOT),
+        "PATH": f"{bindir}:/usr/bin:/bin:/usr/sbin:/sbin:" + str(REPO_ROOT / ".venv" / "bin"),
+    }
+    result = subprocess.run(
+        ["./install.sh", "install", "--with-colgrep"],
+        cwd=str(REPO_ROOT),
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    assert result.returncode == 0, (
+        f"install.sh install --with-colgrep failed (exit {result.returncode})\n"
+        f"--- stdout ---\n{result.stdout}\n--- stderr ---\n{result.stderr}"
+    )
+    return home
+
+
+def test_both_colgrep_dependent_skills_land_with_the_flag(installed_home_with_colgrep):
+    dest = installed_home_with_colgrep / ".claude" / "skills"
+    for name in COLGREP_DEPENDENT_SKILLS:
+        skill_md = dest / name / "SKILL.md"
+        assert skill_md.is_file(), f"'{name}' should be installed with --with-colgrep, missing at {skill_md}"
+
+
+def test_colgrep_step_is_recorded_with_the_flag(installed_home_with_colgrep):
+    lock_path = installed_home_with_colgrep / ".jswarm" / "install.lock.yaml"
+    data = yaml.safe_load(lock_path.read_text())
+    assert "colgrep" in data["steps_completed"], data
 
 
 def test_every_shim_is_discoverable_at_its_own_top_level_name(installed_home):

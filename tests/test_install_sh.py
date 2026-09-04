@@ -1,9 +1,9 @@
 import os, subprocess
 from pathlib import Path
 
-def run(*args, home):
-    env = {**os.environ, "HOME": str(home), "JSWARM_HOME": str(Path.cwd())}
-    return subprocess.run(["bash", "install.sh", *args], capture_output=True, text=True, env=env)
+def run(*args, home, env=None):
+    full_env = {**(env or os.environ), "HOME": str(home), "JSWARM_HOME": str(Path.cwd())}
+    return subprocess.run(["bash", "install.sh", *args], capture_output=True, text=True, env=full_env)
 
 def test_no_provider_flag(tmp_path):
     r = run("install", "--provider", "yaml", "--dry-run", home=tmp_path)
@@ -16,18 +16,26 @@ def test_dry_run_install_writes_nothing_and_names_the_lock(tmp_path):
     assert not (tmp_path / ".jswarm").exists()
 
 def test_with_colgrep_is_accepted(tmp_path):
-    # --with-colgrep must be honest: it does not implement ColGREP (a decision on
-    # shipping it for v0.1.0 is still pending), so it must say so plainly, never claim
-    # success, never mark a completed step, and never install the two skills that
-    # cannot work without it.
-    r = run("install", "--with-colgrep", "--dry-run", home=tmp_path)
+    # --with-colgrep is real now. A stub `colgrep` binary is put on PATH so the
+    # outcome does not depend on whether this machine happens to have Rust/colgrep
+    # installed (see tests/test_install_colgrep.py for PATH-controlled coverage of
+    # the missing-toolchain path, and of a real, non-dry-run install). This dry run
+    # must describe a real plan -- never the old "not implemented" stub text -- and
+    # must never claim the two ColGREP-dependent skills are skipped when the flag is
+    # given and the toolchain is actually present.
+    bindir = tmp_path / "bin"
+    bindir.mkdir()
+    stub = bindir / "colgrep"
+    stub.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    stub.chmod(0o755)
+    env = {**os.environ, "PATH": f"{bindir}:{os.environ.get('PATH', '')}"}
+    r = run("install", "--with-colgrep", "--dry-run", home=tmp_path / "home", env=env)
     out = r.stdout.lower()
     assert r.returncode == 0
-    assert "not implemented" in out
-    assert "colgrep search is available" not in out
-    assert "colgrep_search" in out  # names the actual MCP tools it does NOT register
-    assert "code-overview skipped" in out
-    assert "colgrep-search skipped" in out
+    assert "not implemented" not in out
+    assert "code-overview skipped" not in out
+    assert "colgrep-search skipped" not in out
+    assert "found existing binary" in out
 
 def test_every_mutating_subcommand_has_a_dry_run(tmp_path):
     for args in (["install"], ["adopt", str(tmp_path)], ["unadopt", str(tmp_path)], ["upgrade"], ["uninstall"]):

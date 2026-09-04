@@ -35,14 +35,18 @@ def test_docs_state_that_no_command_invokes_another():
     t = Path("docs/how-the-loop-works.md").read_text()
     assert "/jGo" in t and "does not" in t.lower()
 
-def test_colgrep_is_documented_as_not_implemented_not_as_a_ripgrep_dependency():
-    # Fix round 1 named Docker for optional ColGREP search, which was wrong: Docker
-    # gates an unrelated, unshipped demo-stack preflight. The docs were then "fixed" to
-    # name ripgrep instead -- also wrong: ripgrep is merely what --with-colgrep's stub
-    # happened to check, not what ColGREP actually needs, and the stub installed
-    # nothing regardless. The honest state is that ColGREP is not implemented in this
-    # release; the docs must say that, not offer a fake dependency for either wrong guess.
+def test_colgrep_is_documented_as_a_real_optional_component_needing_rust_not_docker():
+    # Earlier rounds named Docker, then ripgrep, for optional ColGREP search -- both
+    # wrong: Docker gates an unrelated, unshipped demo-stack preflight, and ripgrep was
+    # merely what the old stub happened to check, not what ColGREP actually needs. Now
+    # that --with-colgrep is real (cargo install colgrep + a bundled MCP server), the
+    # docs must say exactly that: a real optional install needing a Rust toolchain, not
+    # Docker, not ripgrep, and not the old "not implemented" stub language.
     t = Path("docs/getting-started.md").read_text()
     assert "docker" not in t.lower()
-    assert "not implemented" in t.lower()
-    assert "colgrep_search" in t  # names the real MCP tools, not a fake "just install ripgrep" fix
+    assert "not implemented" not in t.lower()
+    assert "cargo install colgrep" in t
+    assert "rust" in t.lower()
+    assert "colgrep_search" in t  # names the real MCP tools it registers
+    assert "colgrep_list_dev_indices" in t
+    assert "--with-colgrep" in t
