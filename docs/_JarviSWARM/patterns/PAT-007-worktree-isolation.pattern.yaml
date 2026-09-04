@@ -1,0 +1,133 @@
+schema_version: '0.2'
+id: PAT-007
+level: l2_ingredient
+key: l2.worktree-isolation
+name: Worktree Isolation or Serialized Shared-File Execution
+family: delivery-ceremony
+kind: execution-practice
+intent: Protect concurrent work by using a worktree when supported or recording serialized execution when isolation is unavailable.
+problem:
+  context: Worktree Isolation or Serialized Shared-File Execution is needed when ticket execution must translate ceremony selection into enforceable delivery behavior.
+  forces:
+  - Delivery speed matters, but guidance must compile into concrete obligations.
+  - Agents need visible stop conditions and evidence surfaces, not prose-only advice.
+  - Reviewers need stable markers that can be checked consistently across tickets.
+applicability:
+  use_when: &id001
+  - Concurrent sessions or shared generated files could collide.
+  - The work touches source/config files where isolation reduces risk.
+  avoid_when: &id002
+  - The task is read-only or a local single-file change where no concurrent write risk exists.
+ceremony:
+  tier: medium
+  default_depth: standard
+  supported_tiers:
+  - low
+  - medium
+  - high
+selection_forces:
+  use_when: *id001
+  avoid_when: *id002
+  signals:
+  - concurrency_shared_files
+  - scope_blast_radius
+  - shared_contract_surface
+compile:
+  worktree: yes_if_supported
+  required_prompt_clauses: &id004
+  - Use an isolated worktree when supported, or record serialized execution constraints.
+solution_summary: Protect concurrent work by using a worktree when supported or recording serialized execution when isolation is unavailable.
+lifecycle_hooks:
+  jplan:
+    selection_guidance: Select PAT-007 (l2.worktree-isolation) when its use_when forces are present; record the chosen depth and any rejected lighter alternative.
+    plan_fields: &id003
+    - engineering_pattern_references
+  implement:
+    practices: &id005
+    - Confirm the working tree scope before editing.
+    - Use worktree isolation for multi-file source changes when available.
+    - Serialize or stop when shared generated artifacts would collide.
+  close_ticket:
+    retro_prompts:
+    - Did l2.worktree-isolation add the right amount of ceremony for the ticket shape?
+    - Which evidence or stop condition from l2.worktree-isolation was most useful?
+  feature_reconcile:
+    outcome_use: Aggregate outcomes for l2.worktree-isolation to tune default depths and preset composition.
+  devops_maint:
+    drift_or_telemetry: Surface selections of l2.worktree-isolation that lack compiled obligations or review evidence.
+constraint_surfaces:
+  plan_fields: *id003
+  required_agents:
+  - test-engineer when proof design or test coverage is part of the selected ingredient
+  forbidden_routes:
+  - Claiming catalog Pattern compliance without material plan, prompt, test, or review evidence.
+  required_prompt_clauses: *id004
+execution_practices: *id005
+evidence_tests:
+- Worktree or serialization decision is recorded.
+- Generated aggregate files are not accidentally regenerated outside the planned gate.
+ac_to_uat_mapping:
+  required: true
+  map_shape: Each affected acceptance criterion maps to an automated test, UAT scenario, smoke command, review artifact, or explicit N/A rationale.
+thin_slice_uat_proof:
+  first_proof_point: Run or record the smallest proof that exercises the selected obligation before broad implementation expands.
+  stop_conditions:
+  - The selected obligation has no concrete evidence path.
+  - The proof cannot run and no explicit N/A or blocker is recorded.
+  - The implementation proceeds broadly before the selected proof is satisfied.
+minimum_viable_architecture:
+  rule: Use only the architecture needed to satisfy acceptance criteria, selected ingredients, and dominant NFR weights.
+sufficient_design:
+  rule: Design enough to materialize plan fields, prompt clauses, tests, and reviewer gates; defer speculative generalization.
+nfr_weighting:
+  maintainability: high
+  reliability: high
+  rationale: Isolation reduces cross-session collision and accidental generated-file drift.
+reviewer_enforcement:
+- Reject changes that overwrite unrelated user or concurrent session work.
+anti_patterns:
+- Treating the Pattern as descriptive prose without plan fields or gate evidence.
+- Selecting a heavier or lighter ceremony tier without recording risk rationale.
+- Replacing acceptance evidence with implementation-shape assertions only.
+tradeoffs:
+- Adds explicit ceremony and review markers before or during implementation.
+- Reduces late rework by making obligations visible to agents and reviewers.
+related_patterns: []
+relationships:
+  features: []
+  processes: []
+  tools: []
+  documents: []
+  assets: []
+  components: []
+external_precedents:
+- name: Git worktree documentation
+  url: https://git-scm.com/docs/git-worktree
+  source_type: version-control-documentation
+  citation_note: Documents linked working trees as separate checkouts attached to one repository for parallel work on different branches.
+  usage_boundary: Used as precedent for isolated checkout mechanics; JarviSWARM adds ticket-specific serialization and evidence rules.
+- name: Trunk-Based Development short-lived branches
+  url: https://trunkbaseddevelopment.com/short-lived-feature-branches/
+  source_type: engineering-practice
+  citation_note: Describes small concurrent branch work and integration discipline for reducing collision and drift risk.
+  usage_boundary: Used as precedent for concurrency control expectations, not as a mandate for one branching strategy.
+worked_examples:
+- ticket: BASE-PATTERN-CATALOG
+  evidence: scripts/catalog/tests/test_base_presets.py
+  note: Base catalog contract test proves l2.worktree-isolation is loadable and compiles to concrete obligations.
+publication:
+  publish_class: polish-then-publish
+  sanitization_class: human-rewrite
+  audience_value_fit: "G2+G3 \xB7 delivery teams can select l2.worktree-isolation and see concrete execution obligations."
+  audience:
+  - adopter
+  - maintainer
+metadata:
+  owner: JarviSWARM
+  status: draft
+  created: '2026-06-20'
+  updated: '2026-06-20'
+  reviewers: []
+changelog:
+- date: '2026-06-20'
+  change: Added as part of the base two-level Pattern catalog.

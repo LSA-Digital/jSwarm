@@ -1,0 +1,135 @@
+schema_version: '0.2'
+id: PAT-005
+level: l2_ingredient
+key: l2.bdd-uat-scenarios
+name: BDD and UAT Scenario Mapping
+family: delivery-ceremony
+kind: execution-practice
+intent: Translate acceptance criteria into concrete scenarios and prove the intended user or operator outcome.
+problem:
+  context: BDD and UAT Scenario Mapping is needed when ticket execution must translate ceremony selection into enforceable delivery behavior.
+  forces:
+  - Delivery speed matters, but guidance must compile into concrete obligations.
+  - Agents need visible stop conditions and evidence surfaces, not prose-only advice.
+  - Reviewers need stable markers that can be checked consistently across tickets.
+applicability:
+  use_when: &id001
+  - User-visible behavior, workflow, or command UX needs scenario-level acceptance proof.
+  - A reviewer needs examples that connect business intent to tests.
+  avoid_when: &id002
+  - The change has no user-observable behavior and a focused unit proof is sufficient.
+ceremony:
+  tier: medium
+  default_depth: standard
+  supported_tiers:
+  - low
+  - medium
+  - high
+selection_forces:
+  use_when: *id001
+  avoid_when: *id002
+  signals:
+  - user_visible_behavior
+  - shared_contract_surface
+  - novelty_architecture_uncertainty
+compile:
+  automated_uat: yes_if_ui_e2e
+  e2e_policy: per_ticket_if_stable
+  required_prompt_clauses: &id004
+  - Translate acceptance criteria into concrete BDD/UAT scenarios.
+solution_summary: Translate acceptance criteria into concrete scenarios and prove the intended user or operator outcome.
+lifecycle_hooks:
+  jplan:
+    selection_guidance: Select PAT-005 (l2.bdd-uat-scenarios) when its use_when forces are present; record the chosen depth and any rejected lighter alternative.
+    plan_fields: &id003
+    - engineering_pattern_references
+  implement:
+    practices: &id005
+    - Write scenario bullets before coding user-visible behavior.
+    - For UI or CLI flows, assert the outcome after interaction, not only element existence.
+    - Record manual N/A when automation is inappropriate.
+  close_ticket:
+    retro_prompts:
+    - Did l2.bdd-uat-scenarios add the right amount of ceremony for the ticket shape?
+    - Which evidence or stop condition from l2.bdd-uat-scenarios was most useful?
+  feature_reconcile:
+    outcome_use: Aggregate outcomes for l2.bdd-uat-scenarios to tune default depths and preset composition.
+  devops_maint:
+    drift_or_telemetry: Surface selections of l2.bdd-uat-scenarios that lack compiled obligations or review evidence.
+constraint_surfaces:
+  plan_fields: *id003
+  required_agents:
+  - test-engineer when proof design or test coverage is part of the selected ingredient
+  forbidden_routes:
+  - Claiming catalog Pattern compliance without material plan, prompt, test, or review evidence.
+  required_prompt_clauses: *id004
+execution_practices: *id005
+evidence_tests:
+- Scenario list maps to acceptance criteria.
+- Automated or manual UAT evidence proves the outcome path.
+ac_to_uat_mapping:
+  required: true
+  map_shape: Each affected acceptance criterion maps to an automated test, UAT scenario, smoke command, review artifact, or explicit N/A rationale.
+thin_slice_uat_proof:
+  first_proof_point: Run or record the smallest proof that exercises the selected obligation before broad implementation expands.
+  stop_conditions:
+  - The selected obligation has no concrete evidence path.
+  - The proof cannot run and no explicit N/A or blocker is recorded.
+  - The implementation proceeds broadly before the selected proof is satisfied.
+minimum_viable_architecture:
+  rule: Use only the architecture needed to satisfy acceptance criteria, selected ingredients, and dominant NFR weights.
+sufficient_design:
+  rule: Design enough to materialize plan fields, prompt clauses, tests, and reviewer gates; defer speculative generalization.
+nfr_weighting:
+  user_experience: high
+  reliability: high
+  transparency: high
+  rationale: Scenario proof keeps acceptance evidence close to user/operator intent.
+reviewer_enforcement:
+- Reject UAT claims that lack scenario mapping or outcome assertions.
+anti_patterns:
+- Treating the Pattern as descriptive prose without plan fields or gate evidence.
+- Selecting a heavier or lighter ceremony tier without recording risk rationale.
+- Replacing acceptance evidence with implementation-shape assertions only.
+tradeoffs:
+- Adds explicit ceremony and review markers before or during implementation.
+- Reduces late rework by making obligations visible to agents and reviewers.
+related_patterns: []
+relationships:
+  features: []
+  processes: []
+  tools: []
+  documents: []
+  assets: []
+  components: []
+external_precedents:
+- name: Cucumber BDD
+  url: https://cucumber.io/docs/bdd/
+  source_type: testing-practice
+  citation_note: Concrete examples and scenario thinking as a delivery feedback loop.
+  usage_boundary: Used as precedent for evidence-centered workflow design; Pattern text is JarviSWARM synthesis.
+- name: DORA capabilities
+  url: https://dora.dev/capabilities/
+  source_type: devops-capability
+  citation_note: Fast feedback, test automation, and deployment safety practices.
+  usage_boundary: Used as general precedent for operational delivery constraints, not copied prose.
+worked_examples:
+- ticket: BASE-PATTERN-CATALOG
+  evidence: scripts/catalog/tests/test_base_presets.py
+  note: Base catalog contract test proves l2.bdd-uat-scenarios is loadable and compiles to concrete obligations.
+publication:
+  publish_class: polish-then-publish
+  sanitization_class: human-rewrite
+  audience_value_fit: "G2+G3 \xB7 delivery teams can select l2.bdd-uat-scenarios and see concrete execution obligations."
+  audience:
+  - adopter
+  - maintainer
+metadata:
+  owner: JarviSWARM
+  status: draft
+  created: '2026-06-20'
+  updated: '2026-06-20'
+  reviewers: []
+changelog:
+- date: '2026-06-20'
+  change: Added as part of the base two-level Pattern catalog.

@@ -528,6 +528,9 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
+        except recommend.PatternCatalogError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 3
         print(render_one_block(result, tty=not args.no_tty, locked_tier=args.locked_tier))
         return 0
 
@@ -556,6 +559,9 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
+        except recommend.PatternCatalogError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 3
         print(render_reevaluate(reevaluation, tty=not args.no_tty, output_format=args.format, locked_tier=args.locked_tier))
         return 0
 
@@ -563,7 +569,11 @@ def main(argv: list[str] | None = None) -> int:
         print("error: --beat explain requires --tier", file=sys.stderr)
         return 2
 
-    result = recommend.recommend(signals, worktree_adopted=not no_worktree, nfr_adopted=not no_nfr)
+    try:
+        result = recommend.recommend(signals, worktree_adopted=not no_worktree, nfr_adopted=not no_nfr)
+    except recommend.PatternCatalogError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 3
     try:
         output = render_beat(
             args.beat,

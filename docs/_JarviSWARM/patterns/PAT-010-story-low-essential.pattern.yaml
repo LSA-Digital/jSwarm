@@ -1,0 +1,179 @@
+schema_version: '0.2'
+id: PAT-010
+level: l1_preset
+key: l1.story.low-essential
+name: Story Low Essential Preset
+family: delivery-ceremony
+kind: story-preset
+intent: Compose the base low story preset into concrete Q5-Q9, review, NFR, UAT, worktree, and context obligations.
+problem:
+  context: Story Low Essential Preset is needed when ticket execution must translate ceremony selection into enforceable delivery behavior.
+  forces:
+  - Delivery speed matters, but guidance must compile into concrete obligations.
+  - Agents need visible stop conditions and evidence surfaces, not prose-only advice.
+  - Reviewers need stable markers that can be checked consistently across tickets.
+applicability:
+  use_when: &id001
+  - A local, reversible story or task needs acceptance core, thin-slice proof, focused test proof, and standard review only.
+  avoid_when: &id002
+  - The ticket touches shared contracts, security/compliance controls, migrations, broad lifecycle hooks, or live user journeys.
+ceremony:
+  tier: low
+  default_depth: basic
+  supported_tiers:
+  - low
+  - medium
+  - high
+selection_forces:
+  use_when: *id001
+  avoid_when: *id002
+  signals:
+  - scope_blast_radius
+  - user_visible_behavior
+  - shared_contract_surface
+  - security_compliance_external_write
+  - reversibility_migration_risk
+  - novelty_architecture_uncertainty
+  - concurrency_shared_files
+compile:
+  q5_depth: quick
+  q6_execution_team_hint: pattern_2
+  review_tier_input: critic_default
+  architecture_tier_input: none
+  automated_uat: 'no'
+  e2e_policy: deferred
+  test_data_strategy: n_a
+  worktree: 'no'
+  nfr: none
+  precompact_cadence: none
+  orchestrator_context: 272k
+  plan_fields: &id003
+  - engineering_pattern_references
+  - acceptance_criteria
+  - ac_to_evidence_map
+  - focused_proof_command
+  required_prompt_clauses: &id004
+  - Use Low Essential only for small reversible work.
+  - Map acceptance criteria to a focused proof before implementation.
+  - Record why worktree, E2E, and managed test data are not required.
+  reviewer_enforcement: &id006
+  - Reject missing A/C-to-evidence map.
+  - Reject Low tier on shared-contract or hard-High triggers without risk rationale.
+solution_summary: Compose the base low story preset into concrete Q5-Q9, review, NFR, UAT, worktree, and context obligations.
+lifecycle_hooks:
+  jplan:
+    selection_guidance: Select PAT-010 (l1.story.low-essential) when its use_when forces are present; record the chosen depth and any rejected lighter alternative.
+    plan_fields: *id003
+  implement:
+    practices: &id005
+    - Resolve included L2 ingredients before planning execution.
+    - Apply the compiled Q5-Q9 levers and record any user override rationale.
+    - Run reviewer enforcement against the compiled obligations before closeout.
+  close_ticket:
+    retro_prompts:
+    - Did l1.story.low-essential add the right amount of ceremony for the ticket shape?
+    - Which evidence or stop condition from l1.story.low-essential was most useful?
+  feature_reconcile:
+    outcome_use: Aggregate outcomes for l1.story.low-essential to tune default depths and preset composition.
+  devops_maint:
+    drift_or_telemetry: Surface selections of l1.story.low-essential that lack compiled obligations or review evidence.
+constraint_surfaces:
+  plan_fields: *id003
+  required_agents:
+  - executor or hephaestus for implementation work matching the selected preset
+  - critic or verifier for independent review of compiled obligations
+  forbidden_routes:
+  - Changing Q6 execution-team tiers solely because the preset is high ceremony.
+  - Skipping include-resolution or conflict checks before using compiled obligations.
+  required_prompt_clauses: *id004
+execution_practices: *id005
+evidence_tests:
+- All included L2 keys resolve to existing active catalog records.
+- Compile block contains every required lever and non-empty enforcement lists.
+- Reviewer can verify each compiled obligation in the plan or final evidence.
+ac_to_uat_mapping:
+  required: true
+  map_shape: Each affected acceptance criterion maps to an automated test, UAT scenario, smoke command, review artifact, or explicit N/A rationale.
+thin_slice_uat_proof:
+  first_proof_point: Run or record the smallest proof that exercises the selected obligation before broad implementation expands.
+  stop_conditions:
+  - The selected obligation has no concrete evidence path.
+  - The proof cannot run and no explicit N/A or blocker is recorded.
+  - The implementation proceeds broadly before the selected proof is satisfied.
+minimum_viable_architecture:
+  rule: Use only the architecture needed to satisfy acceptance criteria, selected ingredients, and dominant NFR weights.
+sufficient_design:
+  rule: Design enough to materialize plan fields, prompt clauses, tests, and reviewer gates; defer speculative generalization.
+nfr_weighting:
+  reliability: high
+  transparency: high
+  maintainability: high
+  rationale: The low preset makes ceremony selection deterministic and reviewable.
+reviewer_enforcement: *id006
+anti_patterns:
+- Treating the Pattern as descriptive prose without plan fields or gate evidence.
+- Selecting a heavier or lighter ceremony tier without recording risk rationale.
+- Replacing acceptance evidence with implementation-shape assertions only.
+tradeoffs:
+- Adds explicit ceremony and review markers before or during implementation.
+- Reduces late rework by making obligations visible to agents and reviewers.
+related_patterns: []
+relationships:
+  features: []
+  processes: []
+  tools: []
+  documents: []
+  assets: []
+  components: []
+external_precedents:
+- name: Cucumber BDD
+  url: https://cucumber.io/docs/bdd/
+  source_type: testing-practice
+  citation_note: Concrete examples and scenario thinking as a delivery feedback loop.
+  usage_boundary: Used as precedent for evidence-centered workflow design; Pattern text is JarviSWARM synthesis.
+- name: DORA capabilities
+  url: https://dora.dev/capabilities/
+  source_type: devops-capability
+  citation_note: Fast feedback, test automation, and deployment safety practices.
+  usage_boundary: Used as general precedent for operational delivery constraints, not copied prose.
+worked_examples:
+- ticket: BASE-PATTERN-CATALOG
+  evidence: scripts/catalog/tests/test_base_presets.py
+  note: Base catalog contract test proves l1.story.low-essential is loadable and compiles to concrete obligations.
+publication:
+  publish_class: polish-then-publish
+  sanitization_class: human-rewrite
+  audience_value_fit: "G2+G3 \xB7 delivery teams can select l1.story.low-essential and see concrete execution obligations."
+  audience:
+  - adopter
+  - maintainer
+metadata:
+  owner: JarviSWARM
+  status: draft
+  created: '2026-06-20'
+  updated: '2026-06-20'
+  reviewers: []
+changelog:
+- date: '2026-06-20'
+  change: Added as part of the base two-level Pattern catalog.
+composition:
+  includes:
+  - key: l2.acceptance-core
+    depth: basic
+    required: true
+    params: {}
+  - key: l2.thin-slice-proof
+    depth: basic
+    required: true
+    params: {}
+  - key: l2.focused-test-proof
+    depth: basic
+    required: true
+    params: {}
+  - key: l2.review-rubric-gate
+    depth: basic
+    required: true
+    params: {}
+  requires: []
+  overrides: []
+  conflicts: []

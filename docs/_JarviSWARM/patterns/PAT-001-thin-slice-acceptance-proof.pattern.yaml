@@ -1,0 +1,207 @@
+schema_version: "0.2"
+id: PAT-001
+level: l2_ingredient
+key: l2.thin-slice-proof
+name: "Thin-Slice Acceptance Proof Before Broad Coding"
+family: agile-lean-discovery
+kind: execution-practice
+intent: >-
+  Prove that the smallest useful slice satisfies acceptance evidence before agents
+  invest in broad implementation detail.
+problem:
+  context: >-
+    A planned implementation has multiple acceptance criteria, lifecycle gates, or
+    non-functional constraints, and agents are likely to code for a long stretch
+    before proving the user-facing or acceptance-facing path works.
+  forces:
+    - "Speed matters, but unverified speed creates late rework."
+    - "Tests must prove acceptance intent, not only compile-time or lint correctness."
+    - "Architecture should be sufficient for the slice and dominant NFRs, not speculative."
+    - "Human reviewers need evidence checkpoints before the implementation grows too large to steer."
+applicability:
+  use_when:
+    - "A ticket has multiple acceptance criteria or a meaningful end-to-end workflow."
+    - "A selected Pattern requires A/C-to-UAT, scenario, smoke, or equivalent acceptance evidence."
+    - "The work could drift into broad coding without early feedback."
+  avoid_when:
+    - "The task is a one-line mechanical correction with no workflow or acceptance uncertainty."
+    - "The first useful proof would require infrastructure outside the ticket scope and the plan records an explicit N/A rationale."
+ceremony:
+  tier: tiered
+  default_depth: standard
+  supported_tiers:
+    - low
+    - medium
+    - high
+selection_forces:
+  use_when:
+    - "A ticket has multiple acceptance criteria or a meaningful end-to-end workflow."
+    - "A selected Pattern requires A/C-to-UAT, scenario, smoke, or equivalent acceptance evidence."
+    - "The work could drift into broad coding without early feedback."
+  avoid_when:
+    - "The task is a one-line mechanical correction with no workflow or acceptance uncertainty."
+    - "The first useful proof would require infrastructure outside the ticket scope and the plan records an explicit N/A rationale."
+  signals:
+    - scope_blast_radius
+    - user_visible_behavior
+    - shared_contract_surface
+    - novelty_architecture_uncertainty
+    - concurrency_shared_files
+compile:
+  required_prompt_clauses:
+    - "Identify the thinnest acceptance-relevant slice and the exact proof before broad coding."
+    - "Map every affected A/C to scenario/test/evidence or explicit N/A."
+    - "Stop if the proof cannot run or no longer reflects intended behavior."
+  reviewer_enforcement:
+    - "Reject phase completion when broad coding occurred before the recorded proof."
+    - "Reject missing A/C-to-UAT evidence maps unless every gap has explicit N/A rationale."
+solution_summary: >-
+  Identify the thinnest acceptance-relevant slice, map each affected A/C to a UAT
+  scenario, test, smoke, or explicit N/A rationale, implement only enough to pass
+  that proof, and stop broad coding until the proof is recorded.
+lifecycle_hooks:
+  jplan:
+    selection_guidance: >-
+      Select this catalog Pattern when a story risks long implementation before
+      acceptance feedback. Record PAT-001 separately from the execution-team Pattern
+      field, with rationale and rejected alternatives.
+    plan_fields:
+      - "Engineering pattern references: PAT-001 with rationale and alternatives."
+      - "A/C-to-UAT scenario/test/evidence map with explicit N/A rationale."
+      - "Thin-slice proof point and stop condition."
+      - "Per-job NFR weighting."
+  implement:
+    practices:
+      - "Before broad coding, implement the smallest slice that proves the mapped A/C evidence."
+      - "Stop and update the plan if the thin-slice proof is blocked, stale, or no longer matches intended behavior."
+      - "Use the minimum viable architecture and sufficient design needed for the proof and dominant NFRs."
+  close_ticket:
+    retro_prompts:
+      - "Did PAT-001 prevent late rework or reveal acceptance drift?"
+      - "Was the thin-slice proof early enough, too heavy, or missing?"
+      - "Which NFR weights changed during implementation?"
+  feature_reconcile:
+    outcome_use: >-
+      Aggregate retros where PAT-001 was selected to tune future story scope,
+      UAT expectations, and acceptance-evidence defaults.
+  devops_maint:
+    drift_or_telemetry: >-
+      Surface tickets that selected PAT-001 but lack recorded thin-slice proof,
+      A/C-to-UAT evidence, or retro outcome notes.
+constraint_surfaces:
+  plan_fields:
+    - "engineering_pattern_references"
+    - "ac_to_uat_evidence_map"
+    - "thin_slice_acceptance_proof"
+    - "nfr_weighting"
+  required_agents:
+    - "test-engineer when acceptance proof requires new or upgraded tests outside a trivial local check"
+    - "critic or verifier when reviewer enforcement must judge evidence adequacy"
+  forbidden_routes:
+    - "Broad implementation phase marked complete before the thin-slice proof is recorded."
+    - "Claiming Pattern compliance from prose-only guidance without evidence artifacts."
+  required_prompt_clauses:
+    - "Identify the thinnest acceptance-relevant slice and the exact proof before broad coding."
+    - "Map every affected A/C to scenario/test/evidence or explicit N/A."
+    - "Stop if the proof cannot run or no longer reflects intended behavior."
+execution_practices:
+  - "Start with the smallest executable acceptance path."
+  - "Prefer upgrading an existing test or smoke before creating a parallel proof."
+  - "Record the proof command, result, and evidence path in the plan."
+  - "Resume broader implementation only after proof passes or the user accepts a documented N/A/blocker."
+evidence_tests:
+  - "A/C-to-UAT scenario/test/evidence map exists for every affected A/C."
+  - "Thin-slice proof command or manual acceptance evidence is recorded before broad coding continues."
+  - "Reviewer/verifier confirms tests prove acceptance intent rather than only implementation shape."
+ac_to_uat_mapping:
+  required: true
+  map_shape: >-
+    Each acceptance criterion maps to a UAT scenario, automated test, smoke, command
+    evidence, review artifact, or explicit N/A rationale.
+thin_slice_uat_proof:
+  first_proof_point: >-
+    Run the smallest acceptance-relevant proof before implementing the rest of the
+    phase or story.
+  stop_conditions:
+    - "No affected A/C has an evidence mapping."
+    - "The selected proof cannot run and no N/A/blocker is recorded."
+    - "The proof passes only implementation details and not user/acceptance intent."
+minimum_viable_architecture:
+  rule: >-
+    Choose the smallest architecture that can pass the thin-slice proof and preserve
+    the dominant NFR weights for the job.
+sufficient_design:
+  rule: >-
+    Design enough to satisfy A/C, selected catalog Patterns, and weighted NFRs;
+    avoid speculative frameworks or generalized mechanisms before proof.
+nfr_weighting:
+  reliability: high
+  compliance_security: medium
+  transparency: high
+  maintainability: high
+  efficiency_readability: medium
+  rationale: >-
+    PAT-001 prioritizes reliability of acceptance evidence, transparency of proof,
+    and maintainability of small slices. Compliance/security is medium by default
+    and should be raised for regulated or control-bearing work.
+reviewer_enforcement:
+  - "Reject phase completion when broad coding occurred before the recorded proof."
+  - "Reject missing A/C-to-UAT evidence maps unless every gap has explicit N/A rationale."
+  - "Reject overbuilt architecture not justified by dominant NFR weights."
+anti_patterns:
+  - "Writing a large implementation and then inventing tests that match it."
+  - "Using Pattern language as prose guidance without material plan/test/review surfaces."
+  - "Treating lint, type checks, or schema validation as acceptance proof when the A/C describes behavior or workflow."
+tradeoffs:
+  - "Adds a small up-front planning/testing cost."
+  - "May feel slow for trivial tickets; use avoid_when to keep it out of mechanical work."
+related_patterns: []
+relationships:
+  features:
+    - F-01
+    - F-05
+  processes:
+    - PROC-001
+  tools: []
+  documents:
+    - docs/devops-practices.md
+    - docs/dev-guide.structured-evidence.md
+  assets: []
+  components:
+    - lifecycle-commands
+external_precedents:
+  - name: "Cucumber BDD"
+    url: "https://cucumber.io/docs/bdd/"
+    source_type: testing-practice
+    citation_note: "Discovery, formulation, and automation around concrete examples."
+    usage_boundary: "Used as precedent for example/evidence-centered practice; Pattern text is JarviSWARM synthesis."
+  - name: "DORA Test Automation capability"
+    url: "https://dora.dev/capabilities/test-automation/"
+    source_type: devops-capability
+    citation_note: "Automated tests as fast feedback for delivery quality."
+    usage_boundary: "Used as precedent for fast feedback loops, not copied prose."
+  - name: "Open Practice Library Mobius Loop"
+    url: "https://openpracticelibrary.com/"
+    source_type: agile-lean-practice
+    citation_note: "Discovery and delivery practices organized around learning loops."
+    usage_boundary: "Used as precedent for iterative learning; commands render only Pattern IDs and obligations."
+worked_examples:
+  - ticket: BASE-PATTERN-CATALOG
+    evidence: "scripts/catalog/tests/test_base_presets.py"
+    note: "Base catalog contract test proves the thin-slice-proof ingredient is loadable and composes into concrete obligations."
+publication:
+  publish_class: polish-then-publish
+  sanitization_class: human-rewrite
+  audience_value_fit: "G2+G3 · A/B/C · publish: an acceptance-proof Pattern that prevents broad coding before user-facing evidence exists"
+  audience:
+    - adopter
+    - maintainer
+metadata:
+  owner: JarviSWARM
+  status: draft
+  created: "2026-06-08"
+  updated: "2026-06-08"
+  reviewers: []
+changelog:
+  - date: "2026-06-08"
+    change: "Added as part of the base two-level Pattern catalog."

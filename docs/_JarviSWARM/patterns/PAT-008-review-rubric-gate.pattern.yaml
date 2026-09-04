@@ -1,0 +1,151 @@
+schema_version: '0.2'
+id: PAT-008
+level: l2_ingredient
+key: l2.review-rubric-gate
+name: Review Rubric Gate
+family: delivery-ceremony
+kind: execution-practice
+intent: Apply review and architecture escalation rubrics explicitly, preserving user-gated high-tier agent selection.
+problem:
+  context: Review Rubric Gate is needed when ticket execution must translate ceremony selection into enforceable delivery behavior.
+  forces:
+  - Delivery speed matters, but guidance must compile into concrete obligations.
+  - Agents need visible stop conditions and evidence surfaces, not prose-only advice.
+  - Reviewers need stable markers that can be checked consistently across tickets.
+applicability:
+  use_when: &id001
+  - The ticket needs independent review against explicit risk triggers.
+  - Expensive review tiers must be evaluated but not silently selected.
+  avoid_when: &id002
+  - The change is trivial and the plan records why standard review is enough.
+ceremony:
+  tier: tiered
+  default_depth: standard
+  supported_tiers:
+  - low
+  - medium
+  - high
+selection_forces:
+  use_when: *id001
+  avoid_when: *id002
+  signals:
+  - security_compliance_external_write
+  - novelty_architecture_uncertainty
+  - shared_contract_surface
+  - scope_blast_radius
+compile:
+  review_tier_input: evaluate_xhigh_triggers
+  architecture_tier_input: evaluate_architect
+  reviewer_enforcement:
+  - Apply the review rubric and record trigger evidence before closeout.
+solution_summary: Apply review and architecture escalation rubrics explicitly, preserving user-gated high-tier agent selection.
+lifecycle_hooks:
+  jplan:
+    selection_guidance: Select PAT-008 (l2.review-rubric-gate) when its use_when forces are present; record the chosen depth and any rejected lighter alternative.
+    plan_fields: &id003
+    - engineering_pattern_references
+  implement:
+    practices: &id004
+    - Evaluate review and architecture triggers after selecting ceremony.
+    - Record why higher tiers are or are not required.
+    - Keep the Q6 execution-team rubric authoritative.
+  close_ticket:
+    retro_prompts:
+    - Did l2.review-rubric-gate add the right amount of ceremony for the ticket shape?
+    - Which evidence or stop condition from l2.review-rubric-gate was most useful?
+  feature_reconcile:
+    outcome_use: Aggregate outcomes for l2.review-rubric-gate to tune default depths and preset composition.
+  devops_maint:
+    drift_or_telemetry: Surface selections of l2.review-rubric-gate that lack compiled obligations or review evidence.
+constraint_surfaces:
+  plan_fields: *id003
+  required_agents:
+  - test-engineer when proof design or test coverage is part of the selected ingredient
+  forbidden_routes:
+  - Claiming catalog Pattern compliance without material plan, prompt, test, or review evidence.
+  required_prompt_clauses:
+  - Evaluate review and architecture triggers after selecting ceremony.
+  - Record why higher tiers are or are not required.
+execution_practices: *id004
+evidence_tests:
+- Review tier rationale is recorded.
+- Architecture escalation trigger evidence is present when applicable.
+ac_to_uat_mapping:
+  required: true
+  map_shape: Each affected acceptance criterion maps to an automated test, UAT scenario, smoke command, review artifact, or explicit N/A rationale.
+thin_slice_uat_proof:
+  first_proof_point: Run or record the smallest proof that exercises the selected obligation before broad implementation expands.
+  stop_conditions:
+  - The selected obligation has no concrete evidence path.
+  - The proof cannot run and no explicit N/A or blocker is recorded.
+  - The implementation proceeds broadly before the selected proof is satisfied.
+minimum_viable_architecture:
+  rule: Use only the architecture needed to satisfy acceptance criteria, selected ingredients, and dominant NFR weights.
+sufficient_design:
+  rule: Design enough to materialize plan fields, prompt clauses, tests, and reviewer gates; defer speculative generalization.
+nfr_weighting:
+  compliance_security: high
+  transparency: high
+  maintainability: high
+  rationale: Rubric gates prevent silent escalation and silent under-review.
+reviewer_enforcement:
+- Reject silent xhigh or architect-master selection without recorded trigger and approval.
+inline_gate_dedup:
+  supersession_rule: When an inline jCritic, jVerifier, or jArchitect lane has already applied the review/architecture rubric and recorded trigger evidence during implementation, the default orchestrator-level rubric gate is not re-run for that same change; the inline verdict supersedes it.
+  inline_reviewer_roles:
+  - jCritic
+  - jVerifier
+  - jArchitect
+  evidence_requirements:
+  - Recorded review-tier rationale and any architecture-escalation trigger evidence in the ticket evidence folder.
+  - Inline reviewer identity and verdict attached, distinct from the change author.
+  author_not_approve_separation: true
+  second_lane_exceptions:
+  - xhigh or architect-master escalation still requires the recorded trigger plus explicit user approval.
+  - Security-sensitive or external-write changes still require an independent jSecurityReviewer lane.
+anti_patterns:
+- Treating the Pattern as descriptive prose without plan fields or gate evidence.
+- Selecting a heavier or lighter ceremony tier without recording risk rationale.
+- Replacing acceptance evidence with implementation-shape assertions only.
+tradeoffs:
+- Adds explicit ceremony and review markers before or during implementation.
+- Reduces late rework by making obligations visible to agents and reviewers.
+related_patterns: []
+relationships:
+  features: []
+  processes: []
+  tools: []
+  documents: []
+  assets: []
+  components: []
+external_precedents:
+- name: Architecture Tradeoff Analysis Method Collection
+  url: https://resources.sei.cmu.edu/library/asset-view.cfm?assetid=513908
+  source_type: architecture-evaluation-method
+  citation_note: Establishes scenario-based architectural risk and tradeoff evaluation as a structured review practice.
+  usage_boundary: Used as precedent for explicit risk-review questions; JarviSWARM keeps the gate lightweight and ticket-scoped.
+- name: Architecture Decision Records
+  url: https://adr.github.io/
+  source_type: architecture-documentation-practice
+  citation_note: Captures decisions, context, and consequences in lightweight durable records suitable for review evidence.
+  usage_boundary: Used as precedent for recording review rationale, not as a requirement to adopt a specific ADR template.
+worked_examples:
+- ticket: BASE-PATTERN-CATALOG
+  evidence: scripts/catalog/tests/test_base_presets.py
+  note: Base catalog contract test proves l2.review-rubric-gate is loadable and compiles to concrete obligations.
+publication:
+  publish_class: polish-then-publish
+  sanitization_class: human-rewrite
+  audience_value_fit: "G2+G3 \xB7 delivery teams can select l2.review-rubric-gate and see concrete execution obligations."
+  audience:
+  - adopter
+  - maintainer
+metadata:
+  owner: JarviSWARM
+  status: draft
+  created: '2026-06-20'
+  updated: '2026-06-20'
+  reviewers: []
+changelog:
+- date: '2026-06-20'
+  change: Added as part of the base two-level Pattern catalog.

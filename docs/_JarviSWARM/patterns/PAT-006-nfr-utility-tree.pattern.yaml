@@ -1,0 +1,141 @@
+schema_version: '0.2'
+id: PAT-006
+level: l2_ingredient
+key: l2.nfr-utility-tree
+name: NFR Utility Tree and Quality Gates
+family: delivery-ceremony
+kind: execution-practice
+intent: Materialize non-functional requirements as weighted utility-tree rows, A/C mappings, and gate evidence.
+problem:
+  context: NFR Utility Tree and Quality Gates is needed when ticket execution must translate ceremony selection into enforceable delivery behavior.
+  forces:
+  - Delivery speed matters, but guidance must compile into concrete obligations.
+  - Agents need visible stop conditions and evidence surfaces, not prose-only advice.
+  - Reviewers need stable markers that can be checked consistently across tickets.
+applicability:
+  use_when: &id001
+  - Security, reliability, performance, compliance, or maintainability concerns materially affect design choices.
+  - A ticket has broad shared-contract or migration risk.
+  avoid_when: &id002
+  - NFRs are genuinely local and can be recorded as one or two lightweight concerns.
+ceremony:
+  tier: high
+  default_depth: deep
+  supported_tiers:
+  - low
+  - medium
+  - high
+selection_forces:
+  use_when: *id001
+  avoid_when: *id002
+  signals:
+  - security_compliance_external_write
+  - shared_contract_surface
+  - reversibility_migration_risk
+  - scope_blast_radius
+compile:
+  nfr: full_utility_tree
+  plan_fields: &id003
+  - nfr_utility_tree
+  - ac_to_nfr_matrix
+  - quality_gate_evidence
+  reviewer_enforcement:
+  - Reject missing NFR weights or gate evidence for adopted NFR rows.
+solution_summary: Materialize non-functional requirements as weighted utility-tree rows, A/C mappings, and gate evidence.
+lifecycle_hooks:
+  jplan:
+    selection_guidance: Select PAT-006 (l2.nfr-utility-tree) when its use_when forces are present; record the chosen depth and any rejected lighter alternative.
+    plan_fields: *id003
+  implement:
+    practices: &id004
+    - Identify quality attributes that can change the solution.
+    - Map high-weight NFRs to acceptance criteria or explicit gates.
+    - Stop when an adopted high-weight NFR lacks evidence.
+  close_ticket:
+    retro_prompts:
+    - Did l2.nfr-utility-tree add the right amount of ceremony for the ticket shape?
+    - Which evidence or stop condition from l2.nfr-utility-tree was most useful?
+  feature_reconcile:
+    outcome_use: Aggregate outcomes for l2.nfr-utility-tree to tune default depths and preset composition.
+  devops_maint:
+    drift_or_telemetry: Surface selections of l2.nfr-utility-tree that lack compiled obligations or review evidence.
+constraint_surfaces:
+  plan_fields: *id003
+  required_agents:
+  - test-engineer when proof design or test coverage is part of the selected ingredient
+  forbidden_routes:
+  - Claiming catalog Pattern compliance without material plan, prompt, test, or review evidence.
+  required_prompt_clauses:
+  - Identify quality attributes that can change the solution.
+  - Map high-weight NFRs to acceptance criteria or explicit gates.
+execution_practices: *id004
+evidence_tests:
+- NFR utility tree exists with weighted attributes.
+- High-weight NFRs have evidence or blocker rationale.
+ac_to_uat_mapping:
+  required: true
+  map_shape: Each affected acceptance criterion maps to an automated test, UAT scenario, smoke command, review artifact, or explicit N/A rationale.
+thin_slice_uat_proof:
+  first_proof_point: Run or record the smallest proof that exercises the selected obligation before broad implementation expands.
+  stop_conditions:
+  - The selected obligation has no concrete evidence path.
+  - The proof cannot run and no explicit N/A or blocker is recorded.
+  - The implementation proceeds broadly before the selected proof is satisfied.
+minimum_viable_architecture:
+  rule: Use only the architecture needed to satisfy acceptance criteria, selected ingredients, and dominant NFR weights.
+sufficient_design:
+  rule: Design enough to materialize plan fields, prompt clauses, tests, and reviewer gates; defer speculative generalization.
+nfr_weighting:
+  reliability: high
+  compliance_security: high
+  maintainability: high
+  transparency: high
+  rationale: The utility tree makes quality tradeoffs explicit before review.
+reviewer_enforcement:
+- Reject high-risk completion without NFR weights and gate evidence.
+anti_patterns:
+- Treating the Pattern as descriptive prose without plan fields or gate evidence.
+- Selecting a heavier or lighter ceremony tier without recording risk rationale.
+- Replacing acceptance evidence with implementation-shape assertions only.
+tradeoffs:
+- Adds explicit ceremony and review markers before or during implementation.
+- Reduces late rework by making obligations visible to agents and reviewers.
+related_patterns: []
+relationships:
+  features: []
+  processes: []
+  tools: []
+  documents: []
+  assets: []
+  components: []
+external_precedents:
+- name: Cucumber BDD
+  url: https://cucumber.io/docs/bdd/
+  source_type: testing-practice
+  citation_note: Concrete examples and scenario thinking as a delivery feedback loop.
+  usage_boundary: Used as precedent for evidence-centered workflow design; Pattern text is JarviSWARM synthesis.
+- name: DORA capabilities
+  url: https://dora.dev/capabilities/
+  source_type: devops-capability
+  citation_note: Fast feedback, test automation, and deployment safety practices.
+  usage_boundary: Used as general precedent for operational delivery constraints, not copied prose.
+worked_examples:
+- ticket: BASE-PATTERN-CATALOG
+  evidence: scripts/catalog/tests/test_base_presets.py
+  note: Base catalog contract test proves l2.nfr-utility-tree is loadable and compiles to concrete obligations.
+publication:
+  publish_class: polish-then-publish
+  sanitization_class: human-rewrite
+  audience_value_fit: "G2+G3 \xB7 delivery teams can select l2.nfr-utility-tree and see concrete execution obligations."
+  audience:
+  - adopter
+  - maintainer
+metadata:
+  owner: JarviSWARM
+  status: draft
+  created: '2026-06-20'
+  updated: '2026-06-20'
+  reviewers: []
+changelog:
+- date: '2026-06-20'
+  change: Added as part of the base two-level Pattern catalog.

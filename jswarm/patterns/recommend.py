@@ -60,6 +60,16 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 PATTERN_DIR = REPO_ROOT / "docs" / "_JarviSWARM" / "patterns"
 
 
+class PatternCatalogError(RuntimeError):
+    """Raised when the on-disk Pattern catalog cannot supply what the selector needs.
+
+    A bare ``KeyError`` from an unguarded catalog lookup gives the caller no idea
+    what is missing or where to look. This names the missing preset(s) and the
+    directory the selector reads, so a broken or partial checkout fails with a
+    diagnosable message instead of a traceback.
+    """
+
+
 def _load_catalog() -> dict[str, dict[str, Any]]:
     """Load source Pattern records directly from PAT-*.pattern.yaml files."""
     catalog: dict[str, dict[str, Any]] = {}
@@ -68,6 +78,29 @@ def _load_catalog() -> dict[str, dict[str, Any]]:
         if isinstance(record, dict) and isinstance(record.get("key"), str):
             catalog[record["key"]] = record
     return catalog
+
+
+def _require_presets(catalog: dict[str, dict[str, Any]]) -> None:
+    """Fail with a clear, actionable message when required L1 presets are absent.
+
+    Called right after every catalog load a public entry point depends on, so a
+    missing directory or an incomplete set of PAT-*.pattern.yaml records is
+    reported by name instead of surfacing as an unhandled KeyError deep in
+    recommend() or explain().
+    """
+    missing = sorted(key for key in PRESET_KEYS.values() if key not in catalog)
+    if not missing:
+        return
+    if not PATTERN_DIR.is_dir():
+        raise PatternCatalogError(
+            f"pattern catalog directory not found at {PATTERN_DIR}. "
+            "The ceremony selector needs PAT-*.pattern.yaml records defining "
+            f"{', '.join(sorted(PRESET_KEYS.values()))}."
+        )
+    raise PatternCatalogError(
+        f"pattern catalog at {PATTERN_DIR} is missing required preset(s): {', '.join(missing)}. "
+        "Each must be supplied by a PAT-*.pattern.yaml file whose top-level 'key' matches."
+    )
 
 
 def _normalize_signals(signals: dict[str, Any]) -> tuple[dict[str, str], list[str]]:
@@ -261,6 +294,7 @@ def recommend(
 ) -> dict[str, Any]:
     """Compile deterministic Low/Medium/High Pattern recommendations from signal values."""
     catalog = _load_catalog()
+    _require_presets(catalog)
     detected, unknown_signals = _normalize_signals(signals)
     recommended_tier = _recommended_tier(detected)
 
@@ -622,6 +656,7 @@ def explain(result: dict[str, Any], tier: str) -> str:
         raise ValueError(f"unknown tier: {tier}")
     option = result["options"][TIER_RANK[tier]]
     catalog = _load_catalog()
+    _require_presets(catalog)
     preset = catalog[option["preset_key"]]
     compile_block = option["compile"]
 
@@ -686,11 +721,13 @@ def main(argv: list[str] | None = None) -> int:
         print("error: --signals must decode to a JSON object", file=sys.stderr)
         return 2
 
-    result = recommend(signals, worktree_adopted=not args.no_worktree, nfr_adopted=not args.no_nfr)
-    if args.explain:
-        print(explain(result, args.explain))
-    else:
-        print(result["cards"])
+    try:
+        result = recommend(signals, worktree_adopted=not args.no_worktree, nfr_adopted=not args.no_nfr)
+        output = explain(result, args.explain) if args.explain else result["cards"]
+    except PatternCatalogError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 3
+    print(output)
     return 0
 
 

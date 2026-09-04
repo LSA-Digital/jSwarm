@@ -1,0 +1,135 @@
+schema_version: '0.2'
+id: PAT-009
+level: l2_ingredient
+key: l2.context-budget-precompact
+name: Context Budget and Precompact Cadence
+family: delivery-ceremony
+kind: execution-practice
+intent: Set context budget expectations and checkpoint cadence so long-running work survives compaction and handoff boundaries.
+problem:
+  context: Context Budget and Precompact Cadence is needed when ticket execution must translate ceremony selection into enforceable delivery behavior.
+  forces:
+  - Delivery speed matters, but guidance must compile into concrete obligations.
+  - Agents need visible stop conditions and evidence surfaces, not prose-only advice.
+  - Reviewers need stable markers that can be checked consistently across tickets.
+applicability:
+  use_when: &id001
+  - The ticket may span phases, many files, or long-running investigation.
+  - Sub-agent or orchestrator context pressure could lose work.
+  avoid_when: &id002
+  - The task is short, local, and can finish with normal final evidence only.
+ceremony:
+  tier: tiered
+  default_depth: standard
+  supported_tiers:
+  - low
+  - medium
+  - high
+selection_forces:
+  use_when: *id001
+  avoid_when: *id002
+  signals:
+  - scope_blast_radius
+  - novelty_architecture_uncertainty
+  - concurrency_shared_files
+compile:
+  precompact_cadence: phase_boundary
+  orchestrator_context: 272k_or_1m
+  required_prompt_clauses: &id004
+  - Checkpoint at phase boundaries and before irreversible changes when context risk is present.
+solution_summary: Set context budget expectations and checkpoint cadence so long-running work survives compaction and handoff boundaries.
+lifecycle_hooks:
+  jplan:
+    selection_guidance: Select PAT-009 (l2.context-budget-precompact) when its use_when forces are present; record the chosen depth and any rejected lighter alternative.
+    plan_fields: &id003
+    - engineering_pattern_references
+  implement:
+    practices: &id005
+    - Choose orchestrator context budget by size and novelty.
+    - Checkpoint plans or evidence at phase boundaries.
+    - Stop and hand back when context pressure threatens output loss.
+  close_ticket:
+    retro_prompts:
+    - Did l2.context-budget-precompact add the right amount of ceremony for the ticket shape?
+    - Which evidence or stop condition from l2.context-budget-precompact was most useful?
+  feature_reconcile:
+    outcome_use: Aggregate outcomes for l2.context-budget-precompact to tune default depths and preset composition.
+  devops_maint:
+    drift_or_telemetry: Surface selections of l2.context-budget-precompact that lack compiled obligations or review evidence.
+constraint_surfaces:
+  plan_fields: *id003
+  required_agents:
+  - test-engineer when proof design or test coverage is part of the selected ingredient
+  forbidden_routes:
+  - Claiming catalog Pattern compliance without material plan, prompt, test, or review evidence.
+  required_prompt_clauses: *id004
+execution_practices: *id005
+evidence_tests:
+- Plan or final evidence records context budget and checkpoint cadence.
+- Long phases include precompact or durable handoff evidence.
+ac_to_uat_mapping:
+  required: true
+  map_shape: Each affected acceptance criterion maps to an automated test, UAT scenario, smoke command, review artifact, or explicit N/A rationale.
+thin_slice_uat_proof:
+  first_proof_point: Run or record the smallest proof that exercises the selected obligation before broad implementation expands.
+  stop_conditions:
+  - The selected obligation has no concrete evidence path.
+  - The proof cannot run and no explicit N/A or blocker is recorded.
+  - The implementation proceeds broadly before the selected proof is satisfied.
+minimum_viable_architecture:
+  rule: Use only the architecture needed to satisfy acceptance criteria, selected ingredients, and dominant NFR weights.
+sufficient_design:
+  rule: Design enough to materialize plan fields, prompt clauses, tests, and reviewer gates; defer speculative generalization.
+nfr_weighting:
+  reliability: high
+  transparency: high
+  maintainability: medium
+  rationale: Context checkpoints protect evidence and prevent partial invisible completion.
+reviewer_enforcement:
+- Reject long-running phase completion when required checkpoint evidence is missing.
+anti_patterns:
+- Treating the Pattern as descriptive prose without plan fields or gate evidence.
+- Selecting a heavier or lighter ceremony tier without recording risk rationale.
+- Replacing acceptance evidence with implementation-shape assertions only.
+tradeoffs:
+- Adds explicit ceremony and review markers before or during implementation.
+- Reduces late rework by making obligations visible to agents and reviewers.
+related_patterns: []
+relationships:
+  features: []
+  processes: []
+  tools: []
+  documents: []
+  assets: []
+  components: []
+external_precedents:
+- name: Google SRE Book - Managing Incidents
+  url: https://sre.google/sre-book/managing-incidents/
+  source_type: reliability-runbook-practice
+  citation_note: Emphasizes durable incident state, handoffs, and clear operational records during long-running work.
+  usage_boundary: Used as precedent for checkpoint and handoff discipline; JarviSWARM applies the idea to agent context windows.
+- name: OpenAI Swarm routines and handoffs
+  url: https://github.com/openai/swarm#routines-and-handoffs
+  source_type: agent-orchestration-reference
+  citation_note: Describes explicit routines and handoffs as a way to transfer control and preserve task state between agents.
+  usage_boundary: Used as precedent for context handoff concepts, not as a dependency or endorsement of that framework.
+worked_examples:
+- ticket: BASE-PATTERN-CATALOG
+  evidence: scripts/catalog/tests/test_base_presets.py
+  note: Base catalog contract test proves l2.context-budget-precompact is loadable and compiles to concrete obligations.
+publication:
+  publish_class: polish-then-publish
+  sanitization_class: human-rewrite
+  audience_value_fit: "G2+G3 \xB7 delivery teams can select l2.context-budget-precompact and see concrete execution obligations."
+  audience:
+  - adopter
+  - maintainer
+metadata:
+  owner: JarviSWARM
+  status: draft
+  created: '2026-06-20'
+  updated: '2026-06-20'
+  reviewers: []
+changelog:
+- date: '2026-06-20'
+  change: Added as part of the base two-level Pattern catalog.
