@@ -2,7 +2,7 @@
 # Authoring a UAT round the owner can actually work
 
 This is the orchestrator's contract for building the `canonical_manifest` that
-`/jTest uat prepare` seals. Author it, check it, then prepare — the check is
+`/jTest uat prepare` seals. Author it, check it, then prepare: the check is
 cheap and the alternative is discovering a shape error at cutover.
 
 The deployed [feedback result contract](feedback-result-contract.json) is the
@@ -25,7 +25,7 @@ F-15. Portal-side detail lives in `docs/tools/fix-decisions/uat-rounds.md`.
 
 It accepts a bare manifest or a request wrapping one, writes nothing, and
 reports every problem at once with the step it is in and how to fix it. A clean
-run prints the journey, step, scenario, and GWT-block counts — read them, since
+run prints the journey, step, scenario, and GWT-block counts; read them, since
 a manifest can be valid and still not be the round you meant.
 
 ## Choose the round source
@@ -95,12 +95,12 @@ traceable to the walk and is incomplete.
 **Steps are what the owner does in the app.** Not test-runner actions, fixture
 commands, or digest checks. If a card would read as internal machinery, it does
 not belong in the round. `name`, `instruction`, and `expected_outcome` are all
-required and all owner-facing — an id is not a name.
+required and all owner-facing; an id is not a name.
 
 **`name` is a short DESCRIPTION, never the ordinal restated.** The portal
 renders the card header as `Step <ordinal> · <name>`, so `name: "Step 1"`
-produces the broken header "Step 1 · Step 1" (owner-reported, round-017). Write what the step does in a few words — `"Upload the EPC PDF"`,
-`"Build from the document row"` — the way a checklist line would read.
+produces the broken header "Step 1 · Step 1" (owner-reported, round-017). Write what the step does in a few words, such as `"Upload the EPC PDF"` or
+`"Build from the document row"`, the way a checklist line would read.
 
 **`expected_outcome` is ONE sentence, then short bullets for observables.**
 Never a wall of text, and never the whole journey's outcome pasted onto every
@@ -116,7 +116,7 @@ One sentence stating the outcome of THIS step.
 Each step's outcome is its own; journey-level outcomes belong on the journey's
 outcome atom, not copied per step. When transforming a prior round's manifest
 into a new one, re-read every step's `name` and `expected_outcome` as the owner
-will see them rendered — inherited fields carry inherited mistakes.
+will see them rendered; inherited fields carry inherited mistakes.
 
 **`step_id` is stable identity.** Feedback is keyed by it, so it must be unique
 across the whole round and must not be recomputed from wording or current order.
@@ -124,7 +124,7 @@ across the whole round and must not be recomputed from wording or current order.
 
 **Given/when/then are ordered arrays of independent length.** Real acceptance
 criteria are rarely one clause each. Write `["only clause"]` rather than a bare
-string — a scalar is rejected.
+string; a scalar is rejected.
 
 **Lineage is nested, never parallel.** A step has no top-level `gwt_refs`. Every
 reference sits inside the `{scenario_id, gwt_refs[]}` entry for the scenario that
@@ -154,10 +154,10 @@ scenario about durable draft state.
 ## Best practice: UAT round content writing
 
 **Journey shape (owner-ruled 2026-09-01, round-017 failure close):** ONE
-document is each journey's end-to-end thread — other documents may be uploaded
+document is each journey's end-to-end thread; other documents may be uploaded
 within it, but a single named document travels the whole journey the way a real
 user's would. Steps are SPECIFIC BUILD ACTIONS; do not atomize into minor
-observe-and-report steps — observations belong in the action step's expected
+observe-and-report steps; observations belong in the action step's expected
 outcome, and fewer steps beat granular ones. Assign DIFFERENT documents to
 different journeys so the round exercises different pipeline permutations
 (randomized coverage through clear user-shaped arcs).
@@ -166,35 +166,35 @@ different journeys so the round exercises different pipeline permutations
 Owner-taught rules (rounds 016-017); every one of these was a real
 mid-walk complaint. Apply them to every journey and step before sealing:
 
-1. **Number the journeys.** Titles read `Journey N — <name>`. The owner
+1. **Number the journeys.** Titles read `Journey N: <name>`. The owner
    identifies journeys by number when reporting; an unnumbered list cannot be
    referenced.
-2. **NAME the artifacts — never "the named documents" / "one of the listed
+2. **NAME the artifacts, never "the named documents" / "one of the listed
    fixtures".** Lazy indirection forces the owner to hunt. Write the exact
    filename in backticks every time it is needed, even when repeating it.
 3. **Cross-reference reuse explicitly.** When a step reuses earlier work, say
-   "the SAME documents used in Journey X step Y (`file-a.pdf`, `file-b.md`)" —
+   "the SAME documents used in Journey X step Y (`file-a.pdf`, `file-b.md`)",
    both the reference AND the names. Add a fallback for skipped prerequisites
    ("if you skipped Journey X, build one fresh from `file` first").
 4. **`name` is a short description, never the ordinal restated** (see the rule
    above); **`expected_outcome` is one sentence plus short observable bullets**,
    per step, never a journey blob.
-5. **Read every step as the owner will see it rendered** before sealing — the
+5. **Read every step as the owner will see it rendered** before sealing: the
    card header, the instruction, the outcome. If any field makes the reader ask
    "what/which?", it is not done.
 6. **Never reference "the normal flow", "the available action", or any other
    implied knowledge.** Name the concrete UI surface and control: which editor
    to open, which button to select, what appears next ("open the Inputs editor
-   and select Build" — not "continue through the normal Inputs flow";
+   and select Build", not "continue through the normal Inputs flow";
    owner-reported, round-017 reseal 3). Sweep sealed instructions for
    "normal", "available", "as appropriate", "the named" before cutover.
 7. **Show the fixed-defect ledger identifiers in the advisory notices**
    (owner-required, round-018, 2026-09-01). Every journey/step that
    re-proves a defect fixed in the fix cycle being tested MUST carry a
    `known_items` entry (rendered as the yellow advisory notice) whose text
-   leads with the FULL defect-ledger identifier in its canonical form —
+   leads with the FULL defect-ledger identifier in its canonical form,
    `TICKET.DEFECTID.slug-slug-slug` (e.g.
-   `TICKET-XXX.B211.activity-panel-stuck-merging-inputs`) — followed by one plain
+   `TICKET-XXX.B211.activity-panel-stuck-merging-inputs`), followed by one plain
    sentence: what was broken, and what the owner should now see instead.
    Attach it to the specific step(s) via `step_refs` (never a journey-wide
    unscoped item). Multiple defects re-proven by one step get one advisory
@@ -209,7 +209,7 @@ compatibility aliases, requiredness, nullability, and projections come from the
 deployed [feedback result contract](feedback-result-contract.json), not from
 this document. New steps must offer the options authored on that step; aliases
 are read-only compatibility inputs and must not be emitted as new options.
-Owners save partially on purpose — an untouched card never blocks a save, and the
+Owners save partially on purpose; an untouched card never blocks a save, and the
 step they filled in first is usually the one that matters most.
 
 Scenario and GWT content is read-only to the owner. If a scenario is wrong, they
@@ -220,5 +220,5 @@ say so in step feedback; the round is not where scenarios get edited.
 A registered round appears on the decision-review portal, where sending commits
 a durable event. An armed orchestrator monitor may then discover it and continue
 the mapped lifecycle step with an idempotent effect. Registration in the deployed config is an owner-facing
-deployment change — confirm the round is listed before sending anyone a link, or
+deployment change; confirm the round is listed before sending anyone a link, or
 they will open an empty queue rather than an error.
