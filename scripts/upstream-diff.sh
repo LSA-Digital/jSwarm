@@ -6,13 +6,21 @@ common="${1:?path to the common checkout}"; mode="${2:---stat}"
 here="$(cd "$(dirname "$0")/.." && pwd)"
 prov="$here/PROVENANCE.yaml"
 
-py="$here/.venv/bin/python"
-if [ ! -x "$py" ]; then
+# JSWARM_UPSTREAM_DIFF_PYTHON overrides the interpreter search entirely, ahead
+# of the repo's own venv and the python3 fallback. It exists so this script
+# can be tested in isolation (a scratch checkout has no venv of its own) and
+# so anyone whose bare python3 lacks PyYAML can point at one that has it,
+# without touching their PATH.
+if [ -n "${JSWARM_UPSTREAM_DIFF_PYTHON:-}" ]; then
+    py="$JSWARM_UPSTREAM_DIFF_PYTHON"
+elif [ -x "$here/.venv/bin/python" ]; then
+    py="$here/.venv/bin/python"
+else
     py="python3"
 fi
 if ! "$py" -c "import yaml" >/dev/null 2>&1; then
-    echo "error: no Python interpreter with PyYAML available (tried $here/.venv/bin/python and python3)." >&2
-    echo "Install it with: $here/.venv/bin/python -m pip install pyyaml (or create the venv from requirements.txt)." >&2
+    echo "error: no Python interpreter with PyYAML available (tried \$JSWARM_UPSTREAM_DIFF_PYTHON, $here/.venv/bin/python, and python3)." >&2
+    echo "Install it with: $here/.venv/bin/python -m pip install pyyaml (or create the venv from requirements.txt), or set JSWARM_UPSTREAM_DIFF_PYTHON=/path/to/python-with-pyyaml." >&2
     exit 1
 fi
 
