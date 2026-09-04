@@ -99,13 +99,13 @@ required and all owner-facing; an id is not a name.
 
 **`name` is a short DESCRIPTION, never the ordinal restated.** The portal
 renders the card header as `Step <ordinal> · <name>`, so `name: "Step 1"`
-produces the broken header "Step 1 · Step 1" (owner-reported, round-017). Write what the step does in a few words, such as `"Upload the EPC PDF"` or
+produces the broken header "Step 1 · Step 1". Write what the step does in a few words, such as `"Upload the EPC PDF"` or
 `"Build from the document row"`, the way a checklist line would read.
 
 **`expected_outcome` is ONE sentence, then short bullets for observables.**
 Never a wall of text, and never the whole journey's outcome pasted onto every
-step (owner-reported, round-017: a 757-character journey blob repeated
-on all four step cards). Shape:
+step (a long journey-level summary copied onto every one of that journey's
+step cards is the shape to avoid). Shape:
 
 ```
 One sentence stating the outcome of THIS step.
@@ -153,7 +153,7 @@ scenario about durable draft state.
 
 ## Best practice: UAT round content writing
 
-**Journey shape (owner-ruled 2026-09-01, round-017 failure close):** ONE
+**Journey shape:** ONE
 document is each journey's end-to-end thread; other documents may be uploaded
 within it, but a single named document travels the whole journey the way a real
 user's would. Steps are SPECIFIC BUILD ACTIONS; do not atomize into minor
@@ -185,11 +185,11 @@ mid-walk complaint. Apply them to every journey and step before sealing:
 6. **Never reference "the normal flow", "the available action", or any other
    implied knowledge.** Name the concrete UI surface and control: which editor
    to open, which button to select, what appears next ("open the Inputs editor
-   and select Build", not "continue through the normal Inputs flow";
-   owner-reported, round-017 reseal 3). Sweep sealed instructions for
-   "normal", "available", "as appropriate", "the named" before cutover.
-7. **Show the fixed-defect ledger identifiers in the advisory notices**
-   (owner-required, round-018, 2026-09-01). Every journey/step that
+   and select Build", not "continue through the normal Inputs flow"). Sweep
+   sealed instructions for "normal", "available", "as appropriate", "the
+   named" before cutover.
+7. **Show the fixed-defect ledger identifiers in the advisory notices.**
+   Every journey/step that
    re-proves a defect fixed in the fix cycle being tested MUST carry a
    `known_items` entry (rendered as the yellow advisory notice) whose text
    leads with the FULL defect-ledger identifier in its canonical form,

@@ -3,11 +3,11 @@
 
 **Last Updated:** 2026-08-30 (fix-cycle architect-effort rule added; prior 2026-07-27)
 
-## Fix-cycle architect effort (owner rubric update 2026-08-30)
+## Fix-cycle architect effort
 
 **Owner rule, verbatim: "any defect that touches pipeline build logic is automatic xhigh call."**
 
-Scope: this is an EFFORT-SCORING rule for the jArchitect call the fix methodology ALREADY intends (the `/jFix` cycle is architect-first by design; this rule adds no new step and mandates no extra architect launch). When that existing intended jArchitect call concerns a defect whose mechanism or fix touches pipeline build logic (build rails, dispatch/harvest/park machinery, revision persistence, Temporal build workflows and replay semantics), score it **xhigh automatically**: no per-case rubric scoring, no owner prompt. Execute via the governed jAgentLaunch effort override (never raw effort params on a named core) and verify `servedEffort=xhigh` on the [OUTCOME] line. Rulings already delivered and accepted at lower effort stand (owner 2026-08-30: existing advice usable, don't relaunch).
+Scope: this is an EFFORT-SCORING rule for the jArchitect call the fix methodology ALREADY intends (the `/jFix` cycle is architect-first by design; this rule adds no new step and mandates no extra architect launch). When that existing intended jArchitect call concerns a defect whose mechanism or fix touches pipeline build logic (build rails, dispatch/harvest/park machinery, revision persistence, Temporal build workflows and replay semantics), score it **xhigh automatically**: no per-case rubric scoring, no owner prompt. Execute via the governed jAgentLaunch effort override (never raw effort params on a named core) and verify `servedEffort=xhigh` on the [OUTCOME] line. Rulings already delivered and accepted at lower effort stand: existing advice is usable, don't relaunch.
 
 Skipping the methodology's intended architect call entirely remains a process error under the existing fix methodology, not something this rule adds or governs. Non-pipeline-build defects continue to score through the ordinary tiers below.
 

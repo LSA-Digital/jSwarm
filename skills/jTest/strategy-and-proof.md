@@ -19,7 +19,7 @@ Use during `/jPlan`, `/jGo`, or plan repair.
    - `Test data strategy`
 4. If Automated UAT is yes, ensure ticket-local scenario and executable UAT docs exist.
 
-Test-class ladder (owner-ruled 2026-07-08): uat-class (scenarios + `uat-scenario-steps.md`, formerly `uat-test.md`) = flexible, rapid-change, drives QA agents/humans step-by-step, never regression proof; regression class = higher-effort deterministic (see `regression.md`); pre-scenarios/tests = legacy/invalid → archive. E2E chains string together scenarios that already own their steps; no separate E2E step-script assets.
+Test-class ladder: uat-class (scenarios + `uat-scenario-steps.md`, formerly `uat-test.md`) = flexible, rapid-change, drives QA agents/humans step-by-step, never regression proof; regression class = higher-effort deterministic (see `regression.md`); pre-scenarios/tests = legacy/invalid → archive. E2E chains string together scenarios that already own their steps; no separate E2E step-script assets.
 
 Reference: `docs/devops-practices.md`, `docs/devops-testing-master.md` (detailed testing governance map), and `docs/templates/UAT_TEST_TEMPLATE.md`.
 

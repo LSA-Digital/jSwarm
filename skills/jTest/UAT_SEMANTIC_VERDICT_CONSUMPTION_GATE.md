@@ -1,8 +1,8 @@
 # Chatbot Testing Protocol: UAT Semantic Verdict Consumption Gate
 
-> **Name:** this protocol is the **"chatbot testing protocol"** (owner-named 2026-08-02). The filename stays stable for existing references; prose references should use the new name.
+> **Name:** this protocol is the **"chatbot testing protocol."** The filename stays stable for existing references; prose references should use the new name.
 
-## Applicability (binding rule, owner-ruled 2026-08-02)
+## Applicability (binding rule)
 
 **Any plan whose testing includes non-deterministic behavior judged semantically (LLM-judgment UAT such as chatbot conversations, advisor answers, or generated content) MUST use this protocol.** Concretely, such a plan:
 

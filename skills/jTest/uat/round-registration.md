@@ -11,7 +11,7 @@ check, then continue below.
 This is the owner-authorized front door for practical issuance. Do not edit the
 deployed config or invent an `active_round_sources` registration.
 
-## Good-enough rounds: first-class methodology (owner-ruled 2026-08-31)
+## Good-enough rounds: first-class methodology
 
 Owner UAT exists to produce NEW information from owner minutes (experience quality and unpredicted inputs), not to re-prove defects automation already booked. Two binding practices follow; both apply to every ticket's rounds, and Option 4 executes them.
 
@@ -19,7 +19,7 @@ Owner UAT exists to produce NEW information from owner minutes (experience quali
 
 **2. Cut on the green-enough bar.** Issue the round when its headline journeys (the ones the round exists to show) pass end-to-end in user terms. Edge-case reds never hold a cut: they enter the round's disclosed known-items list in plain English with fix status, and the round's qa_status records what was red at issuance (UAT-R5/R7 already require this representation: disclosure is the mechanism that makes early issuance honest). The only cut-blockers are walk-killers: broken auth/build, or a defect the owner would hit on nearly every journey. A red edge case blocks MERGE, not owner UAT; the regression layer owns it. Never hide a red, and never hold an owner behind one.
 
-**3. Deliver with parallel jQATester lanes (owner-ruled 2026-08-31).** Round delivery speed is the priority, so split QA into concurrent jQATester lanes: a **round lane** that walks ONLY the owner round's user-voice journeys (it alone gates the cut, and a green-enough verdict from it cuts the round immediately) and one or more **coverage lanes** that run everything else (technical scenarios, regression-adjacent walks) concurrently; their findings flow into disclosed known-items or the fix loop without delaying issuance. Lanes run **headless by default for speed** (headless satisfies verification per the 2026-07-31 ruling; headed remains available when the developer wants to watch). Multiple concurrent jQATester agents are the norm, with one harness constraint intact: the shared Playwright MCP browser stays a SINGLETON: at most one lane drives it; every additional concurrent lane uses its own browser instance via the project e2e harness CLI or a node-driven Playwright browser. Never two lanes on one browser.
+**3. Deliver with parallel jQATester lanes.** Round delivery speed is the priority, so split QA into concurrent jQATester lanes: a **round lane** that walks ONLY the owner round's user-voice journeys (it alone gates the cut, and a green-enough verdict from it cuts the round immediately) and one or more **coverage lanes** that run everything else (technical scenarios, regression-adjacent walks) concurrently; their findings flow into disclosed known-items or the fix loop without delaying issuance. Lanes run **headless by default for speed** (headless satisfies verification; headed remains available when the developer wants to watch). Multiple concurrent jQATester agents are the norm, with one harness constraint intact: the shared Playwright MCP browser stays a SINGLETON: at most one lane drives it; every additional concurrent lane uses its own browser instance via the project e2e harness CLI or a node-driven Playwright browser. Never two lanes on one browser.
 
 ## Validate and cut over
 

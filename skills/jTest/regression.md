@@ -6,7 +6,7 @@ Read `execution-protocol.md` first (MASTER INVARIANT in `SKILL.md`). This file h
 
 A route-proof test does not count if it fakes, directly calls, or bypasses the classifier or router instead of traversing the real public route to a visible/public outcome. A prior baseline shipped six wrong-target tests that passed while proving nothing about the real route; passing is not proof. A satisfying route-proof test must traverse the real public route (the actual entry point a user or caller invokes) and assert a visible/public outcome (observable state, response, or rendered UI); a test that fakes, directly calls, or bypasses the classifier/router is supplemental evidence at best, never route proof.
 
-**Class boundary (owner-ruled 2026-07-08):** regression tests are the higher-effort DETERMINISTIC class, constructed to survive non-deterministic conditions (capture/replay, managed state). UAT-class assets (`uat-scenarios` + `uat-scenario-steps`, see `uat.md`) are flexible and rapid-change; they are NOT regression tests. Alignment rule: the capture-replay regression ticket owns the audit of ALL existing tests against updated uat-scenarios: update aligned tests, retire misaligned ones; anything predating the capture-replay regression rollout is legacy/invalid and gets archived.
+**Class boundary:** regression tests are the higher-effort DETERMINISTIC class, constructed to survive non-deterministic conditions (capture/replay, managed state). UAT-class assets (`uat-scenarios` + `uat-scenario-steps`, see `uat.md`) are flexible and rapid-change; they are NOT regression tests. Alignment rule: the capture-replay regression ticket owns the audit of ALL existing tests against updated uat-scenarios: update aligned tests, retire misaligned ones; anything predating the capture-replay regression rollout is legacy/invalid and gets archived.
 
 ## UAT-D4 regression eligibility
 
@@ -67,9 +67,9 @@ Coordinate LLM-traffic capture/replay regression promotion for an accepted UAT s
 
 **When to use:** a UAT scenario is accepted or ready for promotion and the durable regression must replay the same LLM traffic later.
 
-> **HARD PRECONDITION, DO NOT INVOKE** (owner directive 2026-06-29): a COMPLETE `TICKET-XXX.uat-scenarios.md` scenario AND its associated executable `TICKET-XXX.uat-scenario-steps.md` (legacy `uat-test.md`) scripts MUST both exist and be **owner-signed-off** before this option runs. No signed-off UAT pair ⇒ stay PARKED: no capture baseline, no replay authoring, no fixture promotion. Authoring/committing this option does NOT authorize using it; the signed-off scenario+scripts are the spec the guard encodes, so they are locked first. If invoked without that pair, STOP and report the missing/unratified input rather than capturing against an unratified scenario.
+> **HARD PRECONDITION, DO NOT INVOKE:** a COMPLETE `TICKET-XXX.uat-scenarios.md` scenario AND its associated executable `TICKET-XXX.uat-scenario-steps.md` (legacy `uat-test.md`) scripts MUST both exist and be **owner-signed-off** before this option runs. No signed-off UAT pair ⇒ stay PARKED: no capture baseline, no replay authoring, no fixture promotion. Authoring/committing this option does NOT authorize using it; the signed-off scenario+scripts are the spec the guard encodes, so they are locked first. If invoked without that pair, STOP and report the missing/unratified input rather than capturing against an unratified scenario.
 
-> **TIMING WEIGHTING, SHAPE-COUPLING** (owner directive 2026-07-03): this guard captures a STATIC LLM request/response SHAPE and replays it. If a later bugfix changes that shape, the guard must be UPDATED, and the non-deterministic→deterministic conversion is painful/expensive. Weight the timing before building: only build when the scenario's LLM/pipeline shape is STABLE, not while the ticket is mid-churn with imminent fixes (e.g. an in-flight broad-impact/choke-point fix that will alter the merge/build/terminal shape the capture encodes). Building mid-churn means paying the conversion cost again on the next shape change. **Prefer:** build guards for a complete scenario or a whole multi-leg e2e chain at a *stabilization point* (after the broad-impact fixes land + owner sign-off), not per-fix mid-flight; a chain-level guard also catches cross-leg regressions. If asked to build mid-churn, surface the shape-churn cost and recommend deferring to the stabilization point unless the owner accepts the re-capture cost.
+> **TIMING WEIGHTING, SHAPE-COUPLING:** this guard captures a STATIC LLM request/response SHAPE and replays it. If a later bugfix changes that shape, the guard must be UPDATED, and the non-deterministic→deterministic conversion is painful/expensive. Weight the timing before building: only build when the scenario's LLM/pipeline shape is STABLE, not while the ticket is mid-churn with imminent fixes (e.g. an in-flight broad-impact/choke-point fix that will alter the merge/build/terminal shape the capture encodes). Building mid-churn means paying the conversion cost again on the next shape change. **Prefer:** build guards for a complete scenario or a whole multi-leg e2e chain at a *stabilization point* (after the broad-impact fixes land + owner sign-off), not per-fix mid-flight; a chain-level guard also catches cross-leg regressions. If asked to build mid-churn, surface the shape-churn cost and recommend deferring to the stabilization point unless the owner accepts the re-capture cost.
 
 Offer points: `/jPrecompact` full-mode promotion review gate, when a UAT row is proposed for Done and needs regression promotion · `/jClose` Block 4, when Regression/E2E policy requires a deterministic promotion artifact · Options 5/6 above cover E2E-shaped promotion; use this option for the missing LLM-traffic replay layer.
 
@@ -115,7 +115,7 @@ Authoring separation: the `jTestEngineer` running this option must not personall
    # jInfra is the single infrastructure authority: recreate through it, not a hand-rolled docker command.
    # There is no `jInfra` on PATH: invoke by absolute path (jInfra SKILL.md § How to invoke).
    "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/jinfra_cli.py" \
-     --docker-recreate --services hai-simulator --confirm
+     --docker-recreate --services <app-service> --confirm
    jswarm/agent-e2e.sh verify tests/e2e/primary/pe2e_TICKETXXX_<scenario_slug>_llm_replay.spec.ts
    ```
    Capture guardrails: do not use the default `tests/fixtures/llm-replay/smoke-fixture.json` for ticket promotion · capture into a proposal fixture first; do not capture directly into the committed canonical fixture unless the owner explicitly asks for a refresh of that fixture · record scenario id, session id, command, fixture path, entry count, and decisive evidence paths · capture replaces entries with the same deterministic key in the target file; this is why proposal-first promotion is mandatory.
@@ -143,7 +143,7 @@ Authoring separation: the `jTestEngineer` running this option must not personall
    # jInfra is the single infrastructure authority: recreate through it, not a hand-rolled docker command.
    # There is no `jInfra` on PATH: invoke by absolute path (jInfra SKILL.md § How to invoke).
    "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/jinfra_cli.py" \
-     --docker-recreate --services hai-simulator --confirm
+     --docker-recreate --services <app-service> --confirm
    shasum -a 256 "$MOCK_AGENTS_FIXTURE_PATH"
    jswarm/agent-e2e.sh verify tests/e2e/primary/pe2e_TICKETXXX_<scenario_slug>_llm_replay.spec.ts
    shasum -a 256 "$MOCK_AGENTS_FIXTURE_PATH"
@@ -176,7 +176,7 @@ Authoring separation: the `jTestEngineer` running this option must not personall
 
 **Why this ownership model exists.** The orchestrator should not be the hidden owner of a half-promoted regression. `jTestEngineer` owns the working deliverable, while bounded L2 delegation lets `jQATester`, runner, and oracle contribute without blowing the context limit or forcing the orchestrator through repeated capture/replay/debug cycles.
 
-Steps 3-6 above are the complete successor procedure; the standalone `test-regression` skill's separate command-shape cheatsheet carried no content beyond what is already written here and was not recreated. The project-local `test-regression` skill directory (including its cheatsheet and template assets) was fully removed on 2026-07-14 per owner ruling (controlled-config masters remain the source of truth); only a minimal redirect stub remains at `.claude/skills/test-regression/SKILL.md` pointing back to this file.
+Steps 3-6 above are the complete successor procedure; the standalone `test-regression` skill's separate command-shape cheatsheet carried no content beyond what is already written here and was not recreated. The project-local `test-regression` skill directory (including its cheatsheet and template assets) was fully removed, by owner ruling, in favor of this file (controlled-config masters remain the source of truth); only a minimal redirect stub remains at `.claude/skills/test-regression/SKILL.md` pointing back to this file.
 
 ### Option 8: Run existing E2E/regression verification
 
