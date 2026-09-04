@@ -44,7 +44,7 @@ Rules:
 
 Why this is required: subagent self-context is resolved by locating the single `subagents/agent-<id>.jsonl` file that contains the caller's nonce. The resolver then verifies that the filename `agentId`, transcript `agentId`, `sessionId`, and `isSidechain` metadata agree. Ambiguity or mismatch fails closed as `unavailable`; it never guesses and never reads the parent transcript for a subagent.
 
-### Runtime note — orchestrator Bash subprocess is classified as a subagent
+### Runtime note: orchestrator Bash subprocess is classified as a subagent
 
 In the current Claude Code runtime, the orchestrator's own `Bash` tool runs its subprocess with `CLAUDE_CODE_CHILD_SESSION=1` set, so a plain `ctx` call made from the orchestrator's Bash tool is classified as a subagent invocation and returns `unavailable` (no identity nonce was supplied for it). Subagents are the primary supported path here — invoke with `--identity-nonce`. To read the orchestrator's own session context directly, invoke `ctx-usage.py` in true main-mode with `CLAUDE_CODE_CHILD_SESSION` cleared from the environment. Separately, the F-49 `jswarm-ctx-widget.py` HUD already owns reading the orchestrator's own statusline context, so most callers never need this workaround.
 
@@ -71,7 +71,7 @@ The context window comes from the `model-windows.yaml` registry unless a higher-
 
 Set `JSWARM_CTX_MODEL_WINDOWS` to point at an alternate registry file when testing or running from a nonstandard deployment.
 
-### Quota data — scoped to the caller's OWN provider and model (Phase 9)
+### Quota data: scoped to the caller's OWN provider and model (Phase 9)
 
 Quota reflects the **caller's own provider**, resolved from the usage record's model/provider (`resolve_quota_provider`), then dispatched to a per-provider adapter (`fetch_quota_for_caller`). A caller never shows another provider's quota — a gpt subagent shows its OpenAI/Codex quota, a Claude caller shows its Anthropic quota. An **unknown/unidentified** provider fetches **no** quota and makes **no** network call (fail-closed dispatch isolation).
 

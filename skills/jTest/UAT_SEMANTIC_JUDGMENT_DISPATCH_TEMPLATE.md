@@ -1,4 +1,4 @@
-# UAT Semantic Judgment Dispatch — UAT-D3
+# UAT Semantic Judgment Dispatch: UAT-D3
 
 Copy this block into every Layer-2 semantic judgment dispatch. Fill every field. A dispatch missing the bound rubric is `BLOCKED: missing scenario judgment contract` before any probe is attempted.
 
@@ -7,7 +7,7 @@ Copy this block into every Layer-2 semantic judgment dispatch. Fill every field.
 - **Scenario ID:** <UAT-SLUG>
 - **Round/report file:** `.jswarm/plans/<TICKET>/uat-results/<TICKET>.agentic-verdict.round-N.md`
 
-## Bound acceptance contract — paste verbatim
+## Bound acceptance contract: paste verbatim
 ### Canonical GWT
 <BEGIN VERBATIM GWT>
 Given ...
@@ -16,7 +16,7 @@ Then ...
 FAIL if ...
 <END VERBATIM GWT>
 
-### Judgment rubric — paste verbatim
+### Judgment rubric: paste verbatim
 <BEGIN VERBATIM JUDGMENT RUBRIC>
 pass_exemplars:
 <paste verbatim>

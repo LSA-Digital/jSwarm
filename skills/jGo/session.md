@@ -1,4 +1,4 @@
-# /jGo Session — Admission and Execution Context
+# /jGo Session: Admission and Execution Context
 
 Use this companion after the facade has resolved an invocation. Return one
 executable context or one clear blocker; do not start a task here.

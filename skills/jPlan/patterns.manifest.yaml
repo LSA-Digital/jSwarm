@@ -117,7 +117,7 @@ singleton_header_ownership:
   "## Required Reading": pattern.plan-governance.md
   "## Agent Assignment Summary": pattern.plan-governance.md
   "## End-to-End Demo Path": pattern.plan-governance.md
-  "## Risk / Rollback": "pattern.plan-governance.md (FULL wording) / pattern.feature-governance.md (FEATURE wording) — same heading text, template-specific bodies, bundle-scoped so never co-selected"
+  "## Risk / Rollback": "pattern.plan-governance.md (FULL wording) / pattern.feature-governance.md (FEATURE wording): same heading text, template-specific bodies, bundle-scoped so never co-selected"
   "## Screenshot Evidence": pattern.plan-governance.md
   "## Smoke Test Impact Assessment": pattern.plan-governance.md
   "## Error Handling Strategy": pattern.plan-governance.md

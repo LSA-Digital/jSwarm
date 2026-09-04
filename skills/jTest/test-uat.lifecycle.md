@@ -25,7 +25,7 @@ A finding or other recorded confirmation that changes expected behavior returns 
 | `<TICKET>.UAT-CURRENT-ROUND.md` | Sealed round package (`DRAFT_SEALED` → `ISSUED`) with gate cards and bound identities | Process + tooling (issuance gates, exact-file walk) | `jswarm/uat_round_materialize.py` via `/jTest uat prepare` |
 | `<TICKET>.uat-feedback.md` | Pre-filled owner feedback document with per-journey verdict slots | Human (owner) + tooling (`jswarm/uat_feedback.py`) | `jswarm/uat_prepare.py` at `ISSUED` |
 
-## Diagram 1 — DevOps lifecycle with the UAT overlay
+## Diagram 1: DevOps lifecycle with the UAT overlay
 
 ```text
 You type each command in this loop yourself; none of them runs the next one
@@ -48,7 +48,7 @@ canonical loop order is **jPlan -> jGo -> jTest -> jUAT -> jFix (when the
 round finds something) -> jClose -> jMerge**. Each stage is typed by the
 user; `/jClose` does not invoke `/jMerge` (`skills/jClose/SKILL.md`).
 
-## Diagram 2 — Level 1 UAT is a cycle
+## Diagram 2: Level 1 UAT is a cycle
 
 ```text
                           official UAT scenarios (source of truth)

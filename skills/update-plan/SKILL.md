@@ -81,7 +81,7 @@ local result docs → (AC-10 reconcile) → plan matrices → (this module count
 
 ---
 
-## Step 3: Content hygiene — propose by default, `--apply` to move
+## Step 3: Content hygiene: propose by default, `--apply` to move
 
 A **bare** invocation (no `--apply`) moves **zero** content. It normalizes frontmatter
 and emits a *proposal* listing candidate moves; plan/spec/archive bytes are otherwise
@@ -115,7 +115,7 @@ duplicate back-links; a re-run with nothing new produces no diff.
 
 ---
 
-## Step 4: HUD refresh — pull-render, no fake push
+## Step 4: HUD refresh: pull-render, no fake push
 
 The HUD (ccstatusline widgets) is **pull-rendered**: it re-reads the plan each render
 cycle. "Refresh" therefore means *the module writes normalized frontmatter (the HUD's

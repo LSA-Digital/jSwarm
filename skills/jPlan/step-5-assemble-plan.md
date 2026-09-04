@@ -1,8 +1,8 @@
-# Step 5 — Assemble plan file
+# Step 5: Assemble plan file
 
-## Step 5 — Assemble plan file
+## Step 5: Assemble plan file
 
-### Pre-plan gate (Standard + Deep only — BLOCKING)
+### Pre-plan gate (Standard + Deep only, BLOCKING)
 
 **Do NOT proceed to full plan creation** if ANY of:
 - Any Open Technical Question is marked `Blocking = Yes` and `Status = Open`
@@ -175,7 +175,7 @@ Record in plan's **Testing Strategy** / **Automated UAT Plan** sections:
 - **Regression promotion:** per-ticket headless Playwright artifact, feature-level deferred, or N/A with reason
 - **Architecture scenario merge-back:** target architecture scenario inventory path, or note that no official inventory exists yet
 
-### Feature plans only — create defect tracker files
+### Feature plans only: create defect tracker files
 
 When issue type is Feature, create these two files alongside the plan file:
 1. Copy `docs/templates/INTEGR_FIXES_TEMPLATE.md` → `.jswarm/plans/TICKET-{NUMBER}/TICKET-{NUMBER}.integr-fixes.md`
@@ -255,7 +255,7 @@ The failure this prevents is specific and recent: one ticket closed with 8,571 l
 
 **STOP — rule-bearing module.** If the Story belongs to a parent Feature that has a dashboard data substrate (`jswarm/feature-dashboard-system/`; data object at `docs/plans/${PARENT}.plan-data.json` / `${PARENT}.feature-dashboard.json` / legacy `.refactor-scoreboard.json`), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/feature-child-projections.md` in full and apply every rule before plan completion — Section A `projected_only` cells, the held-vs-same enum distinction (load-bearing), planned Section B/C/D rows, the validate-`--check`-FIRST-then-render gate, the dual-render projection write rules, and the `Dashboard projection:` plan line. If the parent Feature has no dashboard data object, record `Dashboard projection: N/A — parent Feature has no dashboard` in the Story plan. Do not work from memory.
 
-### Seed `plan_status` (MANDATORY — lifecycle event + metrics freshness)
+### Seed `plan_status` (MANDATORY: lifecycle event + metrics freshness)
 
 Immediately after the master plan is assembled and the receipt gate has passed, record the **initial** `plan_status` through the canonical CLI so the plan frontmatter carries a fresh `plan_status_last_updated` stamp from birth:
 
@@ -267,7 +267,7 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python jswarm/plan_status/cli.py reco
 
 `<SEED-STATE>` = `2.planning.detailed` for a full plan, `0.planning.lite_init` for `--lite`. This stamps `plan_status_last_updated` / `plan_status_actor` (DERIVED — never hand-edit) and records the creation event.
 
-### Ceremony decision-state lint gate (BLOCKING — AC-A)
+### Ceremony decision-state lint gate (BLOCKING: AC-A)
 
 For full-mode Story/Task/Bug plans that ran the ceremony selector, the persisted `## Ceremony Decision State` must pass the deterministic decision-state lint before `/jPlan` completes. `rapid-vibe-ui` bypasses the selector and therefore this lint. Run it fail-closed on every selector-produced assembled plan:
 
@@ -277,7 +277,7 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
 
 Both the interpreter and the script resolve by absolute common-repository path (the script does NOT live in downstream projects); only the PLAN path is target-project-relative. The command propagates failure (exit 1). `decision_state_lint.py` recomputes the High bar and the Medium-default engine baseline from `selector_signals` (it never trusts the authored `hard_high_triggers`/`engine_recommended_tier`), and requires both `engine_recommended_tier` and `jarvi_recommended_tier`, a non-empty `situational_rationale`, `owner_approved_high: true` whenever High is selected, and a `downgrade_rationale` whenever the selected tier is below a fired High bar — so a persisted decision state can neither introduce nor waive those gates. Plans with no `## Ceremony Decision State` section (lite / feature / legacy) fail open (exit 0). Fix the decision state before completing `/jPlan`; do not use `|| true` or prose substitutes.
 
-### NFR catalog and canonical-format authoring gate (BLOCKING — R2)
+### NFR catalog and canonical-format authoring gate (BLOCKING: R2)
 
 When the project is NFR-adopted and the ticket declares `**NFR catalog:** applicable`, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/nfr-chain.md` in full and create the required NFR working slice, machine sidecar, and—when Automated NFR is yes—derived test document. After UAT/NFR authoring, run:
 
@@ -287,7 +287,7 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
 
 The command propagates failure. Fix canonical index/matrix shape, width, seedability, and every declared-applicable missing dimension before completing `/jPlan`; do not use `|| true` or prose substitutes. A fresh ticket may have `0/0` rows, but declared-applicable dimensions need their canonical starter index/matrix.
 
-### Conditional seventh output — initialize UAT round tracking
+### Conditional seventh output: initialize UAT round tracking
 
 Run this seventh `/jPlan` output only after the matching assembly receipt is verified, the final plan is complete, and all applicable UAT/NFR sidecars have passed their authoring gates. Persist `.jswarm/plans/<TICKET>/jcheckin-context.json` from the final plan bytes, then invoke `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/joptimize/checkin_runtime.py --lifecycle-boundary --caller jPlan --project-root "$PWD" --context-file "$CHECKIN_CONTEXT" --boundary-id "$BOUNDARY_ID" --format json`; record/warn/continue. The command writes directly to canonical `common/logs.jCheckin/`, ensures this checkout's enrollment, appends the boundary event, and repairs the project read-only views. If common is unavailable, the typed event-loss result is recorded or warned and the plan workflow continues without a local spool. Then, when `UAT round tracking: on` (or `yes`), run from the consumer repository root:
 

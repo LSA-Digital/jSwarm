@@ -1,4 +1,4 @@
-# /jTest — UAT sub-area (options 2–4)
+# /jTest: UAT sub-area (options 2–4)
 
 Read `execution-protocol.md` first (MASTER INVARIANT in `SKILL.md`).
 
@@ -64,7 +64,7 @@ Derive detailed steps from executable GWT, write clause-bound tests, prove RED, 
 4. Re-evaluate every loaded stop condition before issuing or refreshing.
 5. Preserve Options 2–4 ownership: source intent first, derived steps second, QA execution third, owner round last.
 
-## /jTest uat prepare — PREP-only
+## /jTest uat prepare: PREP-only
 
 Use `/jTest uat prepare [HAS-XXX] [--only #NNN,#MMM] [--force-recreate]`. It resolves focus, gathers the ready-to-test bundle, certifies currency, and prepares the canonical round. It does **not** dispatch jQATester, run the QA walk, or compose the owner invitation. The deprecated `/uat-round` alias forwards its arguments verbatim here, including `--localization-smoke`.
 
@@ -72,7 +72,7 @@ Before consuming a scenario semantic verdict into the prepared round, apply `UAT
 
 Resolve focus from the explicit ticket, then branch, testing context, or the Most-recently-modified eligible round; `INITIALIZED_NOT_READY` is ineligible. Unless `--only` pins a subset, the bundle = union of every **`1.OPEN`** row with a committed fix and commits landed since the round file's `Last refreshed` header. Materialize wholesale only at issuance; a post-issuance change must patch in place. The canonical round file outranks chat; under `UAT-R2`, cite sources in each Journey cell and do not add a Sources column.
 
-## Gate card — complete before preparation
+## Gate card: complete before preparation
 
 1. Load `UAT-D4` before instrument selection; record the behavior-lock decision.
 2. Load `UAT-G0`; require the selected typed certification receipt: Docker retains jInfra recreate/currency evidence, while `local-process-v1` requires fresh listener lineage, content/build/fixture/config identity, served-byte binding, targeted smoke, and current-script replay N/A when UAT-D4 selects the current walk.
@@ -118,7 +118,7 @@ Give the subagent this compact handoff and require it to: **resolve focus** → 
 6. For combinatorial fixes, deterministic tests enumerate the full matrix on captured production-shape data and capture-replay/projection fixtures pin write-path→read-path behavior; above about 10 permutations, jQATester remains limited to a handful of journey-shape spot checks.
 7. If a malformed handoff blocks the run, correct it once; use disk-first recovery and jOracle escalation for a persistent logical blocker. Orchestrator-direct QA is not permitted.
 
-## Option 2 — Create or tighten a Live Show UAT script
+## Option 2: Create or tighten a Live Show UAT script
 
 Use before delegating jQATester.
 
@@ -136,7 +136,7 @@ When a project has adopted the scenario engine, query canonical JSON with `jswar
 
 Reference: `docs/testing/live-show-mode-guide.md` and `docs/templates/UAT_TEST_TEMPLATE.md`.
 
-## Option 3 — Execute Live Show UAT with jQATester
+## Option 3: Execute Live Show UAT with jQATester
 
 Use for developer-watched UAT.
 
@@ -152,7 +152,7 @@ Use for developer-watched UAT.
 Reference: `docs/testing/live-show-mode-guide.md`, the live jQATester definition, and `docs/templates/UAT_REPORT_TEMPLATE.md`.
 
 **Before preparing or issuing a round, you MUST read the [Good-enough round methodology](uat/round-registration.md#good-enough-rounds).**
-## Option 4 — Compose an owner UAT invitation round
+## Option 4: Compose an owner UAT invitation round
 
 Use after Option 3 or a fix wave makes journeys ready for owner review.
 

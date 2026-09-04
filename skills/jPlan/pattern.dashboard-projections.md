@@ -4,7 +4,7 @@ A Story has a parent Feature with a dashboard data substrate.
 
 ## Header lines
 
-**Dashboard projection:** [planned projection / N/A — parent Feature has no dashboard]
+**Dashboard projection:** [planned projection / N/A (parent Feature has no dashboard)]
 
 ## Plan sections
 

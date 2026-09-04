@@ -34,7 +34,7 @@ How does the user know they're done? [e.g., success toast, redirected to dashboa
 
 ### ASCII Mockups
 
-> Include one mockup per distinct screen state. These are the contract between planner and implementer — if the implementation doesn't match the mockup, it's a bug.
+> Include one mockup per distinct screen state. These are the contract between planner and implementer: if the implementation doesn't match the mockup, it's a bug.
 
 ```
 ┌─────────────────────────────────────┐

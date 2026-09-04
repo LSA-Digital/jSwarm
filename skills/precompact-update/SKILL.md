@@ -3,7 +3,7 @@ name: precompact-update
 description: Symlink to the global /precompact-update command that authors global, project-local, or ticket-local precompact include rules from natural-language instructions.
 ---
 
-# /precompact-update — Scope-Aware Precompact Include Authoring
+# /precompact-update: Scope-Aware Precompact Include Authoring
 
 Author or update precompact standards in the correct include layer from natural-language developer instructions. This is a global command: it can run from any project repo so developers can maintain global, project-local, or ticket-local precompact rules without weakening the canonical `/jPrecompact` safety contract.
 
@@ -33,7 +33,7 @@ After the scope is selected, ask for the developer's natural-language instructio
 
 ---
 
-## Option 1: global — Staged Cutover for `~/.claude/skills/jPrecompact/SKILL.md`
+## Option 1 (global): Staged Cutover for `~/.claude/skills/jPrecompact/SKILL.md`
 
 Use this option only when the developer wants to change the canonical global `/jPrecompact` command itself.
 
@@ -73,7 +73,7 @@ Only after explicit user apply, write the approved diff to `~/.claude/skills/jPr
 
 ---
 
-## Option 2: project — `.claude/precompact.local.md`
+## Option 2 (project): `.claude/precompact.local.md`
 
 Use this option for project-wide standards that should apply to every `/jPrecompact` run in the current project.
 
@@ -99,7 +99,7 @@ After confirmation, create or update `.claude/precompact.local.md`. Report the f
 
 ---
 
-## Option 3: ticket — `.jswarm/plans/<TICKET-KEY>/.precompact.md`
+## Option 3 (ticket): `.jswarm/plans/<TICKET-KEY>/.precompact.md`
 
 Use this option for standards that apply only to one ticket's checkpoint flow.
 
@@ -125,7 +125,7 @@ After confirmation, create or update `.jswarm/plans/<TICKET-KEY>/.precompact.md`
 
 ---
 
-## Option 4: inspect — Show Current Layers
+## Option 4 (inspect): Show Current Layers
 
 Use this option when the developer wants to understand the effective include stack before making changes.
 

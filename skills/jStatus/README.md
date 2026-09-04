@@ -1,6 +1,6 @@
 # jStatus
 
-> **Generally available** — canonical JSWARM user skill; registered and deployed through the governed catalog lifecycle.
+> **Generally available**: canonical JSWARM user skill; registered and deployed through the governed catalog lifecycle.
 
 `jStatus` produces one evidence-backed ticket status report in two places: chat and `.jswarm/plans/<TICKET-XXX>/.jstatus.latest.md`. The chat and file render are intentionally identical. The latest file is overwritten on each render so it remains the current report, not an append-only log.
 

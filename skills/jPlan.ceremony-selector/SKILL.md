@@ -17,7 +17,7 @@ Classify these by **contract surface, not file type**. Default prose, guidance, 
 
 ## Live flow
 
-### Step 1 — scope render command
+### Step 1: scope render command
 
 Run EXACTLY this one command. Fill the drafted scope fields (Goal, In scope, Out of scope, and Acceptance) from the Q1-Q4 read, then print its output verbatim and ask the developer to confirm or refine:
 
@@ -27,7 +27,7 @@ Run EXACTLY this one command. Fill the drafted scope fields (Goal, In scope, Out
 
 If the developer refines the scope, update your signal read from the confirmed scope before Step 2.
 
-### Step 2 — one render command
+### Step 2: one render command
 
 After scope confirmation, run EXACTLY this one command. Fill the seven signal values from the Q1-Q4 read; add `--low`, `--medium`, or `--high` only if the developer passed a tier flag. Then print its output verbatim:
 
@@ -37,7 +37,7 @@ After scope confirmation, run EXACTLY this one command. Fill the seven signal va
 
 The rendered block contains the three pattern cards, the deterministic Engine Baseline (signals + baseline tier), and the tier menu in one deterministic response. Jarvi's situational recommendation is authored in Step 3, not in this deterministic render.
 
-### Step 3 — pick, apply, and persist
+### Step 3: pick, apply, and persist
 
 After scope confirmation, Jarvi authors `jarvi_recommended_tier` and a non-empty `situational_rationale` anchored to the rendered `engine_recommended_tier` and selector card data. **Default `jarvi_recommended_tier` to Medium** unless the owner already locked `--high`. Ask the developer to pick Low, Medium, or High, presenting Medium as the default. Do not apply High unless the owner explicitly chose High. If the rendered block shows `downgrade rationale required`, ask for the rationale.
 

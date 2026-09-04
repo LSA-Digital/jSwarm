@@ -1,4 +1,4 @@
-# /jGo Task Cycle — One Planned Task
+# /jGo Task Cycle: One Planned Task
 
 Use this companion only for the next incomplete task in an admitted session.
 

@@ -142,11 +142,11 @@ The orchestrating agent should **coordinate and delegate** to specialized sub-ag
 - [ ] AC-DOC-1: Update this plan with implementation notes and status
 - [ ] AC-DOC-2: Update architecture docs with finalized decisions
 
-### [TICKET-YYY](https://your-jira.atlassian.net/browse/TICKET-YYY): Story Title — 🔴 Not started
+### [TICKET-YYY](https://your-jira.atlassian.net/browse/TICKET-YYY): Story Title (🔴 Not started)
 - [ ] [Acceptance criterion 1]
 - [ ] [Acceptance criterion 2]
 
-### [TICKET-ZZZ](https://your-jira.atlassian.net/browse/TICKET-ZZZ): Story Title — 🔴 Not started
+### [TICKET-ZZZ](https://your-jira.atlassian.net/browse/TICKET-ZZZ): Story Title (🔴 Not started)
 - [ ] [Acceptance criterion 1]
 - [ ] [Acceptance criterion 2]
 

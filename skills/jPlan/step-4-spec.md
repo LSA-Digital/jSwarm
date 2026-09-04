@@ -1,11 +1,11 @@
 
-# Step 4 — Create technical design spec (Standard + Deep only)
+# Step 4: Create technical design spec (Standard + Deep only)
 
-## Step 4 — Create technical design spec (Standard + Deep only)
+## Step 4: Create technical design spec (Standard + Deep only)
 
 Skip for Quick (depth 1) plans and Lite mode. Required only for Standard (depth 2) and Deep (depth 3).
 
-### 4A — Read architecture and design inputs
+### 4A: Read architecture and design inputs
 
 Search at each level:
 
@@ -35,13 +35,13 @@ find .jswarm/plans -maxdepth 2 -name "*.research.*.md" 2>/dev/null | head -10
 
 Record everything read in the spec's **Input Documents** section. If no architecture docs exist, note that — it signals the project may need them.
 
-### 4B — Read the technical design spec template
+### 4B: Read the technical design spec template
 
 ```
 Read docs/templates/TECH_DESIGN_SPEC_TEMPLATE.md
 ```
 
-### 4C — Populate the technical design spec
+### 4C: Populate the technical design spec
 
 Write to: `.jswarm/plans/TICKET-XXX/TICKET-XXX.specs.<descriptive>.md`
 
@@ -61,7 +61,7 @@ Key sections to populate thoroughly:
 
 Leave the **Oracle / Advisor Review** section empty — Step 4D populates it.
 
-### 4D — Oracle review
+### 4D: Oracle review
 
 **Deep (depth 3) — MANDATORY.** Consult Oracle before writing the plan.
 **Standard (depth 2) — RECOMMENDED.** Offer Oracle consultation to the user.

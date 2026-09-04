@@ -1,4 +1,4 @@
-# UAT — CURRENT ROUND (single always-current file; wholesale-replaced at issuance, PATCHED mid-round)
+# UAT: CURRENT ROUND (single always-current file; wholesale-replaced at issuance, PATCHED mid-round)
 
 **Round:** <YYYY-MM-DD> · <one-line round purpose>
 **Last refreshed:** <host-clock YYYY-MM-DDTHH:MM±HH:MM (IANA zone + abbrev) · HH:MM UTC; update on every patch>
@@ -42,7 +42,7 @@ BEGIN NORMALIZED PACKAGE
 ```
 END NORMALIZED PACKAGE
 
-## Composer gate — complete before issue
+## Composer gate: complete before issue
 **Scenario + step sources:** <linked owner GWT scenarios and derived step-script sections>
 **Bound GWT + boundary:** <verbatim relevant clauses and production/user-visible boundary>
 **Stack currency:** <UAT-G0 proof: runtime sentinel, start time, smoke, replay or N/A>
@@ -71,7 +71,7 @@ END NORMALIZED PACKAGE
 |---|---|---|
 | `SET.<YYYY-MM-DDTHH:MM-TZ>` | [`key`→`key`, `key`] | <timestamp-named review batch purpose> |
 
-## Journeys (hot) — readiness assigned during PREP; placeholder rows are not test targets
+## Journeys (hot): readiness assigned during PREP; placeholder rows are not test targets
 
 **Data sources for this table (all rows summarized from, never invented):** [<TICKET>.uat-scenarios.md](<path>) · [<TICKET>.uat-scenario-steps.md](<path>) · [uat-scenarios-e2e.md](<path>) · [architecture.uat-scenarios.md](<path>) · [bug ledger](<path>) · [session registry](<path>) · [NFR slice](<path>)
 
@@ -83,7 +83,7 @@ The source links govern both tables; per-row citations live inside Journey and t
 |---|---|---|---|---|---|---|---|---|
 | 1 | 🔴 | <OWNER / QA / OWNER + QA> | <what this proves — UAT-n steps §x + e2e §Jx> | <1. Do X. 2. Do Y. 3. Do Z.> | <observable outcome from cited GWT> | <explicit FAIL condition> | <`#NNN-slug` / `AC:<requirement-ref>` / relevant NFR IDs> | `<lowercase 64-hex copied from the cited official scenario gwt_sha256>` |
 
-## Journeys (cold) — no action: context, confirmed/closed rows, known behavior
+## Journeys (cold, no action needed): context, confirmed/closed rows, known behavior
 
 | # | UAT ready? | Who | Journey (plain-English summary + SPECIFIC scenario ids + step §s) | Walk — numbered do-this steps (or n/a for ⚫) | PASS / expected looks like | FAIL / report if | Closes |
 |---|---|---|---|---|---|---|---|

@@ -12,7 +12,7 @@ level: 2
 ---
 
 
-# uat-author-scenario — mid-ticket guided scenario authoring + runbook + test scaffolding
+# uat-author-scenario: mid-ticket guided scenario authoring + runbook + test scaffolding
 
 Option 3 of the `/jUAT` menu. It lets a developer, **while another ticket is mid-`/jGo`**, add UAT coverage for newly-discovered behavior without leaving the flow: author a brand-new scenario (or update an existing one), generate that scenario's executable `.uat-test.md` runbook, and scaffold the unit/integration test stubs it implies — then continue with `/jGo` to author the real assertions.
 
@@ -37,7 +37,7 @@ This skill is a **thin orchestration** over the existing UAT-scenario engine. It
 | `jswarm/uat-scenarios/scaffold_uat_tests.py` | Generate the `.uat-test.md` runbook + collectable test stubs: `preview` / `apply`. |
 | `jswarm/uat-scenarios/render-uat-scenarios.py` | Re-render derived Markdown; `--check` / `--strict-links` after apply. |
 
-## Workflow (8 steps — keep the developer informed at each)
+## Workflow (8 steps: keep the developer informed at each)
 
 1. **Resolve + validate the active ticket.** Gather the candidate ticket from the per-session `active-ticket.json` binding, the git branch (`git branch --show-current`), and the session title, then validate with the resolver:
 

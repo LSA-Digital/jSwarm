@@ -3,7 +3,7 @@ name: "code-overview"
 description: "Symlink to the global /code-overview slash command: builds a bounded, data-driven code overview for one UAT scenario grouping instead of brute-force reading the whole repo."
 ---
 
-# /code-overview — Scenario-Guided Code Overview
+# /code-overview: Scenario-Guided Code Overview
 
 Build a bounded, data-driven overview of code for one UAT scenario grouping. Use this command to understand a feature slice without brute-force reading the whole repository.
 

@@ -1,4 +1,4 @@
-# UAT — CURRENT ROUND (single always-current file; wholesale-replaced at issuance, PATCHED mid-round)
+# UAT: CURRENT ROUND (single always-current file; wholesale-replaced at issuance, PATCHED mid-round)
 
 **Round:** 2026-07-08 · re-observation of the four owner-reported defect fixes (#102/#103/#104/#106) + carry-forward
 **Last refreshed:** 2026-07-08T15:50-04:00 (America/New_York EDT) · 19:50 UTC
@@ -27,7 +27,7 @@
 |---|---|---|
 | `SET.2026-07-05T09:12-EDT` | [`#102-card-composition`→`e4eec4fa`, `#103-ref-miswired-paint`→`573540b0`, `#104-ref-fallback-kind`→`e4979b49`, `#106-missing-trio`→`ef3dbbd3`] | LIVE — the deploy under test this round |
 
-## Journeys (hot) — test NOW, or fix/trace in progress
+## Journeys (hot): test NOW, or fix/trace in progress
 
 **UAT ready?** 🟢 test it NOW · 🟡 fix in progress — do NOT test yet · 🔴 not started
 

@@ -1,4 +1,4 @@
-# /jTest — Execution Protocol (all options)
+# /jTest: Execution Protocol (all options)
 
 Loaded by every `/jTest` option per the MASTER INVARIANT in `SKILL.md`. Options may ADD requirements; none may skip this protocol.
 
@@ -20,7 +20,7 @@ Required command fields for UAT/E2E handoffs:
 - exact runner command
 - exact regression command, or explicit deferral/N/A reason
 - preflight command
-- runtime monitor command/task or `N/A — reason`
+- runtime monitor command/task or `N/A (reason)`
 - relevant log/telemetry sources to follow during execution: backend/service logs, runtime monitor logs, Playwright stdout, trace/video/screenshot output, structured evidence output, and any project-specific ledger/telemetry paths from `.jswarm/e2e-manifest.json`
 - report and evidence paths
 
@@ -37,7 +37,7 @@ During any Live Show UAT or long-running E2E/regression execution, the agent mus
    - Playwright stdout, trace, video, screenshot, JSON, and HTML-report paths
    - backend/API/service logs, container logs, workflow/runtime logs, SSE/streaming logs, and domain telemetry
    - runtime monitor logs and JSONL ledgers, including /OpenCode monitor ledgers when available
-2. **Mechanical preflight — backend monitor starts before the runner.** When backend/API/workflow/streaming/persistence/dispatch behavior is in scope:
+2. **Mechanical preflight: backend monitor starts before the runner.** When backend/API/workflow/streaming/persistence/dispatch behavior is in scope:
    - verify loud telemetry is enabled in the project `.env` (`LOG_LEVEL=DEBUG` and/or `DEBUG=true`); if it is off, turn it on before the run
    - start a Monitor task or an equivalent line-buffered capture such as `docker logs -f <api> 2>&1 | grep --line-buffered -Ei '<named-signatures>'`
    - name a signature set that covers backend exceptions (`Traceback`, `ERROR`, `CRITICAL`) **and** provider failures (`429`, `RateLimitError`, `RouterExhaustedError`, `exhausted fallback chain`, `quota`)

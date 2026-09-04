@@ -3,7 +3,7 @@ name: jUAT
 description: UAT command surface used to run guided acceptance flows.
 ---
 
-# /jUAT — UAT scenario utilities menu
+# /jUAT: UAT scenario utilities menu
 
 `/jUAT` is a small, extensible menu of UAT-scenario engine utilities. It is a **thin menu**: each option delegates to an associated skill that does the work.
 

@@ -1,4 +1,4 @@
-# /jGo Phase Exit — Accept and Advance One Phase
+# /jGo Phase Exit: Accept and Advance One Phase
 
 Use this companion only after every planned task in the active phase is complete.
 

@@ -1,4 +1,4 @@
-# Chatbot Testing Protocol — UAT Semantic Verdict Consumption Gate
+# Chatbot Testing Protocol: UAT Semantic Verdict Consumption Gate
 
 > **Name:** this protocol is the **"chatbot testing protocol"** (owner-named 2026-08-02). The filename stays stable for existing references; prose references should use the new name.
 

@@ -12,7 +12,7 @@ level: 2
 ---
 
 
-# uat-extract-assets — PDF slide → scenario image extraction
+# uat-extract-assets: PDF slide → scenario image extraction
 
 Extract per-slide PNGs from a PDF and align them to the /UAT scenarios JSON. A slide whose text contains a scenario id (e.g. `UAT.UPLOAD.STARTSCREEN`) is rasterized to `<assets-dir>/<id>.png`, and the image path + PDF-extracted provenance are **injected into the scenarios JSON** as `scenario.image`. The renderer then embeds the image inline in both render profiles. This skill is option 1 of the `/jUAT` menu.
 

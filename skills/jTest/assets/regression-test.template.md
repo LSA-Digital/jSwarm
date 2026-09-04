@@ -1,4 +1,4 @@
-# TICKET-XXX: Regression Test Result — <accepted UAT scenario id>
+# TICKET-XXX: Regression Test Result (<accepted UAT scenario id>)
 
 **Ticket:** [TICKET-XXX](https://your-jira.atlassian.net/browse/TICKET-XXX)  
 **Accepted UAT scenario:** `<UAT.SCENARIO.ID>`  

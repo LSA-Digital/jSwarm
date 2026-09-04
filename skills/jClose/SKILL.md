@@ -3,7 +3,7 @@ name: jClose
 description: Close a work item — update its plan status, write the retro, sync the tracker (when one is configured), and record the close.
 ---
 
-# /jClose — Close a Work Item
+# /jClose: Close a Work Item
 
 ## Safety contract
 
@@ -34,7 +34,7 @@ Every close includes a structured reflection, written by the agent without askin
 **Template** (when creating fresh):
 
 ```markdown
-# Retrospective: <ID> — [Short Title]
+# Retrospective for <ID>: [Short Title]
 
 **Date:** YYYY-MM-DD
 **Work item:** <ID> (tracker: [link] | local slug)

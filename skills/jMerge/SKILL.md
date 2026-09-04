@@ -3,7 +3,7 @@ name: jMerge
 description: Integrate a work item's branch into the target branch — fetch, rebase or merge, push, open a PR when configured, confirm the work item is closed, delete the branch.
 ---
 
-# /jMerge — Merge a Work Item's Branch
+# /jMerge: Merge a Work Item's Branch
 
 ## Safety contract
 

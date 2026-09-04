@@ -60,7 +60,7 @@ Full technical design, phases, tasks, tests/UAT plan, and `/jGo` scaffolding. Cr
 
 After Step 2 (work item identity + rename intent), jump to Step 5 Lite (this shape only), then Step 6 (Lite tracker-comment variant below).
 
-## Lite Step 2 — Work item identity and session rename intent
+## Lite Step 2: Work item identity and session rename intent
 
 Resolve identity, check the hard stop, write local state, and (when a tracker is configured) resolve or create the tracked issue exactly as in operations.md Step 2A.
 
@@ -68,11 +68,11 @@ Resolve identity, check the hard stop, write local state, and (when a tracker is
 
 > **Feature-orchestrator carve-out — SKIP rename.** When you are the Feature orchestrator running `/jPlan` serially for child Stories under a Feature you own, do not write `.jswarm/state/pending-session-rename` and mark the Step 6 Session row `n/a (Feature orchestrator)`. This applies in Lite too.
 
-## Lite Step 2a — Bug evidence pack (DEFECT tickets, MANDATORY — owner-ruled 2026-08-05)
+## Lite Step 2a: Bug evidence pack (DEFECT tickets, MANDATORY, owner-ruled 2026-08-05)
 
 When the ticket is a **defect** (Bug issue type, or a Story chartering a bug/defect follow-up — e.g. filed from a triage, review finding, or UAT report), the filing is NOT complete until a **reproduction-evidence pack** exists at `<plans-root>/TICKET-XXX/design-inputs/` per [`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/templates/BUG_EVIDENCE_PACK_TEMPLATE.md`](../../docs/templates/BUG_EVIDENCE_PACK_TEMPLATE.md): frozen COPIES (or source-headed excerpts) of the diagnosis/triage material, symptom artifacts (screenshots, log slices), and an indexed `README.md` carrying **reproduction anchors** (sessions/commands/ids, trigger condition, code anchors with verbatim failure signatures, environment state) and **boundary notes** mirroring the plan's non-goals. Pointers to origin-ticket evidence are allowed IN ADDITION, never INSTEAD — origin folders evaporate at close (worktree teardown, log rotation, context compaction). Commit plan + pack together. Non-defect lite tickets (features, enablers, docs) skip this step with no annotation.
 
-## Lite Step 6 — Tracker comment and summary
+## Lite Step 6: Tracker comment and summary
 
 Comment through the tracker boundary (skipped cleanly when no tracker is configured):
 

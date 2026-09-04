@@ -1,7 +1,7 @@
 
 # Operations
 
-## Step 0a — Main-sync preflight (SILENT unless escalation needed)
+## Step 0a: Main-sync preflight (SILENT unless escalation needed)
 
 Run main-sync portion of [`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/merge/preflight.md`](../../docs/merge/preflight.md). Auto-resolve gitignored chaff + ahead-only push + behind-only pull silently. Escalate ONLY for tracked-file dirt or diverged branch state. Emit one-line success log before Step 1.
 
@@ -35,7 +35,7 @@ Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with
 
 > **Advisory — Background Tasks & Hang Prevention:** Run delegated tasks/agents as background (`run_in_background=true`) with task IDs. Don't poll every turn. Use completion notifications. For long-running work, use externally monitorable execution: explicit timeouts, redirected log files, heartbeats/progress, process status.
 
-## Step 1 — Full-mode questions and ceremony selection
+## Step 1: Full-mode questions and ceremony selection
 
 **If Lite mode applies, use Lite questions above instead.**
 
@@ -117,9 +117,9 @@ Legacy-safe: plans with no ceremony selection / no-selection recorded remain val
 
 **Wait for user response before proceeding.**
 
-## Step 2 — Work item and session
+## Step 2: Work item and session
 
-### Step 2A — Work item identity (tracker-optional)
+### Step 2A: Work item identity (tracker-optional)
 
 `/jPlan <work-item>` accepts either identity form (`jswarm.workitem.identity.parse`):
 
@@ -170,7 +170,7 @@ There is no tracker `create` verb at the boundary in v0.1.0 (only `resolve`/`com
 
 > **Point-of-impact reminder:** after establishing ANY work item — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
 
-### Step 2B — Session rename
+### Step 2B: Session rename
 
 Title format: `TICKET-{NUMBER}-{DESCRIPTION}` — UPPERCASE, hyphens, ~40 chars max.
 
@@ -205,7 +205,7 @@ All Playwright screenshot evidence goes in **LOCAL PLAN FILE** using rendered ma
 
 **NEVER embed screenshots or image links in a tracker comment.** A tracker (when configured) gets text-only comments. Plan file is source of truth for visual evidence.
 
-## Step 6 — Sync the tracker and show summary
+## Step 6: Sync the tracker and show summary
 
 **Full-plan mode — tracker comment (skipped cleanly when no tracker is configured):**
 

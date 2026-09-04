@@ -10,7 +10,7 @@ triggers:
 argument-hint: "<description of what's broken | error message | test name>"
 ---
 
-# /jFix — Diagnose, Contract, Repair, Prove
+# /jFix: Diagnose, Contract, Repair, Prove
 
 ## Safety contract
 

@@ -1,4 +1,4 @@
-# /jGo Completion — Ready for Merge
+# /jGo Completion: Ready for Merge
 
 Use this companion only after every phase is accepted.
 

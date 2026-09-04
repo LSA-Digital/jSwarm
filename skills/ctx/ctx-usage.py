@@ -136,7 +136,7 @@ class UsageResult:
 
 
 # ---------------------------------------------------------------------------
-# Layer A / Layer B — identity resolution
+# Layer A / Layer B: identity resolution
 # ---------------------------------------------------------------------------
 
 _DEFAULT_RECENT_WINDOW = 200
@@ -557,7 +557,7 @@ def resolve_current_invocation(
 
 
 # ---------------------------------------------------------------------------
-# Usage lookup — raw jAgentProxy [OUTCOME] log-line parse (Phase 1)
+# Usage lookup: raw jAgentProxy [OUTCOME] log-line parse (Phase 1)
 # ---------------------------------------------------------------------------
 
 _OUTCOME_TIMESTAMP_RE = re.compile(r"^\[(?P<timestamp>[^\]]+)\]\s*(?P<body>.*)$")
@@ -687,7 +687,7 @@ def _compute_context_tokens(fields: dict[str, str]) -> int | None:
 
 
 # ---------------------------------------------------------------------------
-# Model context-window resolution (Phase 2) — no-dependency YAML line parser
+# Model context-window resolution (Phase 2): no-dependency YAML line parser
 # ---------------------------------------------------------------------------
 
 _MODEL_KEY_RE = re.compile(r"^  ([^\s:][^:]*):\s*(?:#.*)?$")

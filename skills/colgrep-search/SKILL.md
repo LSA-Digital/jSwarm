@@ -26,7 +26,7 @@ SEARCH PROTOCOL (MANDATORY — follow before touching any file):
 
 **Why this matters:** The runtime cancels agents that call `read` >80% of the time in a sliding window. Without ColGREP, agents grep → read 15+ files → get cancelled (false positive). With ColGREP, they search semantically → read 2-3 targeted files → succeed.
 
-## MCP Tools — Code Search (local per-checkout OOB)
+## MCP Tools: Code Search (local per-checkout OOB)
 
 ### `colgrep_search`
 
@@ -40,7 +40,7 @@ SEARCH PROTOCOL (MANDATORY — follow before touching any file):
 
 Discover active local OOB development indexes/checkouts. This is informational; use `cwd` for code search and do not restore the legacy `index=` calling pattern.
 
-## OOB per-checkout mode — preferred code-search shape
+## OOB per-checkout mode: preferred code-search shape
 
 When the OOB backend is active (`COLGREP_MCP_BACKEND=oob` on the ColGREP MCP
 server), `colgrep_search` queries the per-checkout index directly and `cwd`
@@ -60,7 +60,7 @@ colgrep_search(query="<what you need>", cwd="<absolute checkout/worktree path>",
   `WARNING ... watcher not running` token means background refresh is down;
   results still return but may be outdated.
 
-## MCP Tools — Content Search (port 3281)
+## MCP Tools: Content Search (port 3281)
 
 ### `colgrep_search_content`
 
@@ -161,12 +161,12 @@ colgrep -e "exactPattern" "semantic description" ~/dev/project -k 10 2>/dev/null
 ## Anti-Patterns
 
 ```
-# WRONG — shelling out to colgrep CLI
+# WRONG: shelling out to colgrep CLI
 Bash: colgrep "role assignment" -k 10
 
-# WRONG — grep for exploratory questions
+# WRONG: grep for exploratory questions
 grep(pattern="role.*assignment")
 
-# CORRECT — first-class MCP tool (direct call)
+# CORRECT: first-class MCP tool (direct call)
 colgrep_search(query="role assignment and access control", cwd="/absolute/path/to/checkout", top_k=10)
 ```

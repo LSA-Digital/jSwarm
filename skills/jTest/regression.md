@@ -1,4 +1,4 @@
-# /jTest — Regression sub-area (options 5-8)
+# /jTest: Regression sub-area (options 5-8)
 
 Read `execution-protocol.md` first (MASTER INVARIANT in `SKILL.md`). This file has three hard-labeled subsections: what is available today, what is T4-owned and must not be invoked yet, and the maintenance rule that is active now regardless of T4.
 
@@ -28,9 +28,9 @@ A promoted Layer-1 regression test is still subject to the route-proof tripwire 
 
 ---
 
-## (1) Available today — provider-seam capture/replay
+## (1) Available today: provider-seam capture/replay
 
-### Option 5 — Create an E2E regression test
+### Option 5: Create an E2E regression test
 
 Use when a stable journey needs durable automated proof.
 
@@ -45,7 +45,7 @@ Use when a stable journey needs durable automated proof.
 
 Reference: `docs/dev-guide.e2e-testing.md` and `docs/dev-guide.structured-evidence.md`.
 
-### Option 6 — Promote Live Show UAT to E2E regression
+### Option 6: Promote Live Show UAT to E2E regression
 
 Use after live-show passes and the flow should become durable.
 
@@ -61,7 +61,7 @@ If the scenario's behavior depends on LLM calls, pair this with Option 7 below f
 
 Reference: `docs/testing/live-show-mode-guide.md`, `docs/dev-guide.e2e-testing.md`, and `docs/dev-guide.structured-evidence.md`.
 
-### Option 7 — Capture/refresh deterministic LLM-replay fixtures (NEW; "available today" half only, until T4)
+### Option 7: Capture/refresh deterministic LLM-replay fixtures (NEW; "available today" half only, until T4)
 
 Coordinate LLM-traffic capture/replay regression promotion for an accepted UAT scenario whose behavior depends on LLM calls. This is a `jTestEngineer` procedure: `jTestEngineer` owns the working test, coordinates a bounded team, and does not return until replay is green and deterministic.
 
@@ -178,7 +178,7 @@ Authoring separation: the `jTestEngineer` running this option must not personall
 
 Steps 3-6 above are the complete successor procedure — the standalone `test-regression` skill's separate command-shape cheatsheet carried no content beyond what is already written here and was not recreated. The project-local `test-regression` skill directory (including its cheatsheet and template assets) was fully removed on 2026-07-14 per owner ruling (controlled-config masters remain the source of truth); only a minimal redirect stub remains at `.claude/skills/test-regression/SKILL.md` pointing back to this file.
 
-### Option 8 — Run existing E2E/regression verification
+### Option 8: Run existing E2E/regression verification
 
 1. Read `.jswarm/e2e-manifest.json`.
 2. Identify the exact test file or suite.
@@ -192,7 +192,7 @@ Steps 3-6 above are the complete successor procedure — the standalone `test-re
 
 ---
 
-## (2) T4-owned — DO NOT INVOKE until T4 lands
+## (2) T4-owned: DO NOT INVOKE until T4 lands
 
 T4 ships the tooling layer this redesign's SKILL/doc layer does not: permutation manifest · call-slot registry · staleness CI · matrix-row generator · demo mode · runtime toggle.
 

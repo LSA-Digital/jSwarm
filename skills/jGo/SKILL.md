@@ -3,7 +3,7 @@ name: jGo
 description: Symlink to the global /jGo command that executes a plan through progressive-disclosure lifecycle seams and flips plan status ACTIVE->READY_FOR_MERGE at completion.
 ---
 
-# /jGo — Execute a Plan
+# /jGo: Execute a Plan
 
 ## Safety and invocation
 

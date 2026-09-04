@@ -1,4 +1,4 @@
-# UAT GWT Test-Authoring Dispatch — UAT-R9
+# UAT GWT Test-Authoring Dispatch: UAT-R9
 
 Copy this block into every jTestEngineer prompt and every jCoder prompt whose scope includes creating or altering tests. Fill every field. Acceptance comes only from the bound clauses, not from the defect narrative.
 
@@ -11,7 +11,7 @@ Copy this block into every jTestEngineer prompt and every jCoder prompt whose sc
 - **Scenario ID:** <UAT-SLUG>
 - **Implementation scope (jCoder only):** <exact production files/behavior, or N/A>
 
-## Bound acceptance contract — paste verbatim
+## Bound acceptance contract: paste verbatim
 Assign a stable label outside each quote (`C1`, `C2`, or the source's label). Do not edit, summarize, or "improve" the clause text.
 
 ### <SCENARIO-ID:C1>
@@ -42,7 +42,7 @@ FAIL if ...
 Also return:
 1. Files changed.
 2. Exact commands and results.
-3. Any clause not proven, with `BLOCKED: GWT-CONTRACT-GAP — <why>`.
+3. Any clause not proven, with `BLOCKED: GWT-CONTRACT-GAP (<why>)`.
 4. Any new expectation discovered. Do not encode it only in a test; return it for UAT-G1 folding before further work.
 
 ## STOP conditions

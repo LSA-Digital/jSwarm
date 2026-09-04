@@ -3,7 +3,7 @@ name: jPrecompact
 description: Symlink to the global /jPrecompact command that runs the 4-surface checkpoint protocol before context compaction and persists durable retro lessons.
 ---
 
-# /jPrecompact — Execute Pre-Compaction Protocol
+# /jPrecompact: Execute Pre-Compaction Protocol
 
 ## Safety contract (destructive skill, agent-invocable)
 
@@ -250,7 +250,7 @@ This state file is the post-compaction resume anchor. It is separate from the st
 **Template:** Add one `Main divergence` line to every state file — including lite mode — so the resuming session inherits the divergence fact instead of rediscovering it.
 
 ```markdown
-# Precompact State — TICKET-XXX
+# Precompact State: TICKET-XXX
 **Written:** [ISO timestamp]
 **Commit:** [last SHA]
 **Main divergence:** behind by [N]; relevant surfaces changed on main: [paths or none]; checked [ISO timestamp]
@@ -324,7 +324,7 @@ task(subagent_type="jOps", load_skills=[], run_in_background=true,
 # which orchestrates migrate → rebuild-rows → reconcile-status → count in canonical order over
 # the same engines (byte/exit parity proven by jswarm/tests/test_update_ticket_*).
 # The wrapper is common-owned and invoked by ABSOLUTE COMMON PATH (it resolves its engines from
-# common, not the target project), with --repo-root . naming the project — so this works in every
+# common, not the target project), with --repo-root . naming the project: so this works in every
 # project. Steps 2.0a–2.1 below describe each section's behavior; all four run from this ONE
 # fail-open delegation. (The promotion-review gate in §1e is interactive prose, also homed in the
 # `update-ticket` skill; it is NOT part of this deterministic call.)
@@ -375,13 +375,13 @@ This reuses `normalize_plan_file` (no reimplementation) and prints a summary lin
 ls .jswarm/plans/TICKET-XXX.plan.*.md 2>/dev/null         # master
 ls .jswarm/plans/TICKET-XXX/TICKET-XXX.*.md 2>/dev/null   # artifacts
 
-# Legacy — pre-2026-05-22 tickets keep their existing paths
+# Legacy: pre-2026-05-22 tickets keep their existing paths
 ls docs/plans/TICKET-XXX-*.md 2>/dev/null
 ```
 
 Resolve once: if the new master `.jswarm/plans/TICKET-XXX.plan.*.md` exists, this is a NEW-LOCATION ticket — use only `.jswarm/plans/TICKET-XXX/` for artifact reads/writes. Otherwise this is a LEGACY ticket — use `docs/plans/TICKET-XXX-*.md` paths. **Never mix locations for one ticket.**
 
-### Plan maintenance contract (master plan file — MANDATORY)
+### Plan maintenance contract (master plan file, MANDATORY)
 
 Every full checkpoint must bring the **master plan file** to a **current, lean execution snapshot**. Update **status and evidence only** — not scope prose. The plan is the resume map; the retro holds narrative lessons. Lite mode is limited to the Status Updates row described in the Lite Checkpoint Protocol.
 
@@ -513,7 +513,7 @@ Prefer **one** `TICKET-XXX.retro.md` until a **second** narrative is clearly war
 **Discovery helpers:**
 
 ```bash
-# Canonical real file (authoritative — the `common` archive)
+# Canonical real file (authoritative: the `common` archive)
 ls ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro*.md 2>/dev/null
 ls ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX*.retro*.md 2>/dev/null   # legacy / phased / slugged names
 
@@ -742,7 +742,7 @@ After the eviction check, run the **ticket-scoped ColGREP index-health check** s
 ```bash
 # Substitute $TICKET with the ACTIVE ticket key (from Step 1a). If the active
 # ticket is unknown, OMIT --ticket entirely so the CLI falls back to
-# session-binding -> session-title -> git-branch resolution — an explicit --ticket
+# session-binding -> session-title -> git-branch resolution: an explicit --ticket
 # WINS over fallback, so a literal "TICKET-XXX" placeholder would force
 # health_state=unknown. Use --repo-root "$PWD" (the resolved repo root), not ".".
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/colgrep_index_lag_eta.py \

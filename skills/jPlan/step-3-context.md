@@ -1,11 +1,11 @@
 
-# Step 3 — Search existing tests + gather codebase context
+# Step 3: Search existing tests + gather codebase context
 
-## Step 3 — Search existing tests + gather codebase context
+## Step 3: Search existing tests + gather codebase context
 
 Skip entirely in Lite mode. Optional: if the user already pasted file paths or stack traces in their initial message, reference them in the Lite plan under **Context** without running mandatory ColGREP or catalog searches.
 
-### 3.1 — Architecture-level test/scenario docs first
+### 3.1: Architecture-level test/scenario docs first
 
 Start with the project's canonical scenario inventory. Architecture-owned docs are the stable contract; legacy catalogs are compatibility input.
 
@@ -16,7 +16,7 @@ ls docs/architecture/*uat-scenarios*.md 2>/dev/null
 
 If found: read the relevant feature inventories and extract the scenarios this ticket modifies, extends, or adds.
 
-### 3.2 — Compatibility search (`tests/TEST_CATALOG.md` projects only)
+### 3.2: Compatibility search (`tests/TEST_CATALOG.md` projects only)
 
 If the project has `tests/TEST_CATALOG.md`:
 
@@ -44,19 +44,19 @@ For each match found:
 
 **Dedup rule:** If the spec file already exists in the project's e2e test directory, mark it as `Upgrade` (add new assertions). If not, mark as `New`.
 
-### 3.3 — Plain test directory fallback (no TEST_CATALOG.md)
+### 3.3: Plain test directory fallback (no TEST_CATALOG.md)
 
 ```bash
 grep -ri "<feature_keywords>" tests/ --include="*.py" --include="*.spec.ts" | head -30
 ```
 
-### 3.4 — Codebase context via ColGREP
+### 3.4: Codebase context via ColGREP
 
 ```
 colgrep_search({"query": "<A/C keywords>", "index": "<project>", "top_k": 10})
 ```
 
-### 3A — Locate the official UAT scenario inventory (when `Automated UAT: yes`)
+### 3A: Locate the official UAT scenario inventory (when `Automated UAT: yes`)
 
 ```bash
 ls docs/plans/*uat-scenarios.md 2>/dev/null
@@ -75,7 +75,7 @@ The scenario extract is the ticket's living UAT slice; it may evolve during `/jG
 
 **Per-Phase UAT expectations (MANDATORY when Automated UAT applies):** If the ticket has UI/E2E/user-journey impact and `Automated UAT: yes`, `TICKET-XXX.uat-test.md` must define automated UAT expectations for each applicable phase — not just a single end-of-ticket verification. Each phase section lists the UAT scenarios that validate that phase's user-visible deliverables, referencing `docs/architecture/architecture.uat-scenarios.md` for the master inventory. During `/jGo`, a phase without UAT expectations BLOCKS until they're added. Backend-only, schema-only, migration-only, infrastructure-only, or tooling-only phases record `Automated UAT: no — no UI/E2E impact` and use lower-level proof.
 
-### Step 3A.5 — UAT Pre-flight 5-question check (MANDATORY when `Automated UAT: yes`)
+### Step 3A.5: UAT Pre-flight 5-question check (MANDATORY when `Automated UAT: yes`)
 
 Skip entirely when `Automated UAT: no — no UI/E2E impact`.
 
@@ -92,7 +92,7 @@ For each scenario in the extracted UAT file, answer:
 Record results in `TICKET-XXX.uat-scenarios.md` under a `## UAT Pre-flight` section. Any scenario that fails checks 1–4 **MUST be re-scoped** before the executable UAT doc is written — do not carry known-infeasible scenarios into `TICKET-XXX.uat-test.md`.
 
 
-## Bounded overview first — only when the project adopted the scenarios engine (WS3)
+## Bounded overview first: only when the project adopted the scenarios engine (WS3)
 
 Before the architecture-first ColGREP trawl, check whether this project has adopted the UAT-scenario engine. The **adoption signal** is deterministic: the project manages `code-overview.md` (a `managed_commands.code-overview.md` entry with a `code-overview-scenario-source` anchor / a resolvable canonical scenarios JSON). Verify with:
 

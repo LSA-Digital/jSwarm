@@ -1,8 +1,8 @@
-# /jTest — Strategy and non-UAT proof (options 1, 9)
+# /jTest: Strategy and non-UAT proof (options 1, 9)
 
 Read `execution-protocol.md` first (MASTER INVARIANT in `SKILL.md`).
 
-## Option 1 — Decide testing strategy for a ticket
+## Option 1: Decide testing strategy for a ticket
 
 Use during `/jPlan`, `/jGo`, or plan repair.
 
@@ -19,18 +19,18 @@ Use during `/jPlan`, `/jGo`, or plan repair.
    - `Test data strategy`
 4. If Automated UAT is yes, ensure ticket-local scenario and executable UAT docs exist.
 
-Test-class ladder (owner-ruled 2026-07-08): uat-class (scenarios + `uat-scenario-steps.md`, formerly `uat-test.md`) = flexible, rapid-change, drives QA agents/humans step-by-step — never regression proof; regression class = higher-effort deterministic (see `regression.md`); pre-scenarios/tests = legacy/invalid → archive. E2E chains string together scenarios that already own their steps — no separate E2E step-script assets.
+Test-class ladder (owner-ruled 2026-07-08): uat-class (scenarios + `uat-scenario-steps.md`, formerly `uat-test.md`) = flexible, rapid-change, drives QA agents/humans step-by-step, never regression proof; regression class = higher-effort deterministic (see `regression.md`); pre-scenarios/tests = legacy/invalid → archive. E2E chains string together scenarios that already own their steps; no separate E2E step-script assets.
 
 Reference: `docs/devops-practices.md`, `docs/devops-testing-master.md` (detailed testing governance map), and `docs/templates/UAT_TEST_TEMPLATE.md`.
 
 ---
 
-## Option 9 — Prove backend/API/CLI-only work without UAT
+## Option 9: Prove backend/API/CLI-only work without UAT
 
 Do not call `jQATester` just to satisfy a checkbox.
 
 1. Confirm there is no UI/E2E/user-journey impact.
-2. Set or keep `Automated UAT: no — no UI/E2E impact`.
+2. Set or keep `Automated UAT: no` (no UI/E2E impact).
 3. Prove with the correct tier:
    - unit tests for local logic
    - integration tests for composed services/workflows

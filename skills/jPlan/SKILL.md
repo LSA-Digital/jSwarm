@@ -3,7 +3,7 @@ name: jPlan
 description: Initialize a work item (tracker key or local slug), technical design spec, and plan file (full or --lite/briefing mode).
 ---
 
-# /jPlan — router
+# /jPlan: router
 
 ## Safety contract (destructive skill, agent-invocable)
 

@@ -16,6 +16,6 @@ None.
 
 ## Rules
 
-Feature plans require outcome/NFR rows with a measure, baseline, projected delta, executable recipe, and falsification condition. Refactor, runway, and multi-phase high-risk Features instantiate or link the Feature Scoreboard. For Story/Task/Bug plans, including Quick, propose one to three useful candidates; when declined, record `Outcome metrics: declined — <reason>` rather than silently omitting this section.
+Feature plans require outcome/NFR rows with a measure, baseline, projected delta, executable recipe, and falsification condition. Refactor, runway, and multi-phase high-risk Features instantiate or link the Feature Scoreboard. For Story/Task/Bug plans, including Quick, propose one to three useful candidates; when declined, record `Outcome metrics: declined (<reason>)` rather than silently omitting this section.
 
 Provenance: `step-5-assemble-plan.md` § Outcome Metrics.

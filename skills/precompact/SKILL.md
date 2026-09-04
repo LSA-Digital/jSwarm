@@ -7,7 +7,7 @@ description: "[DEPRECATED — use /jPrecompact] Compatibility alias for the rena
 
 > ⚠️ **`/precompact` has been renamed to `/jPrecompact`.** This alias still works during the deprecation window, but it will be retired (separate ticket, ceiling no earlier than **2026-11-10**). Please use **`/jPrecompact`** going forward.
 
-## Delegation (imperative — this is the entire behavior of the alias)
+## Delegation (imperative: this is the entire behavior of the alias)
 
 When invoked as `/precompact` (with any arguments), **immediately invoke `/jPrecompact` and run the full jPrecompact workflow.** Pass through every argument verbatim — ticket key, `--lite`, `status`, `--help`, and any scope detail — exactly as received.
 

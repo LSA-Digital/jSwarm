@@ -1,5 +1,5 @@
 
-# Agent-Team Rubric — review-tier and architecture-tier escalation
+# Agent-Team Rubric: review-tier and architecture-tier escalation
 
 **Last Updated:** 2026-08-30 (fix-cycle architect-effort rule added; prior 2026-07-27)
 
@@ -33,7 +33,7 @@ This is the **single source of truth** for deciding **whether independent review
 
 ---
 
-## Review activation — decide this before you pick a tier
+## Review activation: decide this before you pick a tier
 
 **Independent review is not automatic.** The orchestrator reviews the diff itself by default. An independent `jCritic` lane is dispatched **only** when at least one of these holds:
 
@@ -67,7 +67,7 @@ The orchestrator remains a **different lane from the author**, so the author-not
 
 ---
 
-## Review tier — the intensity, once review has activated
+## Review tier: the intensity, once review has activated
 
 **Default review tier: `critic`.** Escalate to `critic-xhigh` only when **≥1** of the following triggers holds. Copy the matching trigger text verbatim into `escalation-trigger:`.
 
