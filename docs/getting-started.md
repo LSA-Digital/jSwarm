@@ -36,15 +36,20 @@ Only if you use the related feature:
 
 - **fnm and Node 24** are needed for the local review portal.
 - **A Jira account and project** are needed only if you connect a project to Jira.
+- **A Rust toolchain** (`cargo`) is needed only for `install --with-colgrep`; see below.
+  `check` reports it like any other prerequisite, but it never fails `check` on its own
+  -- the core loop works without it.
 
-ColGREP semantic code search is **not implemented in this release**. The
-`install --with-colgrep` flag exists but sets up nothing: it does not install
-ColGREP, configure a service, or register the MCP tools (`colgrep_search`,
-`colgrep_list_dev_indices`, `colgrep_search_content`, ...) the `colgrep-search`
-skill would call. That skill, and `code-overview` (which depends on it), are
-not installed in this release. A decision on shipping ColGREP for a future
-release is pending; this page will be updated with real setup steps once it
-lands.
+**ColGREP semantic code search is optional.** Pass `--with-colgrep` to `install` to
+set it up: it installs the `colgrep` CLI (`cargo install colgrep`, a public crate at
+[crates.io](https://crates.io/crates/colgrep), upstream
+[`lightonai/next-plaid`](https://github.com/lightonai/next-plaid)), registers a small
+bundled MCP server (`jswarm/colgrep_mcp_server.py`) that wraps it, and installs the
+`colgrep-search` and `code-overview` skills. Without the flag, neither skill is
+installed and nothing in the core loop calls them. Nothing here runs a
+background service or container, and nothing private is involved -- code
+search only, over your own checkout. See
+[ColGREP setup](#colgrep-optional-code-search) below.
 
 ## 2. Clone jSwarm
 
@@ -78,9 +83,10 @@ run `check` again until it is clean.
 
 `--dry-run` prints every write the installer would make and changes nothing.
 Every subcommand that writes anything supports `--dry-run`, and `--dry-run`
-never writes anything at all. Skip `--with-colgrep`: ColGREP is not
-implemented in this release (see [What this guide supports](#1-before-you-start)
-above), and the flag sets up nothing.
+never writes anything at all. Add `--with-colgrep` to also set up ColGREP
+semantic code search; see [ColGREP setup](#colgrep-optional-code-search) below.
+Without it, `colgrep-search` and `code-overview` are skipped and nothing else
+in the loop needs them.
 
 The installer builds the Python virtual environment under `~/dev/jswarm/.venv`,
 copies each command in `skills/` into `~/.claude/skills/<name>`, which is the
@@ -92,6 +98,39 @@ adopted repository, not here), and it does not write to `~/.claude/agents`.
 If a skill or the portal config already exists from an earlier install, the
 existing copy is backed up first, to a timestamped folder under
 `~/.jswarm/backups/`, before it is replaced.
+
+### ColGREP (optional, code search)
+
+```bash
+./install.sh install --with-colgrep --dry-run
+./install.sh install --with-colgrep
+```
+
+This is the same `install` step, with one more flag. It:
+
+1. Checks for a Rust toolchain (`cargo` on PATH). If it's missing, it prints the
+   exact fix (`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y`)
+   and stops there -- it never fails the rest of `install` over this, since ColGREP
+   is optional.
+2. Installs the `colgrep` CLI with `cargo install colgrep` if it isn't already on
+   PATH (or verifies the existing one).
+3. Registers `jswarm/colgrep_mcp_server.py` -- a small server bundled in this repo
+   that wraps the `colgrep` CLI -- as an MCP server with Claude Code
+   (`claude mcp add --scope user colgrep -- <python> <server path>`).
+4. Installs the `colgrep-search` and `code-overview` skills, which are skipped
+   without this flag.
+
+The MCP server exposes exactly two tools, both code search over your own
+checkout, backed by the `colgrep` CLI: `colgrep_search` (`colgrep search`) and
+`colgrep_list_dev_indices` (`colgrep status`). Nothing here runs a background
+service or container, there is no network dependency beyond the one-time
+`cargo install`, and nothing private is involved. The first search on a
+checkout builds its index, which can take a while on a large, never-indexed
+repository; later searches reuse it.
+
+If you already ran `install` without `--with-colgrep`, re-run it with the flag
+added -- `install` resumes from the first incomplete optional step, the same
+way it resumes any partial install.
 
 ## 5. Restart Claude Code
 

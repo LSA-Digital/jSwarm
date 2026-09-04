@@ -20,6 +20,12 @@ Then `./install.sh verify`, adopt one application repository with
 `./install.sh adopt <repo-path>`, and read
 [Getting started](docs/getting-started.md) for the full walkthrough.
 
+Add `--with-colgrep` to `install` for optional semantic code search: it installs
+the [`colgrep`](https://crates.io/crates/colgrep) CLI (`cargo install colgrep`,
+needs a Rust toolchain), registers a small bundled MCP server that wraps it, and
+enables the `colgrep-search` and `code-overview` skills. No Docker, nothing
+private -- see [Getting started](docs/getting-started.md#colgrep-optional-code-search).
+
 ## Docs
 
 - [Getting started](docs/getting-started.md), install, verify, and adopt a project

@@ -57,6 +57,13 @@ you.
 and `/merge` still work for one release: each prints its new name and
 delegates.
 
+The loop above completes with none of the above. `install --with-colgrep`
+adds one optional coding-intelligence component: semantic code search,
+backed by the `colgrep` CLI and a small bundled MCP server. `/code-overview`
+uses it to enrich its bottom-up code pathway when available, but its
+top-down, scenario-driven structure works the same without it -- see
+[Getting started](getting-started.md#colgrep-optional-code-search).
+
 ## Three levels of proof before anything merges
 
 1. **Level 1, automated.** `/jTest` runs the project's own unit and
