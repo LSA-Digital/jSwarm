@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""COM-84 plan-status CLI — the interface lifecycle commands invoke after proof.
+"""plan-status CLI — the interface lifecycle commands invoke after proof.
 
 Slash commands (/jPlan, /jGo, /jClose, /jMerge) call this to record
 a FACT transition once the command has proven it (plan written, phase started, A/C
@@ -69,10 +69,10 @@ class PlanFileAmbiguousError(Exception):
 def _find_plan_path(cfg, ticket: str, plan_file: str) -> Path | None:
     """Resolve the plan file path WITHOUT writing it (Critic atomicity fix).
 
-    Canonical-first (COM-138 BLOCK-3 / AC-10): with no explicit ``--plan-file``, prefer the
+    Canonical-first (BLOCK-3 / AC-10): with no explicit ``--plan-file``, prefer the
     canonical ``.jswarm/plans/<ticket>.plan.*.md`` master, then legacy ``docs/plans/<ticket>-*.md``.
     A ticket with >1 canonical (or >1 legacy when no canonical) raises PlanFileAmbiguousError
-    rather than silently picking — a real case exists (COM-109 has two canonical plans).
+    rather than silently picking — a real case exists where a ticket has two canonical plans.
     """
     if plan_file:
         path = Path(plan_file)
@@ -106,7 +106,7 @@ def _write_frontmatter(path: Path | None, to_status: str, actor: str) -> None:
     """Update plan-file frontmatter canonically. ONLY call AFTER the registry
     transition has validated, so an illegal transition never regresses the file.
 
-    Routes through the COM-138 single normalization invariant after the transition
+    Routes through the single normalization invariant after the transition
     write so ``status``/``phase``/``ac_complete`` are derived + the block is canonicalized.
     """
     if path is None or not path.exists():
@@ -115,7 +115,7 @@ def _write_frontmatter(path: Path | None, to_status: str, actor: str) -> None:
         FM.update_keys(path, {
             "plan_status": to_status,
             "status": S.derive_merge_status(to_status),
-            # COM-173: ISO-second precision so same-day transitions order deterministically
+            # ISO-second precision so same-day transitions order deterministically
             # by time (the HUD resolver ranks ACTIVE plans by this stamp; a date-only stamp
             # collapses to midnight and forces an unreliable mtime tiebreak).
             "plan_status_last_updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -131,7 +131,7 @@ def _write_frontmatter(path: Path | None, to_status: str, actor: str) -> None:
 
 
 def _write_session_binding(repo_root: Path, ticket: str) -> None:
-    """COM-174: record `session → ticket` for the live terminal session so the
+    """Record `session → ticket` for the live terminal session so the
     ccstatusline HUD shows the ticket THIS session is working (per-session), rather
     than the global-freshest ACTIVE plan. Keyed by CLAUDE_CODE_SESSION_ID, which the
     Claude Code statusline payload also carries as `session_id`. Fail-open and a
@@ -157,12 +157,12 @@ def cmd_record(args) -> int:
         _emit({"action": "error", "reason": "invalid-state", "to": args.to_status})
         return 1
 
-    # COM-174 (+ /jPrecompact follow-up): bind THIS session to the ticket as soon as a
+    # (+ /jPrecompact follow-up): bind THIS session to the ticket as soon as a
     # lifecycle command touches it — BEFORE transition validation — so the HUD resolves
     # the session's own ticket even when the transition is rejected/idempotent (e.g. a
     # registry that lags the plan after a tooling outage). The binding is a per-session
     # "working on X" fact, independent of the transition outcome.
-    # COM-174 Phase 6: only auto-bind the live terminal's HUD for active-work
+    # Phase 6: only auto-bind the live terminal's HUD for active-work
     # (3.implementation.*) transitions. Creation/planning-seed states (0/1/2.*) are
     # frequently recorded by a /jPlan planner SUBAGENT that inherits the parent's
     # CLAUDE_CODE_SESSION_ID — auto-binding there hijacks the parent's HUD. Closeout
@@ -301,7 +301,7 @@ def cmd_derive(args) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="COM-84 plan-status CLI")
+    p = argparse.ArgumentParser(description="plan-status CLI")
     p.add_argument("--project-root", default=None, help="Project root (default: cwd)")
     sub = p.add_subparsers(dest="command", required=True)
 

@@ -37,7 +37,7 @@ _SECTION_HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 _NFR_SECTION_HEADING = "## A/C-to-NFR Traceability Matrix"
 _NFR_STRATEGY_HEADING = "### NFR Validation Strategy"
 _NFR_DERIVED_LINE_RE = re.compile(r"^\*\*NFR status \(derived\):\*\*\s*\d+/\d+\s*$", re.MULTILINE)
-# COM-167 AC-9: the UAT-scenario-keyed matrix (one row per UAT scenario; status
+# AC-9: the UAT-scenario-keyed matrix (one row per UAT scenario; status
 # aggregates that scenario's tests — 1:many). Distinct from the A/C-keyed
 # "## A/C-to-Test Traceability Matrix".
 _UAT_SECTION_HEADING = "## UAT-Scenario Traceability Matrix"
@@ -115,7 +115,7 @@ def _count_matrix_status_rows(section: str) -> tuple[int, int]:
     Header rows (above the separator) and the separator itself are skipped regardless of
     their first-cell label, so this works for any status table — including the
     UAT-scenario matrix whose header first cell is ``UAT scenario`` (not ``A/C``).
-    A row is *green* when its last cell contains 🟢. (NFR keeps its own COM-169-owned
+    A row is *green* when its last cell contains 🟢. (NFR keeps its own
     counter ``_count_nfr_matrix_rows`` so that contract is untouched.)
     """
     total = 0
@@ -157,11 +157,11 @@ def _weighted_color_from_statuses(statuses) -> str | None:
 def _nfr_counts(body: str) -> tuple[int, int] | None:
     """(green, total) of the A/C-to-NFR matrix rows. When a ``### NFR Validation Strategy``
     subsection is present it bounds the counted region (rows *before* it); when absent the
-    whole matrix section is counted (COM-167 AC-17 F2 — a present-but-empty matrix derives
+    whole matrix section is counted (AC-17 F2 — a present-but-empty matrix derives
     0/0, not omitted). Returns None only when the matrix SECTION itself is absent.
 
     Single source of truth for BOTH the body-derived ``**NFR status (derived):**`` line
-    and the ``nfr_complete`` frontmatter count (COM-167 AC-9) — so the two can never
+    and the ``nfr_complete`` frontmatter count (AC-9) — so the two can never
     disagree.
     """
     matrix_bounds = _find_section_bounds(body, _NFR_SECTION_HEADING)
@@ -175,7 +175,7 @@ def _nfr_counts(body: str) -> tuple[int, int] | None:
     if strategy_rel_start == -1:
         # No strategy subsection to bound the region — count the whole matrix section (there is
         # no strategy table to mis-count). A present-but-empty NFR matrix then derives 0/0 (HUD
-        # shows the metric) instead of being omitted as `—` (COM-167 AC-17 F2; matches UAT).
+        # shows the metric) instead of being omitted as `—` (AC-17 F2; matches UAT).
         return _count_nfr_matrix_rows(matrix_section)
     return _count_nfr_matrix_rows(matrix_section[:strategy_rel_start])
 
@@ -251,7 +251,7 @@ def _reconcile_nfr_status(body: str) -> str:
 
 
 def normalize_plan_file(path) -> dict:
-    """COM-138 single normalization invariant for a plan file's frontmatter.
+    """single normalization invariant for a plan file's frontmatter.
 
     Every frontmatter mutator (CLI write, post-edit hook, backfill) routes through this
     so ``status``/``phase``/``ac_complete`` self-heal and the block is forced to line 1 +
@@ -289,7 +289,7 @@ def normalize_text(original: str) -> dict:
     """
     # FAIL-OPEN on a present-but-invalid frontmatter block: never rewrite a plan whose
     # leading YAML is broken (it would derive from empty defaults and mangle the block).
-    # No destructive write — return the input unchanged (COM-167 NFR-012).
+    # No destructive write — return the input unchanged (NFR-012).
     if FM.frontmatter_is_invalid(original):
         return {"new_text": original, "changed": False, "hoisted": False,
                 "fields_written": [], "removed": [], "reason": "invalid-frontmatter"}
@@ -312,7 +312,7 @@ def normalize_text(original: str) -> dict:
             and S.is_valid_state(plan_status)):
         phase = S.derive_phase(plan_status, body)
     if phase:
-        # Well-formed COM-84 state: derive status + phase ATOMICALLY (§6.0). phase is
+        # Well-formed state: derive status + phase ATOMICALLY (§6.0). phase is
         # non-None for every well-formed valid state; it is None only for a malformed
         # implementation string (e.g. "3.implementation.phase_x" — a non-numeric phase that
         # category_of still admits). Tying both to derive_phase keeps the guard's intent —
@@ -328,7 +328,7 @@ def normalize_text(original: str) -> dict:
     elif "ac_complete" in fm:
         removals.add("ac_complete")
 
-    # COM-167 AC-9: derived completion counts from the plan's own traceability matrices.
+    # AC-9: derived completion counts from the plan's own traceability matrices.
     # Counting the matrices already in the plan body (NOT the ticket-local test files)
     # keeps this deterministic + project-agnostic — the determinism boundary. Keeping
     # those matrix rows truthful from local assets is /jPrecompact's job (AC-10).

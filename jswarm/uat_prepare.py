@@ -53,7 +53,7 @@ LayerAvailabilityToken = Literal["AVAILABLE", "PARTIAL", "UNAVAILABLE", "UNVERIF
 _SEALED_PACKAGE_LAYER = "sealed-package"
 _PROJECT_SUPPORTED_LAYER = "project-supported"
 _LAYER_STDERR_PREFIX = "prepare.layer-availability"
-_GWT_DEPENDENCY_TICKET = "COM-346-JINFRA-BOSS"
+_GWT_DEPENDENCY_TICKET = "JINFRA-CURRENCY-GATE"
 _GWT_CORPUS_GAP_TOKENS = frozenset({
     "SCENARIO-GWT-MISSING", "SCENARIO-GWT-SHA256-MISSING", "SCENARIO-GWT-SHA256-INVALID", "SCENARIO-GWT-SHA256-MISMATCH",
 })
@@ -130,17 +130,17 @@ def _read_json(path: Path) -> dict[str, Any] | None:
 
 def _layer_availability_rows(chain: _ChainResult) -> dict[str, dict[str, object]]:
     """Derive the per-project layer-availability declaration from chain state
-    run_prepare already computed (HAS-687 F4: loud self-skip instead of per-lane
+    run_prepare already computed (F4: loud self-skip instead of per-lane
     hard-failure rediscovery). Observational ONLY — the declaration never gates,
     blocks, or changes any prepare state transition.
 
     ``sealed-package`` availability is the fraction of the round's hot-journey
-    scenarios carrying a chain-verified ``gwt_sha256`` (the COM-376 sealing
+    scenarios carrying a chain-verified ``gwt_sha256`` (the sealing
     input); ``project-supported`` covers the project-local derivation chain
     (scenario corpus, runbook, round lineage) excluding the governed corpus
     field. The ``gwt_sha256`` corpus writer/backfill and the ``jInfra
-    --currency`` hard-gate are owned by the COM-346-JINFRA-BOSS lane —
-    referenced here, NOT implemented (COM-383 work-stream C interim).
+    --currency`` hard-gate are owned by the JINFRA-CURRENCY-GATE lane —
+    referenced here, NOT implemented.
     """
     total = chain.journey_count
     carrying = len(chain.verified_gwt_sha256_by_journey)
@@ -525,8 +525,8 @@ def _has_unverified_gate_header(round_bytes: bytes) -> bool:
 
 
 def _interrupted_issuance_recovery(request: PrepareRequest, report_path: Path | None, carried: Mapping[str, Mapping[str, object]] | None) -> PrepareResult | None:
-    """Retained-receipt interrupted-issuance recovery (COM-376 §Issuance Write
-    Ordering steps 5/6; COM-383 design §6). ``_atomic`` is replacement-based, so an
+    """Retained-receipt interrupted-issuance recovery (§Issuance Write
+    Ordering steps 5/6; design §6). ``_atomic`` is replacement-based, so an
     interrupted ISSUED-round write (step 5) or success-receipt write (step 6) leaves
     the PRIOR DRAFT_SEALED receipt on disk; the sealed-path drift check then fires
     before any recovery could run. This helper evaluates the interrupted-issuance
@@ -652,8 +652,8 @@ def run_prepare(request: PrepareRequest, *, report_path: Path | None = None, for
     if reason:
         return _result(request, "BLOCKED", f"NOT CERTIFIED: {reason}", None)
     if request.paths.current_round_path.is_file() and request.paths.dispatch_path.is_file() and not request.paths.prep_receipt_path.is_file():
-        # COM-383 receipt-less ISSUED recovery (design §6, "Success receipt write fails
-        # after ISSUED round"): the last step of the COM-376 issuance ordering was
+        # receipt-less ISSUED recovery (design §6, "Success receipt write fails
+        # after ISSUED round"): the last step of the issuance ordering was
         # interrupted after the ISSUED round landed. Recompute every expected byte,
         # recognize byte-equal artifacts, finish idempotently, and only then write the
         # success receipt — the invitation becomes true only then.
