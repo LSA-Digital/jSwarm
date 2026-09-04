@@ -33,7 +33,7 @@ find .jswarm/plans -maxdepth 1 -name "TICKET-*.plan.*.md" 2>/dev/null | grep -i 
 find .jswarm/plans -maxdepth 2 -name "*.research.*.md" 2>/dev/null | head -10
 ```
 
-Record everything read in the spec's **Input Documents** section. If no architecture docs exist, note that — it signals the project may need them.
+Record everything read in the spec's **Input Documents** section. If no architecture docs exist, note that; it signals the project may need them.
 
 ### 4B: Read the technical design spec template
 
@@ -51,29 +51,29 @@ Populate from:
 - Jira ticket details (Step 2A)
 
 Key sections to populate thoroughly:
-- **Technical Context** — current architecture, systems touched, existing tech debt
-- **Technical Approach** — proposed solution, key design decisions, component design, data model, API design
-- **Domain Rules and Edge Cases** — business rules shaping implementation, edge case handling
-- **Non-Functional Technical Requirements** — security approach, performance budget, observability plan, reliability
-- **Constraints and Assumptions** — technical constraints and beliefs that may fail
-- **Technical Risks** — what could go wrong and specific mitigations
-- **Open Technical Questions** — flag unresolved items; mark blocking vs non-blocking
+- **Technical Context**: current architecture, systems touched, existing tech debt
+- **Technical Approach**: proposed solution, key design decisions, component design, data model, API design
+- **Domain Rules and Edge Cases**: business rules shaping implementation, edge case handling
+- **Non-Functional Technical Requirements**: security approach, performance budget, observability plan, reliability
+- **Constraints and Assumptions**: technical constraints and beliefs that may fail
+- **Technical Risks**: what could go wrong and specific mitigations
+- **Open Technical Questions**: flag unresolved items; mark blocking vs non-blocking
 
-Leave the **Oracle / Advisor Review** section empty — Step 4D populates it.
+Leave the **Oracle / Advisor Review** section empty; Step 4D populates it.
 
 ### 4D: Oracle review
 
-**Deep (depth 3) — MANDATORY.** Consult Oracle before writing the plan.
-**Standard (depth 2) — RECOMMENDED.** Offer Oracle consultation to the user.
+**Deep (depth 3), MANDATORY.** Consult Oracle before writing the plan.
+**Standard (depth 2), RECOMMENDED.** Offer Oracle consultation to the user.
 
 Ask user:
 ```
 The technical design spec is ready. Would you like Oracle to review it before planning?
 
-1. jOracle (Recommended) — strong reasoning at lower cost. Good for typically complex plans.
-2. jOracle at xhigh effort — deepest reasoning available. Use for extremely complex architecture, multi-service designs, or security-critical work.
+1. jOracle (Recommended): strong reasoning at lower cost. Good for typically complex plans.
+2. jOracle at xhigh effort: deepest reasoning available. Use for extremely complex architecture, multi-service designs, or security-critical work.
 
-[1 / 2 / skip — Deep cannot skip]
+[1 / 2 / skip (Deep cannot skip)]
 ```
 
 **Oracle consultation prompt:**
