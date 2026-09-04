@@ -11,8 +11,8 @@ Phase 3 evictor; this module proposes repair, not cleanup.
 Policy shape (layered over safe defaults; unspecified fields keep the default):
 
     active_projects:
-      - id: hai-sim-engine
-        path: ~/dev/hai-sim-engine
+      - id: example-app
+        path: ~/dev/example-app
         default: true
         colgrep:
           auto_index_base: true

@@ -94,8 +94,8 @@ def _preflight_command_from_manifest(manifest_path: Path) -> list[str] | None:
     """Read the e2e manifest's declared preflight command, if any.
 
     Supported shapes, first match wins — ``uatState.preflightCommand`` is the
-    REAL field shipped in project manifests (verified against
-    hai-sim-engine/.jswarm/e2e-manifest.json, QA21 2026-07-10); the generic
+    REAL field shipped in project manifests (verified against an adopting
+    project's own .jswarm/e2e-manifest.json, QA21 2026-07-10); the generic
     ``commands.preflight`` / top-level ``preflight`` shapes are fallbacks.
     """
     try:

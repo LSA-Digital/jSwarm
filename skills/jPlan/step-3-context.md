@@ -106,4 +106,4 @@ Adoption requires **both** `mode: managed` **and** `code-overview-scenario-sourc
 - **If adopted →** run `/code-overview <scenario-grouping>` **first** as the bounded, UX-aligned overview pass (scenario-grouping framing, ≤12 / hard-20 tool budget, ≥3× speedup benchmark vs an unbounded trawl). Then let ColGREP enrich the already-bounded pathway with the Step 3A/C-keyword searches in this module.
 - **If NOT adopted →** skip `/code-overview` entirely and use the architecture-first ColGREP search in this module. **Never advise `/code-overview` where no canonical scenarios JSON exists**: it depends on the engine and would mislead on a non-adopting project.
 
-hai-sim-engine is the live first adopter (manifest wires `code-overview.md` → `docs/architecture/architecture.uat-scenarios.json`).
+An adopting project is the live first adopter (manifest wires `code-overview.md` → `docs/architecture/architecture.uat-scenarios.json`).

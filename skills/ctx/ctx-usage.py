@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """ctx v2 subagent-self-identity resolver (Phase 1).
 
-Rewritten, cross-provider, subagent-self-resolving successor to the
-hai-sim-engine v1 ``ctx-usage.py`` skill. Fixes v1's ``_find_current_transcript()``
+Rewritten, cross-provider, subagent-self-resolving successor to an
+earlier adopting project's v1 ``ctx-usage.py`` skill. Fixes v1's ``_find_current_transcript()``
 newest-mtime-anywhere fallback, which could leak an orchestrator's (or an
 unrelated session's) transcript into a subagent's reading. This module does
 not port any v1 logic.

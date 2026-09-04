@@ -37,7 +37,7 @@ For the resolved `TICKET-XXX`, define the plan folder once as `.jswarm/plans/TIC
 
 1. Resolve `.jswarm/plans/TICKET-XXX/.jstatus.template.md`.
 2. A `--template` selector must exactly match either a generally available catalog identity or the identity of the already-materialized ticket-local template, always in `name@version` form. An unversioned or unknown selector is invalid: explain it and show the available choices; never guess.
-3. If the ticket-local template is absent, resolve the repository fallback `.jswarm/jstatus.template.md` (mirroring quick mode's repository layer; e.g. hai-sim-engine's `hai-sim-full@1`, owner-directed 2026-08-30: lite-core base + intent-aligned detail layers + portal-anchored cycle header with the portal-vs-ground reconciliation rule). Only if that is also absent, offer the generally available `standard@1` pattern.
+3. If the ticket-local template is absent, resolve the repository fallback `.jswarm/jstatus.template.md` (mirroring quick mode's repository layer; e.g. an adopting project's own `project-full@1`, owner-directed 2026-08-30: lite-core base + intent-aligned detail layers + portal-anchored cycle header with the portal-vs-ground reconciliation rule). Only if that is also absent, offer the generally available `standard@1` pattern.
 4. Materialize a selected generally available pattern only after explicit confirmation.
 5. If the selected template is missing or malformed, explain the problem, fall back to `standard@1`, and continue. A template problem never blocks ticket progress.
 

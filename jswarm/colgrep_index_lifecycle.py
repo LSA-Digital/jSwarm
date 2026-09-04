@@ -626,7 +626,7 @@ def _default_current_generation(family: str, entry: dict[str, Any]) -> str | Non
 
     Returns a generation index NAME only if the registry exposes one that parses as a
     canonical generation of this family. The live `worktrees.json` `api_index_name` is
-    usually the logical worktree BASE (e.g. ``hai-sim-engine-wt-has-497``), which does
+    usually the logical worktree BASE (e.g. ``example-app-wt-demo-497``), which does
     NOT parse as a generation -> returns None, so the classifier holds the family
     Ambiguous rather than guess (BLOCKER-2). The Phase 3 evictor supplies a
     manifest-backed resolver to recover certain supersession.
@@ -801,7 +801,7 @@ def _classify_one(
                     policy_source="active-projects",
                     reasons=["active-project base / served alias / active-base generation — protected, undeletable"])
 
-    # Bare-name base that is NOT an active base (e.g. epms, em-lab) -> protected Ambiguous.
+    # Bare-name base that is NOT an active base (e.g. example-app, other-app) -> protected Ambiguous.
     if not is_wt_overlay:
         return make("Ambiguous", certainty="ambiguous", protected=True, evictable=False,
                     policy_source="name-shape",
