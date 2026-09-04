@@ -21,20 +21,22 @@ without moving the loop underneath it.
 You need a Mac, a local git repository you can safely test against, and about
 twenty minutes.
 
-Required:
+Required (this is exactly what `./install.sh check` verifies):
 
 - **Xcode command line tools**: `xcode-select --install`
 - **Homebrew**: install it from [brew.sh](https://brew.sh)
 - **Python 3.12**: `brew install python@3.12`
-- **GitHub CLI**: `brew install gh && gh auth login`
-- **Claude Code**: install it from the [Claude Code setup guide](https://code.claude.com/docs/en/setup),
-  then run `claude` once to sign in
-- **A git identity**: the name and email used for your commits
+- **git**: `brew install git` (Xcode command line tools normally provide this already)
+- **GitHub CLI**: `brew install gh`, then `gh auth login`
+- **Claude Code**: `npm install -g @anthropic-ai/claude-code`, then run `claude` once to sign in
+- **A git identity**: the name and email used for your commits (not checked by `check`, but
+  needed for the commits the loop makes on your behalf)
 
 Only if you use the related feature:
 
 - **fnm and Node 24** are needed for the local review portal.
-- **Docker** is needed only for optional ColGREP code search (`install --with-colgrep`).
+- **ripgrep** is needed only for optional ColGREP code search (`install --with-colgrep`):
+  `brew install ripgrep`.
 - **A Jira account and project** are needed only if you connect a project to Jira.
 
 ## 2. Clone jSwarm
@@ -70,17 +72,24 @@ run `check` again until it is clean.
 `--dry-run` prints every write the installer would make and changes nothing.
 Every subcommand that writes anything supports `--dry-run`, and `--dry-run`
 never writes anything at all. Add `--with-colgrep` if you want optional code
-search and already have Docker; skip it the first time.
+search and already have ripgrep installed (`brew install ripgrep`); skip it
+the first time.
 
-The installer builds the Python virtual environment and deploys the Claude
-Code adapter: commands, agents, hooks, and rules. Before its first global
-write, it backs up `~/.claude/settings.json`, `~/.claude/CLAUDE.md`, and
-`~/.claude/agents` to a timestamped folder under `~/.jswarm/backups/`.
+The installer builds the Python virtual environment under `~/dev/jswarm/.venv`,
+copies each command in `skills/` into `~/.claude/skills/<name>`, which is the
+whole of the Claude Code command surface, and writes the local review
+portal's config to `~/.jswarm/decision-review/config.json`. That is all this
+step writes globally: it does not touch your project's `CLAUDE.md` or
+`.claude/settings.json` (those belong to `adopt`, in step 7, run against your
+adopted repository, not here), and it does not write to `~/.claude/agents`.
+If a skill or the portal config already exists from an earlier install, the
+existing copy is backed up first, to a timestamped folder under
+`~/.jswarm/backups/`, before it is replaced.
 
 ## 5. Restart Claude Code
 
 Quit every running Claude Code session and start a new one, so it loads the
-commands, hooks, and agents that were just installed.
+commands that were just installed.
 
 ## 6. Verify the installation
 
@@ -88,9 +97,11 @@ commands, hooks, and agents that were just installed.
 ./install.sh verify
 ```
 
-This checks that the installed commands, agents, hooks, and portal assets are
-in place, and names exactly what to fix when something is missing. Do not
-continue until `verify` passes.
+This checks three things: the skills directory (`~/.claude/skills`) is in
+place, the portal config (`~/.jswarm/decision-review/config.json`) exists,
+and the jSwarm virtual environment's Python is present. It names exactly
+what to fix when one of them is missing. Do not continue until `verify`
+passes.
 
 ## 7. Adopt one application repository
 
@@ -150,10 +161,10 @@ process holds it and how to choose another; it never kills anything for you.
 
 - **`./install.sh unadopt <repo-path> [--dry-run]`** removes `.jswarm/`, the
   managed `CLAUDE.md` block, and jSwarm's hook entries from the project,
-  restoring the backup taken at adoption. Nothing you wrote yourself is
-  touched.
-- **`./install.sh upgrade [--dry-run]`** redeploys skills and hooks from a
-  newer jSwarm checkout and reports the version it moved from and to.
+  restoring `CLAUDE.md` and `.claude/settings.json` to their state from
+  before your first `adopt`. Nothing you wrote yourself is touched.
+- **`./install.sh upgrade [--dry-run]`** redeploys skills from a newer
+  jSwarm checkout and reports the version it moved from and to.
 - **`./install.sh uninstall [--keep-backups] [--dry-run]`** removes the
   deployed skills, `~/.jswarm/`, and the portal daemon. It lists any adopted
   repositories and leaves them alone, suggesting `unadopt` for each.
