@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.lsars.decision-review</string>
+    <string>com.jswarm.decision-review</string>
 
     <key>ProgramArguments</key>
     <array>

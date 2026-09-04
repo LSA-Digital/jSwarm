@@ -14,7 +14,7 @@ from jswarm.paths import jswarm_home
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_TEMPLATE = REPO_ROOT / "templates" / "decision-review" / "config.template.json"
-PLIST_TEMPLATE = REPO_ROOT / "templates" / "launchd" / "com.lsars.decision-review.plist.template"
+PLIST_TEMPLATE = REPO_ROOT / "templates" / "launchd" / "com.jswarm.decision-review.plist.template"
 
 
 def render(template: str, *, home: Path, common: Path, port_ui: int = 8765, port_backend: int = 8766) -> str:
