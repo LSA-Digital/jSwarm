@@ -6,12 +6,10 @@ Use this companion only for the next incomplete task in an admitted session.
    applicable test layer. Search existing coverage before changing it; perform
    practical RED -> minimal implementation -> GREEN work when the plan requires
    a behavior change.
-2. Route governance and delegation through
-   [`subagent-environment`](../subagent-environment/SKILL.md), tests through
-   [`/jTest`](../jTest/SKILL.md), and check-ins through
-   [`/jCheckin`](../jCheckin/SKILL.md). The jPlan rubric owns whether review
-   activates and its tier. Do not duplicate their long procedures or create
-   typed receipts.
+2. Route governance and delegation per your host's subagent-dispatch
+   conventions, and tests through [`/jTest`](../jTest/SKILL.md). The jPlan
+   rubric owns whether review activates and its tier. Do not duplicate their
+   long procedures or create typed receipts.
 3. Use the planned implementation lane and normal verification. For an
    unexpected defect or blocked environment, stop or use the existing `/jFix`
    route rather than inventing a fallback.

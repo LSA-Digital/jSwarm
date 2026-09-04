@@ -64,12 +64,6 @@ The following localized content applies only at the `phase-exit.md` seam:
 
 <!-- inject:component-attach-at-creation -->
 
-All jCheckin lifecycle telemetry is a direct, nonblocking write to the
-canonical `common/logs.jCheckin/` store. `/jGo` ensures the current checkout is
-enrolled and records its boundary event; project `jcheckin-*` files are
-read-only symlink views repaired as needed. If common is unavailable, report
-typed event loss and continue; do not create a project-local spool or mirror.
-
 After `session.md` returns executable context, repeat `task-cycle.md` for the
 current phase. When its tasks are accepted, route through `phase-exit.md`.
 In `--phased` mode, stop only after that complete transaction; in `--continuous`

@@ -15,12 +15,7 @@ executable context or one clear blocker; do not start a task here.
    reading. Gather the ticket, plan path, active phase, next incomplete task,
    A/C progress, selected `--phased` or `--continuous` mode, declared team,
    testing/UAT/E2E/NFR applicability, worktree facts, and status.
-4. At this lifecycle boundary, use `/jCheckin`'s public aggregate contract:
-   refresh plan-derived context only when its digest changes, invoke
-   `--lifecycle-boundary --caller jGo`, and record/warn/continue. It is
-   advisory and has no dispatch authority; `/jCheckin` owns evaluator wiring,
-   state, recovery, and outcomes.
-5. Before task work, run the read-only ColGREP lifecycle check. ColGREP is
+4. Before task work, run the read-only ColGREP lifecycle check. ColGREP is
    optional; an uninstalled or erroring check must never block the loop:
 
    ```bash
@@ -32,7 +27,7 @@ executable context or one clear blocker; do not start a task here.
    command itself failed to run. Surface a single advisory operator choice
    for ambiguous candidates; never auto-apply cleanup, and never block on
    this check.
-6. Only after admission succeeds, call the existing dashboard `started`
+5. Only after admission succeeds, call the existing dashboard `started`
    mechanism. Preserve the command's `dashboard-facts` contract and
    `implement_progress_contract`; append/fold/compose/check remains owned by
    the existing dashboard contract. Do not write legacy machine cells.
