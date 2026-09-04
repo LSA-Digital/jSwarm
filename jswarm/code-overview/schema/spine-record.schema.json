@@ -1,0 +1,484 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lsa.dev/schemas/code-overview/spine-record.schema.json",
+  "title": "code-overview seam-spine record envelope",
+  "description": "Generic (Layer A) schema for the code-overview v2 seam-spine JSONL. Each line is one typed record. This manifest is the single source of truth for required fields, per-record-type D-1 ID grammar (segment count + numeric-ordinal requirement), field type/enum constraints, cross-record graph-reference fields, and the schema-major migration policy; schema/__init__.py loads it at runtime instead of duplicating the shape in Python.",
+  "type": "object",
+  "required": ["record_type", "schema_version"],
+  "properties": {
+    "record_type": {
+      "type": "string",
+      "enum": [
+        "spine_metadata",
+        "seam",
+        "channel",
+        "edge",
+        "ui_surface",
+        "ui_fact_binding",
+        "reason_code",
+        "carrier_matrix_cell",
+        "path",
+        "path_step",
+        "join",
+        "anchor",
+        "trace_resolution_rule",
+        "trace_event",
+        "trace_observation_summary",
+        "freeze_entry"
+      ]
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "MAJOR.MINOR. Only the major version pinned by migration_policy.supported_major_version validates."
+    }
+  },
+  "id_grammar": {
+    "description": "D-1: PIPE-<TYPE_TOKEN>.<PROJECT>.<SUBSYSTEM_OR_KIND>.<CAPABILITY_OR_NAME>[.<NNN>]. Uppercase, dot-separated, ASCII, never reused. No version suffix (e.g. 'V1') is ever embedded in a record_id; lineage instead travels through legacy_ids[]/supersedes[]/superseded_by[]. Per S1.4, the 8 record types listed below additionally pin an exact segment count and whether the trailing .NNN numeric ordinal is mandatory; other record types are only bound by the generic shape_pattern/forbidden_segment_pattern below.",
+    "shape_pattern": "^PIPE-[A-Z][A-Z0-9]*(\\.[A-Z0-9_]+){3,4}$",
+    "forbidden_segment_pattern": "^[Vv][0-9]+$"
+  },
+  "migration_policy": {
+    "supported_major_version": "1",
+    "policy": "schema_version is MAJOR.MINOR. This validator's SUPPORTED_SCHEMA_MAJOR_VERSION enforces MAJOR must match; any record on another MAJOR is rejected with error code 'unsupported_schema_version' and exit_code 7 so producers fail loud instead of silently drifting. MINOR increments must stay additive/backward-compatible within a MAJOR (new optional fields only). Introducing a new MAJOR requires: (1) a new spine-record.schema.json revision documenting the new MAJOR's record shapes alongside this one; (2) a migration script that rewrites existing records onto the new MAJOR and records prior identity via legacy_ids[]/supersedes[]/superseded_by[] lineage fields, never via a version suffix baked into record_id; (3) a transition window where the old and new validator MAJORs both run (dual-validate) until every producer emits the new MAJOR, after which SUPPORTED_SCHEMA_MAJOR_VERSION advances and the old MAJOR is retired with a changelog entry."
+  },
+  "$defs": {
+    "spine_metadata": {
+      "id_token": null,
+      "id_field": "spine_id",
+      "required": [
+        "record_type",
+        "schema_version",
+        "spine_id",
+        "project",
+        "feature_parent",
+        "last_updated",
+        "last_updated_by",
+        "generated_from",
+        "coverage_summary",
+        "gap_summary"
+      ]
+    },
+    "seam": {
+      "id_token": "SEAM",
+      "id_field": "record_id",
+      "id_segment_count": 5,
+      "id_requires_numeric_ordinal": true,
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "name",
+        "subsystem",
+        "layer",
+        "capability",
+        "producer_anchor_ids",
+        "consumer_anchor_ids",
+        "channel_ids",
+        "path_ids",
+        "carrier_cell_ids",
+        "reason_code_ids",
+        "scenario_ids",
+        "test_refs",
+        "lifecycle_state"
+      ],
+      "ref_fields": {
+        "producer_anchor_ids": "list",
+        "consumer_anchor_ids": "list",
+        "channel_ids": "list",
+        "path_ids": "list",
+        "carrier_cell_ids": "list",
+        "reason_code_ids": "list",
+        "rule_ids": "list",
+        "trace_summary_id": "single"
+      }
+    },
+    "channel": {
+      "id_token": "CH",
+      "id_field": "record_id",
+      "id_segment_count": 4,
+      "id_requires_numeric_ordinal": false,
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "channel_kind",
+        "name",
+        "payload_schema_ref",
+        "producer_seam_ids",
+        "consumer_seam_ids",
+        "required_payload_keys",
+        "identity_keys"
+      ],
+      "fields": {
+        "channel_kind": {
+          "type": "string",
+          "enum": [
+            "workflow_outbox",
+            "preview_outbox",
+            "temporal_activity",
+            "session_snapshot",
+            "build_job_projection",
+            "durable_flags",
+            "sse",
+            "ui_state",
+            "file_artifact",
+            "database_row",
+            "function_return"
+          ]
+        }
+      },
+      "ref_fields": {
+        "producer_seam_ids": "list",
+        "consumer_seam_ids": "list"
+      }
+    },
+    "edge": {
+      "id_token": "EDGE",
+      "id_field": "record_id",
+      "id_segment_count": 5,
+      "id_requires_numeric_ordinal": true,
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "from_record_id",
+        "to_record_id",
+        "edge_kind",
+        "channel_id",
+        "anchor_ids",
+        "required"
+      ],
+      "fields": {
+        "required": { "type": "boolean" },
+        "edge_kind": {
+          "type": "string",
+          "enum": ["produces", "consumes", "projects", "emits", "subscribes", "renders", "gates", "calls", "persists"]
+        }
+      },
+      "ref_fields": {
+        "from_record_id": "single",
+        "to_record_id": "single",
+        "channel_id": "single",
+        "anchor_ids": "list"
+      }
+    },
+    "ui_surface": {
+      "id_token": "UI",
+      "id_field": "record_id",
+      "id_segment_count": 4,
+      "id_requires_numeric_ordinal": false,
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "surface_name",
+        "component_anchor_ids",
+        "fact_key",
+        "truth_source_channel_id",
+        "truth_rank",
+        "allowed_fallback_channel_ids",
+        "forbidden_fallbacks"
+      ],
+      "ref_fields": {
+        "component_anchor_ids": "list",
+        "truth_source_channel_id": "single",
+        "allowed_fallback_channel_ids": "list"
+      }
+    },
+    "ui_fact_binding": {
+      "id_token": "UIFACT",
+      "id_field": "record_id",
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "ui_surface_id",
+        "fact_key",
+        "truth_source_channel_id",
+        "allowed_truth_source_channel_ids",
+        "forbidden_truth_source_channel_ids",
+        "fallback_policy",
+        "authority_order_ref"
+      ],
+      "ref_fields": {
+        "ui_surface_id": "single",
+        "truth_source_channel_id": "single",
+        "allowed_truth_source_channel_ids": "list"
+      }
+    },
+    "reason_code": {
+      "id_token": "RC",
+      "id_field": "record_id",
+      "id_segment_count": 4,
+      "id_requires_numeric_ordinal": false,
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "code",
+        "seam_id",
+        "meaning",
+        "failure_family",
+        "retryable",
+        "terminal",
+        "user_action_hint_required"
+      ],
+      "fields": {
+        "retryable": { "type": "boolean" },
+        "terminal": { "type": "boolean" },
+        "user_action_hint_required": { "type": "boolean" }
+      },
+      "ref_fields": {
+        "seam_id": "single"
+      }
+    },
+    "carrier_matrix_cell": {
+      "id_token": "CELL",
+      "id_field": "record_id",
+      "id_segment_count": 4,
+      "id_requires_numeric_ordinal": false,
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "seam_id",
+        "carrier",
+        "state",
+        "rationale",
+        "owner"
+      ],
+      "fields": {
+        "carrier": {
+          "type": "string",
+          "enum": ["doc", "ref", "intent", "repo", "project_defined"]
+        },
+        "state": {
+          "type": "string",
+          "enum": ["active", "n_a", "legacy", "frozen", "planned", "unknown"]
+        }
+      },
+      "ref_fields": {
+        "seam_id": "single"
+      }
+    },
+    "path": {
+      "id_token": "PATH",
+      "id_field": "record_id",
+      "id_segment_count": 4,
+      "id_requires_numeric_ordinal": true,
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "path_kind",
+        "name",
+        "step_record_ids",
+        "scenario_ids",
+        "carrier_scope"
+      ],
+      "fields": {
+        "path_kind": {
+          "type": "string",
+          "enum": ["scenario", "pass_kind", "carrier_flow", "pm_impact", "trace_observed"]
+        }
+      },
+      "ref_fields": {
+        "step_record_ids": "list"
+      }
+    },
+    "path_step": {
+      "id_token": "STEP",
+      "id_field": "record_id",
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "path_id",
+        "order",
+        "seam_id",
+        "channel_id",
+        "expected_event"
+      ],
+      "fields": {
+        "order": { "type": "integer" }
+      },
+      "ref_fields": {
+        "path_id": "single",
+        "seam_id": "single",
+        "channel_id": "single"
+      }
+    },
+    "join": {
+      "id_token": "JOIN",
+      "id_field": "record_id",
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "from_type",
+        "from_id",
+        "to_type",
+        "to_id",
+        "join_kind",
+        "confidence"
+      ],
+      "fields": {
+        "confidence": {
+          "type": "string",
+          "enum": ["declared", "inferred", "observed"]
+        },
+        "join_kind": {
+          "type": "string",
+          "enum": ["scenario_to_path", "path_to_seam", "seam_to_test", "seam_to_ui", "seam_to_trace", "seam_to_debt"]
+        }
+      },
+      "ref_fields": {
+        "from_id": "single",
+        "to_id": "single"
+      }
+    },
+    "anchor": {
+      "id_token": "ANCHOR",
+      "id_field": "record_id",
+      "id_segment_count": 5,
+      "id_requires_numeric_ordinal": true,
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "target_kind",
+        "file_path",
+        "line_start",
+        "line_end",
+        "symbol_name",
+        "semantic_hint",
+        "anchor_state"
+      ],
+      "fields": {
+        "line_start": { "type": "integer" },
+        "line_end": { "type": "integer" },
+        "anchor_state": {
+          "type": "string",
+          "enum": ["verified", "auto_relocated", "needs_reselect", "deleted_or_unresolvable", "ambiguous"]
+        },
+        "target_kind": {
+          "type": "string",
+          "enum": ["python_symbol", "ts_symbol", "file", "test", "ui_component", "db_model", "event_type", "doc_section"]
+        }
+      }
+    },
+    "trace_resolution_rule": {
+      "id_token": "TRACERULE",
+      "id_field": "record_id",
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "match",
+        "target_seam_id",
+        "source",
+        "confidence",
+        "ambiguity_policy",
+        "carrier_extractors"
+      ],
+      "fields": {
+        "confidence": {
+          "type": "string",
+          "enum": ["declared", "inferred", "observed"]
+        }
+      },
+      "ref_fields": {
+        "target_seam_id": "single"
+      }
+    },
+    "trace_event": {
+      "id_token": "TRACE",
+      "id_field": "record_id",
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "seam_id",
+        "source",
+        "event_type",
+        "timestamp",
+        "run_id",
+        "status",
+        "resolution_status"
+      ],
+      "ref_fields": {
+        "seam_id": "single",
+        "channel_id": "single",
+        "resolution_rule_id": "single",
+        "producer_anchor_id": "single",
+        "consumer_anchor_id": "single",
+        "resolved_edge_id": "single"
+      }
+    },
+    "trace_observation_summary": {
+      "id_token": "TRACESUMMARY",
+      "id_field": "record_id",
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "seam_id",
+        "observed_count",
+        "failed_count",
+        "unpaired_count",
+        "dropped_count",
+        "last_observed_run_id",
+        "source_types"
+      ],
+      "fields": {
+        "observed_count": { "type": "integer" },
+        "failed_count": { "type": "integer" },
+        "unpaired_count": { "type": "integer" },
+        "dropped_count": { "type": "integer" }
+      },
+      "ref_fields": {
+        "seam_id": "single",
+        "observed_edge_ids": "list"
+      }
+    },
+    "freeze_entry": {
+      "id_token": "FREEZE",
+      "id_field": "record_id",
+      "required": [
+        "record_id",
+        "record_type",
+        "record_status",
+        "schema_version",
+        "applies_to_record_id",
+        "audit_name",
+        "frozen_violation_signature",
+        "frozen_by",
+        "frozen_at",
+        "rationale",
+        "sunset_condition",
+        "new_violations_blocked"
+      ],
+      "fields": {
+        "new_violations_blocked": { "type": "boolean" }
+      },
+      "ref_fields": {
+        "applies_to_record_id": "single"
+      }
+    }
+  }
+}

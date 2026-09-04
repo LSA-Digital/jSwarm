@@ -19,7 +19,7 @@ from pathlib import Path
 # repo under test). Engine scripts and the interpreter are resolved relative to this, so the
 # wrapper is location-correct no matter which project's plans it is pointed at via --repo-root.
 _TOOL_ROOT = Path(__file__).resolve().parents[2]
-_SCRIPTS_DIR = str(_TOOL_ROOT / "scripts")
+_SCRIPTS_DIR = str(_TOOL_ROOT / "jswarm")
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
@@ -72,7 +72,7 @@ def _section_argv(section: str, *, repo_root: Path, ticket: str, date: str | Non
     py = _tool_python()
 
     def script(rel: str) -> str:
-        return str(_TOOL_ROOT / "scripts" / rel)
+        return str(_TOOL_ROOT / "jswarm" / rel)
 
     if section == "migrate":
         return [py, script("precompact_reconcile/migrate_cli.py"), "--ticket", ticket, "--repo-root", str(repo_root)]

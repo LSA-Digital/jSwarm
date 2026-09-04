@@ -284,7 +284,7 @@ def build_to(build_manifest_path: Path, out_dir: Path, work_dir: Path) -> None:
 
 # COM-398: the portal's canonical dist location (matches
 # deploy/decision-review/config.template.json's "dist_dir").
-DEFAULT_PORTAL_DIST_DIR = REPO_ROOT / "scripts" / "fix_decisions" / "dist"
+DEFAULT_PORTAL_DIST_DIR = REPO_ROOT / "jswarm" / "portal" / "dist"
 
 
 def main(argv=None) -> int:

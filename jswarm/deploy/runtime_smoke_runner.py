@@ -755,7 +755,7 @@ def render_injection_probe(plan: ProbePlan) -> str:
     proc = subprocess.run(
         [
             sys.executable,
-            str(_REPO_ROOT / "scripts" / "devops_command_injection.py"),
+            str(_REPO_ROOT / "jswarm" / "devops_command_injection.py"),
             "render-file",
             "--source-file",
             str(plan.live_probe_target),

@@ -1,10 +1,16 @@
 """Generic COM-108 compliance sink sanitizer.
 
-This module intentionally reuses the COM-112 finding secret/PII regex tuple by
-identity so every COM-108 sink has the same fail-closed leak boundary as the
-shipped substrate.  COM-108 also owns a local generic publish-sink hardening
-layer for common key-like tokens; the upstream COM-112 substrate patterns remain
-consume-only for this phase.
+Upstream (common) also reuses the COM-112 finding secret/PII regex tuple
+(``compliance/substrate/findings.py``) here by identity. That substrate is an
+internal compliance-controls governance/reporting system (event log, dimension
+taxonomy, schema validation against its own internal docs) and is not part of
+this repository. This public copy carries only its own local generic
+publish-sink hardening layer below -- PEM keys, host-local paths, and a
+comprehensive key-like-token set (GitHub/GitLab/Slack/npm/PyPI/AWS/Bearer/
+generic secret-assignment patterns, the same family jswarm/leakgate.yaml
+already declares) -- which was always meant to stand on its own, not
+substitute for the substrate tuple. The redaction boundary here is narrower
+than upstream's by that one tuple's worth of additional detectors, not absent.
 """
 from __future__ import annotations
 
@@ -12,10 +18,9 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-try:  # package import when called as jswarm.compliance.*
-    from .substrate.findings import _SECRET_PATTERNS
-except ImportError:  # top-level import used by legacy jswarm/tests
-    from substrate.findings import _SECRET_PATTERNS  # type: ignore[no-redef]
+# COM-112 substrate.findings._SECRET_PATTERNS deliberately not carried here --
+# see the module docstring above.
+_SECRET_PATTERNS: tuple[re.Pattern[str], ...] = ()
 
 _REDACTION_MARKER = "[REDACTED]"
 _PEM_PRIVATE_KEY_BLOCK_PATTERN = re.compile(

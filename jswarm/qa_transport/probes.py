@@ -138,7 +138,7 @@ def probe_harness_cli(
         if manifest.exists():
             command = _preflight_command_from_manifest(manifest)
     if command is None:
-        conventional = project_root / "scripts" / "agent-e2e.sh"
+        conventional = project_root / "jswarm" / "agent-e2e.sh"
         if conventional.exists():
             command = [str(conventional), "preflight"]
     if command is None:
