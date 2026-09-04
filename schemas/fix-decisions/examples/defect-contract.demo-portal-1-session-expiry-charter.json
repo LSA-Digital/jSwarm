@@ -1,0 +1,143 @@
+{
+  "schema": "jswarm.fix-decisions.defect-contract/v1",
+  "schema_version": "1.0",
+  "document_type": "defect-contract",
+  "contract_id": "DEMO-PORTAL-1-defect-1",
+  "ticket": "DEMO-PORTAL-1",
+  "cycle_key": "cycle-1",
+  "contract_version": "v1",
+  "contract_slug": "session-expiry-charter",
+  "issued_by": "portal-example-fixture",
+  "issued_at": "2026-09-01T00:00:00Z",
+  "invocation_origin": "jswarm.portal example fixture (shipped so the UAT/FIX portal has real data to build against on a fresh clone)",
+  "source_path": ".jswarm/plans/DEMO-PORTAL-1/decision-reviews/DEMO-PORTAL-1.defect-contract.charter.json",
+  "provenance": {
+    "conversion": "native"
+  },
+  "parent_contracts": [],
+  "evidence_refs": [
+    {
+      "ref": "session-expiry-repro.log",
+      "locator": "support/tickets/DEMO-PORTAL-1/session-expiry-repro.log"
+    }
+  ],
+  "intent": "scope-authorizing",
+  "contract_status": "approved",
+  "gate_kind": "defect-contract-scope",
+  "gate_mode": "owner-authorized",
+  "required_approval_vocabulary": "APPROVED: DEMO-PORTAL-1 defect scope",
+  "repair_authority": "none",
+  "revision_policy": {
+    "approval_behavior": "owner-stop-for-this-exact-path-and-reported-sha256",
+    "digest_discipline": "every-revision-new-digest",
+    "within_scope_revisions": "auto-included-without-owner-stop",
+    "scope_widening_rule": "returns-to-owner-before-issuance"
+  },
+  "decision": "Charter the session-expiry defect for repair; the fix contract below is authorized against it.",
+  "summary": [
+    "Signed-in users are logged out roughly one minute earlier than the session's advertised lifetime.",
+    "Root cause: the expiry check compares against server-received time instead of the token's own issued-at claim, so ordinary clock skew between the token issuer and the session host is charged twice."
+  ],
+  "pm_view": [
+    {
+      "anchor": "why this matters",
+      "quote": "Customers are being signed out mid-task with no warning, and the support queue is filling with 'I just typed my password 5 minutes ago' tickets."
+    }
+  ],
+  "terminal_outcome": {
+    "statement": "A session issued with a given Max-Age lasts that long, regardless of ordinary clock skew between the issuer and the session host.",
+    "bullets": [
+      "The expiry check is anchored to the token's own issued-at claim, not to server receive time.",
+      "A skew of up to 5 seconds between issuer and host no longer shortens the effective session."
+    ]
+  },
+  "pm_anchor_map": [
+    {
+      "technical_sections": [
+        "s1-root-cause"
+      ],
+      "controlling_sentence": "The expiry check anchors to received_at instead of the token's own issued_at claim.",
+      "how_it_serves": "Names the exact comparison a repair must change, so the fix contract's scope is unambiguous."
+    }
+  ],
+  "scope": {
+    "in_scope": [
+      {
+        "item": "Session expiry calculation in the auth middleware.",
+        "reason": "Direct cause of the reported early logout."
+      }
+    ],
+    "out_of_scope": [
+      {
+        "item": "Rewriting the session token format.",
+        "reason": "Not needed to fix the expiry calculation; would widen the change far beyond the reported defect."
+      }
+    ]
+  },
+  "defects": [
+    {
+      "key": "DEF-1",
+      "conviction": "Confirmed by reproduction: a session with Max-Age=3600 issued at T is rejected as expired at T+3540, consistently, across three independent sessions.",
+      "preliminary_scope_analysis": {
+        "disposition": "in-scope"
+      }
+    }
+  ],
+  "flow": {
+    "representation": "text-diagram",
+    "body": "issue token(issued_at=T, max_age=3600) -> host receives at T+delta -> host computes expiry = received_at + max_age instead of issued_at + max_age -> session appears to expire delta seconds early"
+  },
+  "risks": [
+    {
+      "priority": "P2",
+      "risk": "Widening the fix to touch token issuance as well as validation could change the token format for other consumers.",
+      "impact": "Would require a coordinated rollout instead of a single-service fix.",
+      "guardrail": "Repair authority is scoped to the validation-side expiry calculation only; see out_of_scope_boundaries."
+    }
+  ],
+  "cost_timeline": {
+    "text": "Small, single-file change; verified locally in under a day once charted."
+  },
+  "detail_refs": [
+    {
+      "ref": "auth/middleware/session_expiry.py",
+      "locator": "expiry calculation"
+    }
+  ],
+  "sections": [
+    {
+      "section_id": "s1-root-cause",
+      "title": "Root cause",
+      "body": "The expiry check anchors to `received_at` (server receive time) instead of the token's own `issued_at` claim, so ordinary clock skew between issuer and host is charged against the user's session lifetime twice: once implicitly at issuance, and again at every validation."
+    },
+    {
+      "section_id": "s2-reproduction",
+      "title": "Reproduction",
+      "body": "Issue a session with Max-Age=3600 from a host whose clock reads 60 seconds ahead of the validating host. The session is rejected as expired at T+3540 instead of T+3600, on every request, not intermittently."
+    }
+  ],
+  "uat_route": "Sign in, wait until shortly before the advertised session lifetime elapses, and confirm the session is still valid at that point.",
+  "vendor_policy": "No third-party or vendor code is touched by this defect; the expiry calculation is first-party.",
+  "accepted_user_outcome": {
+    "statement": "A user who is told their session lasts an hour gets the full hour, not 59 minutes."
+  },
+  "out_of_scope_boundaries": [
+    {
+      "boundary": "Token issuance format and claims.",
+      "reason": "The defect is in validation-side expiry math, not in what the token carries."
+    }
+  ],
+  "probe_constraints": [
+    {
+      "constraint": "Any fix must not require re-issuing already-active sessions."
+    }
+  ],
+  "conviction_state": {
+    "summary": "Reproduced deterministically across three sessions with a fixed clock-skew rig; root cause isolated to a single comparison in the expiry check.",
+    "evidence_refs": [
+      "session-expiry-repro.log"
+    ]
+  },
+  "fix_settings_path": ".jswarm/plans/DEMO-PORTAL-1/.fix-settings.yaml",
+  "fix_settings_sha256": "0b79110816474011bda630c863c9b7b96fecea7af6d859a226decbe260ba523b"
+}

@@ -1,0 +1,204 @@
+# Contract Review — {{ vm.identity.cycle_key }} · {{ vm.identity.document_type }} {{ vm.identity.contract_version }}
+
+## 1. Identity
+
+| Field | Value |
+| --- | --- |
+| Contract ID | {{ vm.identity.contract_id | escape_cell }} |
+| Ticket | {{ vm.identity.ticket | escape_cell }} |
+| Status | {{ vm.identity.contract_status | escape_cell }} |
+| Gate | {{ vm.identity.gate_kind | escape_cell }} ({{ vm.identity.gate_mode | escape_cell }}) |
+| Schema | {{ vm.identity.schema }} v{{ vm.identity.schema_version }} |
+| Canonical path | {{ vm.identity.canonical_path | escape_cell }} |
+| SHA-256 | {{ vm.identity.sha256 }} |
+| Issued by | {{ vm.identity.issued_by | escape_cell }} |
+| Issued at | {{ vm.identity.issued_at }} |
+
+## 2. Decision
+
+{{ vm.decision }}
+
+## 3. Summary
+
+{% for line in vm.summary -%}
+- {{ line }}
+{% endfor %}
+
+## 4. Scope
+
+| In scope | Out of scope |
+| --- | --- |
+{% for row in vm.scope_rows -%}
+| {{ row.in_scope | escape_cell }} | {{ row.out_of_scope | escape_cell }} |
+{% endfor %}
+
+## 5. Defects
+
+{% for defect in vm.defects -%}
+### {{ defect.key }}
+
+- Conviction: {{ defect.conviction }}
+{% if defect.authorization -%}
+- Authorization: {{ defect.authorization }}
+{% endif -%}
+{% if defect.fixed_means -%}
+- Fixed means: {{ defect.fixed_means }}
+{% endif %}
+{% endfor -%}
+{% if vm.authorized_defects %}
+### Authorized for repair
+
+{% for leg in vm.authorized_defects -%}
+- {{ leg.key }}: parent scope trace `{{ leg.parent_scope_trace.get('defect_contract', '') }}#{{ leg.parent_scope_trace.get('defect_key', '') }}` ({{ leg.parent_scope_trace.get('disposition', '') }})
+{% endfor %}
+{% endif %}
+## 6. Flow
+
+Representation: {{ vm.flow.representation }}
+
+{% if vm.flow.body -%}
+```
+{{ vm.flow.body }}
+```
+{% endif %}
+
+## 7. Risks
+
+{% if vm.risks -%}
+| Priority | Risk | Impact | Guardrail |
+| --- | --- | --- | --- |
+{% for risk in vm.risks -%}
+| {{ risk.priority | escape_cell }} | {{ risk.risk | escape_cell }} | {{ risk.impact | escape_cell }} | {{ risk.guardrail | escape_cell }} |
+{% endfor -%}
+{% else -%}
+_None recorded._
+{% endif %}
+
+## 8. Cost / timeline
+
+{{ vm.cost_timeline }}
+{% for paragraph in vm.cost_paragraphs %}
+{{ paragraph }}
+{% endfor %}
+
+## 9. Terminal outcome
+
+{{ vm.terminal_outcome }}
+
+{% for bullet in vm.terminal_bullets -%}
+- {{ bullet }}
+{% endfor -%}
+{% if vm.incompleteness_guardrails %}
+A repair is incomplete if it only:
+
+{% for guardrail in vm.incompleteness_guardrails -%}
+- {{ guardrail }}
+{% endfor %}
+{% endif %}
+{% if vm.must_still_work %}
+### Must still work
+
+{% for item in vm.must_still_work -%}
+- {{ item }}
+{% endfor %}
+{% endif %}
+## 10. PM view
+
+{% for item in vm.pm_view -%}
+> {{ item.quote }}
+>
+> — {{ item.anchor }}
+
+{% endfor -%}
+{% if vm.pm_anchor_map %}
+### PM anchor map
+
+| Technical sections | Controlling sentence | How it serves |
+| --- | --- | --- |
+{% for anchor in vm.pm_anchor_map -%}
+| {{ anchor.technical_sections | join(", ") | escape_cell }} | {{ anchor.controlling_sentence | escape_cell }} | {{ anchor.how_it_serves | escape_cell }} |
+{% endfor %}
+{% endif %}
+## 11. Gate
+
+| Field | Value |
+| --- | --- |
+| Intent | {{ vm.gate.intent | escape_cell }} |
+| Repair authority | {{ vm.gate.repair_authority | escape_cell }} |
+| Required approval vocabulary | {{ vm.gate.required_approval_vocabulary | escape_cell }} |
+| First repair-authorizing | {{ vm.gate.first_repair_authorizing }} |
+| Fix settings path | {{ vm.gate.fix_settings_path | escape_cell }} |
+| Fix settings SHA-256 | {{ vm.gate.fix_settings_sha256 }} |
+
+{% if vm.revision_policy_rows -%}
+### Revision policy
+
+| Field | Value |
+| --- | --- |
+{% for key, value in vm.revision_policy_rows -%}
+| {{ key | escape_cell }} | {{ value | escape_cell }} |
+{% endfor %}
+{% endif %}
+{% if "accepted_user_outcome" in vm %}
+## 12. Accepted user outcome
+
+{{ vm.accepted_user_outcome.get("statement", "") }}
+
+{% for bullet in vm.accepted_user_outcome.get("bullets", []) -%}
+- {{ bullet }}
+{% endfor %}
+{% endif -%}
+{% if "conviction_state" in vm %}
+## 13. Conviction state
+
+{{ vm.conviction_state.get("summary", "") }}
+
+{% for ref in vm.conviction_state.get("evidence_refs", []) -%}
+- {{ ref }}
+{% endfor %}
+{% endif -%}
+{% if "out_of_scope_boundaries" in vm %}
+## 14. Out-of-scope boundaries
+
+{% for boundary in vm.out_of_scope_boundaries -%}
+- {{ boundary.boundary }}: {{ boundary.reason }}
+{% endfor %}
+{% endif -%}
+{% if "probe_constraints" in vm %}
+## 15. Probe constraints
+
+{% for constraint in vm.probe_constraints -%}
+- {{ constraint }}
+{% endfor %}
+{% endif %}
+## 16. Detail references
+
+{% for ref in vm.detail_refs -%}
+- `{{ ref.ref }}`{% if ref.locator %} — {{ ref.locator }}{% endif %}{% if ref.label %} ({{ ref.label }}){% endif %}
+{% endfor -%}
+{% if vm.evidence_refs %}
+### Evidence references
+
+{% for ref in vm.evidence_refs -%}
+- `{{ ref.ref }}`{% if ref.locator %} — {{ ref.locator }}{% endif %}{% if ref.description %}: {{ ref.description }}{% endif %}
+{% endfor %}
+{% endif %}
+{% if vm.parent_contracts %}
+## 17. Parent contracts
+
+{% for parent in vm.parent_contracts -%}
+- `{{ parent.path }}` ({{ parent.relation }}) — {{ parent.sha256 }}
+{% endfor %}
+{% endif %}
+## 18. Full contract body
+
+{% for section in vm.sections_recursive %}
+### {{ section.number }}. {{ section.title }} {{ "{#" }}{{ section.section_id }}}
+
+{{ section.body }}
+{% for sub in section.subsections %}
+#### {{ sub.number }}. {{ sub.title }} {{ "{#" }}{{ sub.section_id }}}
+
+{{ sub.body }}
+{% endfor %}
+{% endfor %}
