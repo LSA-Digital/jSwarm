@@ -3,7 +3,7 @@
 
 The **parent ticket orchestrator** owns this Monitor. The PREP-only `jTestEngineer` does not own or arm it: `/jTest uat prepare` is PREP-only and may exit before the owner acts.
 
-After prepare returns all three owner-ready predicates — `ISSUED`, `OWNER-MAY-WALK: yes`, and `invitation=True` — arm the Monitor immediately and **before sending the Option 4 owner invitation**. Option 4 owns composing and sending that invitation; do not treat a prepared round alone as an armed runtime task. If you skip arming, an owner submission cannot wake this idle session; only boundary discovery can find it later, so the owner must send a message or otherwise re-enter the workflow to tell you that feedback exists.
+After prepare returns all three owner-ready predicates (`ISSUED`, `OWNER-MAY-WALK: yes`, and `invitation=True`), arm the Monitor immediately and **before sending the Option 4 owner invitation**. Option 4 owns composing and sending that invitation; do not treat a prepared round alone as an armed runtime task. If you skip arming, an owner submission cannot wake this idle session; only boundary discovery can find it later, so the owner must send a message or otherwise re-enter the workflow to tell you that feedback exists.
 
 This procedure does not define result vocabulary, entry cells, aliases, or
 aggregate verdicts. Use the deployed [feedback result contract](feedback-result-contract.json)
@@ -41,9 +41,9 @@ The canonical wake surface is `.jswarm/plans/<TICKET>/form-events/<key>/events.n
 
 An explicit owner submit appends one immutable `feedback.send` row to `events.ndjson` using append-and-fsync. That append is the signal. The supplied `registration["notify_command"]` already runs `jswarm.portal.form_events watch`, which polls this event log for pending `feedback.send` events and emits one non-consuming pending signal per event for `Monitor` to stream. Do not build a second file watcher or substitute the feedback document as the source.
 
-> **WARNING — feedback projection fill-in-place trap:** The v2 feedback `.md` is pre-materialized with its entry blocks. Owner submissions fill or replace those existing blocks in the projection; they do not append the submit event to that document. A watcher keyed on the feedback file growing, or on its mtime as a proxy for “new feedback”, will never fire for the canonical submission signal. Watch the `events.ndjson` log via the supplied `notify_command` instead.
+> **WARNING: feedback projection fill-in-place trap:** The v2 feedback `.md` is pre-materialized with its entry blocks. Owner submissions fill or replace those existing blocks in the projection; they do not append the submit event to that document. A watcher keyed on the feedback file growing, or on its mtime as a proxy for “new feedback”, will never fire for the canonical submission signal. Watch the `events.ndjson` log via the supplied `notify_command` instead.
 
-> **WARNING — persistent watcher versus one-shot discovery:** The persistent Monitor command must **not** carry `--once`. Use `registration["notify_command"]` verbatim for the persistent watcher; `--once` belongs only to `registration["notify_once_command"]` for one-shot boundary discovery. If a Monitor exits immediately with no output, the wrong one-shot form was armed — it does **not** mean that the queue is empty, and that Monitor cannot wake later.
+> **WARNING: persistent watcher versus one-shot discovery:** The persistent Monitor command must **not** carry `--once`. Use `registration["notify_command"]` verbatim for the persistent watcher; `--once` belongs only to `registration["notify_once_command"]` for one-shot boundary discovery. If a Monitor exits immediately with no output, the wrong one-shot form was armed: it does **not** mean that the queue is empty, and that Monitor cannot wake later.
 
 `persistent: true` keeps the Monitor alive while this owning session is idle; `timeout_ms: 300000` is the standard Monitor value and is ignored for a persistent task. Keep the returned task id in **ephemeral session execution context only**. Never persist it as proof of a live watcher, and never trust or treat a persisted task id as live in a later session.
 
@@ -63,7 +63,7 @@ When the Monitor emits a signal, follow these steps in order. A signal is only a
    )
    ```
 
-   Construct the resolver from the validated active-round source. `parse_active_round_source` accepts the registration dictionary, approved roots as `Path` objects, and an optional contract size limit. `canonical_feedback_digest_resolver` requires that validated source and a **keyword-only, required** `size_limit` — it has no default:
+   Construct the resolver from the validated active-round source. `parse_active_round_source` accepts the registration dictionary, approved roots as `Path` objects, and an optional contract size limit. `canonical_feedback_digest_resolver` requires that validated source and a **keyword-only, required** `size_limit`. It has no default:
 
    ```python
    from pathlib import Path

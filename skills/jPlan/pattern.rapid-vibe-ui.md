@@ -4,8 +4,8 @@ Owner-approved opt-in for a Story/Task/Bug that refines an existing UI through r
 
 ## Header lines
 
-**Rapid vibe UI:** on — QUICK plan plus living per-item browser contracts; no speculative defect A/C
-**Living contracts:** [.jswarm/plans/<TICKET>/<TICKET>.uat-scenarios.md](<TICKET>/<TICKET>.uat-scenarios.md) — authoritative delivery and acceptance record
+**Rapid vibe UI:** on (QUICK plan plus living per-item browser contracts; no speculative defect A/C)
+**Living contracts:** [.jswarm/plans/<TICKET>/<TICKET>.uat-scenarios.md](<TICKET>/<TICKET>.uat-scenarios.md) (authoritative delivery and acceptance record)
 
 ## Plan sections
 
@@ -30,14 +30,14 @@ Amendments are first-class evidence: append the date, prior wording, revised wor
 1. Append the reported contract as `OPEN`.
 2. Assign concurrent lanes only across disjoint file sets. Any cross-cutting token/theme/shared-ancestor change runs alone.
 3. Implement the smallest fix and verify it in a real browser. Geometry and rendered-style claims use `getBoundingClientRect()` / `getComputedStyle()`, never jsdom. Every contrast result names both measured colours and the ratio.
-4. Report every owner check as a table — never bare IDs: `ID | what changed | what to check in the browser | status | commit`.
+4. Report every owner check as a table, never bare IDs: `ID | what changed | what to check in the browser | status | commit`.
 5. Ask for immediate per-item acceptance. On acceptance, record `ACCEPTED`, commit, and date. On rejection, record `REJECTED`, append the amendment, return it to `OPEN`, and repeat.
 
 ### Final combined walkthrough and close reconciliation
 
 After all individual items are terminal, add one numbered, continuous browser journey to the living-contracts file, ordered to expose inter-fix conflicts. Individual acceptance does not substitute for this walkthrough; record its owner acceptance date separately.
 
-Reconcile at every `/jPrecompact` and immediately before `/jClose`: derive the plan's single closure A/C from the living file rather than duplicating item state. Mark it complete only when no item remains `OPEN`, `READY_FOR_OWNER`, or `REJECTED`; every deferral names its destination ticket; and the combined walkthrough is accepted. Then record the normal lifecycle transition through the canonical plan-status command—never hand-edit derived frontmatter. This keeps the close gate's plan A/C count truthful while the living file remains the detailed source of record.
+Reconcile at every `/jPrecompact` and immediately before `/jClose`: derive the plan's single closure A/C from the living file rather than duplicating item state. Mark it complete only when no item remains `OPEN`, `READY_FOR_OWNER`, or `REJECTED`; every deferral names its destination ticket; and the combined walkthrough is accepted. Then record the normal lifecycle transition through the canonical plan-status command. Never hand-edit derived frontmatter. This keeps the close gate's plan A/C count truthful while the living file remains the detailed source of record.
 
 ## Rules
 
