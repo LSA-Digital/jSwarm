@@ -1,7 +1,7 @@
-"""COM-84 plan-status state machine — canonical vocabulary + transition rules.
+"""plan-status state machine — canonical vocabulary + transition rules.
 
-Authoritative design: docs/plans/COM-84.specs.md (Transition Matrix, Oracle Concern #2).
-Decisions: docs/plans/evidence/COM-84/00-decisions.md (D3 states, D4 merge mapping).
+Authoritative design: docs/plans/TICKET-XXX.specs.md (Transition Matrix, Oracle Concern #2).
+Decisions: docs/plans/evidence/TICKET-XXX/00-decisions.md (D3 states, D4 merge mapping).
 
 A `plan_status` value is the canonical lifecycle state of a plan. Story/Task/Bug
 plans carry one of the values below; Feature plans carry a derived high-level value
@@ -94,7 +94,7 @@ def is_valid_state(state: str) -> bool:
 
 
 # Transition matrix keyed by (from_category, to_category) -> classification.
-# Mirrors docs/plans/COM-84.specs.md § Transition Matrix exactly.
+# Mirrors docs/plans/TICKET-XXX.specs.md § Transition Matrix exactly.
 # Same-category (from == to) is resolved separately: identical string -> idempotent,
 # differing string within IMPL (phase advance) -> allowed.
 _MATRIX: dict[tuple[str, str], Classification] = {}
@@ -203,7 +203,7 @@ def derive_merge_status(plan_status: str) -> str:
 
 def binds_session_hud(plan_status: str) -> bool:
     """True ONLY for active-work implementation states (3.implementation.*), which
-    legitimately bind the live terminal's HUD to this ticket (COM-174 Phase 6).
+    legitimately bind the live terminal's HUD to this ticket (Phase 6).
 
     Creation/planning-seed states (0/1/2.*) and closeout/terminal states
     (4/5/6, wont_do, deferred) do NOT auto-bind — so a /jPlan ticket-creation
@@ -243,13 +243,13 @@ def is_terminal(state: str) -> bool:
     return category_of(state) in _TERMINAL_CATS
 
 
-# --- COM-138: derived frontmatter fields (phase, ac_complete) ----------------
+# --- Derived frontmatter fields (phase, ac_complete) ----------------
 #
 # These are PURE plan-body/plan_status parsing helpers (no registry, no IO). They
 # live beside derive_merge_status because, like ``status:``, the new ``phase:`` and
 # ``ac_complete:`` frontmatter fields are DERIVED projections — never hand-authored
 # source of truth. Callers (reconcile.normalize_plan_file) apply the §6.0 guard:
-# derive_phase is only meaningful for COM-84-valid, non-null states.
+# derive_phase is only meaningful for valid, non-null states.
 
 #: Stage label for non-implementation valid states (spec §6.1). Implementation
 #: states are handled by the phase regex below, not this map.

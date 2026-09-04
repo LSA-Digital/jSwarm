@@ -1,4 +1,4 @@
-"""COM-167 AC-16 — /jPrecompact AUTO-MIGRATION: make a legacy ticket self-heal to current
+"""AC-16 — /jPrecompact AUTO-MIGRATION: make a legacy ticket self-heal to current
 lifecycle asset standards, so /jPrecompact never has to "figure anything out".
 
 Run FIRST in /jPrecompact Surface 2 (Step 2.0a, before the AC-11 rebuild). Idempotently:
@@ -50,12 +50,12 @@ _KIND = {
     "uat": (_UAT_MATRIX, _UAT_INDEX_HEADING, "UAT scenarios"),
     "test": (_TEST_MATRIX, _TEST_INDEX_HEADING, "regression tests"),
 }
-_SEED_NOTE = ("> Seeded from the plan matrix by /jPrecompact migrate (COM-167 AC-16) — edit "
+_SEED_NOTE = ("> Seeded from the plan matrix by /jPrecompact migrate (AC-16) — edit "
               "HERE; /jPrecompact rebuilds the matrix from this index. A cell must not contain "
               "a literal/escaped `|`.")
-_SECTION_NOTE = ("> Added by /jPrecompact migrate (COM-167 AC-16); rows are rebuilt from the "
+_SECTION_NOTE = ("> Added by /jPrecompact migrate (AC-16); rows are rebuilt from the "
                  "slice index.")
-_STARTER_NOTE = ("> Scaffolded by /jPrecompact migrate (COM-167 AC-17) because the plan declares "
+_STARTER_NOTE = ("> Scaffolded by /jPrecompact migrate (AC-17) because the plan declares "
                  "this dimension applicable. Add one row per {unit} below — then /jPrecompact "
                  "rebuilds the plan matrix + refreshes the HUD. See "
                  "docs/agent-system/upgrade-existing-ticket.md.")
@@ -217,7 +217,7 @@ def migrate_text(plan_text: str, *, uat_slice_text: str | None,
             width = len(header) - 1
             # The source matrix must be canonical: the right column COUNT and a trailing
             # ``Status`` column. This catches a header missing Status (which would otherwise
-            # drop a real data column into the index). Column LABELS may vary (e.g. HAS-497's
+            # drop a real data column into the index). Column LABELS may vary (e.g.
             # "Test / Evidence" vs the template's "Test(s) / Evidence") — only count + the
             # Status anchor are enforced.
             expected_cols = len(_MATRIX_COLUMNS[kind])
@@ -239,7 +239,7 @@ def migrate_text(plan_text: str, *, uat_slice_text: str | None,
             section = _seed_index_section(index_heading, header, candidate)
             if slice_text is None:
                 slices[kind] = (f"# {key}: ticket-local {label} "
-                                f"(migrated by /jPrecompact — COM-167 AC-16)\n\n{section}")
+                                f"(migrated by /jPrecompact — AC-16)\n\n{section}")
             else:
                 slices[kind] = slice_text.rstrip("\n") + "\n\n" + section
             report[f"{kind}_seeded"] = True
@@ -249,7 +249,7 @@ def migrate_text(plan_text: str, *, uat_slice_text: str | None,
         elif (kind != "test" and not has_index and (matrix is None or not matrix[1])
               and _is_applicable(plan_text, kind)):
             # AC-17 SCAFFOLD: a declared-applicable ticket with NEITHER matrix rows NOR a slice
-            # index (e.g. COM-141) — create the empty structure so it self-heals to current
+            # index (e.g. a legacy ticket) — create the empty structure so it self-heals to current
             # standards; the agent then authors the rows. (Applicability is read, never guessed.)
             if matrix is None:
                 new_plan = _ensure_matrix_section(new_plan, matrix_heading, _MATRIX_COLUMNS[kind], kind)
@@ -257,7 +257,7 @@ def migrate_text(plan_text: str, *, uat_slice_text: str | None,
             starter = _starter_index_section(index_heading, _MATRIX_COLUMNS[kind], kind)
             if slice_text is None:
                 slices[kind] = (f"# {key}: ticket-local {label} "
-                                f"(scaffolded by /jPrecompact — COM-167 AC-17)\n\n{starter}")
+                                f"(scaffolded by /jPrecompact — AC-17)\n\n{starter}")
             else:
                 slices[kind] = slice_text.rstrip("\n") + "\n\n" + starter
             report[f"{kind}_scaffolded"] = True

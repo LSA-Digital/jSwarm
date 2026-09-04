@@ -69,14 +69,14 @@ def _norm_id(cell: str) -> str:
 
     Result docs written in the natural markdown style wrap ids in code spans
     (`` `UAT-497-RENAMES` ``); without stripping the backticks the anchored id regex
-    never matches, silently zeroing the result map (COM-167 follow-up defect, Bug 1).
+    never matches, silently zeroing the result map (follow-up defect, Bug 1).
     NFKC-normalized first so fullwidth/compatibility glyphs fold to ASCII.
     """
     cell = unicodedata.normalize("NFKC", cell)
     return cell.strip().strip("*").strip("`").strip()
 
 
-# COM-167 R1 (retro 2026-06-22 "silent 0/N from un-gated inputs"). Real authoring deviates
+# R1 (retro 2026-06-22 "silent 0/N from un-gated inputs"). Real authoring deviates
 # from the canonical id cell in two mechanically-strippable ways the engine must TOLERATE
 # (key/match on the id) while leaving the human cell content untouched:
 #   * UAT: the id is glued to a title — "UAT-1a Crash-after-checkpoint resume preserves work".
@@ -86,14 +86,14 @@ def _norm_id(cell: str) -> str:
 # malformed id ("UAT-497-", "NFR-3-") is still rejected, not silently truncated to a key.
 # A cell with no leading complete id ⇒ None ⇒ rejected (never a garbage key — fail-safe).
 #
-# Deliberately a PERMISSIVE SUPERSET of the COM-198 canonical id grammar
+# Deliberately a PERMISSIVE SUPERSET of the canonical id grammar
 # (docs/standards/catalog-id-convention.md; enforced by jswarm/nfr-catalog/nfr_common._REF_RE
 # at catalog-validate / strict-link time, and at authoring time by the /jPlan gate — R2).
 # The RECONCILE engine must NOT enforce that grammar: it keys/matches on whatever id-shaped
 # token leads the cell so that EVERY form reconciles — the new ticket-prefix refs
 # (NFR-198, NFR-198-2-DESC, UAT-324-7A), the legacy global-sequential (NFR-001-DESC) AND bare
 # legacy ids (hse NFR-4). The strict canonical _REF_RE rejects NFR-198 / NFR-4, so reusing it
-# here would re-introduce the silent 0/N this fix (COM-167 R1) exists to close.
+# here would re-introduce the silent 0/N this fix (R1) exists to close.
 _UAT_ID_LEAD_RE = re.compile(r"UAT-[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?=\s|$)")
 _NFR_ID_LEAD_RE = re.compile(r"NFR-[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?=\s|$)")
 _NFR_DECORATION_RE = re.compile(
@@ -312,7 +312,7 @@ def parse_results(doc_text: str, kind: str) -> dict:
     Result column, per table:
       * If the header NAMES a Result/Status/Outcome column, that column is the SOLE source —
         an unrecognized value there is left unmatched, never scavenged from another column
-        (COM-167 follow-up defect Bug 2: a ``… | Result | Last tested | Evidence |`` row must
+        (follow-up defect Bug 2: a ``… | Result | Last tested | Evidence |`` row must
         read Result, not the trailing Evidence/date). Absent on a short row ⇒ unmatched
         (review HIGH-2).
       * Otherwise only an UNAMBIGUOUS two-column row (id + exactly one cell) is read; a wider
@@ -517,7 +517,7 @@ def _read_results(path: Path | None, kind: str) -> tuple[dict[str, str], bool]:
 
     ``unparseable_warn`` is True when the doc EXISTS, is non-empty, and contains a markdown
     table yet yields ZERO parsed ids — the 'present but structurally unreadable' signal that
-    must be LOUD, not silent (COM-167 follow-up defect: a silent ``matched=0`` reads exactly
+    must be LOUD, not silent (follow-up defect: a silent ``matched=0`` reads exactly
     like a healthy 'already in sync' run, so AC-10 went inert unnoticed for a ticket's life).
     A missing/unreadable/empty/prose-only doc is NOT flagged (fail-open, nothing to read).
     """
@@ -563,7 +563,7 @@ def _ticket_from_name(name: str) -> str | None:
     return m.group(1) if m else None
 
 
-# HAS-525 T5.1 — canonical UAT step-script name, with legacy read-compat. Writers/resolvers
+# T5.1 — canonical UAT step-script name, with legacy read-compat. Writers/resolvers
 # prefer the new suffix; a ticket folder that has not migrated yet still resolves via the
 # legacy suffix so its existing result doc keeps reconciling (read-both/write-new; never
 # mass-rename historical ticket folders).

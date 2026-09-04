@@ -184,7 +184,7 @@ def backfill(plans_dir: Path, repo_root: Path, project_key: str, *,
     applied: list[str] = []
     skipped: list[dict] = []
 
-    # apply_files (COM-88) is FILE-level recency scope; apply_tickets is ticket-level;
+    # apply_files is FILE-level recency scope; apply_tickets is ticket-level;
     # apply_all is the guarded mass path. None of these bypasses the clean-tree gate.
     resolved_files = {p.resolve() for p in apply_files} if apply_files is not None else None
     do_apply = apply_all or bool(apply_tickets) or bool(resolved_files)
@@ -209,7 +209,7 @@ def backfill(plans_dir: Path, repo_root: Path, project_key: str, *,
             FM.update_keys(path, {
                 "plan_status": r.plan_status,
                 "status": S.derive_merge_status(r.plan_status),
-                "plan_status_last_updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),  # COM-173: ISO-second precision
+                "plan_status_last_updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),  # ISO-second precision
                 "plan_status_actor": "backfill",
             })
             rel = str(path.relative_to(repo_root)) if path.is_relative_to(repo_root) else str(path)
@@ -236,7 +236,7 @@ def _write_normalize_report(repo_root: Path, candidates: list, changed: list,
     rpath.parent.mkdir(parents=True, exist_ok=True)
     verb = "applied" if applied else "dry-run (would change)"
     lines = [
-        f"# COM-138 plan-frontmatter normalize — {time.strftime('%Y-%m-%d')}", "",
+        f"# plan-frontmatter normalize — {time.strftime('%Y-%m-%d')}", "",
         f"Canonical candidates: {len(candidates)} | {verb}: {len(changed)} | skipped: {len(skipped)}",
         "",
         "| Ticket | File | hoisted | fields written | removed |",
@@ -257,7 +257,7 @@ def _write_normalize_report(repo_root: Path, candidates: list, changed: list,
 
 def normalize_backfill(repo_root: Path, *, apply: bool = False,
                        require_clean_tree: bool = True) -> dict:
-    """COM-138 one-time normalization of the CANONICAL ``.jswarm/plans`` masters.
+    """one-time normalization of the CANONICAL ``.jswarm/plans`` masters.
 
     Canonical-only (``iter_canonical_plan_files`` — never legacy ``docs/plans``). Dry-run by
     default; ``apply`` writes via the single normalization invariant (reconcile.normalize_text)
@@ -296,9 +296,9 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="Backfill plan_status for in-flight plans")
     p.add_argument("--project-root", default=None)
     p.add_argument("--normalize", action="store_true",
-                   help="COM-138: normalize canonical .jswarm plans (dry-run unless --normalize-apply)")
+                   help="Normalize canonical .jswarm plans (dry-run unless --normalize-apply)")
     p.add_argument("--normalize-apply", action="store_true",
-                   help="COM-138: apply canonical-plan normalization (per-file clean-tree gated)")
+                   help="Apply canonical-plan normalization (per-file clean-tree gated)")
     p.add_argument("--apply", default="", help="Comma-separated tickets to apply")
     p.add_argument("--apply-all", action="store_true")
     p.add_argument("--scope", choices=("none", "10d", "30d", "all"), default="none",
@@ -313,7 +313,7 @@ def main(argv=None) -> int:
     if not cfg.plans_dir:
         print(json.dumps({"error": "config-unresolved"}))
         return 0
-    # COM-138 normalize mode is canonical-only and distinct from the plan_status inference.
+    # normalize mode is canonical-only and distinct from the plan_status inference.
     if args.normalize or args.normalize_apply:
         out = normalize_backfill(cfg.repo_root, apply=args.normalize_apply)
         print(json.dumps(out, indent=2))

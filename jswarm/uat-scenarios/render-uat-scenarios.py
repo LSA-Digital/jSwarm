@@ -28,7 +28,7 @@ JsonObject = dict[str, object]
 BANNER_START = "<!-- uat-scenarios:banner:start -->"
 BANNER_END = "<!-- uat-scenarios:banner:end -->"
 
-# COM-129 RD-3: render profiles map a profile name to its shipped template and the
+# RD-3: render profiles map a profile name to its shipped template and the
 # suffix used to derive a default output path from the scenarios JSON path. The
 # deployed engine keeps these repo-relative locations (see deploy_uat_engine.py:
 # render-uat-scenarios.py -> jswarm/uat-scenarios/, templates -> docs/templates/),
@@ -43,7 +43,7 @@ PROFILE_OUTPUT_SUFFIX: dict[str, str] = {
 }
 DEFAULT_PROFILE = "engineering"
 
-# COM-129 RD-9: the single Mermaid escaping path. Reserved characters that would
+# RD-9: the single Mermaid escaping path. Reserved characters that would
 # break a quoted node label, normalized away here and ONLY here.
 _MERMAID_RESERVED = ('"', "[", "]", "{", "}", "|", "<", ">", "(", ")")
 # Mermaid does NOT auto-wrap long single-line node labels — the renderer clips them
@@ -411,7 +411,7 @@ def validate_link_integrity(data: JsonObject, scenarios_dir: Path | str | None =
     check_array("changelog", data.get("changelog"))
     check_array("pending_merge_back", data.get("pending_merge_back"))
 
-    # COM-129 RD-7: PE2E process invariants — scenario_ids resolve to known scenarios,
+    # RD-7: PE2E process invariants — scenario_ids resolve to known scenarios,
     # process ids are unique, and no scenario repeats WITHIN one process. The same
     # scenario appearing across DIFFERENT processes is explicitly allowed.
     seen_process_ids: set[str] = set()
@@ -471,7 +471,7 @@ def validate_link_integrity(data: JsonObject, scenarios_dir: Path | str | None =
             if not isinstance(ref, str) or ref == "":
                 errors.append(f"scenarios[{scenario_index}].evidence_links[{link_index}].ref must be non-empty")
 
-        # COM-129 RD-6: walkthrough screen-id uniqueness + step->screen resolution
+        # RD-6: walkthrough screen-id uniqueness + step->screen resolution
         # (within the same scenario). Both surface as --strict-links failures.
         walkthrough = scenario.get("walkthrough")
         if isinstance(walkthrough, dict):
@@ -501,7 +501,7 @@ def validate_link_integrity(data: JsonObject, scenarios_dir: Path | str | None =
                             f"references unknown screen id {screen_ref} on {scenario_label}"
                         )
 
-        # COM-129 RD-15: image.source.page is one-based (a value contract not expressible in the
+        # RD-15: image.source.page is one-based (a value contract not expressible in the
         # stdlib validator, which has no `minimum`); surface page < 1 as a --strict-links failure.
         image_for_page = scenario.get("image")
         if isinstance(image_for_page, dict):
@@ -514,21 +514,21 @@ def validate_link_integrity(data: JsonObject, scenarios_dir: Path | str | None =
                         f"on {scenario_label}, got {page}"
                     )
 
-        # COM-129 RD-17: image-file existence (only when a base dir is supplied).
+        # RD-17: image-file existence (only when a base dir is supplied).
         if scenarios_dir is not None:
             image = scenario.get("image")
             if isinstance(image, dict):
                 image_path = image.get("path")
                 if isinstance(image_path, str) and image_path:
                     # Must resolve to a real FILE — a directory (or other non-file) would render a
-                    # broken Markdown image link, so is_file (not exists) is the gate (COM-129 RD-17).
+                    # broken Markdown image link, so is_file (not exists) is the gate (RD-17).
                     if not (Path(scenarios_dir) / image_path).is_file():
                         errors.append(
                             f"scenarios[{scenario_index}].image.path references missing image file "
                             f"{image_path} on {scenario_label}"
                         )
 
-        # COM-130 RD-18: optional screen-state anchors and transition anchors
+        # RD-18: optional screen-state anchors and transition anchors
         # resolve either to an exact scenario id or to a numbered scenario id nested
         # under the anchor (e.g. SCREEN.REF resolves via SCREEN.REF.1).
         screen_ref = scenario.get("screen_ref")
