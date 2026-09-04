@@ -178,16 +178,21 @@ added to the project's `CLAUDE.md`, and jSwarm's hooks merged into its
 `.claude/settings.json`. Adoption merges into existing files; nothing you
 already wrote there is replaced.
 
-To connect Jira, add Atlassian's hosted MCP server once, in any Claude Code
-session:
+To connect Jira, register Atlassian's hosted MCP server and authorize it once.
+Run both commands in Terminal on the Mac where you will use Claude Code; the
+second command opens your browser for approval:
 
 ```bash
 claude mcp add --scope user --transport http atlassian https://mcp.atlassian.com/v2/mcp
+claude mcp login atlassian
 ```
 
-Then run `/mcp` inside Claude Code and follow the sign-in prompt. There is no
-self-hosted Jira container in jSwarm; this is host-specific setup and is
-documented as such.
+Already being signed in to Atlassian in that browser does not authorize the MCP
+connection by itself. After approval, start Claude Code and run `/mcp` to
+confirm Atlassian is connected. For SSH or another headless session, use
+`claude mcp login atlassian --no-browser` and follow the URL and redirect
+instructions in Terminal. There is no self-hosted Jira container in jSwarm;
+this is host-specific setup and is documented as such.
 
 ## 8. Start the local review portal
 

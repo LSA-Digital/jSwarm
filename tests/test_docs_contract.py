@@ -11,7 +11,8 @@ def test_every_command_has_a_manpage_in_the_agreed_shape():
 def test_getting_started_matches_contract():
     t = Path("docs/getting-started.md").read_text()
     for s in ("~/dev/jswarm", "./install.sh check", "./install.sh install", "./install.sh verify",
-              "--jira-key", "https://mcp.atlassian.com/v2/mcp", "http://localhost:8766/uat/"):
+              "--jira-key", "https://mcp.atlassian.com/v2/mcp", "claude mcp login atlassian",
+              "http://localhost:8766/uat/"):
         assert s in t, s
     assert "--provider" not in t
     assert ("dev" + "/common") not in t  # split so this line itself stays leak-gate clean

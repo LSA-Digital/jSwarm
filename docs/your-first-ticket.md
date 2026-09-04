@@ -27,6 +27,11 @@ Finish [Getting started](getting-started.md) first: installer verification
 should pass, and the local portal should open at
 `http://localhost:8766/uat/`.
 
+For the Jira path, also run `claude mcp login atlassian` in Terminal on this
+Mac and approve the browser prompt. Being logged in to Jira in the browser is
+not enough by itself. Start Claude Code, run `/mcp`, and confirm Atlassian is
+connected before `/jPlan`.
+
 | Context | Where | What runs there |
 |---|---|---|
 | Terminal | `~/dev/jswarm` | installer and portal commands |
