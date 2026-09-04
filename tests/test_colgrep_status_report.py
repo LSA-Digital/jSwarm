@@ -1,7 +1,7 @@
-"""WORK-241 AC-5 RED tests for the ColGREP status-report generator.
+"""TICKET-241 AC-5 RED tests for the ColGREP status-report generator.
 
 These tests freeze the read-only status-first contract from
-``.jswarm/plans/WORK-241/WORK-241.specs.status-report.md``. They are expected to
+``.jswarm/plans/TICKET-241/TICKET-241.specs.status-report.md``. They are expected to
 fail in RED while ``jswarm.colgrep_status_report`` contains only importable API
 stubs, and turn GREEN only when the next implementation phase builds the real
 report logic.
@@ -26,20 +26,20 @@ from jswarm.colgrep_status_report import (
 FIXED_NOW = 1_783_356_000.0
 CODE_BACKEND = "http://localhost:3280"
 CONTENT_BACKEND = "http://localhost:3281"
-DEFAULT_INDICES = ["common", "common-wt-has-520-overlay", "common-full-g000001-deadbeef"]
+DEFAULT_INDICES = ["common", "common-wt-demo-520-overlay", "common-full-g000001-deadbeef"]
 DEFAULT_STATS = {
     "common": {"num_documents": 100, "num_embeddings": 1_000, "exists": True},
-    "common-wt-has-520-overlay": {"num_documents": 10, "num_embeddings": 100, "exists": True},
+    "common-wt-demo-520-overlay": {"num_documents": 10, "num_embeddings": 100, "exists": True},
     "common-full-g000001-deadbeef": {"num_documents": 3, "num_embeddings": 30, "exists": True},
 }
 DEFAULT_SIZES = {
     "common": 1_073_741_824,
-    "common-wt-has-520-overlay": 134_217_728,
+    "common-wt-demo-520-overlay": 134_217_728,
     "common-full-g000001-deadbeef": 67_108_864,
 }
 DEFAULT_MTIMES = {
     "common": FIXED_NOW - 3_600,
-    "common-wt-has-520-overlay": FIXED_NOW - 7_200,
+    "common-wt-demo-520-overlay": FIXED_NOW - 7_200,
     "common-full-g000001-deadbeef": FIXED_NOW - 86_400,
 }
 
@@ -427,9 +427,9 @@ def test_resolve_raw_dir_excludes_sibling_families():
         [
             "common-25f88f7a",
             "common-b2a9026b",
-            "common-wt-has-520-abc-overlay",
+            "common-wt-demo-520-abc-overlay",
             "common-full-g000001-deadbeef",
-            "common-wt-has-497-4c1636ec",
+            "common-wt-demo-497-4c1636ec",
         ],
     )
 
@@ -574,20 +574,20 @@ def test_missing_base_conditional_restart_and_final_verify():
 
 
 # -----------------------------------------------------------------------------
-# WORK-241 AC-6 remediation: Bug 2 (rebuild-scan blind to overlay build-overlay
+# TICKET-241 AC-6 remediation: Bug 2 (rebuild-scan blind to overlay build-overlay
 # encodes) + Fix 3 (action_sequence must emit REAL runnable commands).
 # -----------------------------------------------------------------------------
 
 
 def test_scan_ps_lines_for_rebuilds_matches_overlay_build_and_refresh_if_stale():
-    """TASK-520 gap: a live `colgrep_worktree.py build-overlay` (or
+    """TICKET-520 gap: a live `colgrep_worktree.py build-overlay` (or
     `refresh-if-stale`) encode must be visible to the rebuild scan — previously the
     regex only matched native `colgrep init` / mem-guard processes and the status
     report falsely reported "Rebuild running: NO" during a live overlay build."""
     ps_stdout = (
         "  PID ELAPSED COMMAND\n"
         "  4242    05:10 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python "
-        "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/colgrep-worktree build-overlay WORK-241 "
+        "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/colgrep-worktree build-overlay TICKET-241 "
         "--worktree /workspace/example-app\n"
         "  4343    02:00 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python "
         "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/colgrep_worktree.py refresh-if-stale "
@@ -616,7 +616,7 @@ def test_scan_ps_lines_for_rebuilds_ignores_unrelated_processes():
 
 
 def test_scan_ps_lines_for_rebuilds_matches_dotted_module_invocation():
-    """Fix 4/5 (WORK-241 AC-6 jCritic pass): a live overlay-build/refresh-if-stale
+    """Fix 4/5 (TICKET-241 AC-6 jCritic pass): a live overlay-build/refresh-if-stale
     encode launched via `python -m jswarm.colgrep_worktree ... build-overlay`
     (the dotted-module invocation shape, distinct from the direct-script or shim
     forms already covered) must still be visible to the rebuild scan — a live
@@ -625,7 +625,7 @@ def test_scan_ps_lines_for_rebuilds_matches_dotted_module_invocation():
     ps_stdout = (
         "  PID ELAPSED COMMAND\n"
         "  5151    03:00 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.colgrep_worktree "
-        "build-overlay WORK-241 --worktree /workspace/example-app\n"
+        "build-overlay TICKET-241 --worktree /workspace/example-app\n"
         "  9999    00:05 -bash\n"
     )
 
@@ -693,7 +693,7 @@ def test_live_active_ops_tokens_still_supplement_active_jobs(tmp_path):
 
 
 def test_quiesced_reload_uses_real_wrapper_not_noop_lib():
-    """WORK-241 AC-6 Bug 1 fix, surfaced through the action_sequence: the quiesced-
+    """TICKET-241 AC-6 Bug 1 fix, surfaced through the action_sequence: the quiesced-
     reload command must reference the real executable wrapper
     (next-plaid/bin/nextplaid-quiesce-restart), never the raw library file
     (next-plaid/lib/nextplaid-quiesce.sh), which is a no-op when run directly."""
@@ -753,7 +753,7 @@ def test_no_action_step_recommends_generation_reaper_for_orphan_cleanup():
 
 
 def test_orphan_generations_get_guarded_lifecycle_cleanup_action_not_generation_reaper():
-    """Fix 3 (WORK-241 AC-6 jCritic finding #3): the orphan action must be a REAL,
+    """Fix 3 (TICKET-241 AC-6 jCritic finding #3): the orphan action must be a REAL,
     runnable, guarded command — `colgrep_orphan_cleanup.py plan`/`apply --family
     <family>`, never `generation_reaper reap` (wrong tool) and never the old
     `colgrep_index_lifecycle.py cleanup` pairing (a bare unload with no paired
@@ -836,7 +836,7 @@ def test_orphan_cleanup_multiple_families_is_blocked_not_guessed():
 
 
 def test_no_action_step_ever_emits_raw_launchctl_or_noop_quiesce_lib():
-    """Fix 2/6 (WORK-241 AC-6 jCritic pass): EVERY mutating action_sequence step
+    """Fix 2/6 (TICKET-241 AC-6 jCritic pass): EVERY mutating action_sequence step
     must route through a guarded, agent-runnable wrapper — never raw `launchctl
     load`/`launchctl unload` prose (no paired stop-without-restart either) and
     never the raw no-op `next-plaid/lib/nextplaid-quiesce.sh` library file.
@@ -887,7 +887,7 @@ def _infra_row(report: dict[str, Any], needle: str) -> dict[str, Any]:
 
 
 def test_supervisor_loaded_no_live_pid_recommends_restart_not_steady_state():
-    """WORK-241 AC-6 jCritic delta finding (residual of finding #6, reopened at
+    """TICKET-241 AC-6 jCritic delta finding (residual of finding #6, reopened at
     the report layer): overlay-fleet-supervisor is LONG-RUNNING — `loaded`
     alone is not "up" for it. A `{"loaded": True, "pid": None}` supervisor is
     crash-looping and must recommend a restart, never render as a healthy
@@ -979,7 +979,7 @@ def test_long_running_launchd_set_matches_launchd_control_module():
 
 
 # -----------------------------------------------------------------------------
-# WORK-241 Phase B RED: status must converge with fleet-plan worktree blockers.
+# TICKET-241 Phase B RED: status must converge with fleet-plan worktree blockers.
 # -----------------------------------------------------------------------------
 
 
@@ -1156,7 +1156,7 @@ def test_fleet_plan_probe_raises_fail_open_and_omits_worktree_actions():
 
 
 # -----------------------------------------------------------------------------
-# WORK-289 BR-15 — registry-integrity linter parity between `health` and `report`.
+# TICKET-289 BR-15 — registry-integrity linter parity between `health` and `report`.
 #
 # BR-05 shipped `_registry_integrity_findings()` as an unconditional `health` row
 # (colgrep_worktree.py `dependency_health`). The `report` surface (this module)
@@ -1184,12 +1184,12 @@ def test_probes_registry_integrity_findings_is_optional_default_none():
 def test_report_surfaces_registry_integrity_findings_row_when_violations_exist():
     finding = {
         "class": "api-index-equals-base",
-        "ticket": "TASK-583",
+        "ticket": "TICKET-583",
         "project": "example-app",
         "worktree_path": "/workspace/example-app-wt-demo-583",
         "api_index_name": "example-app",
         "base_index": "example-app",
-        "detail": "registry entry for ticket 'TASK-583' has api_index_name == base_index",
+        "detail": "registry entry for ticket 'TICKET-583' has api_index_name == base_index",
     }
     report = build_report(
         _with_registry_integrity_findings(_fake_probes(), [finding]),
@@ -1199,7 +1199,7 @@ def test_report_surfaces_registry_integrity_findings_row_when_violations_exist()
     row = next(r for r in report["infrastructure"] if r.get("component") == "registry integrity lint")
     assert "1 finding" in row["state"]
     assert "api-index-equals-base" in row["detail"]
-    assert "TASK-583" in row["detail"]
+    assert "TICKET-583" in row["detail"]
 
 
 def test_report_registry_integrity_row_is_clean_when_no_violations():
@@ -1237,11 +1237,11 @@ def test_report_registry_integrity_probe_raises_fail_open_not_silently_clean():
 
 
 # -----------------------------------------------------------------------------
-# WORK-289 BR-17 — api-index-equals-base precision, report-surface parity with
+# TICKET-289 BR-17 — api-index-equals-base precision, report-surface parity with
 # health. `_registry_integrity_findings()` (colgrep_worktree.py) now enriches the
 # api-index-equals-base shape with whether a dedicated overlay index demonstrably
 # exists (source-confirmed: reconcile_registry_manifest_at_fleet_tick,
-# colgrep_overlay_fleet_supervisor.py, WORK-244 P0-9, always pairs
+# colgrep_overlay_fleet_supervisor.py, TICKET-244 P0-9, always pairs
 # api_index_name=base_index with physical_colgrep_dir="" for a genuinely
 # base-authoritative row). When no dedicated index exists the finding's `class`
 # becomes "api-index-equals-base-informational" -- `report` must not render that
@@ -1250,13 +1250,13 @@ def test_report_registry_integrity_probe_raises_fail_open_not_silently_clean():
 def test_report_registry_integrity_row_is_informational_not_warn_when_no_dedicated_index_exists():
     finding = {
         "class": "api-index-equals-base-informational",
-        "ticket": "TASK-583",
+        "ticket": "TICKET-583",
         "project": "example-app",
         "worktree_path": "/workspace/example-app/.claude/worktrees/example-app-wt-demo-583",
         "api_index_name": "example-app",
         "base_index": "example-app",
         "dedicated_index_exists": False,
-        "detail": "registry entry for ticket 'TASK-583' has api_index_name == base_index but no dedicated index exists (likely honest base-authoritative encoding)",
+        "detail": "registry entry for ticket 'TICKET-583' has api_index_name == base_index but no dedicated index exists (likely honest base-authoritative encoding)",
     }
     report = build_report(
         _with_registry_integrity_findings(_fake_probes(), [finding]),
@@ -1267,7 +1267,7 @@ def test_report_registry_integrity_row_is_informational_not_warn_when_no_dedicat
     assert "⚠️" not in row["state"], (
         f"an informational-only (no dedicated index) finding must not WARN: {row}"
     )
-    assert "TASK-583" in row["detail"], (
+    assert "TICKET-583" in row["detail"], (
         f"the informational finding must still be named, never silently dropped: {row}"
     )
 
@@ -1275,23 +1275,23 @@ def test_report_registry_integrity_row_is_informational_not_warn_when_no_dedicat
 def test_report_registry_integrity_row_still_warns_when_hard_and_informational_findings_coexist():
     hard_finding = {
         "class": "api-index-equals-base",
-        "ticket": "TASK-582",
+        "ticket": "TICKET-582",
         "project": "example-app",
         "worktree_path": "/workspace/example-app/.claude/worktrees/example-app-wt-demo-582",
         "api_index_name": "example-app",
         "base_index": "example-app",
         "dedicated_index_exists": True,
-        "detail": "registry entry for ticket 'TASK-582' has api_index_name == base_index",
+        "detail": "registry entry for ticket 'TICKET-582' has api_index_name == base_index",
     }
     informational_finding = {
         "class": "api-index-equals-base-informational",
-        "ticket": "TASK-583",
+        "ticket": "TICKET-583",
         "project": "example-app",
         "worktree_path": "/workspace/example-app/.claude/worktrees/example-app-wt-demo-583",
         "api_index_name": "example-app",
         "base_index": "example-app",
         "dedicated_index_exists": False,
-        "detail": "registry entry for ticket 'TASK-583' has api_index_name == base_index but no dedicated index exists",
+        "detail": "registry entry for ticket 'TICKET-583' has api_index_name == base_index but no dedicated index exists",
     }
     report = build_report(
         _with_registry_integrity_findings(_fake_probes(), [hard_finding, informational_finding]),
@@ -1300,14 +1300,14 @@ def test_report_registry_integrity_row_still_warns_when_hard_and_informational_f
 
     row = next(r for r in report["infrastructure"] if r.get("component") == "registry integrity lint")
     assert "⚠️" in row["state"], f"the coexisting hard finding must still WARN: {row}"
-    assert "TASK-582" in row["detail"], "the hard finding must still be named"
-    assert "TASK-583" in row["detail"], (
+    assert "TICKET-582" in row["detail"], "the hard finding must still be named"
+    assert "TICKET-583" in row["detail"], (
         "the coexisting informational finding must still be surfaced, not dropped"
     )
 
 
 # -----------------------------------------------------------------------------
-# WORK-289 BR-08 — status-plane disagreement parity between `health` and `report`.
+# TICKET-289 BR-08 — status-plane disagreement parity between `health` and `report`.
 #
 # Field failure (2026Jul23 retro §WRONG-8): `report` said `orphans:0`/"no active
 # rebuild" while `resolve` showed "overlay-rebuilding" and the pid file pointed at
@@ -1336,13 +1336,13 @@ def test_probes_status_plane_disagreements_is_optional_default_none():
 def test_report_surfaces_status_plane_disagreement_row_when_planes_disagree():
     finding = {
         "class": "queue-active-watcher-dead",
-        "ticket": "TASK-999",
+        "ticket": "TICKET-999",
         "project": "example-app",
         "worktree_path": "/workspace/example-app-wt-demo-999",
         "queue_state": "running",
         "watcher_state": "watcher-dead",
         "worker_pid": 999999999,
-        "detail": "refresh-queue for ticket 'TASK-999' claims an active rebuild (state='running') but watcher-liveness says 'watcher-dead'",
+        "detail": "refresh-queue for ticket 'TICKET-999' claims an active rebuild (state='running') but watcher-liveness says 'watcher-dead'",
     }
     report = build_report(
         _with_status_plane_disagreements(_fake_probes(), [finding]),
@@ -1351,7 +1351,7 @@ def test_report_surfaces_status_plane_disagreement_row_when_planes_disagree():
 
     row = next(r for r in report["infrastructure"] if r.get("component") == "status-plane disagreement")
     assert "DISAGREEMENT" in row["state"]
-    assert "TASK-999" in row["state"]
+    assert "TICKET-999" in row["state"]
     assert "running" in row["detail"]
     assert "watcher-dead" in row["detail"]
 

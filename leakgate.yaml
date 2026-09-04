@@ -1,10 +1,13 @@
 # Anything matching these must never be committed here. CI fails on a match.
 patterns:
-  - 'COM-\d+'
-  - 'HAS-\d+'
+  - '(?i)\bCOM-\d+'
+  - '(?i)\bHAS-\d+'
+  - '(?i)\bWORK-\d+'
+  - '(?i)\bTASK-\d+'
   - 'LSARS-'
   - '(?i)hai-sim-engine'
   - '(?i)haisim'
+  - '(?i)hai-simulator'
   - '(?i)epms'
   - '(?i)lsars'
   - 'idengrenme'
