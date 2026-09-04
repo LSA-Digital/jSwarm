@@ -5,9 +5,9 @@ usage: |
   /ctx
   /ctx --json
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: docs/_CONTROLLED_CONFIG/dotclaude/user/commands/ctx.md
-     Deploys to ~/.claude as a symlink ONLY via /devops-maint dotclaude (mode 37);
-     manage via that command, do not hand-edit a deployed copy. -->
+<!-- Canonical source: templates/commands/ctx.md in this repo. Copy or symlink
+     into your project's .claude/commands/ (or globally into ~/.claude/commands/)
+     to install the /ctx command; edit the canonical copy, not a deployed one. -->
 
 # /ctx
 

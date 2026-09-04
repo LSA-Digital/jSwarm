@@ -1,8 +1,9 @@
 """A/C 3: per-project config resolver.
 
-Reads docs/_CONTROLLED_CONFIG/active-projects.yaml (substrate) to identify
-the project, then resolves the Jira key + ticket regex + plans dir. When the key
-cannot be resolved, returns enabled=False so hooks operate advisory-only (no writes).
+Reads jswarm/config/active-projects.yaml (substrate, absent by default — see
+that path's ``.exists()`` guard below) to identify the project, then resolves
+the Jira key + ticket regex + plans dir. When the key cannot be resolved,
+returns enabled=False so hooks operate advisory-only (no writes).
 
 Resolution order for the Jira key:
   1. Optional `jira_key:` field on the matching active-projects.yaml entry.
@@ -31,7 +32,7 @@ PROJECT_KEY_MAP = {
     "lsars-monorepo": "LSARS",
 }
 
-ACTIVE_PROJECTS_REL = "docs/_CONTROLLED_CONFIG/active-projects.yaml"
+ACTIVE_PROJECTS_REL = "jswarm/config/active-projects.yaml"
 
 
 @dataclass

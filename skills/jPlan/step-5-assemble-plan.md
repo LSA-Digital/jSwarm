@@ -295,8 +295,8 @@ Run this seventh `/jPlan` output only after the matching assembly receipt is ver
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat_round_materialize.py create \
   --ticket TICKET-XXX \
   --plans-root .jswarm/plans \
-  --rules ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/UAT_RULES.json \
-  --patterns ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/UAT_ROUND_PATTERNS.json \
+  --rules ${JSWARM_HOME:-$HOME/dev/jswarm}/skills/jTest/UAT_RULES.json \
+  --patterns ${JSWARM_HOME:-$HOME/dev/jswarm}/skills/jTest/UAT_ROUND_PATTERNS.json \
   --pattern default
 ```
 

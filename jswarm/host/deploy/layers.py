@@ -1,11 +1,12 @@
 # CONFIG-CONTROLLED — edit the master under jswarm/host/deploy/.
 """Shared layer loader for the controlled-config one-home model.
 
-Parses ``docs/_CONTROLLED_CONFIG/dotclaude/_layers.yaml`` once and shares the
-result across deploy, verify, adopt, and migration. Each *context* maps to
-exactly one physical deploy target:
+Parses the ``_layers.yaml`` registry (this module's own ``_layers.yaml``, next
+to it, is the default) once and shares the result across deploy, verify,
+adopt, and migration. Each *context* maps to exactly one physical deploy
+target, resolved against a caller-supplied ``dotclaude_root``:
 
-    docs/_CONTROLLED_CONFIG/dotclaude/<context>/<target_relpath>
+    <dotclaude_root>/<context>/<target_relpath>
       -> deployed only to <context>.deploy_target/<target_relpath>
 
 This module is a registry of physical contexts and target roots. It is NOT a

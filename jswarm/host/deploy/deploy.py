@@ -61,7 +61,7 @@ VALID_TYPES = {"symlink", "managed-copy", "merge-template"}
 LIVE_APPLY_REFUSAL = "live apply is refused"
 
 # AC-12 live backup/preview/rollback constants.
-BACKUP_ROOT_ENV = "COM146_CONTROLLED_CONFIG_BACKUP_ROOT"
+BACKUP_ROOT_ENV = "COM146_DEPLOY_BACKUP_ROOT"
 LIVE_BACKUP_KIND = "controlled-config-dotclaude-live-backup"
 LIVE_PREVIEW_KIND = "controlled-config-dotclaude-live-preview"
 LIVE_BACKUP_SCHEMA_VERSION = 1
@@ -1265,7 +1265,7 @@ def _apply_plan(
 def _resolve_backup_root(home_root: str | Path) -> Path:
     """Resolve the AC-12 backup/preview/manifest root.
 
-    Honors ``COM146_CONTROLLED_CONFIG_BACKUP_ROOT`` (the test/operator override). Otherwise it
+    Honors ``COM146_DEPLOY_BACKUP_ROOT`` (the test/operator override). Otherwise it
     defaults to ``<home_root>/../.jswarm/backups/controlled-config/dotclaude`` — deliberately a
     SIBLING of the live ``.claude`` (not the repo) so a monkeypatched-home test never writes into
     the real repo or the real ``~/.jswarm``, and a real operator's backups land beside their home
@@ -1498,7 +1498,7 @@ def _rollback_key(entry: PlanEntry) -> str:
 
 # --- AC-14/AC-15: live-deployment ledger + lifecycle smoke seams ----------------------------------
 
-LEDGER_PATH_ENV = "COM146_CONTROLLED_CONFIG_LEDGER_PATH"
+LEDGER_PATH_ENV = "COM146_DEPLOY_LEDGER_PATH"
 LEDGER_SCHEMA_VERSION = 2
 
 

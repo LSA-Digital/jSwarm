@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-# CONFIG-CONTROLLED (COM-176 controlled-config) — master: docs/_CONTROLLED_CONFIG/dotclaude/user/hooks/posttool-plan-status-reconcile.py
-# Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-# Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy.
+# Canonical source: hooks/posttool-plan-status-reconcile.py in this repo.
+# Install by copying or symlinking into your project's .claude/hooks/ (or
+# globally into ~/.claude/hooks/) and registering it as a PostToolUse(Edit|Write)
+# hook; edit the canonical copy, not a deployed one.
 
 # runtime: claude-only
-"""PostToolUse(Edit|Write) child hook (COM-84): reconcile registry + lite-refine.
+"""PostToolUse(Edit|Write) child hook: reconcile registry + lite-refine.
 
 On an Edit/Write to a plan file (docs/plans/KEY-NNN-*.md):
   1. Reconcile the registry CACHE to the frontmatter plan_status (canonical).
@@ -29,13 +30,17 @@ import time
 from pathlib import Path
 
 def _bootstrap_plan_status_path() -> None:
-    """Add the ACTIVE project's jswarm/ (containing plan_status) to sys.path.
+    """Add the ACTIVE project's repo root (containing jswarm/plan_status) to sys.path.
 
     The dispatcher runs hooks with cwd = the active project, and this hook may live
     either in <repo>/.claude/hooks/ OR the global ~/.claude/hooks/ when dispatched
     globally. Resolving from the hook's own location (parents[N]) is wrong in the
-    global case (it would point at ~/scripts). Resolve from CLAUDE_PROJECT_DIR / cwd
-    first, then fall back to the hook's own repo (the in-repo deployment case).
+    global case (it would point at the wrong repo). Resolve from CLAUDE_PROJECT_DIR /
+    cwd first, then fall back to the hook's own repo (the in-repo deployment case).
+
+    The repo root (not jswarm/ itself) goes on sys.path because jswarm.plan_status's
+    own submodules import each other as ``jswarm.plan_status.<name>`` (absolute,
+    matching the rest of this package), so ``jswarm`` itself must be importable.
     """
     bases = []
     project_dir = os.environ.get("CLAUDE_PROJECT_DIR")
@@ -49,10 +54,10 @@ def _bootstrap_plan_status_path() -> None:
         except Exception:
             continue
         for d in [cur, *cur.parents]:
-            if (d / "scripts" / "plan_status").is_dir():
-                scripts = str(d / "scripts")
-                if scripts not in sys.path:
-                    sys.path.insert(0, scripts)
+            if (d / "jswarm" / "plan_status").is_dir():
+                repo_root = str(d)
+                if repo_root not in sys.path:
+                    sys.path.insert(0, repo_root)
                 return
 
 
@@ -72,7 +77,7 @@ _TRANSITIONAL_INTENT_COMPAT = (
 )
 _LOG = Path("/tmp/plan-status-hook.log")
 
-# COM-138: detection widened to canonical .jswarm/plans/ — the load-bearing fix
+# Detection widened to canonical .jswarm/plans/ — the load-bearing fix
 # (previously this hook matched only legacy docs/plans/, so .jswarm masters got no
 # maintenance). A plan file's PARENT dir must be exactly docs/plans or .jswarm/plans;
 # artifact subfolders (.jswarm/plans/KEY/...) are excluded by the parent check, and
@@ -149,10 +154,10 @@ def main() -> int:
         if not _plan_file_parent_ok(file_path):
             return 0  # Not in a plan directory.
 
-        # COM-174 A/C 9: bind-on-plan-edit must run before the heavy reconcile imports
+        # Bind-on-plan-edit must run before the heavy reconcile imports
         # below. Editing a master plan is the strongest per-session ticket signal, and
         # the binding write is fail-open so hook execution still always exits 0.
-        from plan_status import config as C
+        from jswarm.plan_status import config as C
 
         # Normalize separators before taking the basename so a Windows-style payload
         # (backslashes) still yields the right filename for ticket extraction (MINOR-1).
@@ -175,7 +180,7 @@ def main() -> int:
         if not abs_path.is_relative_to(cfg.repo_root):
             return 0
 
-        # Refresh an EXISTING same-ticket binding for this session (COM-174 Phase 6)
+        # Refresh an EXISTING same-ticket binding for this session
         # using the PostToolUse PAYLOAD session_id (NOT env), before the heavy reconcile
         # imports so a registry/transition_log import failure can't suppress the
         # keep-alive. This never creates or switches a binding; it only refreshes the
@@ -187,17 +192,17 @@ def main() -> int:
         # session_binding. A non-str payload (JSON null) passes "" so the helper's
         # blank-guard no-ops rather than writing a "None" session dir.
         try:
-            from plan_status import session_binding
+            from jswarm.plan_status import session_binding
             _sid = data.get("session_id")
             session_binding.refresh_if_bound_to(cfg.repo_root, _sid if isinstance(_sid, str) else "", ticket, "post-edit-hook")
         except Exception as exc:
             _debug(f"bind-on-edit skipped for {ticket}: {exc}")
 
         # Import lazily so any import error after the binding still fails open.
-        from plan_status import frontmatter as FM
-        from plan_status import registry as R
-        from plan_status import state as S
-        from plan_status import transition_log as TL
+        from jswarm.plan_status import frontmatter as FM
+        from jswarm.plan_status import registry as R
+        from jswarm.plan_status import state as S
+        from jswarm.plan_status import transition_log as TL
 
         fm = FM.read_frontmatter(abs_path)
         plan_status = fm.get("plan_status")
@@ -222,7 +227,7 @@ def main() -> int:
                     )
                     FM.update_keys(abs_path, {
                         "plan_status": S.STATE_LITE_REFINE,
-                        "plan_status_last_updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),  # COM-173: ISO-second precision
+                        "plan_status_last_updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),  # ISO-second precision
                         "plan_status_actor": "post-edit-hook",
                     })
                     TL.emit_event(
@@ -245,11 +250,11 @@ def main() -> int:
                 except Exception as exc:
                     _debug(f"cache sync failed for {ticket}: {exc}")
 
-        # COM-138: single normalization invariant — runs once for ANY detected plan file
+        # Single normalization invariant — runs once for ANY detected plan file
         # (incl. mis-positioned ones the top-read above could not parse), AFTER both
         # registry branches. Individually wrapped; the hook still ALWAYS exits 0.
         try:
-            from plan_status import reconcile as RC
+            from jswarm.plan_status import reconcile as RC
             RC.normalize_plan_file(abs_path)
         except Exception as exc:
             _debug(f"normalize failed for {ticket}: {exc}")

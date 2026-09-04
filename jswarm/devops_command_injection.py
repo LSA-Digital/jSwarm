@@ -852,16 +852,12 @@ def canonical_command_source(common_root: Path, command_name: str) -> Path | Non
     root = Path(common_root)
     stem = "jPlan" if command_name in JPLAN_COMMAND_KEYS else Path(command_name).stem
     candidates = (
-        root
-        / "docs/_CONTROLLED_CONFIG/dotclaude/user/skills"
-        / stem
-        / "SKILL.md",
+        root / "skills" / stem / "SKILL.md",
         _current_host().project_dir(root) / "commands" / (
             LEGACY_JPLAN_COMMAND_KEY if command_name == JPLAN_COMMAND_KEY else command_name
         ),
         _current_host().project_dir(root) / "commands" / command_name,
-        root / "docs/_CONTROLLED_CONFIG/dotclaude/user/commands" / command_name,
-        root / "docs/_CONTROLLED_CONFIG/dotclaude/repo.common/commands" / command_name,
+        root / "templates" / "commands" / command_name,
     )
     return next((candidate for candidate in candidates if candidate.exists()), None)
 

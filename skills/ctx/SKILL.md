@@ -150,7 +150,7 @@ The script also reads Claude Code/session variables needed for operation: `CLAUD
 
 ## `/ctx` command
 
-A thin `/ctx` slash command wraps this skill for interactive use; see `docs/_CONTROLLED_CONFIG/dotclaude/user/commands/ctx.md`. It documents the orchestrator path (clear `CLAUDE_CODE_CHILD_SESSION` so the call resolves as main-session, not subagent) and the agent path (pass a fresh `--identity-nonce ctx-nonce:<...>`).
+A thin `/ctx` slash command wraps this skill for interactive use; see `templates/commands/ctx.md`. It documents the orchestrator path (clear `CLAUDE_CODE_CHILD_SESSION` so the call resolves as main-session, not subagent) and the agent path (pass a fresh `--identity-nonce ctx-nonce:<...>`).
 
 ## Limitations
 

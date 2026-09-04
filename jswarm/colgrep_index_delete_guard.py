@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_ACTIVE_PROJECTS_PATH = REPO_ROOT / "docs" / "_CONTROLLED_CONFIG" / "active-projects.yaml"
+DEFAULT_ACTIVE_PROJECTS_PATH = REPO_ROOT / "jswarm" / "config" / "active-projects.yaml"
 DEFAULT_BASE_ALIASES_PATH = Path.home() / "dev" / "colgrep-idx" / "base-aliases.json"
 DEFAULT_EVIDENCE_LOG_PATH = Path.home() / "dev" / "colgrep-idx" / "log" / "index-delete-guard.jsonl"
 ACTIVE_BASE_REFUSAL_REASON = "active-project base index is undeletable"
@@ -45,7 +45,7 @@ def _load_yaml_like(path: Path) -> dict[str, Any]:
 
 
 def _parse_active_projects_minimal(path: Path) -> dict[str, Any]:
-    """Tiny fallback parser for docs/_CONTROLLED_CONFIG/active-projects.yaml."""
+    """Tiny fallback parser for jswarm/config/active-projects.yaml."""
 
     rows: list[dict[str, str]] = []
     in_active = False

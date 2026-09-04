@@ -2,14 +2,16 @@
 
 This is the Claude-side regeneration helper. It assembles each live agent
 file ``<slug>.md`` in this host's agents directory
-(`jswarm.host.claude_code.ClaudeCodeHost.agents_dir`) from three
-version-controlled sources in the ``common`` repo:
+(`jswarm.host.claude_code.ClaudeCodeHost.agents_dir`) from two
+version-controlled sources local to this repo, both absent by default
+(populate them locally to use this tool; every load below fails open —
+warns and falls back to an empty registry — when either is missing):
 
-  1. ``docs/_CONTROLLED_CONFIG/subagent-context-profiles.yaml`` — the
+  1. ``jswarm/config/subagent-context-profiles.yaml`` — the
      ``agents:`` block. Supplies the frontmatter mirror (``frontmatter:``) and
      the Claude routing chain (``claude.model`` / ``claude.effort`` /
      ``claude.fallbacks``).
-  2. ``docs/_CONTROLLED_CONFIG/agent-bodies/<slug>.body.md`` — the prompt
+  2. ``jswarm/config/agent-bodies/<slug>.body.md`` — the prompt
      body (extracted by ``jswarm/extract_agent_bodies.py``, Phase 13a).
 
 Each agent file is assembled as::
@@ -88,8 +90,8 @@ if str(_REPO_ROOT) not in sys.path:
 
 from jswarm.host import current as _current_host  # noqa: E402
 from jswarm.subagent_context_budget.registry import alias_status, is_legacy_slug  # noqa: E402
-DEFAULT_PROFILES = _REPO_ROOT / "docs" / "_CONTROLLED_CONFIG" / "subagent-context-profiles.yaml"
-DEFAULT_BODIES = _REPO_ROOT / "docs" / "_CONTROLLED_CONFIG" / "agent-bodies"
+DEFAULT_PROFILES = _REPO_ROOT / "jswarm" / "config" / "subagent-context-profiles.yaml"
+DEFAULT_BODIES = _REPO_ROOT / "jswarm" / "config" / "agent-bodies"
 DEFAULT_AGENTS_DIR = _current_host().agents_dir()
 
 # Sentinel value in `claude.model` marking an agent that is intentionally
@@ -700,7 +702,13 @@ def regenerate_all(
     runtime agent files (they would resurrect a legacy dispatch target), so
     this filters to canonical-only BEFORE assembly. A missing body file for a
     non-canonical record is therefore never reported as ``missing-body``.
+
+    Fails open (empty results, nothing assembled) when ``profiles`` does not
+    exist: it is absent by default in this repo (populate it locally, or pass
+    ``--profiles``, to use this tool for real).
     """
+    if not profiles.exists():
+        return [], {}
     data = yaml.safe_load(profiles.read_text(encoding="utf-8")) or {}
     agents = data.get("agents") or {}
     agents = {slug: body for slug, body in agents.items() if alias_status(body) == "canonical"}

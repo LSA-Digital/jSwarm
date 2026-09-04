@@ -49,7 +49,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 DEFAULT_ACTIVE_PROJECTS_PATH = (
-    Path(__file__).resolve().parents[1] / "docs" / "_CONTROLLED_CONFIG" / "active-projects.yaml"
+    Path(__file__).resolve().parents[1] / "jswarm" / "config" / "active-projects.yaml"
 )
 
 CLEANUP_TIER_DEFAULT = "active"

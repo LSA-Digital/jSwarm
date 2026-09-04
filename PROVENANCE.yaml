@@ -2,13 +2,13 @@ source_repo: common
 source_commit: 30219e3c3f7696574f8f6ce13f774da543171176
 files:
 - source: docs/_CONTROLLED_CONFIG/dotclaude/_layers.yaml
-  target: docs/_CONTROLLED_CONFIG/dotclaude/_layers.yaml
+  target: jswarm/host/deploy/_layers.yaml
   sha256: a3b19e8908ff12a6f2dc84a054439be2a3d19d9eb9b9ca78b4f8de03b63f08c3
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/commands/ctx.md
-  target: docs/_CONTROLLED_CONFIG/dotclaude/user/commands/ctx.md
+  target: templates/commands/ctx.md
   sha256: 4a88a8f17fc8ed8a80446bb3d85c284b30a34b7bf1125fbbbf4fc07cd1e0aab6
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/hooks/posttool-plan-status-reconcile.py
-  target: docs/_CONTROLLED_CONFIG/dotclaude/user/hooks/posttool-plan-status-reconcile.py
+  target: hooks/posttool-plan-status-reconcile.py
   sha256: f2cf29ba87a0df17945aa08685451e6193b1a650c95ef244f72b6f7d653969be
 - source: scripts/install-jarviswarm.sh
   target: install.sh

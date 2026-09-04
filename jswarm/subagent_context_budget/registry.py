@@ -1,8 +1,8 @@
 """Registry loader for model windows and inheritance profiles.
 
 Loads:
-  - docs/_CONTROLLED_CONFIG/model-windows.yaml
-  - docs/_CONTROLLED_CONFIG/subagent-context-profiles.yaml
+  - jswarm/config/model-windows.yaml
+  - jswarm/config/subagent-context-profiles.yaml
 
 Public API:
   lookup_agent(slug, *, runtime="claude", model_windows_path=None,
@@ -53,8 +53,8 @@ _LOG = logging.getLogger(LOGGER_NAME)
 # Resolved relative to the repo root (this file lives at
 # <repo>/jswarm/subagent_context_budget/registry.py).
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_DEFAULT_MODEL_WINDOWS = _REPO_ROOT / "docs" / "_CONTROLLED_CONFIG" / "model-windows.yaml"
-_DEFAULT_PROFILES = _REPO_ROOT / "docs" / "_CONTROLLED_CONFIG" / "subagent-context-profiles.yaml"
+_DEFAULT_MODEL_WINDOWS = _REPO_ROOT / "jswarm" / "config" / "model-windows.yaml"
+_DEFAULT_PROFILES = _REPO_ROOT / "jswarm" / "config" / "subagent-context-profiles.yaml"
 
 DEFAULT_CATEGORY = "architect-planner"
 
@@ -143,6 +143,23 @@ class EffortResolution:
 
 
 HEAVY_HIGH_XHIGH_ONLY = {"jArchitect"}
+
+# Zeroed-out stand-in for DEFAULT_CATEGORY when the profiles registry has no
+# categories loaded at all (e.g. subagent-context-profiles.yaml is absent, as
+# it is by default in this repo — see _DEFAULT_PROFILES). Without this,
+# category_for_agent's own documented fail-open contract ("unknown category ->
+# default to DEFAULT_CATEGORY") would still KeyError when DEFAULT_CATEGORY
+# itself was never defined by an empty/missing registry.
+_FALLBACK_CATEGORY = CategoryInfo(
+    name=DEFAULT_CATEGORY,
+    max_budget_tokens=0,
+    window_fraction=0.0,
+    working_headroom_floor=0,
+    transcript_head_tokens=0,
+    transcript_tail_tokens=0,
+    allowed_reduction_tiers=(),
+    description="synthetic fallback: no categories loaded",
+)
 
 
 class ProfileRegistry:
@@ -275,6 +292,13 @@ class ProfileRegistry:
                 slug, cat_name, DEFAULT_CATEGORY,
             )
             cat_name = DEFAULT_CATEGORY
+        if cat_name not in self._categories:
+            _LOG.warning(
+                "category %r not found in registry (no categories loaded) — "
+                "using a zeroed-out synthetic fallback",
+                cat_name,
+            )
+            return _FALLBACK_CATEGORY
         return self._categories[cat_name]
 
     def primary_model_slug(self, slug: str) -> Optional[str]:
@@ -419,7 +443,7 @@ def validate_model_literal(model: str, *, model_windows_path: Optional[Path] = N
     return result
 
 
-_MODEL_WINDOWS_REL_PATH = "docs/_CONTROLLED_CONFIG/model-windows.yaml"
+_MODEL_WINDOWS_REL_PATH = "jswarm/config/model-windows.yaml"
 
 # Generic family-prefix pairing rule (fail-loud spec §D.2) — no
 # per-model table, only a coarse provider-family check so a request like

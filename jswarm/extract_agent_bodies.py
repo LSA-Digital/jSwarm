@@ -7,12 +7,15 @@ this host's agents directory (``*.md`` files under
 This script extracts the prompt body (everything after the YAML frontmatter
 and any optional ``<ROUTE:...>`` tag) from each live agent file into a
 version-controlled body file at
-``docs/_CONTROLLED_CONFIG/agent-bodies/<slug>.body.md``.
+``jswarm/config/agent-bodies/<slug>.body.md`` (absent by default — an
+adopter populates it locally; see the module docstring on
+``jswarm.regenerate_claude_agents`` for the fail-open contract when it's
+missing).
 
 After Phase 4 regeneration lands, an OMC wipeout becomes recoverable by:
-  1. running ``/agents-claude-maint`` (or ``/devops-maint`` post-upgrade
-     restore) which reads YAML frontmatter from ``subagent-context-profiles.yaml``,
-     emits an optional ROUTE tag, and appends the committed body file.
+  1. running the equivalent post-upgrade restore tooling, which reads YAML
+     frontmatter from ``subagent-context-profiles.yaml``, emits an optional
+     ROUTE tag, and appends the committed body file.
   2. confirming via the upgrade-survival smoke that all agents dispatch and
      bodies match committed sources byte-for-byte.
 
@@ -46,7 +49,7 @@ from jswarm.host import current as _current_host
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SRC = _current_host().agents_dir()
-DEFAULT_DST = _REPO_ROOT / "docs" / "_CONTROLLED_CONFIG" / "agent-bodies"
+DEFAULT_DST = _REPO_ROOT / "jswarm" / "config" / "agent-bodies"
 
 FRONTMATTER_RE = re.compile(r"^---\n.*?\n---\n", re.DOTALL)
 ROUTE_RE = re.compile(r"^\s*<ROUTE:[^>]+>\s*\n", re.DOTALL)

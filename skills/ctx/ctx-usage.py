@@ -697,16 +697,17 @@ _DEFAULT_MODEL_WINDOW = 200_000
 
 
 def _default_registry_path() -> Path:
-    """The repo/deployed ``model-windows.yaml`` sibling of ``_CONTROLLED_CONFIG``.
+    """The repo's ``jswarm/config/model-windows.yaml`` (absent by default).
 
-    ``Path(__file__).resolve()`` follows this module's own controlled-config
-    symlink chain back to its master source under
-    ``skills/ctx/ctx-usage.py``, so
-    ``parents[4]`` is always ``docs/_CONTROLLED_CONFIG`` regardless of where
-    this module was deployed/loaded from.
+    ``Path(__file__).resolve()`` follows this module's own symlink chain back
+    to its master source under ``skills/ctx/ctx-usage.py``, so ``parents[2]``
+    is always the repo root regardless of where this module was
+    deployed/loaded from. The registry is optional: ``_parse_model_windows_registry``
+    below fails safe to ``{}`` on any read error, so a missing file falls
+    through to the heuristic/default window tiers rather than raising.
     """
 
-    return Path(__file__).resolve().parents[4] / "model-windows.yaml"
+    return Path(__file__).resolve().parents[2] / "jswarm" / "config" / "model-windows.yaml"
 
 
 def _parse_model_windows_registry(path: Path) -> dict[str, int]:

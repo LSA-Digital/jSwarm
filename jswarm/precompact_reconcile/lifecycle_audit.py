@@ -66,7 +66,7 @@ from jswarm.plan_status import frontmatter as FM  # noqa: E402
 from jswarm.plan_status import reconcile as RC  # noqa: E402
 from jswarm.plan_status import state as S  # noqa: E402
 # NOTE: ``joptimize`` is deliberately NOT imported at module scope. This package is a
-# whole-directory managed-copy deployment (docs/_CONTROLLED_CONFIG/managed-deployments.yaml,
+# whole-directory managed-copy deployment (managed-deployments.yaml,
 # id: precompact-matrix-reconcile) declared "self-contained" and shipped WITHOUT
 # jswarm/joptimize/. A module-scope import would make every operation here — --stage close,
 # --scan, ordinary UAT/NFR lint — ImportError in the downstream project, for a dependency

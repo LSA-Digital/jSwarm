@@ -824,7 +824,7 @@ def _validate_tolerance(entrypoint: str, plan: Path) -> None:
         elif entrypoint == "posttool-plan-status-reconcile":
             hook_env = dict(base_env, CLAUDE_PROJECT_DIR=str(repo))
             _run_boundary(
-                [python, str(ROOT / "docs/_CONTROLLED_CONFIG/dotclaude/user/hooks/posttool-plan-status-reconcile.py")],
+                [python, str(ROOT / "hooks/posttool-plan-status-reconcile.py")],
                 cwd=repo, env=hook_env,
                 stdin=json.dumps({"tool_input": {"file_path": str(isolated)}, "session_id": "tolerance"}),
             )
