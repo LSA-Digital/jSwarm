@@ -43,7 +43,7 @@ During any Live Show UAT or long-running E2E/regression execution, the agent mus
    - name a signature set that covers backend exceptions (`Traceback`, `ERROR`, `CRITICAL`) **and** provider failures (`429`, `RateLimitError`, `RouterExhaustedError`, `exhausted fallback chain`, `quota`)
    - confirm the monitor is armed, then launch the browser/test runner
 
-   **Never run a QA/smoke/E2E build as fire-and-wait-for-pass/fail when backend behavior is in scope. Live backend telemetry is the ground truth; test-level pass/fail is a lagging, lossy proxy.** If a provider-layer signature fires, immediately use `../jDebug/runtime-probes.md`'s provider-signature recipe and `../jDebug/litellm-debugging.md`; do not duplicate or improvise the LiteLLM diagnosis inside `/jTest`.
+   **Never run a QA/smoke/E2E build as fire-and-wait-for-pass/fail when backend behavior is in scope. Live backend telemetry is the ground truth; test-level pass/fail is a lagging, lossy proxy.** If a provider-layer signature fires, capture the raw provider/runtime error (status code, message, offending request) and route it through Option 10's diagnose flow (`diagnose.md`) rather than treating it as a test failure; do not improvise a provider-specific diagnosis inline inside `/jTest`.
 3. While the test runs, follow along with each visible test step and pair it with backend status:
    - state the current front-end step or live-show callout being exercised
    - confirm matching backend/API/runtime activity when visible in logs
