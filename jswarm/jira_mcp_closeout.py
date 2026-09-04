@@ -185,7 +185,7 @@ def get_issue(client: JiraMcpClient, issue_key: str) -> JsonDict:
         {
             "issue_key": issue_key,
             # `parent`/`issuetype` are requested so the post-create read-back-verify
-            # (verify_parent_link) has the fields it asserts on (COM-203 AC-1).
+            # (verify_parent_link) has the fields it asserts on (AC-1).
             "fields": "summary,status,updated,parent,issuetype",
             "comment_limit": 0,
             "update_history": False,
@@ -205,9 +205,9 @@ def create_issue(client: JiraMcpClient, project_key: str, summary: str, issue_ty
         # legacy REST object shape. Official schema (lazy-mcp/hierarchy/atlassian/
         # jira_create_issue.json): {"parent": "PROJ-123"}. The nested form
         # {"parent": {"key": "…"}} makes the MCP reject create with
-        # "expected 'key' property to be a string" (COM-143, HAS-238, Jun-2025 tool
+        # "expected 'key' property to be a string" (Jun-2025 tool
         # failures). Read-back verify after create catches any silent link miss
-        # (COM-203 AC-1).
+        # (AC-1).
         args["additional_fields"] = json.dumps({"parent": parent})
     return client.call_tool("jira_create_issue", args)
 
@@ -270,7 +270,7 @@ def verify_and_report_parent(
     """Verify the parent link after create; on failure warn LOUDLY + write a manual-action artifact.
 
     Returns True iff the read-back confirmed the parent link. A False return is never
-    silent — it emits a stderr WARN and a durable manual-action artifact (COM-203 AC-1 /
+    silent — it emits a stderr WARN and a durable manual-action artifact (AC-1 /
     NFR-014-NO-FALSE-GREEN-UNDERREPORT: the helper must never report clean success while
     the parent silently failed to link).
     """
@@ -415,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
                 # A verification error must NEVER discard a successful create: if it
                 # propagated to the outer `except` the issue would be re-reported as a
                 # create failure (and, before the fix below, re-created). Keep the failure
-                # loud + artifacted, but return 0 — the issue WAS created (COM-203 finding 2).
+                # loud + artifacted, but return 0 — the issue WAS created (finding 2).
                 new_key: str | None = None
                 try:
                     new_key = extract_issue_key(cast(JsonDict, result.value))
@@ -487,7 +487,7 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as error:  # noqa: BLE001 - failure report must capture any closeout blocker.
         # Do NOT re-run the operation here. retry() above already exhausted transient
         # retries; re-executing create-issue in the error path risks a double-create that
-        # is then reported as success WITHOUT verification (COM-203 critic finding 2). The
+        # is then reported as success WITHOUT verification (critic finding 2). The
         # error path's sole job is to record an exact manual-action artifact.
         if args.command == "get-issue":
             manual_action = f"Fetch `{args.issue_key}` in the Jira UI and compare summary/status with local plan metadata."

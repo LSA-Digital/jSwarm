@@ -9,7 +9,7 @@ usage: |
 
 # ctx
 
-**Last Updated:** 2026-07-05 (Phase 9, COM-239)
+**Last Updated:** 2026-07-05 (Phase 9)
 
 Use this skill to check the current context-window usage for the caller itself. It is designed to work for both the top-level orchestrator session and subagents without letting a subagent accidentally report the parent session or a sibling agent.
 
@@ -62,7 +62,7 @@ The context tokens are terminal / last-known usage from the last usable record. 
 
 ### Window size
 
-The context window comes from the COM-49 `model-windows.yaml` registry unless a higher-precedence source applies. Precedence is:
+The context window comes from the `model-windows.yaml` registry unless a higher-precedence source applies. Precedence is:
 
 1. `JSWARM_CTX_WINDOW` explicit positive integer token override (`window_source="env"`).
 2. Exact model id in `model-windows.yaml` (`window_source="registry"`).
@@ -71,7 +71,7 @@ The context window comes from the COM-49 `model-windows.yaml` registry unless a 
 
 Set `JSWARM_CTX_MODEL_WINDOWS` to point at an alternate registry file when testing or running from a nonstandard deployment.
 
-### Quota data — scoped to the caller's OWN provider and model (Phase 9, COM-239)
+### Quota data — scoped to the caller's OWN provider and model (Phase 9)
 
 Quota reflects the **caller's own provider**, resolved from the usage record's model/provider (`resolve_quota_provider`), then dispatched to a per-provider adapter (`fetch_quota_for_caller`). A caller never shows another provider's quota — a gpt subagent shows its OpenAI/Codex quota, a Claude caller shows its Anthropic quota. An **unknown/unidentified** provider fetches **no** quota and makes **no** network call (fail-closed dispatch isolation).
 
@@ -83,7 +83,7 @@ Every adapter reads its credential with the same fd-anchored, `O_NOFOLLOW`, regu
 
 ## Output
 
-A single compact all-info line is the default human-readable output (Phase 7, COM-239) — nothing is hidden, and the shape is **identical** whether the caller is the orchestrator (`agent_id` is `null`) or a subagent:
+A single compact all-info line is the default human-readable output (Phase 7) — nothing is hidden, and the shape is **identical** whether the caller is the orchestrator (`agent_id` is `null`) or a subagent:
 
 ```text
 ctx <context_tokens>/<window> <context_pct>% | <model>[ <provider>] | src:<usage_source> | quota.5h <n>%, quota.7d <n>%, quota.fable <n>%[, quota.opus <n>%, quota.sonnet <n>%]
@@ -140,7 +140,7 @@ Supported user-facing overrides:
 | --- | --- |
 | `JSWARM_CTX_WINDOW` | Positive integer model window token override. |
 | `JSWARM_CTX_TAIL_LINES` | Number of recent transcript lines searched for a subagent identity nonce. Defaults to `200`. |
-| `JSWARM_CTX_OUTCOME_LOG` | Path to the raw jAgentProxy `[OUTCOME]` log. When unset, the default is auto-resolved (Phase 7, COM-239): `$JARVISWARM_ROOT/log/jagentproxy.log` if that file exists, else `${JSWARM_HOME:-$HOME/dev/jswarm}/log/jagentproxy.log` if that file exists, else no outcome log (falls through to the transcript-tail source). |
+| `JSWARM_CTX_OUTCOME_LOG` | Path to the raw jAgentProxy `[OUTCOME]` log. When unset, the default is auto-resolved (Phase 7): `$JARVISWARM_ROOT/log/jagentproxy.log` if that file exists, else `${JSWARM_HOME:-$HOME/dev/jswarm}/log/jagentproxy.log` if that file exists, else no outcome log (falls through to the transcript-tail source). |
 | `JSWARM_CTX_MODEL_WINDOWS` | Path to an alternate `model-windows.yaml` registry. |
 | `JSWARM_CTX_CREDENTIALS` | Path to the Anthropic OAuth credentials JSON used for the Anthropic-caller quota GET. Defaults to `~/.claude/.credentials.json`. Read header-only; token never logged/persisted. |
 | `JSWARM_CTX_CODEX_CREDENTIALS` | Path to the OpenAI/Codex OAuth credentials JSON used for the gpt-caller quota GET. Defaults to a non-`disabled` `~/.cli-proxy-api/codex-*.json`. Read header-only (`access_token` + `account_id`); never logged/persisted. |

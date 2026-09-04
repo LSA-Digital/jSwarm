@@ -99,13 +99,12 @@ required and all owner-facing — an id is not a name.
 
 **`name` is a short DESCRIPTION, never the ordinal restated.** The portal
 renders the card header as `Step <ordinal> · <name>`, so `name: "Step 1"`
-produces the broken header "Step 1 · Step 1" (owner-reported, HAS-617
-round-017). Write what the step does in a few words — `"Upload the EPC PDF"`,
+produces the broken header "Step 1 · Step 1" (owner-reported, round-017). Write what the step does in a few words — `"Upload the EPC PDF"`,
 `"Build from the document row"` — the way a checklist line would read.
 
 **`expected_outcome` is ONE sentence, then short bullets for observables.**
 Never a wall of text, and never the whole journey's outcome pasted onto every
-step (owner-reported, HAS-617 round-017: a 757-character journey blob repeated
+step (owner-reported, round-017: a 757-character journey blob repeated
 on all four step cards). Shape:
 
 ```
@@ -154,7 +153,7 @@ scenario about durable draft state.
 
 ## Best practice: UAT round content writing
 
-**Journey shape (owner-ruled 2026-09-01, HAS-617 round-017 failure close):** ONE
+**Journey shape (owner-ruled 2026-09-01, round-017 failure close):** ONE
 document is each journey's end-to-end thread — other documents may be uploaded
 within it, but a single named document travels the whole journey the way a real
 user's would. Steps are SPECIFIC BUILD ACTIONS; do not atomize into minor
@@ -164,7 +163,7 @@ different journeys so the round exercises different pipeline permutations
 (randomized coverage through clear user-shaped arcs).
 
 
-Owner-taught rules (HAS-617 rounds 016-017); every one of these was a real
+Owner-taught rules (rounds 016-017); every one of these was a real
 mid-walk complaint. Apply them to every journey and step before sealing:
 
 1. **Number the journeys.** Titles read `Journey N — <name>`. The owner
@@ -187,15 +186,15 @@ mid-walk complaint. Apply them to every journey and step before sealing:
    implied knowledge.** Name the concrete UI surface and control: which editor
    to open, which button to select, what appears next ("open the Inputs editor
    and select Build" — not "continue through the normal Inputs flow";
-   owner-reported, HAS-617 round-017 reseal 3). Sweep sealed instructions for
+   owner-reported, round-017 reseal 3). Sweep sealed instructions for
    "normal", "available", "as appropriate", "the named" before cutover.
 7. **Show the fixed-defect ledger identifiers in the advisory notices**
-   (owner-required, HAS-617 round-018, 2026-09-01). Every journey/step that
+   (owner-required, round-018, 2026-09-01). Every journey/step that
    re-proves a defect fixed in the fix cycle being tested MUST carry a
    `known_items` entry (rendered as the yellow advisory notice) whose text
    leads with the FULL defect-ledger identifier in its canonical form —
    `TICKET.DEFECTID.slug-slug-slug` (e.g.
-   `HAS-617.B211.activity-panel-stuck-merging-inputs`) — followed by one plain
+   `TICKET-XXX.B211.activity-panel-stuck-merging-inputs`) — followed by one plain
    sentence: what was broken, and what the owner should now see instead.
    Attach it to the specific step(s) via `step_refs` (never a journey-wide
    unscoped item). Multiple defects re-proven by one step get one advisory

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""COM-233 Phase 2 — pure ColGREP index-lag / ETA estimator.
+"""Phase 2 — pure ColGREP index-lag / ETA estimator.
 
 This module is the single shared, deterministic contract consumed by both the
 ColGREP MCP search formatter and the ticket-scoped precompact health check
-(COM-233 upgrades #2 and #3). It performs NO filesystem, HTTP, git, or
+(upgrades #2 and #3). It performs NO filesystem, HTTP, git, or
 wall-clock IO of its own: every fact the estimator reasons about arrives via a
 fully-collected ``IndexLagSnapshot``. Real-world collectors (worktree
 resolver, registry reader, heartbeat/manifest readers, live :3280 probes) are
@@ -150,7 +150,7 @@ class IndexLagSnapshot:
     live_index_stats: Mapping[str, Any] | None
     progress_samples: tuple[ProgressSample, ...]
     source_errors: tuple[str, ...]
-    # COM-233 A/C10 REVISE BLOCKER 1: True when expected-file evidence (git
+    # A/C10 REVISE BLOCKER 1: True when expected-file evidence (git
     # ls-files) could not be collected. Callers must never mistake this for a
     # complete expected-file set — `expected_files` is not "everything is
     # indexed" evidence when this flag is set.
@@ -334,7 +334,7 @@ def freshness_age_report(
     budget_seconds: float | None,
     budget_source: str,
 ) -> dict[str, Any]:
-    """COM-349 Phase 3: per-index freshness age + budget, never fabricated.
+    """Phase 3: per-index freshness age + budget, never fabricated.
 
     Missing or malformed ``last_indexed_at`` yields ``freshness_state=unknown``
     and null ages. Unknown is never coerced to fresh. A numeric age is compared
@@ -892,7 +892,7 @@ def resolve_base_index_last_indexed(
 
 
 # =============================================================================
-# COM-233 Phase 3 — ticket-scoped ColGREP index-health IO collectors + CLI.
+# Phase 3 — ticket-scoped ColGREP index-health IO collectors + CLI.
 #
 # Everything below this line performs real IO (filesystem, git subprocess,
 # env reads). ``estimate_lag`` above stays pure: collectors here gather
@@ -1074,7 +1074,7 @@ def _is_worktree_checkout(repo_root: Path) -> bool:
 
 
 def _select_worktree_index(*, repo_root: Path, indices_root: Path) -> dict[str, Any] | None:
-    """Best-effort worktree index lookup via ``colgrep_worktree`` (COM-171/172 manifest).
+    """Best-effort worktree index lookup via ``colgrep_worktree`` (/172 manifest).
 
     Fail-open: any import/resolution failure falls back to ``None`` so callers
     degrade to the base-index scan / unknown estimate rather than raising."""
@@ -1637,7 +1637,7 @@ def build_health_payload(
 
 def _cli_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="COM-233 ticket-scoped ColGREP index-lag health CLI (read-only, fail-open).",
+        description="ticket-scoped ColGREP index-lag health CLI (read-only, fail-open).",
     )
     # NB: dest must NOT be "command" — a "--command" option on the "health"
     # subparser below needs its own distinct dest so it cannot clobber this

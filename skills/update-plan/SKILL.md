@@ -5,7 +5,7 @@ description: Normalize JSWARM plan frontmatter, propose or apply explicit conten
 
 # Update Plan
 
-## Safety contract (COM-219 — destructive skill, agent-invocable)
+## Safety contract (destructive skill, agent-invocable)
 - **Default is read-only / no-write.** Invoked with no args (or `--help`/`status`), this skill only inspects and reports/proposes frontmatter and content hygiene candidates; it performs NO write, apply, push, delete, remote, trim, or content-relocation/archive move.
 - **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation — or run an approved preview/dry-run first and act only on that approved plan.
 - **Agents are NOT locked out** (no `disable-model-invocation`); this contract — not frontmatter — is what gates writes, so an agent can use the read-only path freely and must pause for approval before mutating.
@@ -60,7 +60,7 @@ If no plan resolves (no ticket, missing file, ambiguous/invalid key), the module
 The module reuses `jswarm/plan_status/reconcile.normalize_plan_file` (no
 reimplementation). It hoists frontmatter to line 1, derives `status` / `phase` /
 `ac_complete` from `plan_status` + the `## Acceptance Criteria` section, **plus the
-COM-167 AC-9 counts `nfr_complete` / `uat_complete`** (🟢 rows / total rows of the
+AC-9 counts `nfr_complete` / `uat_complete`** (🟢 rows / total rows of the
 `## A/C-to-NFR Traceability Matrix` and `## UAT-Scenario Traceability Matrix`; omitted
 when the matrix is absent ⇒ the HUD shows no segment), and canonicalizes field order.
 The operation is **idempotent** — re-running on an already-clean plan produces no diff.
@@ -71,7 +71,7 @@ It then prints a deterministic summary line:
 update-plan KEY-XXX: status=ACTIVE phase=2.planning ac=1/8 nfr=2/3 uat=1/4 normalized=Y
 ```
 
-**Determinism boundary (COM-167 AC-9/AC-10):** this module only *counts* the matrices
+**Determinism boundary (AC-9/AC-10):** this module only *counts* the matrices
 already in the plan — it never reads the ticket-local test/result files, which keeps the
 count path deterministic and project-agnostic. Keeping those matrix Status cells truthful
 from the local result docs is a **separate** pass owned by `/jPrecompact` Step 2.0
@@ -133,7 +133,7 @@ fallbacks were removed — see `.claude/hud/README.jswarm-hud.md`):
 
 ```bash
 .venv/bin/python jswarm/update_plan/cli.py backfill --repo-root . \
-  --evidence .jswarm/plans/COM-167/COM-167.backfill-evidence.md
+  --evidence .jswarm/plans/TICKET-XXX/TICKET-XXX.backfill-evidence.md
 ```
 
 "Active" = `.jswarm/plans/*.plan.*.md` whose derived `status` ∈ {ACTIVE, READY_FOR_MERGE}
@@ -146,5 +146,5 @@ before/after counts to the evidence artifact and is fail-open.
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-06-14 | COM-167 (Phase 2, /jGo) | Initial skill facade over `jswarm/update_plan/cli.py`: resolve → normalize → propose/apply content hygiene → pull-render HUD refresh → backfill. Fail-open; `.venv/bin/python` only. |
-| 2026-06-14 | COM-167 (Phase 8, /jGo) | AC-9: module now also derives `nfr_complete`/`uat_complete` (matrix 🟢/total) into frontmatter + summary line. AC-10: documented the determinism boundary + the separate `/jPrecompact` Step 2.0 reconciler (`jswarm/precompact_reconcile/`) that feeds the matrices before this count. |
+| 2026-06-14 | (Phase 2, /jGo) | Initial skill facade over `jswarm/update_plan/cli.py`: resolve → normalize → propose/apply content hygiene → pull-render HUD refresh → backfill. Fail-open; `.venv/bin/python` only. |
+| 2026-06-14 | (Phase 8, /jGo) | AC-9: module now also derives `nfr_complete`/`uat_complete` (matrix 🟢/total) into frontmatter + summary line. AC-10: documented the determinism boundary + the separate `/jPrecompact` Step 2.0 reconciler (`jswarm/precompact_reconcile/`) that feeds the matrices before this count. |
