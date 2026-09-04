@@ -14,8 +14,8 @@ Both are code search only. Neither talks to a network service, a Docker
 container, or any document corpus -- there is no content-search backend here.
 This is a fresh, small, public implementation; it does not import or share
 code with the private `next-plaid/colgrep-mcp-server.py`, which also backs a
-private document corpus on port 3281 and several company-specific ingest
-paths that are not part of this product.
+private document-search backend and several company-specific ingest paths
+that are not part of this product.
 
 The `colgrep` binary is resolved from the `COLGREP_BIN` environment variable
 if set, else from `PATH` -- never a hardcoded path, since that would encode

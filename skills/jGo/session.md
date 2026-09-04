@@ -15,19 +15,7 @@ executable context or one clear blocker; do not start a task here.
    reading. Gather the ticket, plan path, active phase, next incomplete task,
    A/C progress, selected `--phased` or `--continuous` mode, declared team,
    testing/UAT/E2E/NFR applicability, worktree facts, and status.
-4. Before task work, run the read-only ColGREP lifecycle check. ColGREP is
-   optional; an uninstalled or erroring check must never block the loop:
-
-   ```bash
-   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/colgrep_index_lifecycle.py \
-     check --command implement --json || echo '{"note": "ColGREP unavailable, continuing"}'
-   ```
-
-   Continue silently when there is no unsuppressed question, or when the
-   command itself failed to run. Surface a single advisory operator choice
-   for ambiguous candidates; never auto-apply cleanup, and never block on
-   this check.
-5. Only after admission succeeds, call the existing dashboard `started`
+4. Only after admission succeeds, call the existing dashboard `started`
    mechanism. Preserve the command's `dashboard-facts` contract and
    `implement_progress_contract`; append/fold/compose/check remains owned by
    the existing dashboard contract. Do not write legacy machine cells.

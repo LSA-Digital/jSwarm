@@ -264,16 +264,4 @@ State file: `.jswarm/plans/TICKET-XXX/TICKET-XXX.new-work-state.md` (≤200 line
 
 **Skip protocol for:** Lite mode, Quick (depth 1) <15 min, simple single-ticket with no jOracle/research, user actively driving each step.
 
-## ColGREP Index Lifecycle Check (no-badgering)
-
-During **plan setup (before dispatching implementation)**, run the read-only ColGREP lifecycle check. It silently lets the certain-only evictor handle stale/orphan indices and surfaces ONE consolidated question only for genuinely ambiguous candidates, and only once per unchanged set (receipt-backed; no badgering). ColGREP is optional; an uninstalled or erroring check must never block planning:
-
-```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/colgrep_index_lifecycle.py \
-  check --command jPlan --json || echo '{"note": "ColGREP unavailable, continuing"}'
-```
-
-- `question` null or `suppressed: true`, or the command itself failed to run → proceed silently; no action needed.
-- `question` present → surface its `prompt` + each `candidate` (with its `reasons`) using the actions **keep-protect / delete-now / defer / inspect-details**. Advisory only: never block planning, and never auto-`--apply` cleanup from a lifecycle command (deletion stays operator-gated; dry-run is the default).
-
 ---

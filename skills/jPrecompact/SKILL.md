@@ -687,45 +687,11 @@ Never silently assume state after a compaction. Confirm.
 
 ---
 
-## ColGREP Index Lifecycle Check (no-badgering)
-
-During checkpoint (after the plan/state is written; full mode), run the read-only ColGREP lifecycle check. It silently lets the certain-only evictor handle stale/orphan indices and surfaces ONE consolidated question only for genuinely ambiguous candidates, and only once per unchanged set (receipt-backed; no badgering):
-
-```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/colgrep_generation_reaper.py \
-  sweep-certain --caller precompact --worktree "$PWD" --max-targets 3 --json || true
-
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/colgrep_index_lifecycle.py \
-  check --command precompact --json || echo '{"note": "ColGREP unavailable, continuing"}'
-```
-
-ColGREP is optional; an uninstalled or erroring check must never block the checkpoint.
-
-- `question` null or `suppressed: true`, or the command itself failed to run → proceed silently; no action needed.
-- `question` present → surface its `prompt` + each `candidate` (with its `reasons`) using the actions **keep-protect / delete-now / defer / inspect-details**. Advisory only; never block the checkpoint, and never auto-`--apply` cleanup from a lifecycle command (deletion stays operator-gated; dry-run is the default).
-
-After the eviction check, run the **ticket-scoped ColGREP index-health check** so the checkpoint records whether *this ticket's* index is fresh, lagging, or stalled: scoped to the resolved ticket, never a blanket all-index scan:
-
-```bash
-# Substitute $TICKET with the ACTIVE ticket key (from Step 1a). If the active
-# ticket is unknown, OMIT --ticket entirely so the CLI falls back to
-# session-binding -> session-title -> git-branch resolution: an explicit --ticket
-# WINS over fallback, so a literal "TICKET-XXX" placeholder would force
-# health_state=unknown. Use --repo-root "$PWD" (the resolved repo root), not ".".
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/colgrep_index_lag_eta.py \
-  health --command precompact --ticket "$TICKET" --repo-root "$PWD" --json || true
-```
-
-- **Fail-open:** the health CLI always exits 0 and emits `colgrep.ticket-index-health.v1`; the trailing `|| true` guarantees a health-command failure NEVER blocks the checkpoint.
-- **Order:** runs immediately AFTER the eviction `check` above (evict/adjudicate first, then report this ticket's freshness).
-- **Record the health advisory into checkpoint state:** fold the resulting **health advisory** (its `health_state`, plus any outstanding-file count / ETA / `stalled` note) into the Surface 1 **state** file under a short "ColGREP index health" line; advisory only; it never gates the checkpoint.
-
----
-
 ## Changelog
 
 | Date       | Author   | Change |
 |------------|----------|--------|
+| 2026-09-04 | Claude Opus 5 | **Removed the "ColGREP Index Lifecycle Check" section** (the `colgrep_index_lifecycle.py check`, `colgrep_generation_reaper.py sweep-certain`, and `colgrep_index_lag_eta.py health` invocations). Those scripts classified/evicted indices for a private out-of-band indexing daemon that this public repo never shipped; `check` always reported `colgrep_available: false` here since the enterprise-only evictor it depended on was never part of this repo either. ColGREP is now the public `colgrep` CLI, which auto-indexes and manages its own storage — there is nothing left for this check to do. |
 | 2026-08-31 | Grok 4.6 | **`/jPrecompact --lite` runs `/jStatus --lite`, not full `/jStatus`.** Lite currency gate inspects `.jstatus.quick.latest.md`; stale/missing ⇒ `/jStatus --lite` only. Full mode still inspects `.jstatus.latest.md` and re-renders with full `/jStatus`. Lite must not escalate to a standard-mode render when the quick template is absent; record the gap and continue. |
 | 2026-08-30 | Fable 5  | **jStatus currency gate + heavy-use retro rule (owner-directed; full AND lite).** Before the state file is written, verify `.jstatus.latest.md` is accurate (provenance + cycle header vs governing files + material events); stale ⇒ run full `/jStatus` first. The state file links the report and never repeats its content: resume mechanics and post-render deltas only. Feature-feedback roster extended (fix cycle, fix-uat portal) plus a heavy-use rule: any skill/mechanism in heavy use this interval gets detailed retro coverage when there is feedback; heavy use with owner corrections and no retro coverage is a checkpoint defect. |
 | 2026-08-22 | Grok 4.6 | **Lite files retros + standing feature-feedback directive.** `/jPrecompact --lite` now files the ticket retro and separate kind-files for recently updated features (jGuardrail, jCheckin, test UAT lifecycle) only when those features were used this interval and there is feedback, weighing benefits (re-work and risk avoided) against costs (time and tokens). Lite may make a scoped retro-only commit; it still skips promotion review, matrix reconcile, checkpoint commit, TaskList, and broad plan maintenance, and it does not run the full-mode jCheckin telemetry re-extract or changelog-only "no new activity" rows. |
