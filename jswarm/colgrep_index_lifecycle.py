@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""COM-204 — ColGREP :3280 code-search index lifecycle classifier + plane/base guard.
+"""ColGREP :3280 code-search index lifecycle classifier + plane/base guard.
 
 Phase 1 surface: classify every loaded code-search (:3280) index into exactly one
 lifecycle class — ``Active``, ``Superseded-generation``, ``Orphan``, or
@@ -80,7 +80,7 @@ def _is_worktree_or_overlay_name(name: str) -> bool:
 # A worktree family is `{project}-wt-{ticket}[-wt-...]`. Each `-wt-`-delimited segment
 # must be a safe slug — no path separators, no `..`, no whitespace/control chars — so a
 # malformed/traversal name (e.g. `../evil-wt-x`) can NEVER parse as a canonical
-# generation and therefore can never reach a guarded DELETE (COM-204 Phase-3 BLOCKER-4).
+# generation and therefore can never reach a guarded DELETE (Phase-3 BLOCKER-4).
 _SAFE_FAMILY_SEGMENT_RE = re.compile(r"^[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$")
 
 
@@ -106,7 +106,7 @@ class ParsedName:
 def _parse_generation(name: str) -> ParsedName | None:
     """Parse a canonical worktree generation name, or None if not confidently parseable.
 
-    Enforces mode/suffix COHERENCE (COM-204 BLOCKER-1): mode-A names MUST carry the
+    Enforces mode/suffix COHERENCE (BLOCKER-1): mode-A names MUST carry the
     ``-overlay`` suffix and full-index names MUST NOT. A name that violates this contract
     (e.g. ``...-a-g000001-deadbeef`` without ``-overlay``, or ``...-full-...-overlay``) is
     malformed and returns None — so it can never become a certain eviction candidate.
@@ -133,7 +133,7 @@ def _family_key(name: str) -> str | None:
     """Family key for any worktree-shaped name (canonical generation OR logical index).
 
     Returns None for unsafe families (path-traversal / malformed) so such names can
-    never become an eviction family key (COM-204 Phase-3 BLOCKER-4).
+    never become an eviction family key (Phase-3 BLOCKER-4).
     """
     parsed = _parse_generation(name)
     if parsed is not None:
@@ -149,7 +149,7 @@ def _base_project_of_family(family: str) -> str:
 
     Naive prefix only; used for human-readable messaging. Ownership/protection
     decisions MUST use ``_owning_active_base`` so a base name that itself contains
-    ``-wt-`` cannot mis-compute an active generation into an orphan (COM-204 MAJOR-3).
+    ``-wt-`` cannot mis-compute an active generation into an orphan (MAJOR-3).
     """
     return family.split("-wt-", 1)[0]
 
@@ -185,7 +185,7 @@ def _registry_row_families(row: dict[str, Any]) -> set[str]:
 
     A well-formed row resolves to exactly one family; an empty set (no family key) or a
     set of size > 1 (trustworthy sources disagree) is malformed and makes the registry
-    untrusted (COM-204 MAJOR-R3 malformation classes).
+    untrusted (MAJOR-R3 malformation classes).
     """
     families: set[str] = set()
 
@@ -302,7 +302,7 @@ class ClassificationReport:
         }
 
 
-# --- COM-244 P0-7: accepted-generation-aware cleanup refusal guard -------------------
+# --- P0-7: accepted-generation-aware cleanup refusal guard -------------------
 #
 # A generation with ``normal_results_allowed: True`` is proven queryable/serving and
 # must never be classified ``Orphan`` or recommended for cleanup by its family, even
@@ -457,7 +457,7 @@ def observe_build_state(
     now: datetime,
     builder_live: bool = False,
 ) -> BuildStateObservation | None:
-    """Purely derive COM-215 build state signals without changing lifecycle decisions."""
+    """Purely derive build state signals without changing lifecycle decisions."""
     if entry is None and not heartbeat and not manifest and not restart_history:
         return None
     now = now.astimezone(timezone.utc) if now.tzinfo is not None else now.replace(tzinfo=timezone.utc)
@@ -549,7 +549,7 @@ def _load_registry(registry_path: str | Path) -> tuple[dict[str, dict[str, Any]]
         payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:  # noqa: BLE001 - an unreadable registry is NOT evidence of "no worktrees".
         return {}, RegistryTrust(trusted=False, present=True, error=f"worktrees.json unreadable: {exc}")
-    # --- Registry-shape trust contract (fail-closed; COM-204 MAJOR-1/R1/R2) ----------
+    # --- Registry-shape trust contract (fail-closed; MAJOR-1/R1/R2) ----------
     # A PRESENT registry is trusted ONLY if it has a single, unambiguous, well-formed
     # shape. Anything non-canonical is untrusted (NOT trusted-empty, which would orphan
     # /evict live generations). Trusted shapes:
@@ -628,8 +628,8 @@ def _default_current_generation(family: str, entry: dict[str, Any]) -> str | Non
     canonical generation of this family. The live `worktrees.json` `api_index_name` is
     usually the logical worktree BASE (e.g. ``hai-sim-engine-wt-has-497``), which does
     NOT parse as a generation -> returns None, so the classifier holds the family
-    Ambiguous rather than guess (COM-204 BLOCKER-2). The Phase 3 evictor supplies a
-    COM-171 manifest-backed resolver to recover certain supersession.
+    Ambiguous rather than guess (BLOCKER-2). The Phase 3 evictor supplies a
+    manifest-backed resolver to recover certain supersession.
     """
     for key in ("api_index_name", "current_generation", "active_generation", "served_index"):
         value = str(entry.get(key) or "").strip()
@@ -660,10 +660,10 @@ def classify(
     ``current_generation_resolver(family, registry_entry) -> generation_name | None`` is
     the authoritative pointer to a live family's current generation. The default reads it
     from the registry row only when it parses as a canonical generation; the Phase 3
-    evictor injects a COM-171 manifest-backed resolver. When no trustworthy pointer is
+    evictor injects a manifest-backed resolver. When no trustworthy pointer is
     available, multi-generation live families are held Ambiguous (never guessed).
 
-    ``policy_resolver(family) -> ColgrepPolicy | None`` is the COM-204 layered policy
+    ``policy_resolver(family) -> ColgrepPolicy | None`` is the layered policy
     seam: the per-family ``max_live_generations`` cap is resolved from the owning
     project's policy rather than from a single global scalar. When the resolver is
     absent (or returns no policy for a family), the global ``max_live_generations``
@@ -821,7 +821,7 @@ def _classify_one(
                     family=_family_key(name))
 
     # Fail-closed on invalid policy: a cap < 1 is malformed -> no generation-family
-    # decision can be certain, so hold all worktree/overlay names Ambiguous (COM-204 MAJOR-2).
+    # decision can be certain, so hold all worktree/overlay names Ambiguous (MAJOR-2).
     if max_live_generations < 1:
         return make("Ambiguous", certainty="ambiguous", protected=False, evictable=False,
                     policy_source="policy",
@@ -857,7 +857,7 @@ def _classify_one(
         # when the pointer (a) resolves, (b) parses as a generation of this family,
         # (c) is actually loaded, and (d) is the highest loaded generation. If the
         # registry/API disagree, certainty is gone -> hold the WHOLE family Ambiguous
-        # (COM-204 BLOCKER-2). The default resolver returns None when api_index_name is
+        # (BLOCKER-2). The default resolver returns None when api_index_name is
         # the worktree base, which is the common live case.
         current_name = current_generation_resolver(family, registry_entry)
         current_parsed = _parse_generation(current_name) if current_name else None
@@ -873,11 +873,11 @@ def _classify_one(
                         policy_source="registry",
                         reasons=[f"live worktree {family}: no trustworthy current-generation pointer "
                                  f"(resolved={current_name!r}, loaded_max=g{loaded_max:06d}) — held fail-closed; "
-                                 "certain supersession requires the COM-171 manifest resolver (Phase 3)"],
+                                 "certain supersession requires the manifest resolver (Phase 3)"],
                         family=family, generation=parsed.generation,
                         worktree_path=wt_path or None, owner_state="owner-present")
 
-        # COM-204 layered policy seam (critic MAJOR-4): resolve the per-family cap ONLY
+        # layered policy seam (critic MAJOR-4): resolve the per-family cap ONLY
         # here — strictly downstream of the valid_current gate, and never for malformed
         # names, untrusted registry, orphan candidates, or families lacking a trustworthy
         # current pointer. Absent resolver/policy -> global default (Phase-1 behavior); a
@@ -1058,7 +1058,7 @@ def main(argv: list[str] | None = None) -> int:
                             help="No-op: classify is always read-only (never deletes). Accepted for operator/UAT consistency.")
     p_classify.add_argument("--json", action="store_true", help="Emit full JSON report.")
 
-    # COM-204 Phase 2: fleet coverage planner (read-only; proposes repair, never delete).
+    # Phase 2: fleet coverage planner (read-only; proposes repair, never delete).
     p_coverage = sub.add_parser("coverage",
                                 help="Plan active-worktree index coverage from active-project policy.")
     p_coverage.add_argument("--active-projects", default=str(DEFAULT_ACTIVE_PROJECTS_PATH),
@@ -1069,7 +1069,7 @@ def main(argv: list[str] | None = None) -> int:
     p_coverage.add_argument("--dry-run", action="store_true",
                             help="No-op: coverage planning never mutates. Accepted for operator/UAT consistency.")
 
-    # COM-204 Phase 4: no-badgering lifecycle check for the four lifecycle commands.
+    # Phase 4: no-badgering lifecycle check for the four lifecycle commands.
     from jswarm.colgrep_lifecycle_check import LIFECYCLE_COMMANDS as _LIFECYCLE_COMMANDS
     p_check = sub.add_parser("check",
                              help="No-badgering lifecycle check: one consolidated question only for genuinely ambiguous candidates.")
@@ -1084,7 +1084,7 @@ def main(argv: list[str] | None = None) -> int:
                          help="No-badgering receipts store (defaults to the ColGREP state tree).")
     p_check.add_argument("--session-id", default=None)
 
-    # COM-204 Phase 3: guarded cleanup (dry-run by default; deletes only via evictor chokepoints).
+    # Phase 3: guarded cleanup (dry-run by default; deletes only via evictor chokepoints).
     p_cleanup = sub.add_parser("cleanup", help="Classify then guarded-evict safe ColGREP lifecycle candidates.")
     # MINOR-1: dry-run and apply are mutually exclusive; dry-run is the default.
     cleanup_mode = p_cleanup.add_mutually_exclusive_group()
@@ -1104,7 +1104,7 @@ def main(argv: list[str] | None = None) -> int:
                            help="Durable JSONL audit path (defaults to the ColGREP evictor audit log).")
 
     args = parser.parse_args(argv)
-    # COM-204 A/C 13: record mutating/advisory lifecycle command invocations in
+    # A/C 13: record mutating/advisory lifecycle command invocations in
     # the in-repo activity log (fail-open; writes to the repo log file, never to
     # stdout — the JSON contract is preserved). `classify` is a diagnosis-time
     # read-only probe and must not write receipts or activity.

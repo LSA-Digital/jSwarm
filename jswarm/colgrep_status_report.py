@@ -1,13 +1,13 @@
 """Read-only ColGREP health/status report generator.
 
-COM-241 AC-5 freezes this public API in RED tests first (see
+AC-5 freezes this public API in RED tests first (see
 ``jswarm/tests/test_colgrep_status_report.py`` and
-``.jswarm/plans/COM-241/COM-241.specs.status-report.md``). This module implements the
+``.jswarm/plans/TICKET-XXX/TICKET-XXX.specs.status-report.md``). This module implements the
 GREEN phase: ``build_report`` composes the ``colgrep.status-report.v1`` payload purely
 over the injectable ``Probes`` seam (no direct I/O, fail-open per probe), and
 ``render_markdown`` renders that payload as Markdown (a pure function of the payload).
 
-The retro rule this encodes (HAS-520 status-before-recovery): the FIRST answer is
+The retro rule this encodes (status-before-recovery): the FIRST answer is
 always "is a rebuild currently running?" plus the active-jobs list, rendered before
 any table, advisory, or recommendation. Per-index health distinguishes "listed" from
 "queryable" (a base can be listed with docs but fail a live query — the malformed-base
@@ -33,7 +33,7 @@ _GENERATION_RE = re.compile(r"^(?P<prefix>.+)-full-g\d+-[0-9a-f]+$")
 
 _LAUNCHD_COMPONENTS = ("overlay-fleet-supervisor", "watcher", "health-check")
 
-# COM-241 AC-6 jCritic delta finding (residual of finding #6, reopened at the
+# AC-6 jCritic delta finding (residual of finding #6, reopened at the
 # report layer): `colgrep_launchd_control.py` correctly treats
 # overlay-fleet-supervisor/watcher as LONG-RUNNING — `loaded` alone is not
 # proof of "up" for them, a live pid is also required, or the daemon may be
@@ -112,7 +112,7 @@ def _read_active_ops_jobs(
             stale.append({**job, "stale_reason": "pid-not-live"})
     return {"active": active, "stale": stale}
 
-# COM-241 AC-6 Bug 2 fix (HAS-520 gap): the original rebuild-scan regex only matched
+# AC-6 Bug 2 fix (a gap in the original rebuild-scan regex): it only matched
 # native `colgrep init` / mem-guard / refresh-indices processes and was BLIND to a
 # live `colgrep_worktree.py build-overlay` (or `refresh-if-stale`) encode — during a
 # live overlay build the status report falsely said "Rebuild running: NO". Match
@@ -143,18 +143,18 @@ class Probes:
     # None so existing callers/tests that don't supply it get an honest "no probe"
     # container state rather than a fabricated healthy default.
     container_stats: Callable[[], dict[str, Any] | None] | None = None
-    # Optional (COM-241 Phase B): read-only fleet-plan diagnostic snapshot
+    # Optional (Phase B): read-only fleet-plan diagnostic snapshot
     # (`colgrep_overlay_fleet_supervisor.py plan`). Defaults to None so existing
     # callers/tests that don't supply it get the back-compat behavior of no
     # worktree-level action_sequence entries.
     fleet_plan: Callable[[], dict[str, Any] | None] | None = None
-    # Optional (COM-289 BR-15): registry-integrity lint findings, reusing
+    # Optional (BR-15): registry-integrity lint findings, reusing
     # `colgrep_worktree._registry_integrity_findings()` (the same BR-05 detection
     # already wired into `health`) via an injected probe rather than reimplementing
     # detection here. Defaults to None so absent callers get an honest "no probe"
     # row instead of a fabricated-clean one — report/health parity is the point.
     registry_integrity_findings: Callable[[], list[dict[str, Any]]] | None = None
-    # Optional (COM-289 BR-08): cross-plane disagreement findings, reusing
+    # Optional (BR-08): cross-plane disagreement findings, reusing
     # `colgrep_worktree._status_plane_disagreements()` (the same detection already
     # wired into `health`) via an injected probe rather than reimplementing it here.
     # Defaults to None so absent callers get an honest "no probe" row instead of a
@@ -253,7 +253,7 @@ def _parse_overlay_target(cmd: str) -> dict:
 def _scan_ps_lines_for_rebuilds(ps_stdout: str) -> list:
     """Pure: parse `ps -axo pid,etime,command` stdout into raw rebuild-job dicts.
 
-    Extracted from the live `scan_active_rebuilds` probe (COM-241 AC-6 Bug 2) so the
+    Extracted from the live `scan_active_rebuilds` probe (AC-6 Bug 2) so the
     overlay-build/refresh-if-stale regex extension is directly testable without
     mocking `subprocess` — feed captured `ps` stdout text straight in. Matches the
     original native-rebuild patterns PLUS the overlay-build/refresh-if-stale worktree
@@ -556,7 +556,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
             "detail": ", ".join(f"PID {job['pid']}" for job in active_jobs) if active_jobs else "no active rebuild",
         }
     )
-    # COM-289 BR-15: registry-integrity lint parity with `health` (BR-05's linter,
+    # BR-15: registry-integrity lint parity with `health` (BR-05's linter,
     # reused via probe — see the `registry_integrity_findings` field docstring).
     # Fail-CLOSED tri-state, same shape as Section 0's active-rebuild scan: probe
     # absent -> honest "no probe" (never fabricated-clean); probe raises -> unknown
@@ -590,7 +590,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
                 }
             )
         elif registry_findings:
-            # COM-289 BR-17: "api-index-equals-base-informational" (no dedicated
+            # BR-17: "api-index-equals-base-informational" (no dedicated
             # index -- the honest base-authoritative encoding, see
             # colgrep_worktree._registry_integrity_findings' docstring) must not
             # render as a ⚠️ WARN row, but must never be silently dropped either.
@@ -616,7 +616,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
                     {
                         "component": "registry integrity lint",
                         "state": f"ℹ️ {len(informational_findings)} informational — api-index-equals-base (no dedicated index)",
-                        "detail": f"tickets: {tickets}; likely honest base-authoritative encoding, not corruption (COM-289 BR-17)",
+                        "detail": f"tickets: {tickets}; likely honest base-authoritative encoding, not corruption (BR-17)",
                     }
                 )
         else:
@@ -628,7 +628,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
                 }
             )
 
-    # COM-289 BR-08: status-plane disagreement parity with `health` (reused via
+    # BR-08: status-plane disagreement parity with `health` (reused via
     # probe — see the `status_plane_disagreements` field docstring). Same fail-
     # CLOSED tri-state as the registry-integrity row above: probe absent -> honest
     # "no probe" (never fabricated-clean); probe raises -> unknown (never silently
@@ -730,7 +730,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
             rebuild_elapsed = "—"
             eta = "—"
             est_final_size = "—"
-            # R3 (COM-241 AC-5): classify generation/orphan-generation rows by TYPE
+            # R3 (AC-5): classify generation/orphan-generation rows by TYPE
             # FIRST, regardless of docs count. A listed generation with docs<=0 (or
             # unknown/absent stats) is "listed-unprobed" / "orphan-listed" — never the
             # base-style "❌ missing", which implies an actionable missing base.
@@ -853,7 +853,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
             "verify": verify,
         }
         if blocked_by_missing_parameter:
-            # Fix 3 (COM-241 AC-6): a command that still needs an operator-supplied
+            # Fix 3 (AC-6): a command that still needs an operator-supplied
             # value (`<cap>`, `<repo>`) is kept as a placeholder for readability, but
             # is explicitly flagged as not-yet-runnable so an agent/operator resolves
             # the parameter rather than executing an un-runnable command as-is.
@@ -896,7 +896,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
             (row["index"] for row in base_rows if row["health"] == "⚠️ queryability-unknown"), None
         )
 
-        # Fix 3 (COM-241 AC-6): orphan generations get a REAL guarded, agent-runnable
+        # Fix 3 (AC-6): orphan generations get a REAL guarded, agent-runnable
         # action, not just advisory text — and never `generation_reaper reap` (that
         # tool refuses without a worktree-generation manifest and preserves served
         # names) and never `colgrep_index_lifecycle.py cleanup` (a bare LRU/global
@@ -1001,7 +1001,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
         # Findings #1/#2/#11: supervision deficits are independent of base health —
         # health-check, then watcher, then fleet-supervisor (a launchd state of
         # None/unknown is treated the same as "not loaded" — never a healthy default).
-        # Fix 2/6 (COM-241 AC-6 jCritic pass): every mutating control step must be a
+        # Fix 2/6 (AC-6 jCritic pass): every mutating control step must be a
         # REAL agent-runnable command, never raw launchd-load prose — route
         # through the guarded `colgrep_launchd_control.py` wrapper (exact-label
         # match, before/after verification) instead. `restart` is used uniformly
@@ -1030,7 +1030,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
                     verify=f"colgrep_launchd_control.py status --component {key} --json shows loaded: true",
                 )
 
-        # COM-241 Phase B: consult the fleet-plan probe (read-only, fail-open) to
+        # Phase B: consult the fleet-plan probe (read-only, fail-open) to
         # surface per-worktree build-blocked recommendations that the fleet
         # supervisor already computed, AFTER the infra/base/orphan/launchd
         # steps above but BEFORE the terminal verify-no-reflap advisory below.
@@ -1341,7 +1341,7 @@ def _build_live_probes() -> "Probes":
             ["ps", "-axo", "pid,etime,command"], capture_output=True, text=True, timeout=5, check=True
         )
         jobs = _scan_ps_lines_for_rebuilds(completed.stdout)
-        # COM-241 AC-6 Bug 2: merge in the active-ops registry token as a
+        # AC-6 Bug 2: merge in the active-ops registry token as a
         # supplementary, best-effort source (never the fail-closed gate itself) —
         # it is written the instant an overlay build begins, which can be cheaper
         # and more reliable than reconstructing the worktree from a `ps` command line.
@@ -1454,7 +1454,7 @@ def _build_live_probes() -> "Probes":
         return None
 
     def fleet_plan() -> Optional[dict]:
-        # COM-241 Phase B: strictly read-only — the dry-run `plan` subcommand
+        # Phase B: strictly read-only — the dry-run `plan` subcommand
         # (never `run`/`once`, which spawn/supervise live watcher children).
         # Fail-open on ANY error (missing script, non-zero exit, unparsable
         # stdout) so a broken fleet-plan diagnostic degrades the status report
@@ -1479,11 +1479,11 @@ def _build_live_probes() -> "Probes":
         return parsed if isinstance(parsed, dict) else None
 
     def registry_integrity_findings() -> list[dict]:
-        # COM-289 BR-15/B5: reuse the BR-05 detection function verbatim (no
+        # BR-15/B5: reuse the BR-05 detection function verbatim (no
         # reimplementation) so `report` and `health` can never drift apart on what
         # counts as a registry-integrity violation. `_registry_integrity_findings`
         # returns [] only for a MISSING registry (a legitimate empty state); an
-        # unreadable/malformed registry now raises (COM-289 B5 -- it no longer
+        # unreadable/malformed registry now raises (B5 -- it no longer
         # swallows that into a false-clean []), so let it propagate here too, so
         # build_report's probe wrapper (below) marks this row "unknown", never
         # "clean".
@@ -1494,7 +1494,7 @@ def _build_live_probes() -> "Probes":
         return _registry_integrity_findings(DEFAULT_REGISTRY_PATH)
 
     def status_plane_disagreements() -> list[dict]:
-        # COM-289 BR-08: reuse the detection function verbatim (no reimplementation)
+        # BR-08: reuse the detection function verbatim (no reimplementation)
         # so `report` and `health` can never drift apart on what counts as a
         # cross-plane disagreement. `_status_plane_disagreements` already fails open
         # internally (unreadable/missing registry -> []), so a raise here means the
