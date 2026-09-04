@@ -35,7 +35,7 @@ specifically when an **interactive promotion-review gate** is required:
   first, then the deterministic refresh chain.
 - Any time you need to run the promotion-review gate by preset before reconciling matrix counts.
 
-The deterministic-only callers (`/jClose` `close-refresh`, `/jGo` `implement-gate`,
+The deterministic-only callers (`/jClose` `new-work-lint`, `/jGo` `implement-gate`,
 `/jPlan` `new-work-lint`) need **no** gate; they invoke `jswarm/update_ticket/cli.py`
 directly and never load this gate.
 

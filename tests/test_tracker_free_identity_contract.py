@@ -60,8 +60,9 @@ TRACKER_TICKET = "PS-14"
 def _build_round_fixture(area: Path, ticket: str) -> tuple[Path, Path]:
     """Write a minimal, schema-valid v2 round request + matching acceptance
     evidence for `ticket` under `area`, mirroring jUAT/SKILL.md's own worked
-    example (with real integer step counts, not the doc's placeholder
-    strings). Returns (request_path, evidence_path)."""
+    example, with the real per-journey integer step counts a fresh round
+    actually has (1, here) rather than the doc's `0` placeholder.
+    Returns (request_path, evidence_path)."""
     given, when, then = ["clause"], ["clause"], ["clause"]
     gwt_payload = json.dumps(
         {"given": given, "when": when, "then": then},

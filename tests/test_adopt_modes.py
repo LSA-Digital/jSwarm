@@ -117,3 +117,25 @@ def test_readopt_replaces_the_managed_block_not_appends(tmp_path):
 
     cfg = yaml.safe_load((repo / ".jswarm/config.yaml").read_text())
     assert cfg["tracker"] == {"adapter": "jira", "key_prefix": "BBB"}
+
+
+def test_adopt_tells_the_user_to_commit_the_dirty_tree_it_leaves(tmp_path):
+    # adopt writes/merges CLAUDE.md, .gitignore, .claude/settings.json, and
+    # .jswarm/ but never commits any of it, and getting-started.md/
+    # your-first-ticket.md never tell the user to. Before this fix `adopt`
+    # printed nothing about the resulting dirty tree at all -- a user
+    # proceeding straight to /jSetup carried it forward with no idea it was
+    # there. Drive the real subprocess and check both halves: the tree really
+    # is dirty, and adopt's own output says so.
+    repo = _repo(tmp_path, "proj6")
+    r = run("adopt", str(repo), home=tmp_path)
+    assert r.returncode == 0, r.stderr
+
+    status = subprocess.run(
+        ["git", "-C", str(repo), "status", "--porcelain"], capture_output=True, text=True, check=True,
+    )
+    assert status.stdout.strip(), "test setup assumption broken: adopt should leave untracked/modified files"
+
+    out = r.stdout + r.stderr
+    assert "uncommitted change" in out
+    assert "commit" in out.lower()

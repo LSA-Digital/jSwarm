@@ -258,12 +258,24 @@ def _cmd_install(args: argparse.Namespace) -> int:
             steps.append("colgrep")
             _save("partial")
 
-    if "skills" in steps:
+    # "skills" alone is not a fine-enough marker: the first `install` (no
+    # --with-colgrep) legitimately completes "skills" having deployed everything
+    # except the two colgrep-gated skills (colgrep-search, code-overview). A later
+    # `install --with-colgrep` -- the documented resume path ("re-run it with the
+    # flag added") -- must still redeploy skills once, now that colgrep is ready,
+    # even though "skills" is already marked done. "skills_colgrep" tracks that
+    # narrower fact: it is only set once colgrep-dependent skills have actually
+    # been included in a skills deploy.
+    skills_need_run = "skills" not in steps or (colgrep_ready and "skills_colgrep" not in steps)
+    if not skills_need_run:
         print("install: skills (already done)")
     else:
         print("install: skills")
         _install_skills(ctx, home, source, timestamp, with_colgrep=colgrep_ready)
-        steps.append("skills")
+        if "skills" not in steps:
+            steps.append("skills")
+        if colgrep_ready and "skills_colgrep" not in steps:
+            steps.append("skills_colgrep")
         _save("partial")
 
     if "portal_config" in steps:
@@ -396,11 +408,14 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
         return 0
 
     timestamp = backup_mod.utc_timestamp()
-    _install_skills(ctx, home, source, timestamp, with_colgrep="colgrep" in lock.steps_completed)
+    colgrep_ready = "colgrep" in lock.steps_completed
+    _install_skills(ctx, home, source, timestamp, with_colgrep=colgrep_ready)
     steps = list(lock.steps_completed)
     for step in ("venv", "skills"):
         if step not in steps:
             steps.append(step)
+    if colgrep_ready and "skills_colgrep" not in steps:
+        steps.append("skills_colgrep")
     lockfile.write(ctx, home, lockfile.Lock(public_version=to_version, installed_at=lock.installed_at, state=lock.state, steps_completed=steps))
     print(f"upgrade: done ({from_version} -> {to_version})")
     print("Next: ./install.sh verify   (here, in the jSwarm clone)")
@@ -457,7 +472,24 @@ def _cmd_uninstall(args: argparse.Namespace) -> int:
 
         skills_source = jswarm_paths.jswarm_home() / "skills"
         if skills_source.is_dir():
-            source_skill_names = [p.name for p in skills_source.iterdir() if p.is_dir()]
+            # Real skills first, same as _install_skills: everything directly
+            # under skills/ except the _shims/ grouping directory itself.
+            real_names = [p.name for p in skills_source.iterdir() if p.is_dir() and p.name != "_shims"]
+            source_skill_names = list(real_names)
+            # Shim skills (skills/_shims/<name>/) are deployed at their own
+            # top-level dest_root/<name>, exactly like a real skill -- not
+            # nested under "_shims" -- so they must be named here too, or
+            # uninstall never lists (and never removes) them. Mirror
+            # _install_skills' case-insensitive collision skip: a shim whose
+            # name only differs from a real skill's by case is never actually
+            # deployed under its own name, so it must not be listed for
+            # removal either (that path IS the real skill's directory).
+            shims_source = skills_source / "_shims"
+            if shims_source.is_dir():
+                real_names_lower = {name.lower() for name in real_names}
+                for shim_dir in shims_source.iterdir():
+                    if shim_dir.is_dir() and shim_dir.name.lower() not in real_names_lower:
+                        source_skill_names.append(shim_dir.name)
     except Exception:  # noqa: BLE001 - listing deployed skills must never block uninstall
         source_skill_names = []
 

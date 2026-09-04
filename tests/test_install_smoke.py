@@ -196,3 +196,59 @@ def test_lock_file_is_where_the_contract_says(installed_home):
 def test_portal_config_is_where_the_contract_says(installed_home):
     config_path = installed_home / ".jswarm" / "decision-review" / "config.json"
     assert config_path.is_file(), f"portal config missing at {config_path}"
+
+
+@pytest.fixture(scope="module")
+def uninstalled_home(tmp_path_factory):
+    """A fresh `install` (real skills + shims) immediately followed by a real
+    `uninstall --keep-backups`, both against their own throwaway HOME
+    (separate from `installed_home` above, which other tests still read
+    from). `--keep-backups` sidesteps the interactive "delete backups too?"
+    prompt so this runs unattended, matching how CI invokes it.
+    """
+    home = tmp_path_factory.mktemp("jswarm-uninstall-home")
+    env = {
+        "HOME": str(home),
+        "JSWARM_HOME": str(REPO_ROOT),
+        "PATH": "/usr/bin:/bin:/usr/sbin:/sbin:" + str(REPO_ROOT / ".venv" / "bin"),
+    }
+    install_result = subprocess.run(
+        ["./install.sh", "install"], cwd=str(REPO_ROOT), env=env, capture_output=True, text=True, timeout=120,
+    )
+    assert install_result.returncode == 0, (
+        f"install.sh install failed (exit {install_result.returncode})\n"
+        f"--- stdout ---\n{install_result.stdout}\n--- stderr ---\n{install_result.stderr}"
+    )
+    uninstall_result = subprocess.run(
+        ["./install.sh", "uninstall", "--keep-backups"],
+        cwd=str(REPO_ROOT), env=env, capture_output=True, text=True, timeout=120,
+    )
+    return home, uninstall_result
+
+
+def test_uninstall_removes_every_shim_it_installed(uninstalled_home):
+    """Before this fix, `uninstall` only listed the top-level names directly
+    under skills/ -- which never includes skills/_shims/*, since those are
+    deployed at their own top-level dest_root/<name> by _install_skills, not
+    nested under a literal '_shims' directory. That left every one of the
+    seven shims (close-ticket, fix, implement, merge, new-work, test, uat --
+    jsetup excluded, see the case-collision test above) behind after a
+    reported-successful uninstall. This drives the real `install` then
+    `uninstall` sequence and checks the actual filesystem result.
+    """
+    home, uninstall_result = uninstalled_home
+    assert uninstall_result.returncode == 0, (
+        f"uninstall failed (exit {uninstall_result.returncode})\n"
+        f"--- stdout ---\n{uninstall_result.stdout}\n--- stderr ---\n{uninstall_result.stderr}"
+    )
+    dest = home / ".claude" / "skills"
+    remaining_shims = [name for name in SHIM_NAMES if name != "jsetup" and (dest / name).exists()]
+    assert not remaining_shims, f"uninstall left shim skill(s) behind: {remaining_shims}"
+
+
+def test_uninstall_removes_every_real_skill_too(uninstalled_home):
+    home, uninstall_result = uninstalled_home
+    assert uninstall_result.returncode == 0, uninstall_result.stdout + uninstall_result.stderr
+    dest = home / ".claude" / "skills"
+    remaining = [name for name in _real_skill_names() if (dest / name).exists()]
+    assert not remaining, f"uninstall left real skill(s) behind: {remaining}"

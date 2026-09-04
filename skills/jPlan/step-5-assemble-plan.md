@@ -217,7 +217,7 @@ Three things are worth knowing before you write it, because they are what the ga
 
 `RETHINK PREMISE` blocks until the plan is revised, and **an implementation review cannot satisfy or overwrite it**: a reviewer scoped to a contract enforces that contract, so it cannot be what clears a doubt about whether the contract should exist at all.
 
-Enforcement lives in `lifecycle_audit.lint_necessity_gate`, reached by `/jPrecompact` and `/jClose` through the `new-work-lint` preset; the section is checked, not merely requested. Full rules: `.jswarm/plans/TICKET-XXX/designs/TICKET-XXX.design.ac1-necessity-gate.md`. Do not duplicate them here; this call-out exists to tell you when to author the section and what the gate is actually for.
+Enforcement lives in `lifecycle_audit.lint_necessity_gate`, reached by `/jClose` (Step 2 of `skills/jClose/SKILL.md`) through the `new-work-lint` preset; the section is checked, not merely requested. Full rules: `.jswarm/plans/TICKET-XXX/designs/TICKET-XXX.design.ac1-necessity-gate.md`. Do not duplicate them here; this call-out exists to tell you when to author the section and what the gate is actually for.
 
 **Authoring the section is required once the plan enters implementation.** A plan that reaches its first `3.implementation.*` status without a `## Necessity Gate` heading is blocked by the same lint. This closes the one demonstrated escape: an incident-born plan that skipped `/jPlan` never authored the section, so the gate never engaged, and that ticket over-built roughly a third of its surface before anything asked whether it was needed. Plans already in implementation before this rule shipped stay validate-if-present, and a plan that has not yet entered implementation is never asked for anything.
 

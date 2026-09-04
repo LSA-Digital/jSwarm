@@ -23,7 +23,17 @@ If an argument was given, parse it with `jswarm.workitem.identity.parse` (a trac
 
 Load `.jswarm/work/<ID>/state.json`, written by `/jPlan`, for the plan file path. If it is missing, fall back to `.jswarm/plans/<ID>.plan.*.md` and reconstruct `.jswarm/work/<ID>/` (a work item started before this state directory existed still closes cleanly).
 
-## Step 2: Write the retro (mandatory, autonomous)
+## Step 2: Necessity Gate lint (mandatory, blocking)
+
+`skills/jPlan/step-5-assemble-plan.md` documents `## Necessity Gate` enforcement as reached by `/jClose` through the `new-work-lint` preset; this step is that enforcement point.
+
+```bash
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/update_ticket/cli.py --ticket <ID> --repo-root "$PROJECT_ROOT" --preset new-work-lint
+```
+
+Exit 0 (`lint <ID>: OK`) means continue to Step 3. A non-zero exit (`lint <ID>: BLOCK`) prints one or more problems; the common one is a missing or malformed `## Necessity Gate` table on a plan that entered implementation on or after the presence cutover. Show the reported problem(s) to the user, stop here, and do not proceed to Step 3, 4, 5, or 6 until the plan is fixed and this lint passes. A ticket whose plan predates the presence cutover, or that never authored the section because it added no durable production surface, passes this step for free (validate-if-present); this step only ever blocks a ticket that was actually required to author the section.
+
+## Step 3: Write the retro (mandatory, autonomous)
 
 Every close includes a structured reflection, written by the agent without asking the user questions first.
 
@@ -68,7 +78,7 @@ Every close includes a structured reflection, written by the agent without askin
 
 Run `PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.ext jClose`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
 
-## Step 3: Sync the tracker
+## Step 4: Sync the tracker
 
 Comment with the retro summary, then transition the work item, through the tracker boundary; never by inventing tracker behavior in this file. Both calls are safe to run whether or not a tracker is configured:
 
@@ -83,9 +93,9 @@ EOF
 PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli transition <ID> --repo "$PROJECT_ROOT" --state Done
 ```
 
-Print each result's `message` once. `skipped: true` (no tracker configured) and `ok: false` (tracker reachable but the call failed) are both non-blocking: local state from Steps 1-2 was already written; continue to Step 4 either way.
+Print each result's `message` once. `skipped: true` (no tracker configured) and `ok: false` (tracker reachable but the call failed) are both non-blocking: local state from Steps 1-3 was already written; continue to Step 5 either way.
 
-## Step 4: Update plan status and record the close
+## Step 5: Update plan status and record the close
 
 ```bash
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/plan_status/cli.py record <ID> 5.closed.ready_for_merge \
@@ -106,7 +116,7 @@ Record the close itself at `.jswarm/work/<ID>/close.json`:
 }
 ```
 
-## Step 5: Summary
+## Step 6: Summary
 
 ```
 ✅ <ID> closed

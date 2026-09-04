@@ -104,11 +104,13 @@ Record that this content is ready to show a person, at `.jswarm/work/<ID>/uat-ro
   "verdict": "ACCEPTED",
   "accepted_by": "ticket-boss",
   "accepted_at": "<UTC ISO-8601>",
-  "journey_step_counts": {"<journey-id>": "<step count>"},
-  "step_counts": {"total": "<sum of the above>"},
+  "journey_step_counts": {"<journey-id>": 0},
+  "step_counts": {"total": 0},
   "request_sha256": "<sha256 of the request file's parsed JSON, canonical form, below>"
 }
 ```
+
+`journey_step_counts` and `step_counts.total` are integers, not strings -- follow the example literally with quoted numbers and validation rejects the evidence with `acceptance evidence step counts do not match the request`. Each `<journey-id>` key maps to the exact number of steps that journey carries in the request's `canonical_manifest.journeys[].steps` (one entry per journey; `0` above is a placeholder, not a real count), and `step_counts.total` is the sum across every journey. This must match the request's own step counts exactly, or `/jUAT` rejects the evidence before anything is archived.
 
 ```bash
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python - .jswarm/work/<ID>/uat-round/<ID>.uat-round-request.json <<'PY'

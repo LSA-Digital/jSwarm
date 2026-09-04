@@ -305,4 +305,17 @@ def adopt(
 
     registry.add(ctx, home, repo)
 
+    if not dry_run:
+        final_status = subprocess.run(
+            ["git", "-C", str(repo), "status", "--porcelain"],
+            capture_output=True, text=True, check=False, env=ctx.env(),
+        )
+        if final_status.returncode == 0 and final_status.stdout.strip():
+            n = len(final_status.stdout.strip().splitlines())
+            result.report_lines.append(
+                f"adopt: {repo} now has {n} uncommitted change(s) (the merged CLAUDE.md/.gitignore/"
+                f"settings.json plus the new .jswarm/ directory). adopt never commits on your behalf -- "
+                f"review `git status` and commit the adopt layer yourself before running /jSetup or /jPlan."
+            )
+
     return result

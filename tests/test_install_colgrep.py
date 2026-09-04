@@ -236,3 +236,51 @@ def test_optional_check_failing_does_not_fail_cmd_check(monkeypatch, capsys):
     assert rc == 0, out
     assert "all prerequisites present" in out
     assert "optional thing" in out and "brew install optional-thing" in out
+
+
+def test_with_colgrep_after_a_plain_install_deploys_the_gated_skills(tmp_path):
+    """docs/getting-started.md documents the resume path in these words: "If you
+    already ran `install` without `--with-colgrep`, re-run it with the flag added
+    -- `install` resumes from the first incomplete optional step, the same way it
+    resumes any partial install." Before this fix, `install` marked "skills" done
+    on the first (no-flag) run and never revisited it, so a second `install
+    --with-colgrep` installed colgrep itself but silently left colgrep-search and
+    code-overview undeployed -- exit 0, no warning. This drives that exact
+    documented sequence end to end and proves both skills land on the second run.
+    """
+    home = tmp_path / "home"
+    bindir = tmp_path / "bin"
+    log = tmp_path / "claude-mcp-add.log"
+    _stub_colgrep(bindir)
+    _stub_claude(bindir, log)
+    path = f"{bindir}:{BASE_PATH}"
+
+    r1 = _run(["install"], home=home, path=path)
+    assert r1.returncode == 0, r1.stdout + r1.stderr
+    skills = home / ".claude" / "skills"
+    assert not (skills / "colgrep-search").exists()
+    assert not (skills / "code-overview").exists()
+    lock1 = yaml.safe_load((home / ".jswarm" / "install.lock.yaml").read_text())
+    assert "skills" in lock1["steps_completed"]
+    assert "colgrep" not in lock1["steps_completed"]
+    assert "skills_colgrep" not in lock1["steps_completed"]
+
+    r2 = _run(["install", "--with-colgrep"], home=home, path=path)
+    assert r2.returncode == 0, r2.stdout + r2.stderr
+    out2 = r2.stdout + r2.stderr
+    assert "install: skills (already done)" not in out2, (
+        "the resume run must not silently skip redeploying the colgrep-gated skills"
+    )
+
+    assert (skills / "colgrep-search" / "SKILL.md").is_file(), "colgrep-search was not deployed on resume"
+    assert (skills / "code-overview" / "SKILL.md").is_file(), "code-overview was not deployed on resume"
+
+    lock2 = yaml.safe_load((home / ".jswarm" / "install.lock.yaml").read_text())
+    assert "colgrep" in lock2["steps_completed"]
+    assert "skills_colgrep" in lock2["steps_completed"]
+
+    # A third run (still --with-colgrep) must go back to being a genuine no-op:
+    # both skills already present, nothing re-copied, "already done" printed.
+    r3 = _run(["install", "--with-colgrep"], home=home, path=path)
+    assert r3.returncode == 0, r3.stdout + r3.stderr
+    assert "install: skills (already done)" in (r3.stdout + r3.stderr)
