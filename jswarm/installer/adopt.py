@@ -180,12 +180,12 @@ def adopt(
         )
 
     key = jira_key.strip().upper() if jira_key else None
-    ctx = WriteContext(dry_run=dry_run)
+    ctx = WriteContext(dry_run=dry_run, home=home)
     result = AdoptResult(repo=repo, dry_run=dry_run, jira_key=key)
 
     status = subprocess.run(
         ["git", "-C", str(repo), "status", "--porcelain"],
-        capture_output=True, text=True, check=False,
+        capture_output=True, text=True, check=False, env=ctx.env(),
     )
     if status.returncode == 0 and status.stdout.strip():
         n = len(status.stdout.strip().splitlines())

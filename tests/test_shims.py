@@ -67,7 +67,7 @@ def test_install_flattens_shims_to_discoverable_top_level_names(tmp_path, monkey
     # skill directories into the machine's actual `~/.claude/skills`.
     monkeypatch.setenv("HOME", str(tmp_path))
     dest_root = tmp_path / ".claude" / "skills"
-    ctx = WriteContext(dry_run=False)
+    ctx = WriteContext(dry_run=False, home=tmp_path)
     _install_skills(ctx, home=tmp_path, source=Path.cwd(), timestamp="19700101T000000.000000Z")
 
     for old in RENAMES:

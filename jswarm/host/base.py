@@ -42,3 +42,12 @@ class Host(Protocol):
         `command args...`, with this host at the given scope.
         """
         ...
+
+    def mcp_remove_argv(self, name: str, *, scope: str = "user") -> list[str]:
+        """The argv that removes the MCP server registration named `name`
+        from this host at the given scope -- the undo for `mcp_add_argv`.
+        `uninstall` uses this so it removes exactly what `install` (with
+        `--with-colgrep`) registered, not leave a dangling registration
+        pointing at a binary/server `uninstall` just deleted.
+        """
+        ...

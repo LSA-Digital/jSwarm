@@ -72,7 +72,7 @@ def _strip_jswarm_hooks(settings: dict) -> dict:
 def unadopt(repo: Path, *, dry_run: bool = False, home: Path | None = None) -> UnadoptResult:
     repo = Path(repo).resolve()
     home = Path(home) if home is not None else Path.home()
-    ctx = WriteContext(dry_run=dry_run)
+    ctx = WriteContext(dry_run=dry_run, home=home)
 
     jswarm_dir = repo / ".jswarm"
     marker = jswarm_dir / ".adopted"

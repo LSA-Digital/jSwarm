@@ -21,11 +21,11 @@ from pathlib import Path
 REQUIRED_INSTALL_STEPS = ("venv", "skills", "portal_config")
 
 
-def _public_version(source: Path) -> str:
+def _public_version(source: Path, *, env: dict[str, str] | None = None) -> str:
     try:
         result = subprocess.run(
             ["git", "-C", str(source), "describe", "--tags", "--always"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True, text=True, timeout=5, env=env,
         )
     except (OSError, subprocess.TimeoutExpired):
         return "v0.1.0-dev"
@@ -220,14 +220,14 @@ def _cmd_install(args: argparse.Namespace) -> int:
 
     home = Path.home()
     source = jswarm_paths.jswarm_home()
-    ctx = WriteContext(dry_run=args.dry_run)
+    ctx = WriteContext(dry_run=args.dry_run, home=home)
 
     existing = lockfile.read(home)
     steps = list(existing.steps_completed) if existing else []
     if "venv" not in steps:
         steps.append("venv")  # true by construction: this process is running under a real venv python
     installed_at = existing.installed_at if existing else lockfile.now_iso()
-    version = _public_version(source)
+    version = _public_version(source, env=ctx.env())
 
     print(f"install: {lockfile.lock_path(home)}")
     if args.dry_run:
@@ -385,10 +385,10 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
 
     source = jswarm_paths.jswarm_home()
     from_version = lock.public_version
-    to_version = _public_version(source)
+    ctx = WriteContext(dry_run=args.dry_run, home=home)
+    to_version = _public_version(source, env=ctx.env())
     print(f"upgrade: {from_version} -> {to_version}")
 
-    ctx = WriteContext(dry_run=args.dry_run)
     if args.dry_run:
         pieces = ", ".join(["skills", "portal_config"] + (["colgrep"] if "colgrep" in lock.steps_completed else []))
         print(f"DRY-RUN: would redeploy {pieces} and rewrite {lockfile.lock_path(home)}")
@@ -437,12 +437,19 @@ def _stop_portal_daemon(ctx, home: Path) -> None:
 
 def _cmd_uninstall(args: argparse.Namespace) -> int:
     from jswarm.host import current as current_host
-    from jswarm.installer import registry
+    from jswarm.installer import lockfile, registry
     from jswarm.installer.fsops import WriteContext
 
     home = Path.home()
-    ctx = WriteContext(dry_run=args.dry_run)
+    ctx = WriteContext(dry_run=args.dry_run, home=home)
     host = current_host()
+
+    # Read before anything below removes the lock file: "colgrep" recorded
+    # as a completed step is the only record that `install` ever ran
+    # `claude mcp add` for it, so it is also the only signal `uninstall` has
+    # for whether there is a registration to undo.
+    lock = lockfile.read(home)
+    colgrep_registered = bool(lock and "colgrep" in lock.steps_completed)
 
     source_skill_names: list[str] = []
     try:
@@ -465,6 +472,8 @@ def _cmd_uninstall(args: argparse.Namespace) -> int:
     print(f"  - {jswarm_dir} (installer state, portal config)")
     backups_note = "kept" if args.keep_backups else "kept unless you confirm deleting them interactively"
     print(f"  - {backups_dir} ({backups_note})")
+    if colgrep_registered:
+        print(f"  - MCP server 'colgrep' registration ({host.name})")
 
     repos = registry.read(home)
     if repos:
@@ -479,6 +488,18 @@ def _cmd_uninstall(args: argparse.Namespace) -> int:
         return 0
 
     _stop_portal_daemon(ctx, home)
+
+    if colgrep_registered:
+        print("uninstall: colgrep MCP registration")
+        result = ctx.run(host.mcp_remove_argv("colgrep"))
+        if result is not None and result.returncode != 0:
+            detail = (result.stderr or result.stdout or "").strip()[:400]
+            print(
+                f"  colgrep: MCP removal failed (exit {result.returncode}): {detail}; "
+                f"remove it by hand: {host.name} mcp remove colgrep --scope user"
+            )
+        else:
+            print("  colgrep: MCP registration removed")
 
     for p in deployed:
         ctx.remove_tree(p)
