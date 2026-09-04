@@ -16,7 +16,7 @@ Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with
 |---|---|---|---|---|
 | 1 | **Work item identified and local state written** | Always | Step 2A identity resolution + `.jswarm/work/<id>/` | ? |
 | 2 | **Session renamed** | Always | See Step 2B | ? |
-| 3 | **Technical design spec written** | Standard + Deep (skipped in Lite) | Write to `.jswarm/plans/TICKET-XXX/TICKET-XXX.specs.<descriptive>.md` (per canonical doc `agent-write-permissions.md`) | ? |
+| 3 | **Technical design spec written** | Standard + Deep (skipped in Lite) | Write to `.jswarm/plans/TICKET-XXX/TICKET-XXX.specs.<descriptive>.md` | ? |
 | 4 | **Plan file written** | Always | Write master to `.jswarm/plans/TICKET-XXX.plan.<descriptive>.md` (frontmatter `status: ACTIVE` per state machine; per-ticket artifact subfolder `.jswarm/plans/TICKET-XXX/` auto-created on first artifact write) | ? |
 | 5 | **Ticket-local UAT scenario extract written** | When `Automated UAT: yes` and ticket changes user-visible behavior (never in Lite) | Write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md` from `UAT_SCENARIO_EXTRACT_TEMPLATE.md` | ? |
 | 6 | **Executable UAT doc written** | When `Automated UAT: yes` and ticket changes user-visible behavior (never in Lite) | Write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-test.md` from `UAT_TEST_TEMPLATE.md` | ? |

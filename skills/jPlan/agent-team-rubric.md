@@ -63,7 +63,7 @@ code existence remain non-triggers.
 
 The orchestrator remains a **different lane from the author**, so the author-not-approve separation holds whether or not `jCritic` activates. What changes is who reviews, not whether anyone does.
 
-**How this reaches the plan header.** The header grammar is unchanged and there is no `review:none` token: `review:` names the **tier to use if review activates**, not an instruction to review. The deterministic advisor (`jswarm/patterns/team_advisor.py`) reports activation separately as `review_activation` and emits `effective_review_tier: "none"` when nothing activates; a consumer that reads the header as a standing order to dispatch a reviewer is wrong.
+**How this reaches the plan header.** The header grammar is unchanged and there is no `review:none` token: `review:` names the **tier to use if review activates**, not an instruction to review. Activation and tier are reported as separate fields (`review_activation`, `effective_review_tier`, the latter `"none"` when nothing activates) by whatever composes the plan header for this project; a consumer that reads the header as a standing order to dispatch a reviewer is wrong. (An enterprise deployment may back this with a deterministic advisor module; the public core does not ship one — the four conditions above and the author judge activation directly.)
 
 ---
 
