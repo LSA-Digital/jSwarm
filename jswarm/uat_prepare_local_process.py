@@ -254,7 +254,7 @@ def _identity_manifests(project_root: Path) -> dict[str, str]:
     api.extend((project_root / "jswarm/uat_feedback.py", project_root / "jswarm/uat_round_materialize.py"))
     schema_root = project_root / "schemas/fix-decisions"
     api.extend(_regular_tree(schema_root) if schema_root.exists() else [])
-    ui_root = project_root / "decision-review-ui"
+    ui_root = project_root / "portal"
     ui = [ui_root / name for name in ("package.json", "package-lock.json", "astro.config.mjs", "tailwind.config.mjs", "tsconfig.json")]
     public_root = ui_root / "public"
     ui.extend(_regular_tree(ui_root / "src")); ui.extend(_regular_tree(public_root) if public_root.exists() else [])
@@ -578,7 +578,7 @@ def _default_dependencies(args: argparse.Namespace) -> Mapping[str, Callable[...
         return {"fixture": {"state_path": str(state_path.resolve()), "registration_path": str(registration.resolve()), "config_path": str(config.resolve()), "root": str(fixture_root.resolve()), "round_review_id": state["round_review_id"], "round_state": state["lifecycle"]["round_state"], "feedback_state": state["lifecycle"]["feedback_state"], "verified_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")}, "_state": state}
     def production_build(_parsed_args: argparse.Namespace) -> object:
         npm = Path("/opt/example-user/.local/share/fnm/node-versions/v24.14.0/installation/bin/npm")
-        command = [str(npm), "--prefix", "decision-review-ui", "run", "build"]
+        command = [str(npm), "--prefix", "portal", "run", "build"]
         started = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         with (logs / "build.log").open("w", encoding="utf-8") as log:
             result = subprocess.run(command, cwd=root, stdout=log, stderr=subprocess.STDOUT, text=True, timeout=120, check=False)
@@ -591,7 +591,7 @@ def _default_dependencies(args: argparse.Namespace) -> Mapping[str, Callable[...
         log = (logs / "ui.log").open("w", encoding="utf-8")
         node = "/opt/example-user/.local/share/fnm/node-versions/v24.14.0/installation/bin/node"
         astro = root / "portal/node_modules/astro/astro.js"
-        return subprocess.Popen([node, str(astro), "preview", "--host", "127.0.0.1", "--port", "4321"], cwd=root / "decision-review-ui", stdout=log, stderr=subprocess.STDOUT, text=True)
+        return subprocess.Popen([node, str(astro), "preview", "--host", "127.0.0.1", "--port", "4321"], cwd=root / "portal", stdout=log, stderr=subprocess.STDOUT, text=True)
     def discover(_parsed_args: argparse.Namespace) -> object: return {"api": discover_loopback_listener(8765), "ui": discover_loopback_listener(4321)}
     def smoke(_parsed_args: argparse.Namespace) -> object:
         def api_get(path: str) -> tuple[int, object]:

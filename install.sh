@@ -287,7 +287,7 @@ cmd_portal() {
     ( cd "$JSWARM_HOME" && "$py" -m jswarm.portal.render_portal_config --out "$cfg" )
   fi
 
-  step "portal 2/3: build decision-review-ui (Node)"
+  step "portal 2/3: build portal UI (Node)"
   if [[ "$dry" -eq 1 ]]; then
     warn "would run: npm ci --ignore-scripts && npm run build (jswarm.portal.render_ui --build-only)"
   else

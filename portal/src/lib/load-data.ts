@@ -112,7 +112,7 @@ export function loadReviewData(): ReviewBuildData {
   const file = dataFilePath();
   if (!fs.existsSync(file)) {
     throw new Error(
-      `[decision-review-ui] build data object not found at ${file}. The Python ` +
+      `[portal] build data object not found at ${file}. The Python ` +
         `wrapper (render_ui.py) must write the canonical review data before ` +
         `'npm run build'. Set DECISION_REVIEW_DATA_FILE or run via the wrapper.`,
     );
@@ -121,7 +121,7 @@ export function loadReviewData(): ReviewBuildData {
   try {
     parsed = JSON.parse(fs.readFileSync(file, "utf-8"));
   } catch (err) {
-    throw new Error(`[decision-review-ui] data object at ${file} is not valid JSON: ${String(err)}`);
+    throw new Error(`[portal] data object at ${file} is not valid JSON: ${String(err)}`);
   }
   assertShape(parsed as ReviewBuildData, file);
   const data = parsed as ReviewBuildData;
@@ -133,18 +133,18 @@ export function loadReviewData(): ReviewBuildData {
 
 function assertShape(value: ReviewBuildData, file: string): void {
   if (typeof value !== "object" || value === null) {
-    throw new Error(`[decision-review-ui] data object at ${file} must be a JSON object.`);
+    throw new Error(`[portal] data object at ${file} must be a JSON object.`);
   }
   if (value.schema !== "jswarm.fix-decisions.review-build/1") {
     throw new Error(
-      `[decision-review-ui] unsupported schema ${JSON.stringify(value.schema)} in ${file}; expected "jswarm.fix-decisions.review-build/1".`,
+      `[portal] unsupported schema ${JSON.stringify(value.schema)} in ${file}; expected "jswarm.fix-decisions.review-build/1".`,
     );
   }
   if (!Array.isArray(value.contracts) || value.contracts.length === 0) {
-    throw new Error(`[decision-review-ui] 'contracts' must be a non-empty array in ${file}.`);
+    throw new Error(`[portal] 'contracts' must be a non-empty array in ${file}.`);
   }
   if (!Array.isArray(value.qa_threads)) {
-    throw new Error(`[decision-review-ui] 'qa_threads' must be an array in ${file}.`);
+    throw new Error(`[portal] 'qa_threads' must be an array in ${file}.`);
   }
 }
 
@@ -154,7 +154,7 @@ function validateQaThreads(threads: QaThread[], file: string): void {
     schema = JSON.parse(fs.readFileSync(QA_SCHEMA_PATH, "utf-8"));
   } catch (err) {
     throw new Error(
-      `[decision-review-ui] cannot read qa-thread schema at ${QA_SCHEMA_PATH}: ${String(err)}`,
+      `[portal] cannot read qa-thread schema at ${QA_SCHEMA_PATH}: ${String(err)}`,
     );
   }
   const ajv = new Ajv2020({ allErrors: true, strict: false });
@@ -167,7 +167,7 @@ function validateQaThreads(threads: QaThread[], file: string): void {
         .map((e) => `${e.instancePath || "<root>"}: ${e.message}`)
         .join("; ");
       throw new Error(
-        `[decision-review-ui] qa-thread ${threadId ?? "?"} in ${file} failed AJV validation: ${detail}`,
+        `[portal] qa-thread ${threadId ?? "?"} in ${file} failed AJV validation: ${detail}`,
       );
     }
   }

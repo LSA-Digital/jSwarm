@@ -1,6 +1,6 @@
 """Phase 2 — decision-review UI render wrapper.
 
-The supported entry point for building the decision-review-ui static site:
+The supported entry point for building the portal static site:
 
   1. Reads a build manifest JSON listing contracts, optional publication
      manifests, and qa-thread fixtures.
@@ -52,7 +52,7 @@ from jswarm.portal.render_markdown import render_markdown
 from jswarm.portal.view_model import build_view_model, load_qa_threads
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-APP_DIR = REPO_ROOT / "decision-review-ui"
+APP_DIR = REPO_ROOT / "portal"
 
 
 # duplicated from the npm gate on purpose: hooks run outside the repo
@@ -226,7 +226,7 @@ def build_review_data(build_manifest_path: Path) -> dict:
 def _npm() -> Path:
     if not (NODE_BIN_DIR / "node").exists():
         raise RuntimeError(
-            "Node 24 via fnm is required to build decision-review-ui; "
+            "Node 24 via fnm is required to build the portal; "
             "run: brew install fnm && fnm install 24"
         )
     npm = NODE_BIN_DIR / "npm"
@@ -290,7 +290,7 @@ DEFAULT_PORTAL_DIST_DIR = REPO_ROOT / "jswarm" / "portal" / "dist"
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="jswarm.portal.render_ui",
-        description="Build the decision-review-ui static site from validated contracts.",
+        description="Build the portal static site from validated contracts.",
     )
     parser.add_argument(
         "--build-manifest",

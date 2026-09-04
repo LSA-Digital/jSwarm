@@ -9,7 +9,7 @@
 // for that structural reason, not because of a hand-copied fixture: they drive the
 // real exported functions.
 //
-// Nothing in this file may skip. The decision-review-ui browser suite silently skips
+// Nothing in this file may skip. The portal browser suite silently skips
 // when Playwright is absent, and a missing runtime then reads as a pass — the
 // mechanism by which portal defects reached production past a green suite.
 

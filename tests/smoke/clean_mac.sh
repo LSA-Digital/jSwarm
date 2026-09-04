@@ -11,7 +11,7 @@
 #   - Python 3.12                 (brew install python@3.12)   -- `install.sh check` verifies this
 #   - Node                        (brew install fnm && fnm install 24 && fnm use 24)
 #                                  -- NOT verified by `install.sh check`; only the `portal` step
-#                                  needs it (it builds decision-review-ui), and dies there by name
+#                                  needs it (it builds the portal), and dies there by name
 #                                  if missing. Installing it up front avoids a mid-run stop.
 #   - the agent host (Claude Code): npm install -g @anthropic-ai/claude-code
 #
