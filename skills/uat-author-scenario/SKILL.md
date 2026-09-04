@@ -42,7 +42,7 @@ This skill is a **thin orchestration** over the existing UAT-scenario engine. It
 1. **Resolve + validate the active ticket.** Gather the candidate ticket from the per-session `active-ticket.json` binding, the git branch (`git branch --show-current`), and the session title, then validate with the resolver:
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/resolve_active_ticket.py \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/resolve_active_ticket.py \
      --plans-dir .jswarm/plans \
      --active-ticket "<from active-ticket.json or omit>" \
      --branch "$(git branch --show-current)" \
@@ -55,14 +55,14 @@ This skill is a **thin orchestration** over the existing UAT-scenario engine. It
 2. **NEW or UPDATE?** List what exists so the developer chooses correctly:
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/query_uat_scenarios.py --scenarios <scenarios.json> --schema <schema.json> --list-scenarios
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/query_uat_scenarios.py --scenarios <scenarios.json> --schema <schema.json> --list-scenarios
    ```
 
 3. **Draft** the scenario fields into a proposals sidecar `{"proposals": [{"id": "<id>", "content": { ... }}]}` (interactively or from a source doc). The proposal `id` is authoritative.
 
 4. **PREVIEW (mandatory gate).** Merge in memory, schema-validate, strict-link check, and render a PREVIEW: the canonical JSON stays byte-unchanged. Show the developer.
-   - NEW: `.venv/bin/python jswarm/uat-scenarios/create_uat_scenario.py preview --scenarios <scenarios.json> --proposals <draft.json>`
-   - UPDATE: `.venv/bin/python jswarm/uat-scenarios/populate_scenario_content.py preview --scenarios <scenarios.json> --proposals <draft.json> --strict-links` (pass `--strict-links` so an update cannot write a dangling `image.path` into canonical JSON; the create path enforces this by default)
+   - NEW: `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/create_uat_scenario.py preview --scenarios <scenarios.json> --proposals <draft.json>`
+   - UPDATE: `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/populate_scenario_content.py preview --scenarios <scenarios.json> --proposals <draft.json> --strict-links` (pass `--strict-links` so an update cannot write a dangling `image.path` into canonical JSON; the create path enforces this by default)
 
 5. **APPLY on approval.** Re-validate (schema + strict-link), then write the canonical JSON gated by the fresh preview receipt, and re-render:
    - NEW: `... create_uat_scenario.py apply --scenarios <scenarios.json> --proposals <draft.json> --receipt <...PREVIEW.receipt.json>`
@@ -72,12 +72,12 @@ This skill is a **thin orchestration** over the existing UAT-scenario engine. It
 6. **Generate the uat-test runbook** for the scenario into the active ticket's folder (preview → apply):
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/scaffold_uat_tests.py preview \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/scaffold_uat_tests.py preview \
      --scenarios <scenarios.json> --scenario-id <id> --ticket <KEY> \
      --ticket-dir .jswarm/plans/<KEY> --tests-dir jswarm/uat-scenarios/tests \
      --template docs/templates/UAT_TEST_TEMPLATE.md
    # review, then:
-   .venv/bin/python jswarm/uat-scenarios/scaffold_uat_tests.py apply ... --receipt <...PREVIEW.receipt.json>
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/scaffold_uat_tests.py apply ... --receipt <...PREVIEW.receipt.json>
    ```
 
    The runbook is `.jswarm/plans/<KEY>/<KEY>.uat-test.md` (new file, or a `## Scenario <id>:` section inserted before `## Pass Criteria` if it already exists (no clobber, idempotent re-append).

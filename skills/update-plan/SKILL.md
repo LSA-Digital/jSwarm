@@ -44,10 +44,10 @@ The module resolves the master plan from either an explicit path or a ticket key
 
 ```bash
 # Explicit plan path
-.venv/bin/python jswarm/update_plan/cli.py --plan .jswarm/plans/KEY-XXX.plan.<slug>.md
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/update_plan/cli.py --plan .jswarm/plans/KEY-XXX.plan.<slug>.md
 
 # By ticket key (globs .jswarm/plans/KEY-XXX.plan.*.md under --repo-root)
-.venv/bin/python jswarm/update_plan/cli.py --ticket KEY-XXX --repo-root .
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/update_plan/cli.py --ticket KEY-XXX --repo-root .
 ```
 
 If no plan resolves (no ticket, missing file, ambiguous/invalid key), the module prints
@@ -89,10 +89,10 @@ byte-for-byte unchanged.
 
 ```bash
 # Dry-run: normalize + list candidate tech-spec / archive moves (default; non-destructive)
-.venv/bin/python jswarm/update_plan/cli.py --plan <plan> --propose
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/update_plan/cli.py --plan <plan> --propose
 
 # Apply: actually relocate/archive the explicitly-marked sections
-.venv/bin/python jswarm/update_plan/cli.py --plan <plan> --apply
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/update_plan/cli.py --plan <plan> --apply
 ```
 
 Only with explicit `--apply` is content moved, and only under explicit headings/markers:
@@ -132,7 +132,7 @@ To normalize every **active** plan at once (used as the gate before the HUD's fi
 fallbacks were removed; see `.claude/hud/README.jswarm-hud.md`):
 
 ```bash
-.venv/bin/python jswarm/update_plan/cli.py backfill --repo-root . \
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/update_plan/cli.py backfill --repo-root . \
   --evidence .jswarm/plans/TICKET-XXX/TICKET-XXX.backfill-evidence.md
 ```
 

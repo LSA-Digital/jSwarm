@@ -35,7 +35,7 @@ Extract per-slide PNGs from a PDF and align them to the UAT scenarios JSON. A sl
 2. **Dry-run first.** Show the alignment report (matched / unmatched / ambiguous / orphan / duplicate) so the user can confirm the slide↔scenario mapping before anything is written:
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/extract_uat_assets.py \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/extract_uat_assets.py \
      --pdf "<PDF>" --scenarios "<SCENARIOS_JSON>" --dry-run
    ```
 
@@ -44,17 +44,17 @@ Extract per-slide PNGs from a PDF and align them to the UAT scenarios JSON. A sl
 3. **Extract + inject.** On confirmation, run without `--dry-run` to rasterize each matched slide and inject `scenario.image` (path + `source{pdf, page, extracted_text}`) into the JSON:
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/extract_uat_assets.py \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/extract_uat_assets.py \
      --pdf "<PDF>" --scenarios "<SCENARIOS_JSON>"
    ```
 
 4. **Re-render.** The generated Markdown is derived/read-only: regenerate it so the injected images embed inline, then confirm link integrity:
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/render-uat-scenarios.py \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/render-uat-scenarios.py \
      --scenarios "<SCENARIOS_JSON>" --schema jswarm/uat-scenarios/schema/uat-scenarios.schema.json \
      --profile pm-summary --strict-links
-   .venv/bin/python jswarm/uat-scenarios/render-uat-scenarios.py \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/render-uat-scenarios.py \
      --scenarios "<SCENARIOS_JSON>" --schema jswarm/uat-scenarios/schema/uat-scenarios.schema.json \
      --profile engineering --strict-links
    ```

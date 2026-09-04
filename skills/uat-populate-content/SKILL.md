@@ -56,7 +56,7 @@ The hard rule: **never call `apply` before a `preview` has been produced and app
 3. **Preview (the gate).** Render the merged result WITHOUT touching the canonical JSON:
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/populate_scenario_content.py preview \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/populate_scenario_content.py preview \
      --scenarios "<SCENARIOS_JSON>" --proposals "<PROPOSALS_SIDECAR>" \
      --schema jswarm/uat-scenarios/schema/uat-scenarios.schema.json --profile both
    ```
@@ -68,7 +68,7 @@ The hard rule: **never call `apply` before a `preview` has been produced and app
 5. **Apply (only after approval).** Commit the merged content into the canonical JSON (pretty `indent=2`, key order preserved). `apply` **requires** the receipt the preview emitted and refuses if the scenarios or proposals changed since (re-preview if so):
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/populate_scenario_content.py apply \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/populate_scenario_content.py apply \
      --scenarios "<SCENARIOS_JSON>" --proposals "<PROPOSALS_SIDECAR>" \
      --schema jswarm/uat-scenarios/schema/uat-scenarios.schema.json \
      --receipt "<SCENARIOS_STEM>.PREVIEW.receipt.json"
@@ -77,10 +77,10 @@ The hard rule: **never call `apply` before a `preview` has been produced and app
 6. **Re-render for real + verify.** The generated Markdown is derived/read-only: regenerate both profiles and confirm link integrity:
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/render-uat-scenarios.py \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/render-uat-scenarios.py \
      --scenarios "<SCENARIOS_JSON>" --schema jswarm/uat-scenarios/schema/uat-scenarios.schema.json \
      --profile pm-summary --strict-links
-   .venv/bin/python jswarm/uat-scenarios/render-uat-scenarios.py \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/render-uat-scenarios.py \
      --scenarios "<SCENARIOS_JSON>" --schema jswarm/uat-scenarios/schema/uat-scenarios.schema.json \
      --profile engineering --strict-links
    ```

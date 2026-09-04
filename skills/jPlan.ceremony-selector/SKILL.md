@@ -22,7 +22,7 @@ Classify these by **contract surface, not file type**. Default prose, guidance, 
 Run EXACTLY this one command. Fill the drafted scope fields (Goal, In scope, Out of scope, and Acceptance) from the Q1-Q4 read, then print its output verbatim and ask the developer to confirm or refine:
 
 ```bash
-.venv/bin/python jswarm/patterns/ceremony_selector.py render-scope --goal '<one-sentence goal>' --in-scope '<comma-or-semicolon-separated bullets>' --out-of-scope '<comma-or-semicolon-separated bullets>' --acceptance '<observable done conditions>' --no-tty
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/patterns/ceremony_selector.py render-scope --goal '<one-sentence goal>' --in-scope '<comma-or-semicolon-separated bullets>' --out-of-scope '<comma-or-semicolon-separated bullets>' --acceptance '<observable done conditions>' --no-tty
 ```
 
 If the developer refines the scope, update your signal read from the confirmed scope before Step 2.
@@ -32,7 +32,7 @@ If the developer refines the scope, update your signal read from the confirmed s
 After scope confirmation, run EXACTLY this one command. Fill the seven signal values from the Q1-Q4 read; add `--low`, `--medium`, or `--high` only if the developer passed a tier flag. Then print its output verbatim:
 
 ```bash
-.venv/bin/python jswarm/patterns/ceremony_selector.py render --signals 'scope_blast_radius=<low|medium|high>,user_visible_behavior=<low|medium|high>,shared_contract_surface=<low|medium|high>,security_compliance_external_write=<low|medium|high>,reversibility_migration_risk=<low|medium|high>,novelty_architecture_uncertainty=<low|medium|high>,concurrency_shared_files=<low|medium|high>' --no-tty
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/patterns/ceremony_selector.py render --signals 'scope_blast_radius=<low|medium|high>,user_visible_behavior=<low|medium|high>,shared_contract_surface=<low|medium|high>,security_compliance_external_write=<low|medium|high>,reversibility_migration_risk=<low|medium|high>,novelty_architecture_uncertainty=<low|medium|high>,concurrency_shared_files=<low|medium|high>' --no-tty
 ```
 
 The rendered block contains the three pattern cards, the deterministic Engine Baseline (signals + baseline tier), and the tier menu in one deterministic response. Jarvi's situational recommendation is authored in Step 3, not in this deterministic render.
@@ -44,7 +44,7 @@ After scope confirmation, Jarvi authors `jarvi_recommended_tier` and a non-empty
 Then invoke the executable boundary to validate and persist the complete decision state. Replace every `<...>` with the real value first: `apply` rejects template/placeholder text such as `<scope-anchored rationale>`:
 
 ```bash
-.venv/bin/python jswarm/patterns/ceremony_selector.py apply --signals 'scope_blast_radius=<low|medium|high>,user_visible_behavior=<low|medium|high>,shared_contract_surface=<low|medium|high>,security_compliance_external_write=<low|medium|high>,reversibility_migration_risk=<low|medium|high>,novelty_architecture_uncertainty=<low|medium|high>,concurrency_shared_files=<low|medium|high>' --tier '<low|medium|high>' --jarvi-tier '<low|medium|high>' --situational-rationale '<the actual scope-anchored rationale you authored>' --format json
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/patterns/ceremony_selector.py apply --signals 'scope_blast_radius=<low|medium|high>,user_visible_behavior=<low|medium|high>,shared_contract_surface=<low|medium|high>,security_compliance_external_write=<low|medium|high>,reversibility_migration_risk=<low|medium|high>,novelty_architecture_uncertainty=<low|medium|high>,concurrency_shared_files=<low|medium|high>' --tier '<low|medium|high>' --jarvi-tier '<low|medium|high>' --situational-rationale '<the actual scope-anchored rationale you authored>' --format json
 ```
 
 Default `--tier` to `medium` unless the owner picked another tier. Only when the owner explicitly selected High, append `--owner-approved-high`. Only when the selected tier is below a fired High bar, append `--rationale '<the actual downgrade reason>'` with concrete text (never the literal placeholder). `apply` exits non-zero if High is selected without `--owner-approved-high`, or if a High bar fired and no real downgrade rationale is supplied. Jarvi's recommendation can never waive either gate.

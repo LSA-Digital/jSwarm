@@ -46,16 +46,8 @@ fixed here:
    on arrival there (`zsh: no such file or directory: .venv/bin/python`),
    and this test's `cwd=REPO_ROOT` carve-out is exactly what let that ship.
    `/jSetup`'s own command now carries the `${JSWARM_HOME...}` token like
-   every other lifecycle command, so it is picked up by the general rule
-   above on its own merits -- but because doc phrasing is what drives that
-   rule, a future edit that quietly strips the token back out would make
-   this test silently forgive the same regression a second time. Module
-   `jswarm.installer.jsetup` is therefore also listed in
-   `_MUST_RESOLVE_FROM_ADOPTED_PROJECT` below, which keeps it pinned to
-   `cwd=tmp_path` regardless of what the doc text says, so that regression
-   cannot recur unnoticed. No other command in this repo is named as a
-   legitimate `cwd=REPO_ROOT` exception; the general rule above governs
-   everything else.
+   every other lifecycle command. (This carve-out itself no longer exists --
+   see "Second correction" below for why, and for what replaced it.)
 2. **Wrong environment.** A `${JSWARM_HOME...}`-parameterized `-m jswarm.X`
    invocation needs `PYTHONPATH` naming the clone (`-m` puts cwd, not the
    script's own directory, on `sys.path[0]`); the correct spelling already
@@ -75,6 +67,31 @@ the thirteen ModuleNotFoundError commands the rehearsal found live in
 companion files (`operations.md`, `mode-lite.md`, `step-5-assemble-plan.md`,
 `completion.md`), not in a top-level `SKILL.md`, and a scan that only ever
 looked at `SKILL.md` would keep missing them regardless of the cwd fix.
+
+## Second correction: the carve-out itself was the defect class (2026-09-04)
+
+The `/jSetup` carve-out above was doc-text-driven and generic: any command
+whose doc text lacked the `${JSWARM_HOME...}` token fell back to
+`cwd=REPO_ROOT`, on the unstated assumption that no other command in this
+repo was ever documented in bare form. That assumption was false. Seven
+other skills (`code-overview`, `jPlan.ceremony-selector`,
+`uat-author-scenario`, `uat-extract-assets`, `uat-populate-content`,
+`update-ticket`, `update-plan`) had commands written the exact same bare way
+`/jSetup` originally was, so the same carve-out silently exempted them too,
+and this suite stayed green while (per hand reproduction, matching
+`code-overview/cli.py`'s failure) most of them were dead on arrival from an
+adopted project the same way `/jSetup` was.
+
+This is the fourth time a test in this repository reasoned its way to a
+pass instead of matching what the product tells the user, so the fix this
+time closes the class rather than the instance: the doc-text-driven
+exemption is gone. Every command is now tested from `cwd=tmp_path` (the
+adopted-project stand-in) by default, full stop -- doc phrasing has no say
+in it any more. The only way out is `_RUNS_FROM_REPO_ROOT_ONLY` below, a
+hand-maintained, hand-justified allowlist keyed by exact `Invocation.raw`
+label; nothing populates it automatically, and nothing in a skill document
+can add to it. As of this fix it is empty: every entry point this suite has
+ever found turned out to belong at `cwd=tmp_path`, `/jSetup` included.
 
 ## What counts as a command here
 
@@ -163,14 +180,36 @@ _JSWARM_HOME_RE = re.compile(r"\$\{JSWARM_HOME:-\$HOME/dev/jswarm\}")
 # PYTHONPATH it needs to resolve the package from an arbitrary cwd.
 _PYTHONPATH_RE = re.compile(r'PYTHONPATH="\$\{JSWARM_HOME:-\$HOME/dev/jswarm\}"')
 
-# Entry points this test pins to cwd=tmp_path (adopted-project stand-in)
-# regardless of whether the doc text carries the ${JSWARM_HOME...} token,
-# so a future edit cannot silently un-fix a known regression by dropping
-# the token back out of the doc (see module docstring: this is exactly how
-# /jSetup's bare-relative form went undetected before). Add an entry point
-# here only once a real bug proved it belongs -- this is a regression
-# guard for known history, not a place to pre-emptively declare intent.
-_MUST_RESOLVE_FROM_ADOPTED_PROJECT = {"module:jswarm.installer.jsetup"}
+# Every command in this repo is, by default, tested as if run from an
+# arbitrary adopted project (cwd=tmp_path, see Invocation.resolve below) --
+# NOT from this checkout. That default used to be inverted: a command was
+# only held to that standard when its doc text happened to carry the
+# ${JSWARM_HOME...} token, so anything the docs described in bare form was
+# silently tested from cwd=REPO_ROOT instead, which is exactly the one cwd
+# every command in this repo is guaranteed to work from and exactly the one
+# cwd a real lifecycle command never actually runs from. That doc-text-driven
+# exemption is what let seven skills (code-overview, jPlan.ceremony-selector,
+# uat-author-scenario, uat-extract-assets, uat-populate-content, update-ticket,
+# update-plan) ship broken exactly the way `/jSetup` was broken, with this
+# suite fully green throughout -- see module docstring, "2026-09-04" section.
+#
+# This dict is the ONLY escape hatch left. It is not doc-text-driven and
+# cannot be widened by editing a skill document: an entry must be added here,
+# by hand, keyed by the exact `Invocation.raw` label, with a comment stating
+# the concrete, verified reason that specific command cannot run from an
+# adopted project. A generic reason ("it's an install-time command") is not
+# enough -- that was the reasoning that produced the original bug, and it
+# was wrong even for the one command it was written for. Do not add an entry
+# to make a failing test pass; add one only after confirming by hand that
+# running the command from an adopted project is impossible in principle,
+# not just currently undocumented.
+_RUNS_FROM_REPO_ROOT_ONLY: dict[str, str] = {
+    # (empty) -- as of 2026-09-04, every entry point this suite has ever
+    # found, /jSetup included, is documented (or has been fixed) to resolve
+    # via the ${JSWARM_HOME:-$HOME/dev/jswarm}/ token and therefore runs
+    # correctly from an adopted project. No command has yet demonstrated a
+    # genuine need for this escape hatch.
+}
 
 # Python's own import/exec machinery talking, before the target module's own
 # code (argparse included) ever got a chance to run.
@@ -190,7 +229,11 @@ class Invocation:
     fail_open: bool
     # True when at least one occurrence of this target names it via the
     # ${JSWARM_HOME...} token -- i.e. the docs claim this command works from
-    # an arbitrary (adopted-project) cwd, not just from this checkout.
+    # an arbitrary (adopted-project) cwd, not just from this checkout. This
+    # no longer decides cwd (see _RUNS_FROM_REPO_ROOT_ONLY above); it is kept
+    # only to drive test_parameterized_module_invocations_all_carry_pythonpath,
+    # a doc-consistency lint distinct from the cwd this test actually runs
+    # the command from.
     parameterized: bool
     # True only when every parameterized occurrence of this target also sets
     # PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" ahead of the interpreter.
@@ -204,9 +247,18 @@ class Invocation:
         """Build (command, env, cwd) the way a real user's shell would see it."""
         kind, target = self.raw.split(":", 1)
         env = dict(os.environ)
-        if self.parameterized:
-            # Stand in for the adopted project a real lifecycle command runs
-            # from -- deliberately NOT this checkout.
+        if self.raw in _RUNS_FROM_REPO_ROOT_ONLY:
+            # Explicit, hand-added, hand-justified exception -- see the
+            # comment on _RUNS_FROM_REPO_ROOT_ONLY above for what it takes to
+            # add one. Ambient env is left alone, same as this checkout's own
+            # shell would have it.
+            cwd = REPO_ROOT
+        else:
+            # The strict default for every command in this repo: stand in
+            # for the adopted project a real lifecycle command runs from --
+            # deliberately NOT this checkout. Doc text (the ${JSWARM_HOME...}
+            # token, or lack of it) no longer has any say over this; only
+            # _RUNS_FROM_REPO_ROOT_ONLY does.
             cwd = tmp_path
             if self.pythonpath_set:
                 env["PYTHONPATH"] = str(REPO_ROOT)
@@ -214,13 +266,6 @@ class Invocation:
                 # Never let this test's own ambient shell mask a doc that
                 # forgot PYTHONPATH -- a real user's shell would not have it.
                 env.pop("PYTHONPATH", None)
-        else:
-            # Bare form, and not in _MUST_RESOLVE_FROM_ADOPTED_PROJECT: no
-            # command in this repo is actually documented to require this
-            # cwd (see module docstring); this is the historical fallback,
-            # preserved so an unnamed future bare invocation still gets a
-            # test run rather than being skipped outright.
-            cwd = REPO_ROOT
 
         if kind == "module":
             return [str(VENV_PYTHON), "-m", target, "--help"], env, cwd
@@ -232,14 +277,14 @@ class Invocation:
             # A script that ships alongside its own skill -- pre-install, its
             # source lives at skills/<name>/... in this checkout.
             resolved = (REPO_ROOT / "skills" / script[len("~/.claude/skills/"):]).resolve()
-        elif self.parameterized:
-            # Statement was parameterized elsewhere (e.g. the interpreter) but
-            # this script path itself was left bare -- a real user's shell,
-            # cwd'd into the adopted project, would look for it there and not
-            # find it. Resolve it exactly that way so the bug surfaces.
-            resolved = (cwd / script).resolve()
         else:
-            resolved = (REPO_ROOT / script).resolve()
+            # Bare script path (no ${JSWARM_HOME...} token, no ~/.claude/skills/
+            # prefix): resolve it exactly the way a real user's shell would,
+            # relative to cwd. For an unlisted command that is tmp_path, so a
+            # bare-relative script path surfaces as "can't open file" here
+            # exactly as it would for a real user -- this is the check that
+            # catches the defect class, not a special case to route around.
+            resolved = (cwd / script).resolve()
         return [str(VENV_PYTHON), str(resolved), "--help"], env, cwd
 
 
@@ -287,11 +332,10 @@ def _extract_invocations() -> list[Invocation]:
         # Strict wins for fail_open, same as before: a target seen even once
         # without the marker stays strict.
         fail_open = all(flags["fail_open"])
-        # `or raw in _MUST_RESOLVE_FROM_ADOPTED_PROJECT` is the regression
-        # guard: for a known-history entry point this is True even if every
-        # occurrence in the docs happens to lack the ${JSWARM_HOME...}
-        # token, so reverting the doc text alone cannot resurrect the bug.
-        parameterized = any(flags["parameterized"]) or raw in _MUST_RESOLVE_FROM_ADOPTED_PROJECT
+        # This flag is now only a doc-consistency signal (see the comment on
+        # Invocation.parameterized above) -- it no longer decides cwd, so it
+        # no longer needs a regression-guard pin the way it used to.
+        parameterized = any(flags["parameterized"])
         # Strict wins here too: PYTHONPATH must be set on every parameterized
         # occurrence, or a real user hitting the unset one would still fail.
         pythonpath_set = all(flags["pythonpath_set"]) if any(flags["pythonpath_set"]) else False

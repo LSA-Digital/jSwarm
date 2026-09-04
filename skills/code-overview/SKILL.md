@@ -100,7 +100,7 @@ When no grouping is supplied:
 3. Run the project's bundled query tool against the canonical JSON and schema:
 
    ```bash
-   .venv/bin/python jswarm/uat-scenarios/query_uat_scenarios.py \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat-scenarios/query_uat_scenarios.py \
      --scenarios <canonical-scenarios-json> \
      --schema jswarm/uat-scenarios/schema/uat-scenarios.schema.json \
      --list-groupings
@@ -177,13 +177,13 @@ Operational rule: this command should behave like the guided strategy first, the
 `jswarm/code-overview/cli.py` is a generic, subcommand-first Python entry point layered over the v1 workflow above. It never hard-codes any project vocabulary: every project-specific value (scenario JSON path, spine-manifest path, carrier names, ...) is resolved at run time from `.claude/project-command-injections.yaml`.
 
 ```bash
-.venv/bin/python jswarm/code-overview/cli.py
-.venv/bin/python jswarm/code-overview/cli.py menu
-.venv/bin/python jswarm/code-overview/cli.py <grouping_id>
-.venv/bin/python jswarm/code-overview/cli.py --localization-smoke
-.venv/bin/python jswarm/code-overview/cli.py query <text> [--lod 0..4] [--budget-tokens N] [--scenario <id>] [--carrier <carrier>]
-.venv/bin/python jswarm/code-overview/cli.py benchmark [--fixture <path>] [--v1-compat]
-.venv/bin/python jswarm/code-overview/cli.py build|audit|trace|debt|impact|render ...
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/code-overview/cli.py
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/code-overview/cli.py menu
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/code-overview/cli.py <grouping_id>
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/code-overview/cli.py --localization-smoke
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/code-overview/cli.py query <text> [--lod 0..4] [--budget-tokens N] [--scenario <id>] [--carrier <carrier>]
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/code-overview/cli.py benchmark [--fixture <path>] [--v1-compat]
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/code-overview/cli.py build|audit|trace|debt|impact|render ...
 ```
 
 The no-arg, `menu`, and `<grouping_id>` paths shell out to the same `jswarm/uat-scenarios/query_uat_scenarios.py` engine used by the v1 workflow, unmodified, so their stdout stays byte-stable with the legacy behavior. `--localization-smoke` reports the v1 anchor proof plus every `code-overview-v2-*` anchor (each `required: false`) and benchmark-runner availability.
@@ -210,7 +210,7 @@ Before reading source files to understand a pipeline or debug a runtime issue, c
 Precomputes the `generated/summary-index.json`, `generated/full-index.json`, and `generated/build-report.json` triad from a spine so later `query` calls (especially `--lod 4`) never re-derive ranking or source excerpts live:
 
 ```bash
-.venv/bin/python jswarm/code-overview/cli.py build \
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/code-overview/cli.py build \
   --spine <spine.jsonl> --out <artifact-home-dir> --source-root <source-root> --json
 ```
 
@@ -248,7 +248,7 @@ The default token budget is 1,200 (counted with `tiktoken`'s `cl100k_base` encod
 Ingests a runtime-observation source (SSE, outbox, workflow/preview outbox, Temporal history, or UI evidence), normalizes and resolves each raw event against the spine's declared edges (plus any `--rules` file), and both prints the result as JSON on stdout **and persists it as siblings of `--spine`**:
 
 ```bash
-.venv/bin/python jswarm/code-overview/cli.py trace ingest \
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/code-overview/cli.py trace ingest \
   --source sse --run-id <run_id> --input <raw-source-file> \
   --spine <artifact-home-dir>/spine.jsonl --rules <rules.json> --json
 ```
