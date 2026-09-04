@@ -13,7 +13,7 @@ Keep output deterministic and persist the validated decision state returned by t
 
 ### Skill and controlled-config edits
 
-Classify these by **contract surface, not file type**. Default prose, guidance, example, formatting, and additive opt-in edits that do not change a parsed contract to **Low ceremony (S0)**: one-pass edit, light smoke, then `jregister`/`jdeploy`; no RED/GREEN, separate xhigh review, or tabletop. Ask: **Does tooling parse or enforce this exact content, or does another command, agent, or schema depend on this exact byte?** If no, keep `shared_contract_surface=low`. If yes, treat it as **S1**: raise `shared_contract_surface` to match the actual blast radius and use `novelty_architecture_uncertainty` only when genuine uncertainty exists; use RED→GREEN plus one independent `jCritic`, reserving xhigh/architect/tabletop for a high-blast-radius live-global shared contract.
+Classify these by **contract surface, not file type**. Default prose, guidance, example, formatting, and additive opt-in edits that do not change a parsed contract to **Low ceremony (S0)**: one-pass edit, light smoke, then commit; no RED/GREEN, separate xhigh review, or tabletop. Ask: **Does tooling parse or enforce this exact content, or does another command, agent, or schema depend on this exact byte?** If no, keep `shared_contract_surface=low`. If yes, treat it as **S1**: raise `shared_contract_surface` to match the actual blast radius and use `novelty_architecture_uncertainty` only when genuine uncertainty exists; use RED→GREEN plus one independent `jCritic`, reserving xhigh/architect/tabletop for a high-blast-radius live-global shared contract.
 
 ## Live flow
 
