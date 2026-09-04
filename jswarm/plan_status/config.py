@@ -1,20 +1,25 @@
 """A/C 3: per-project config resolver.
 
-Reads jswarm/config/active-projects.yaml (substrate, absent by default — see
+Reads jswarm/config/active-projects.yaml (substrate, absent by default; see
 that path's ``.exists()`` guard below) to identify the project, then resolves
 the Jira key + ticket regex + plans dir. When the key cannot be resolved,
 returns enabled=False so hooks operate advisory-only (no writes).
 
 Resolution order for the Jira key:
   1. Optional `jira_key:` field on the matching active-projects.yaml entry.
-  2. Built-in PROJECT_KEY_MAP (common -> COM, hai-sim-engine -> HAS, ...).
-  3. git-remote inference (best effort).
-  4. None -> enabled=False.
+  2. The adopted project's own `.jswarm/config.yaml` `tracker.key_prefix`
+     (the same config `jswarm.tracker.resolve.load` reads to build the live
+     tracker; see `jswarm/installer/adopt.py`, which writes it).
+  3. None -> enabled=False.
+
+There is no built-in table mapping real project names to ticket-key
+prefixes. A project's prefix is either recorded in its own committed
+`.jswarm/config.yaml` (once it has adopted a tracker) or not resolved at
+all; there is nothing left to guess from.
 """
 from __future__ import annotations
 
 import re
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, cast
@@ -23,14 +28,6 @@ try:
     import yaml
 except Exception:  # pragma: no cover - yaml is a hard dep in this repo
     yaml = None
-
-# Built-in fallback map. active-projects.yaml jira_key field overrides this.
-PROJECT_KEY_MAP = {
-    "common": "COM",
-    "hai-sim-engine": "HAS",
-    "epms": "EPMS",
-    "lsars-monorepo": "LSARS",
-}
 
 ACTIVE_PROJECTS_REL = "jswarm/config/active-projects.yaml"
 
@@ -43,7 +40,7 @@ class ProjectConfig:
     ticket_regex: Optional[str]
     plans_dir: Optional[Path]
     repo_root: Path
-    source: str  # how the key was resolved: 'active-projects' | 'builtin' | 'git-remote' | 'unresolved'
+    source: str  # how the key was resolved: 'active-projects' | 'tracker-config' | 'unresolved'
 
 
 def find_repo_root(start: Optional[Path] = None) -> Optional[Path]:
@@ -76,20 +73,26 @@ def _expand(path_str: str) -> Path:
     return Path(path_str.replace("~", str(Path.home()))).resolve()
 
 
-def _git_remote_key(repo_root: Path) -> Optional[str]:
+def _tracker_key_prefix(repo_root: Path) -> Optional[str]:
+    """Read the adopted project's own `<repo_root>/.jswarm/config.yaml`.
+
+    Mirrors the config shape `jswarm.tracker.resolve.load` reads (this
+    resolver only needs the prefix string, not a live Tracker, so it reads
+    the file directly rather than importing that module). A missing file,
+    a missing `tracker` key, or an empty `key_prefix` all resolve to None.
+    """
+    if yaml is None:
+        return None
+    config_path = repo_root / ".jswarm" / "config.yaml"
+    if not config_path.is_file():
+        return None
     try:
-        out = subprocess.run(
-            ["git", "-C", str(repo_root), "remote", "get-url", "origin"],
-            capture_output=True, text=True, timeout=5,
-        )
-        url = out.stdout.strip()
+        data = cast(dict[str, Any], yaml.safe_load(config_path.read_text()) or {})
     except Exception:
         return None
-    if not url:
-        return None
-    # Infer from repo basename in the remote URL.
-    name = url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git").lower()
-    return PROJECT_KEY_MAP.get(name)
+    tracker_cfg = data.get("tracker") or {}
+    prefix = tracker_cfg.get("key_prefix")
+    return str(prefix) if prefix else None
 
 
 def resolve_config(
@@ -123,19 +126,12 @@ def resolve_config(
                 source = "active-projects"
             break
 
-    # 2. Built-in map.
+    # 2. The adopted project's own .jswarm/config.yaml tracker.key_prefix.
     if project_key is None:
-        mapped = PROJECT_KEY_MAP.get(project_id)
-        if mapped:
-            project_key = mapped
-            source = "builtin"
-
-    # 3. git-remote inference.
-    if project_key is None:
-        inferred = _git_remote_key(repo_root)
-        if inferred:
-            project_key = inferred
-            source = "git-remote"
+        configured = _tracker_key_prefix(repo_root)
+        if configured:
+            project_key = configured
+            source = "tracker-config"
 
     plans_dir = repo_root / "docs" / "plans"
     ticket_regex = rf"^{project_key}-\d+$" if project_key else None
