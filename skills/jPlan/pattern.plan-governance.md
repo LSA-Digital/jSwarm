@@ -14,7 +14,7 @@ None.
 
 | Document | Why it matters |
 |----------|----------------|
-| [`docs/architecture/...`](../architecture/...) | [what from this doc shapes this work] |
+| `docs/architecture/<relevant-doc>.md` | [what from this doc shapes this work] |
 | [`docs/plans/TICKET-XXX.specs.md`](TICKET-XXX.specs.md) | Technical source of truth |
 
 ---

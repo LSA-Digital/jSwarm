@@ -29,7 +29,7 @@ This is the **single source of truth** for deciding **whether independent review
 - `review:` and `arch:` are the **tiers**; `escalation-trigger:` is the **verbatim reason** any non-default tier was chosen (or `none`).
 - An agent that runs at a tier above the line without a matching trigger is **visibly wrong** — the trigger is auditable.
 
-**Dynamic topology/staffing selection:** the agent-team catalog ([`docs/_JarviSWARM/agent-team-index.v1.json`](../../../../_JarviSWARM/agent-team-index.v1.json) plus `agent-team-fallback.v1.json`) owns dynamic selection through the `agent-team-advisor` skill. Fail open: if the catalog is missing or unparseable, use this rubric's inline guidance; never block. This rubric remains the SSoT only for the frozen header grammar and review/architecture tier enums.
+**Dynamic topology/staffing selection:** the agent-team catalog ([`docs/_JarviSWARM/agent-team-index.v1.json`](../../docs/_JarviSWARM/agent-team-index.v1.json) plus `agent-team-fallback.v1.json`) owns dynamic selection through the `agent-team-advisor` skill. Fail open: if the catalog is missing or unparseable, use this rubric's inline guidance; never block. This rubric remains the SSoT only for the frozen header grammar and review/architecture tier enums.
 
 ---
 

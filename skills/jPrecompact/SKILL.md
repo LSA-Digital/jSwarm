@@ -569,18 +569,11 @@ Pre-compact checkpoint. State: .jswarm/plans/TICKET-XXX/TICKET-XXX.state.md
 
 ---
 
-## Step 2.9: Role-aligned PM/PO rollup comments (opt-in, AC-20)
+## Step 2.9: Role-aligned PM/PO rollup comments (opt-in)
 
-**Gate:** run ONLY when the plan frontmatter has `rollup_comments: on` (set once at `/jPlan`; absent or `off` ⇒ skip entirely — post nothing, write nothing). **`/jPrecompact --lite` never runs this step** — rollups are a full-checkpoint surface only.
+**Gate:** run ONLY when the plan frontmatter has `rollup_comments: on` (absent or `off` ⇒ skip entirely — post nothing, write nothing). **`/jPrecompact --lite` never runs this step** — rollups are a full-checkpoint surface only.
 
-When enabled, at every full checkpoint:
-1. Render the **po-ticket-outcome** (ticket outcome, A/C evidence, UAT/NFR status, defects fixed, sibling impact) at **PO altitude** via `/plain-english`, and post/update it as a comment on the **story/task** Jira issue.
-2. If the ticket is a child of a Feature, also render the **pm-feature-rollup** (feature value delta, dependency change, risk, next-up) at **PM altitude** via `/plain-english` and post/update it as a comment on the **Feature** Jira issue.
-3. Post via the jira-sync-engine glue `jswarm/installer/walkthrough/rollup_sync.py` — a retry-safe wrapper over `jira_mcp_closeout.py` `add_comment`. Capture the returned **comment deep link** (comment URL) and record it in the plan so the dev team can open it.
-4. Each rollup comment is `run_id`-namespaced and ledgered (NFR-016/NFR-029) so DEMO comments are removable at teardown.
-5. **Jira-off fallback:** when Jira is unavailable, write an equivalent local **receipt** and record its path in the plan.
-
-This is distinct from the 4-surface checkpoint and the retro; with `rollup_comments` off it adds no obligation.
+**Not implemented in this distribution:** the PO/PM-altitude rendering this step depends on is not available here (see `/jPlan`'s Q10). With the flag left at its default `off`, this step adds no obligation; a project that sets it `on` gets a skipped step, not a working rollup.
 
 ---
 

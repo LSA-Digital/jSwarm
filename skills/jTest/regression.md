@@ -2,11 +2,11 @@
 
 Read `execution-protocol.md` first (MASTER INVARIANT in `SKILL.md`). This file has three hard-labeled subsections: what is available today, what is T4-owned and must not be invoked yet, and the maintenance rule that is active now regardless of T4.
 
-## Route-proof tripwire (guards the HAS-568 six-wrong-target-test failure mode)
+## Route-proof tripwire (guards against the six-wrong-target-test failure mode)
 
-A route-proof test does not count if it fakes, directly calls, or bypasses the classifier or router instead of traversing the real public route to a visible/public outcome. HAS-568's baseline shipped six wrong-target tests that passed while proving nothing about the real route — passing is not proof. A satisfying route-proof test must traverse the real public route (the actual entry point a user or caller invokes) and assert a visible/public outcome (observable state, response, or rendered UI); a test that fakes, directly calls, or bypasses the classifier/router is supplemental evidence at best — never route proof.
+A route-proof test does not count if it fakes, directly calls, or bypasses the classifier or router instead of traversing the real public route to a visible/public outcome. A prior baseline shipped six wrong-target tests that passed while proving nothing about the real route — passing is not proof. A satisfying route-proof test must traverse the real public route (the actual entry point a user or caller invokes) and assert a visible/public outcome (observable state, response, or rendered UI); a test that fakes, directly calls, or bypasses the classifier/router is supplemental evidence at best — never route proof.
 
-**Class boundary (owner-ruled 2026-07-08):** regression tests are the higher-effort DETERMINISTIC class, constructed to survive non-deterministic conditions (capture/replay, managed state). UAT-class assets (`uat-scenarios` + `uat-scenario-steps`, see `uat.md`) are flexible and rapid-change — they are NOT regression tests. Alignment rule: the capture-replay regression ticket owns the audit of ALL existing tests against updated uat-scenarios — update aligned tests, retire misaligned ones; anything predating HAS-508 is legacy/invalid and gets archived.
+**Class boundary (owner-ruled 2026-07-08):** regression tests are the higher-effort DETERMINISTIC class, constructed to survive non-deterministic conditions (capture/replay, managed state). UAT-class assets (`uat-scenarios` + `uat-scenario-steps`, see `uat.md`) are flexible and rapid-change — they are NOT regression tests. Alignment rule: the capture-replay regression ticket owns the audit of ALL existing tests against updated uat-scenarios — update aligned tests, retire misaligned ones; anything predating the capture-replay regression rollout is legacy/invalid and gets archived.
 
 ## UAT-D4 regression eligibility
 
@@ -14,9 +14,9 @@ See [the instrument selection behavior lock](uat.md#instrument-selection-behavio
 
 ---
 
-## Regression and replay ownership split (COM-307)
+## Regression and replay ownership split
 
-**Layer 1 — durable, deterministic regression owned by affected product tickets.** COM-307 defines this ownership rule; it does not author other tickets' tests. A Layer-1 invariant that tabletop review proves true is promoted to durable deterministic regression owned by the affected product ticket whose behavior it constrains, gated on real-route UI coverage: the promoted test must traverse the real public entry point to a visible/public outcome, never an implementation-level substitute.
+**Layer 1 — durable, deterministic regression owned by affected product tickets.** This ownership rule does not author other tickets' tests. A Layer-1 invariant that tabletop review proves true is promoted to durable deterministic regression owned by the affected product ticket whose behavior it constrains, gated on real-route UI coverage: the promoted test must traverse the real public entry point to a visible/public outcome, never an implementation-level substitute.
 
 A promoted Layer-1 regression test is still subject to the route-proof tripwire above — promotion never exempts it from that boundary: a test that fakes, directly calls, or bypasses the classifier/router is not route proof merely because its assertion started life as a Layer-1 invariant. Composition applies exactly as it does to every other regression test in this file.
 
@@ -107,8 +107,8 @@ Authoring separation: the `jTestEngineer` running this option must not personall
 3. *Capture whole-pipeline LLM traffic.* Capture mode wraps the real provider chain and writes `{key, request, response}` entries to `MOCK_AGENTS_FIXTURE_PATH`. It still needs the normal real-LLM environment. The backend process must actually start with the capture env; setting env only on the Playwright wrapper is not enough if the Docker service is already running with different env. Use a dedicated/quiescent stack. Never recreate or restart the worker while an extraction/build/Temporal activity is in flight. If no safe window exists, stop and ask the orchestrator/owner for one.
    ```bash
    cd <worktree root>
-   export DEV_AUTH_EMAIL=mike@lsa.dev
-   export REMOTE_USER=mike@lsa.dev
+   export DEV_AUTH_EMAIL="<dev-email>"
+   export REMOTE_USER="<dev-email>"
    export WORKFLOW_MOCK_AGENTS=capture
    export MOCK_AGENTS_FIXTURE_PATH=tests/fixtures/llm-replay/proposals/TICKET-XXX-<scenario_slug>.json
    # Only in a safe/quiescent capture window so the backend reads the env above.
@@ -136,8 +136,8 @@ Authoring separation: the `jTestEngineer` running this option must not personall
 5. *Run deterministic replay.* Replay mode substitutes `MockAgentsProvider` and never falls back to live LLMs. A fixture miss raises fail-loud `KeyError` and logs `llm_replay_miss`; fix by repairing the test/fixture, not by allowing live calls.
    ```bash
    cd <worktree root>
-   export DEV_AUTH_EMAIL=mike@lsa.dev
-   export REMOTE_USER=mike@lsa.dev
+   export DEV_AUTH_EMAIL="<dev-email>"
+   export REMOTE_USER="<dev-email>"
    export WORKFLOW_MOCK_AGENTS=instant
    export MOCK_AGENTS_FIXTURE_PATH=tests/fixtures/llm-replay/TICKET-XXX-<scenario_slug>.json
    # jInfra is the single infrastructure authority — recreate through it, not a hand-rolled docker command.

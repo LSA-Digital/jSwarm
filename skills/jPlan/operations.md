@@ -177,7 +177,7 @@ Title format: `TICKET-{NUMBER}-{DESCRIPTION}` — UPPERCASE, hyphens, ~40 chars 
 | Runtime | Agent-automated? | How |
 |---|---|---|
 | **Claude Code** | Yes (without `/rename`) | Write title as single line to `.jswarm/state/pending-session-rename`. Hooks / user submit apply `sessionTitle`. Do NOT claim you ran `/rename`. |
-| **OpenCode** | Yes (via server API) | Set `OPENCODE_SERVER_URL`, then `PATCH /session/:id` with `{"title": "..."}`. See `/opencode-test-session-rename`. |
+| **OpenCode** | Yes (via server API) | Set `OPENCODE_SERVER_URL`, then `PATCH /session/:id` with `{"title": "..."}`. |
 | **Any** | User fallback | User runs `/rename TICKET-XXX-DESCRIPTION` in TUI. |
 
 > **Feature-orchestrator carve-out — SKIP 2B.** When you are the **Feature orchestrator** running `/jPlan` serially for child Stories under a Feature you own, skip this rename entirely: do **not** write `.jswarm/state/pending-session-rename` and do **not** claim a rename. `/jGo` runs in a separate chat, so per-Story renames are pointless churn that pollute the orchestrator session title — whose correct identity is the FEATURE, not the latest child Story. **Detection:** parent is a Feature AND you are running multiple consecutive `/jPlan` cycles in one chat. In the Step 6 summary, mark the Session row `n/a (Feature orchestrator)`. Applies in Lite too. If you already wrote a rename intent before realizing, don't revert — just stop renaming for subsequent cycles.

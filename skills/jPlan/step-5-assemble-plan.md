@@ -47,7 +47,7 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
   [--with <pattern>...]
 ```
 
-**Inputs/outputs ROOT env contract (COM-254 T2.5; HAS-548/HAS-549):**
+**Inputs/outputs ROOT env contract:**
 - The assembler resolves its assembly INPUTS from `skills/jPlan/` inside the `common` tool repo by default — you do not normally set anything. `NEW_WORK_TEMPLATE_ROOT` overrides that inputs directory (recovery lever only). A missing template root / manifest fails loudly with the typed **missing-inputs-root** error that names this env var — distinct from a genuinely malformed manifest.
 - The provenance RECEIPT is written into the SAME repository as the `--out` plan (derived from the output path's repo root), so running from the consumer repo root makes the receipt land in the consumer's `.jswarm/plans/<KEY>/` — where the Receipt gate below looks. `NEW_WORK_RECEIPT_ROOT` overrides the receipt's repo root (recovery lever only); do not set it in the normal flow.
 
@@ -95,7 +95,7 @@ For Standard/Deep plans: the plan file MUST be informed by the technical design 
 - Observability and security requirements from the spec appear in phase tasks
 - If Oracle flagged architectural concerns or design alternatives, the plan reflects them
 
-### Catalog Pattern selection (COM-139 — lean, optional, distinct from Q6 execution-team Pattern)
+### Catalog Pattern selection (lean, optional, distinct from Q6 execution-team Pattern)
 
 Before writing the plan body, decide whether 1-3 **catalog Pattern** records apply. Use Pattern IDs such as `PAT-001`; do not paste full Pattern bodies, external-source prose, or pattern literature into the plan. Keep this separate from the Q6 **execution-team Pattern 1/2** answer.
 
@@ -118,7 +118,7 @@ Reviewer/implementation enforcement: critic, verifier, and jTestEngineer checks 
 2. Include at least one UX A/C in the format: "User can [verb] [object] and sees [feedback]"
 3. Include ASCII mockups of each distinct screen state
 
-Stories without UX A/C produce technically correct but user-hostile interfaces (HAS-144 retro).
+Stories without UX A/C produce technically correct but user-hostile interfaces (a retro finding).
 
 ### Story plans under a Feature parent
 
@@ -131,10 +131,10 @@ If the story contributes to no PE2E steps, document why and delete the section.
 
 ### Parent Feature plan reconciliation (MANDATORY at end of /jPlan, before commit)
 
-When the parent Feature plan uses the Feature Governance Rings methodology with a Mermaid dependency flowchart (per `HAS-381.devops.feature-gov-rings.md` §5.5):
+When the parent Feature plan uses the Feature Governance Rings methodology with a Mermaid dependency flowchart (per `TICKET-XXX.devops.feature-gov-rings.md` §5.5):
 
 1. Locate the Story's node in the parent's `§ Sequencing View — Companion dependency flowchart` Mermaid block
-2. Add `📋 ` prefix to the label: `S08["📋 HAS-394<br/>OpenAPI Typed UI Client"]`
+2. Add `📋 ` prefix to the label: `S08["📋 TICKET-XXX<br/>OpenAPI Typed UI Client"]`
 3. In the `class <node-id> ...` directives at the bottom, move the node ID from the `unplanned` list to the `planned` list. **Mermaid only allows one `:::class` inline; planning state is layered via `class` directive, never chained inline.**
 4. Reconcile §6a Active table row: bump Ring column `0 → 2`; update Notes with `/jPlan Ring 2 complete YYYY-MM-DD`
 5. Reconcile § User Stories row: status flip + effort update if applicable
@@ -185,7 +185,7 @@ Substitute `TICKET-XXX` with actual ticket number and `TICKET-XXX-DESCRIPTION.md
 
 ## Current modular additions
 
-### Components and features frontmatter (COM-114)
+### Components and features frontmatter
 
 The assembled plan seeds `components: []` and `features: []`. Fill them in:
 - **`components:`** — the logical-component id(s) this ticket contributes to (records in `docs/_JarviSWARM/components/{id}.component.yaml`). Reference each declared id in the plan body (Scope/AC). Leave `[]` (explicit, never omit) if the ticket touches no durable component. Validation is **WARN-only + fail-open** — an unknown id never blocks `/jPlan` and is **never auto-created**.
@@ -194,7 +194,7 @@ The assembled plan seeds `components: []` and `features: []`. Fill them in:
 
 ### Dashboard-delivering stories (render tier)
 
-**STOP — rule-bearing module.** If the story *delivers* a dashboard (builds/publishes a dashboard UI from a data object — project, security, compliance, feature, or cross-project aggregator — as opposed to merely projecting metrics into an existing dashboard's data substrate, which is the separate "Feature-child Story Dashboard projections" module), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/dashboard-render-tier.md` in full and apply every rule (COM-119 toolkit, COM-125 JDS type→render-profile, deployment target, publication-safety gates, the plan's `Dashboard render tier:` line) before proceeding. Do not work from memory.
+**STOP — rule-bearing module.** If the story *delivers* a dashboard (builds/publishes a dashboard UI from a data object — project, security, compliance, feature, or cross-project aggregator — as opposed to merely projecting metrics into an existing dashboard's data substrate, which is the separate "Feature-child Story Dashboard projections" module), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/dashboard-render-tier.md` in full and apply every rule (toolkit, JDS type→render-profile, deployment target, publication-safety gates, the plan's `Dashboard render tier:` line) before proceeding. Do not work from memory.
 
 ### Outcome Metrics (Standard/Deep/Quick; skipped in Lite)
 
@@ -217,11 +217,11 @@ Three things are worth knowing before you write it, because they are what the ga
 
 `RETHINK PREMISE` blocks until the plan is revised, and **an implementation review cannot satisfy or overwrite it**: a reviewer scoped to a contract enforces that contract, so it cannot be what clears a doubt about whether the contract should exist at all.
 
-Enforcement lives in `lifecycle_audit.lint_necessity_gate`, reached by `/jPrecompact` and `/jClose` through the `new-work-lint` preset — the section is checked, not merely requested. Full rules: `.jswarm/plans/COM-300/designs/COM-300.design.ac1-necessity-gate.md`. Do not duplicate them here; this call-out exists to tell you when to author the section and what the gate is actually for.
+Enforcement lives in `lifecycle_audit.lint_necessity_gate`, reached by `/jPrecompact` and `/jClose` through the `new-work-lint` preset — the section is checked, not merely requested. Full rules: `.jswarm/plans/TICKET-XXX/designs/TICKET-XXX.design.ac1-necessity-gate.md`. Do not duplicate them here; this call-out exists to tell you when to author the section and what the gate is actually for.
 
 **Authoring the section is required once the plan enters implementation.** A plan that reaches its first `3.implementation.*` status without a `## Necessity Gate` heading is blocked by the same lint. This closes the one demonstrated escape: an incident-born plan that skipped `/jPlan` never authored the section, so the gate never engaged — and that ticket over-built roughly a third of its surface before anything asked whether it was needed. Plans already in implementation before this rule shipped stay validate-if-present, and a plan that has not yet entered implementation is never asked for anything.
 
-**One entry point for all of the above.** The right-sizing controls in this step — the necessity pass, the plan-shape conventions, and the acceptance-tier test inventory below — are also reachable as a named skill, `/jRightSize` (`skills/jRightSize/SKILL.md`), which additionally runs a read-only retrofit audit over an existing plan. It owns no rules of its own; it points at the same homes cited here. Use it when auditing a plan you did not write, or when you want the controls in one place rather than spread across this step.
+**One entry point for all of the above.** The right-sizing controls in this step are the necessity pass, the plan-shape conventions, and the acceptance-tier test inventory below. Use them directly when auditing a plan you did not write, rather than spreading the check across ad-hoc reading of this step.
 
 ### Plan shape: an intent clause per A/C, and naming the work you will be tempted to do
 
@@ -247,13 +247,13 @@ The failure this prevents is specific and recent: one ticket closed with 8,571 l
 
 **Every test cites the A/C, UAT scenario, or NFR it evidences.** A test that cannot name one raises the same question as any other unaligned work — *should I be doing this?* — and the honest answer is sometimes yes, when implementation reveals a class of failure planning missed. The standing carve-out is that a genuinely necessary unplanned test class goes through a check-in, so it is a decision on the record rather than silent accumulation.
 
-### COM-97 Security & Compliance baseline risk capture (Standard/Deep/Quick; skipped in Lite)
+### Security & Compliance baseline risk capture (Standard/Deep/Quick; skipped in Lite)
 
-**STOP — rule-bearing module.** For Standard/Deep/Quick (NOT Lite), during Step 5 after the plan file exists and before the Jira summary, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/security-compliance-baseline.md` in full and capture the security + compliance baseline (per-dimension applicability; `probability_before`/`impact_before` when applicable; safe `why_rationale`; `baseline_controls_context`) into the plan. This is required for COM-97 lifecycle telemetry so `/jClose` has a before-state; the telemetry writer is fail-open. Do not work from memory.
+**STOP — rule-bearing module.** For Standard/Deep/Quick (NOT Lite), during Step 5 after the plan file exists and before the Jira summary, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/security-compliance-baseline.md` in full and capture the security + compliance baseline (per-dimension applicability; `probability_before`/`impact_before` when applicable; safe `why_rationale`; `baseline_controls_context`) into the plan. This is required for lifecycle telemetry so `/jClose` has a before-state; the telemetry writer is fail-open. Do not work from memory.
 
 ### Feature-child Story Dashboard projections
 
-**STOP — rule-bearing module.** If the Story belongs to a parent Feature that has a dashboard data substrate (HAS-444 `jswarm/feature-dashboard-system/`; data object at `docs/plans/${PARENT}.plan-data.json` / `${PARENT}.feature-dashboard.json` / legacy `.refactor-scoreboard.json`), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/feature-child-projections.md` in full and apply every rule before plan completion — Section A `projected_only` cells, the held-vs-same enum distinction (load-bearing), planned Section B/C/D rows, the validate-`--check`-FIRST-then-render gate, the COM-100 dual-render projection write rules, and the `Dashboard projection:` plan line. If the parent Feature has no dashboard data object, record `Dashboard projection: N/A — parent Feature has no dashboard` in the Story plan. Do not work from memory.
+**STOP — rule-bearing module.** If the Story belongs to a parent Feature that has a dashboard data substrate (`jswarm/feature-dashboard-system/`; data object at `docs/plans/${PARENT}.plan-data.json` / `${PARENT}.feature-dashboard.json` / legacy `.refactor-scoreboard.json`), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/feature-child-projections.md` in full and apply every rule before plan completion — Section A `projected_only` cells, the held-vs-same enum distinction (load-bearing), planned Section B/C/D rows, the validate-`--check`-FIRST-then-render gate, the dual-render projection write rules, and the `Dashboard projection:` plan line. If the parent Feature has no dashboard data object, record `Dashboard projection: N/A — parent Feature has no dashboard` in the Story plan. Do not work from memory.
 
 ### Seed `plan_status` (MANDATORY — lifecycle event + metrics freshness)
 
@@ -267,7 +267,7 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python jswarm/plan_status/cli.py reco
 
 `<SEED-STATE>` = `2.planning.detailed` for a full plan, `0.planning.lite_init` for `--lite`. This stamps `plan_status_last_updated` / `plan_status_actor` (DERIVED — never hand-edit) and records the creation event.
 
-### Ceremony decision-state lint gate (BLOCKING — COM-254 AC-A)
+### Ceremony decision-state lint gate (BLOCKING — AC-A)
 
 For full-mode Story/Task/Bug plans that ran the ceremony selector, the persisted `## Ceremony Decision State` must pass the deterministic decision-state lint before `/jPlan` completes. `rapid-vibe-ui` bypasses the selector and therefore this lint. Run it fail-closed on every selector-produced assembled plan:
 
@@ -277,7 +277,7 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
 
 Both the interpreter and the script resolve by absolute common-repository path (the script does NOT live in downstream projects); only the PLAN path is target-project-relative. The command propagates failure (exit 1). `decision_state_lint.py` recomputes the High bar and the Medium-default engine baseline from `selector_signals` (it never trusts the authored `hard_high_triggers`/`engine_recommended_tier`), and requires both `engine_recommended_tier` and `jarvi_recommended_tier`, a non-empty `situational_rationale`, `owner_approved_high: true` whenever High is selected, and a `downgrade_rationale` whenever the selected tier is below a fired High bar — so a persisted decision state can neither introduce nor waive those gates. Plans with no `## Ceremony Decision State` section (lite / feature / legacy) fail open (exit 0). Fix the decision state before completing `/jPlan`; do not use `|| true` or prose substitutes.
 
-### NFR catalog and canonical-format authoring gate (BLOCKING — COM-167 R2)
+### NFR catalog and canonical-format authoring gate (BLOCKING — R2)
 
 When the project is NFR-adopted and the ticket declares `**NFR catalog:** applicable`, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/nfr-chain.md` in full and create the required NFR working slice, machine sidecar, and—when Automated NFR is yes—derived test document. After UAT/NFR authoring, run:
 
@@ -320,12 +320,12 @@ When `UAT round tracking: off`/`no` or unanswered, omit the seventh output and w
 | When `Automated UAT: yes` and the ticket changes user-visible behavior | KEPT | Retained verbatim. |
 | Feature plans only — create defect tracker files | KEPT | Retained verbatim. |
 | Current modular additions | KEPT | Retained as the parent heading. |
-| Components and features frontmatter (COM-114) | REWRITTEN | Kept all obligations; changed template-seed wording to assembler-seed wording. |
+| Components and features frontmatter | REWRITTEN | Kept all obligations; changed template-seed wording to assembler-seed wording. |
 | Dashboard-delivering stories (render tier) | KEPT | Retained verbatim. |
 | Outcome Metrics (Standard/Deep/Quick; skipped in Lite) | REWRITTEN | Kept all obligations; changed selected-template wording to assembled-plan wording. |
-| COM-97 Security & Compliance baseline risk capture (Standard/Deep/Quick; skipped in Lite) | KEPT | Retained verbatim. |
+| Security & Compliance baseline risk capture (Standard/Deep/Quick; skipped in Lite) | KEPT | Retained verbatim. |
 | Feature-child Story Dashboard projections | KEPT | Retained verbatim. |
 | Seed `plan_status` (MANDATORY — lifecycle event + metrics freshness) | REWRITTEN | Kept command and state rules; receipt gate now precedes status stamping, and removed obsolete manual provenance-transform wording. |
-| NFR catalog and canonical-format authoring gate (BLOCKING — COM-167 R2) | KEPT | Retained verbatim. |
+| NFR catalog and canonical-format authoring gate (BLOCKING — R2) | KEPT | Retained verbatim. |
 | `status: ACTIVE` template-default note | DROPPED — obsolete | Plan birth no longer selects or copies legacy templates; lifecycle state remains assembler-produced and `plan_status`-derived. |
 -->

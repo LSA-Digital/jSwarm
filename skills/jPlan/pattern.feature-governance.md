@@ -168,7 +168,7 @@ Staged delivery — foundation first, features second:
 
 ### Dependencies Between Stories
 
-> **Maintained execution-order view.** `/feature-reconcile` owns this diagram (Step 6.3): every new or carry-forward child Story lands here as a **node + an edge**, and each node's status **glyph and class are derived from that child's live `plan_status`** — never hand-edited (a stale `status: ACTIVE` never overrides the folded `plan_status`). Forward edges are sequencing, not date commitments. Statuses: ⬚ backlog `s_backlog` · 🔵 plan-ready gate `s_planready` · 🟠 active `s_active` · ▶ ready — unblocked `s_ready` · 🟢 done `s_done`. Node labels carry the `[FABL]`/`[OPUS]` orchestrator tag as a label prefix (for example, `TYYY["[FABL] ⬚ TICKET-YYY — Foundation story"]`); landed/done nodes drop the tag.
+> **Maintained execution-order view.** The Feature-plan reconciliation step (see the Parent Feature plan reconciliation module) owns this diagram: every new or carry-forward child Story lands here as a **node + an edge**, and each node's status **glyph and class are derived from that child's live `plan_status`** — never hand-edited (a stale `status: ACTIVE` never overrides the folded `plan_status`). Forward edges are sequencing, not date commitments. Statuses: ⬚ backlog `s_backlog` · 🔵 plan-ready gate `s_planready` · 🟠 active `s_active` · ▶ ready — unblocked `s_ready` · 🟢 done `s_done`. Node labels carry the `[FABL]`/`[OPUS]` orchestrator tag as a label prefix (for example, `TYYY["[FABL] ⬚ TICKET-YYY — Foundation story"]`); landed/done nodes drop the tag.
 
 ```mermaid
 flowchart LR
