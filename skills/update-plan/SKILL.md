@@ -13,7 +13,7 @@ description: Normalize JSWARM plan frontmatter, propose or apply explicit conten
 **Last Updated:** 2026-06-14
 
 A reliable single entry point for agents to update a JSWARM (JarviSWARM) plan file. The skill
-is a thin **facade** — all behavior lives in the deterministic Python module
+is a thin **facade**: all behavior lives in the deterministic Python module
 `jswarm/update_plan/cli.py` (run via `.venv/bin/python`), so the live-global
 lifecycle path never depends on model-mediated prose. `/jPrecompact` calls the **same**
 entrypoint directly.
@@ -51,7 +51,7 @@ The module resolves the master plan from either an explicit path or a ticket key
 ```
 
 If no plan resolves (no ticket, missing file, ambiguous/invalid key), the module prints
-`update-plan KEY: no plan ...` and exits 0 — **fail-open, no write**.
+`update-plan KEY: no plan ...` and exits 0 (**fail-open, no write**).
 
 ---
 
@@ -63,7 +63,7 @@ reimplementation). It hoists frontmatter to line 1, derives `status` / `phase` /
 AC-9 counts `nfr_complete` / `uat_complete`** (🟢 rows / total rows of the
 `## A/C-to-NFR Traceability Matrix` and `## UAT-Scenario Traceability Matrix`; omitted
 when the matrix is absent ⇒ the HUD shows no segment), and canonicalizes field order.
-The operation is **idempotent** — re-running on an already-clean plan produces no diff.
+The operation is **idempotent**: re-running on an already-clean plan produces no diff.
 
 It then prints a deterministic summary line:
 
@@ -72,7 +72,7 @@ update-plan KEY-XXX: status=ACTIVE phase=2.planning ac=1/8 nfr=2/3 uat=1/4 norma
 ```
 
 **Determinism boundary (AC-9/AC-10):** this module only *counts* the matrices
-already in the plan — it never reads the ticket-local test/result files, which keeps the
+already in the plan; it never reads the ticket-local test/result files, which keeps the
 count path deterministic and project-agnostic. Keeping those matrix Status cells truthful
 from the local result docs is a **separate** pass owned by `/jPrecompact` Step 2.0
 (`jswarm/precompact_reconcile/cli.py`, AC-10), which runs **before** this count. Chain:
@@ -106,7 +106,7 @@ Only with explicit `--apply` is content moved, and only under explicit headings/
   `… Log`, or carrying `<!-- update-plan:archive -->`. Leaves an anchored back-link under the
   plan's stable `## Archived Detail` section.
 
-**Never** moved — even under `--apply`: Acceptance Criteria, active blockers, unresolved
+**Never** moved, even under `--apply`: Acceptance Criteria, active blockers, unresolved
 decisions, current verification requirements, Scope, Changelog, Required Reading, or any
 semantically ambiguous content. Content is **never** moved by age or length alone.
 
@@ -119,7 +119,7 @@ duplicate back-links; a re-run with nothing new produces no diff.
 
 The HUD (ccstatusline widgets) is **pull-rendered**: it re-reads the plan each render
 cycle. "Refresh" therefore means *the module writes normalized frontmatter (the HUD's
-single source of truth) and prints the summary line* — the **next** statusline render
+single source of truth) and prints the summary line*; the **next** statusline render
 reflects the new `status` / `phase` / `ac_complete`. The module does **not** fake a redraw
 by touching unrelated files or forcing side effects. The only write is to the plan file
 itself (plus the specs/archive files when `--apply` moves content).
@@ -129,7 +129,7 @@ itself (plus the specs/archive files when `--apply` moves content).
 ## Step 5: Backfill sweep (maintenance)
 
 To normalize every **active** plan at once (used as the gate before the HUD's file/body
-fallbacks were removed — see `.claude/hud/README.jswarm-hud.md`):
+fallbacks were removed; see `.claude/hud/README.jswarm-hud.md`):
 
 ```bash
 .venv/bin/python jswarm/update_plan/cli.py backfill --repo-root . \
