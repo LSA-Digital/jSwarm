@@ -77,7 +77,7 @@ When the ticket is a **defect** (Bug issue type, or a Story chartering a bug/def
 Comment through the tracker boundary (skipped cleanly when no tracker is configured):
 
 ```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli comment <ID> --repo "$PROJECT_ROOT" --text "$(cat <<'EOF'
+PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli comment <ID> --repo "$PROJECT_ROOT" --text "$(cat <<'EOF'
 Lite briefing plan: .jswarm/plans/ID.plan.<descriptive>.md
 Planning mode: Lite (briefing only)
 Depth / execution team / UAT: N/A (deferred until full /jPlan)

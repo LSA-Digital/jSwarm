@@ -18,7 +18,7 @@ Use this companion only after every phase is accepted.
 3. Record, rather than hand-edit, the ready status:
 
    ```bash
-   .venv/bin/python jswarm/plan_status/cli.py record TICKET-XXX \
+   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/plan_status/cli.py record TICKET-XXX \
      5.closed.ready_for_merge --actor /jGo --proof-source verification-complete
    ```
 

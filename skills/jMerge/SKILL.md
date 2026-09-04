@@ -44,7 +44,7 @@ A real conflict stops here and is presented to the user directly: the specific f
 
 ## Extension steps
 
-Run `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.ext jMerge`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
+Run `PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.ext jMerge`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
 
 ## Step 3: Push
 
@@ -62,7 +62,7 @@ When `.jswarm/config.yaml` names a PR host (`pr.enabled: true`), open one with t
 Read `.jswarm/work/<ID>/close.json` written by `/jClose`. If it is missing, Step 1 already stopped before this point. Confirm the tracker reflects the close (re-run the transition if `/jClose`'s recorded result was a failure, not merely a skip):
 
 ```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli describe --repo "$PROJECT_ROOT"
+PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli describe --repo "$PROJECT_ROOT"
 ```
 
 `configured: false` means there is nothing further to confirm upstream; local state (`close.json`, the retro) is the record of closure. Print the tracker's state (or the local-only note) once.

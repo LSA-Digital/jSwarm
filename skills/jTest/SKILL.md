@@ -19,7 +19,7 @@ description: "Run the project's automated tests (level 1) and an agent-led smoke
 
 ## Extension steps
 
-Run `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.ext jTest`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
+Run `PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.ext jTest`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
 
 ## Step 1: Level 1, automated tests
 

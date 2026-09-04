@@ -260,7 +260,7 @@ Feature-child dashboard projection (`jswarm/feature-dashboard-system/`) is not p
 Immediately after the master plan is assembled and the receipt gate has passed, record the **initial** `plan_status` through the canonical CLI so the plan frontmatter carries a fresh `plan_status_last_updated` stamp from birth:
 
 ```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python jswarm/plan_status/cli.py record TICKET-XXX <SEED-STATE> \
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/plan_status/cli.py record TICKET-XXX <SEED-STATE> \
   --actor /jPlan --proof-source new-work-plan-created \
   --plan-file .jswarm/plans/TICKET-XXX.plan.<descriptive>.md
 ```
@@ -289,7 +289,7 @@ The command propagates failure. Fix canonical index/matrix shape, width, seedabi
 
 ### Conditional seventh output: initialize UAT round tracking
 
-Run this seventh `/jPlan` output only after the matching assembly receipt is verified, the final plan is complete, and all applicable UAT/NFR sidecars have passed their authoring gates. Persist `.jswarm/plans/<TICKET>/jcheckin-context.json` from the final plan bytes, then invoke `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/joptimize/checkin_runtime.py --lifecycle-boundary --caller jPlan --project-root "$PWD" --context-file "$CHECKIN_CONTEXT" --boundary-id "$BOUNDARY_ID" --format json`; record/warn/continue. The command writes directly to canonical `common/logs.jCheckin/`, ensures this checkout's enrollment, appends the boundary event, and repairs the project read-only views. If common is unavailable, the typed event-loss result is recorded or warned and the plan workflow continues without a local spool. Then, when `UAT round tracking: on` (or `yes`), run from the consumer repository root:
+Run this seventh `/jPlan` output only after the matching assembly receipt is verified, the final plan is complete, and all applicable UAT/NFR sidecars have passed their authoring gates. Persist `.jswarm/plans/<TICKET>/jcheckin-context.json` from the final plan bytes, then run `PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.ext jPlan`. For each path printed, in order, read the file and carry out its steps here before continuing; a step there is what does anything with the persisted context file (e.g. an installed lifecycle-boundary checkin). If nothing is printed, continue. Then, when `UAT round tracking: on` (or `yes`), run from the consumer repository root:
 
 ```bash
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat_round_materialize.py create \

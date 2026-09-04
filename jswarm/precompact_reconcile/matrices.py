@@ -21,8 +21,16 @@ _SCRIPTS_DIR = str(Path(__file__).resolve().parents[2])
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
-# Canonical Jira key — validated before any glob so metacharacters can't match plans.
-_TICKET_RE = re.compile(r"^[A-Z][A-Z0-9]+-[0-9]+$")
+from jswarm.workitem import identity as _workitem_identity
+
+# A ticket here is a work item id per jswarm.workitem.identity: a tracker key
+# (PS-14) OR a jPlan-produced local slug (add-csv-export) — the two are
+# interchangeable identity forms, not a tracker-only feature (see
+# docs/superpowers/specs/2026-09-03-jswarm-public-repo-split-design.md
+# section 4). Validated before any glob so metacharacters can't match plans.
+_TICKET_RE = re.compile(
+    f"^(?:{_workitem_identity.TRACKER_KEY[1:-1]}|{_workitem_identity.SLUG[1:-1]})$"
+)
 # Segmented grammar: dashes ONLY between non-empty alphanumeric segments — admits
 # multi-segment ids (UAT-497-RENAMES / NFR-3-BUILD-PIPELINE) but rejects empty segments
 # (UAT--, UAT-497-, NFR--) so a malformed id can't become an authoritative/false-green row.

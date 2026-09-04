@@ -757,11 +757,21 @@ def lint_checkin_evaluation_rows(
 
     Ledger absence and rows of other types are intentionally free: this lint
     validates recorded data but does not claim that every ticket recorded it.
+    The validator itself (``joptimize.checkin``) is enterprise-only machinery
+    this public core never ships; a project without the enterprise extension
+    installed has no ledger this lint could even name, so an unimportable
+    ``joptimize`` is exactly as free as ledger absence -- checked BEFORE
+    computing the ledger path, unlike the presence-gated seam imports in
+    ``lint_checkin_reviews``/``lint_advisor_acceptance`` above, which import
+    only once real recorded data already needs validating.
     """
 
     checkin = sys.modules.get("jswarm.joptimize.checkin")
     if checkin is None:
-        from joptimize import checkin
+        try:
+            from joptimize import checkin
+        except ImportError:
+            return []
 
     ledger_path = checkin.dedicated_evaluation_ledger_path(project_root, ticket)
     try:

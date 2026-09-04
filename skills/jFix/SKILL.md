@@ -28,7 +28,7 @@ Public `/jFix` diagnoses on its own; it does not hand off to another agent for t
 
 ## Extension steps
 
-Run `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.ext jFix`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
+Run `PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.ext jFix`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
 
 ## Step 1: Diagnose
 

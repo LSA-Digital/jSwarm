@@ -129,7 +129,7 @@ An argument that parses as neither is a usage error; show both accepted shapes.
 **Check the tracker before anything else is created:**
 
 ```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli is-configured --repo "$PROJECT_ROOT"
+PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli is-configured --repo "$PROJECT_ROOT"
 ```
 
 **The one hard stop:** if the argument looks like a tracker key (matches the tracker-key pattern above) and `is-configured` prints `{"configured": false}`, STOP:
@@ -159,7 +159,7 @@ Record the work item's identity, kind, and plan-file path in `.jswarm/work/<ID>/
 **Then, only when a tracker is configured, resolve or create the tracked issue.** With a tracker key argument, resolve it:
 
 ```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli resolve <ID> --repo "$PROJECT_ROOT"
+PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli resolve <ID> --repo "$PROJECT_ROOT"
 ```
 
 There is no tracker `create` verb at the boundary in v0.1.0 (only `resolve`/`comment`/`transition`); when the user wants a brand-new tracked issue rather than an existing key or a local slug, create it directly with the connected tracker's own tool (for Jira: the connected Atlassian MCP's create-issue tool) using the project key from `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/devops_command_injection.py jira-key --project-root <PROJECT_ROOT>`, then treat the returned key as `<ID>` for the rest of this step. With a slug argument, or with no tracker configured at all, there is nothing to create upstream; local state is the whole of it.
@@ -207,7 +207,7 @@ All Playwright screenshot evidence goes in **LOCAL PLAN FILE** using rendered ma
 **Full-plan mode: tracker comment (skipped cleanly when no tracker is configured):**
 
 ```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli comment <ID> --repo "$PROJECT_ROOT" --text "$(cat <<'EOF'
+PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli comment <ID> --repo "$PROJECT_ROOT" --text "$(cat <<'EOF'
 Plan: .jswarm/plans/ID.plan.<descriptive>.md
 Spec: .jswarm/plans/ID/ID.specs.<descriptive>.md (if applicable)
 Local UAT scenarios: .jswarm/plans/ID/ID.uat-scenarios.md (if Automated UAT)

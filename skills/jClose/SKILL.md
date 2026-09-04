@@ -66,21 +66,21 @@ Every close includes a structured reflection, written by the agent without askin
 
 ## Extension steps
 
-Run `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.ext jClose`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
+Run `PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.ext jClose`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
 
 ## Step 3: Sync the tracker
 
 Comment with the retro summary, then transition the work item, through the tracker boundary; never by inventing tracker behavior in this file. Both calls are safe to run whether or not a tracker is configured:
 
 ```bash
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli comment <ID> --repo "$PROJECT_ROOT" --text "$(cat <<'EOF'
+PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli comment <ID> --repo "$PROJECT_ROOT" --text "$(cat <<'EOF'
 Closed via /jClose.
 Retro: .jswarm/work/<ID>/retro.md
 Plan: .jswarm/plans/<ID>.plan.<descriptive>.md
 Next: /jMerge
 EOF
 )"
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli transition <ID> --repo "$PROJECT_ROOT" --state Done
+PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli transition <ID> --repo "$PROJECT_ROOT" --state Done
 ```
 
 Print each result's `message` once. `skipped: true` (no tracker configured) and `ok: false` (tracker reachable but the call failed) are both non-blocking: local state from Steps 1-2 was already written; continue to Step 4 either way.

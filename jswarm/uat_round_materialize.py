@@ -19,7 +19,26 @@ from pathlib import Path
 from typing import Any, Callable, Literal, NoReturn, cast
 
 RULE_ID = re.compile(r"^UAT-(?:G\d+|R\d+|T\d+|D\d+)$")
-TICKET_ID = re.compile(r"^[A-Z][A-Z0-9]+-\d+$")
+# A ticket id here is a work item id in the sense of jswarm.workitem.identity:
+# either a tracker key (PS-14) or a jPlan-produced local slug (add-csv-export)
+# -- the two are interchangeable identity forms of the same contract, not a
+# tracker-only feature. Delegate to that module rather than re-deriving the
+# pattern, so the two never drift apart (see docs/superpowers/specs/
+# 2026-09-03-jswarm-public-repo-split-design.md section 4).
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+from jswarm.workitem import identity as _workitem_identity
+
+
+def _is_valid_ticket_id(ticket: str) -> bool:
+    try:
+        _workitem_identity.parse(ticket)
+    except _workitem_identity.WorkItemIdError:
+        return False
+    return True
+
+
 CONTROLLED_SKILL_ROOT = Path(__file__).resolve().parents[1] / "skills/jTest"
 ALLOWED_RULE_STATUSES = {"active", "inactive"}
 ALLOWED_PATTERN_STATUSES = {"active", "inactive"}
@@ -434,6 +453,15 @@ def effective_assessment_options(step: Mapping[str, object]) -> list[str]:
 
 def _validate_app_url(value: object) -> str:
     app_url = _package_nonempty(value, "package.invalid.app_url")
+    # Escape hatch for a ticket with no running application (a pure library
+    # change, a CLI-only change, etc.): the plan template's own "UAT state
+    # policy" field documents "N/A" as a legitimate value here, but nothing
+    # previously accepted it -- a stranger had to invent a placeholder
+    # http://... URL to get a round validated at all. A relative app_link
+    # href (the documented convention, e.g. "/") never dereferences app_url
+    # as a base, so "N/A" is safe downstream.
+    if app_url == "N/A":
+        return app_url
     if any(ord(character) < 32 or ord(character) == 127 for character in app_url):
         _invalid("package.invalid.app_url")
     try:
@@ -631,7 +659,7 @@ def _validate_immutable_manifest(manifest: Mapping[str, object]) -> None:
     if manifest["schema_version"] not in {CANONICAL_PACKAGE_SCHEMA, CANONICAL_PACKAGE_SCHEMA_V2}:
         _invalid("package.invalid.schema_version")
     ticket = _package_nonempty(manifest["ticket"], "package.invalid.ticket")
-    if not TICKET_ID.fullmatch(ticket):
+    if not _is_valid_ticket_id(ticket):
         _invalid("package.invalid.ticket")
     round_id = _package_nonempty(manifest["round_id"], "package.invalid.round_id")
     if not ROUND_ID.fullmatch(round_id):
@@ -1055,7 +1083,7 @@ class _RoundTree:
     """Directory-fd anchored view of one ticket's round files."""
 
     def __init__(self, plans_root: Path, ticket: str, *, create: bool) -> None:
-        if not TICKET_ID.fullmatch(ticket):
+        if not _is_valid_ticket_id(ticket):
             raise ValidationError(f"invalid ticket id: {ticket!r}")
         root = plans_root.absolute()
         flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)

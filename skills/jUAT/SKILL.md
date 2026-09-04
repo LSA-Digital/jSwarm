@@ -28,7 +28,7 @@ Look for the canonical UAT scenarios this work item's plan names. If none exist 
 
 ## Extension steps
 
-Run `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.ext jUAT`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
+Run `PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.ext jUAT`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
 
 ## Step 3: Build and validate the round request
 
@@ -126,7 +126,7 @@ Then cut over. This renders and writes the round, feedback shell, handoff, recei
 TICKET="<ID>"; ROUND_REVIEW_ID="$TICKET/round-1"
 WORK=".jswarm/work/$TICKET/uat-round"
 CONFIG="${HOME}/.jswarm/decision-review/config.json"
-${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.uat_practical_cutover practical-cutover \
+PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.uat_practical_cutover practical-cutover \
   --authorized-by ticket-boss \
   --note "issued via /jUAT" \
   --request "$WORK/$TICKET.uat-round-request.json" \

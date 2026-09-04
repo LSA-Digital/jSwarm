@@ -234,9 +234,14 @@ def practical_cutover(command: dict[str, Any], *, after_write: Callable[[str], N
     if package.get("schema_version") != "uat-canonical-package@2":
         raise ValueError("request must contain canonical v2 package")
     config = _read_json(paths["config_path"], "config")
-    registrations = config.get("active_round_sources")
+    # `active_round_sources` is this config's own registration list. Nothing in
+    # the documented /jUAT flow ever seeds it (the rendered config template
+    # never includes the key), so a project's first-ever round must default it
+    # to empty rather than treat an absent key as a fatal setup error -- an
+    # explicitly-present non-list value is still rejected as a corrupt config.
+    registrations = config.get("active_round_sources", [])
     if not isinstance(registrations, list):
-        raise ValueError("config registration is missing")
+        raise ValueError("active_round_sources in config must be a list")
     target_id = command.get("round_review_id")
     matches = [row for row in registrations if isinstance(row, dict) and row.get("round_review_id") == target_id]
     if len(matches) > 1:
