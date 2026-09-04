@@ -151,8 +151,8 @@ Lite mode is for continuity when the developer wants a small session checkpoint 
 **Allowed writes only:**
 1. **State file**: write or refresh `.jswarm/plans/TICKET-XXX/TICKET-XXX.state.md` (or `.jswarm/state/precompact-state.md` when no ticket) with current phase/task, completed work this session, next action, pending A/C/NFR/UAT notes, background/open agent runs, and timestamp. Keep it under 200 lines. Apply the jStatus currency gate above: link `.jstatus.quick.latest.md`; no duplication.
 2. **Master plan Status Updates row**: if a plan exists, add one lean row summarizing this session's activity and current next step. Update the checkpoint marker only if it directly describes this session boundary.
-3. **Canonical retros**: file the ticket retro and any standing feature-feedback retros using the Retrospective checkpoint location, naming, template, and evidence rules. Refresh the project symlink for each touched retro. Skip silently when there is nothing to record (`N/A (no new lessons this interval)` in the state file).
-4. **Scoped retro-only commit**: when this lite run wrote retro content, commit those retro real files (and project symlinks) per the dual-repo order in Surface 3. Do not create an empty checkpoint commit, and do not widen the commit to promotion, matrix, TaskList, or artifact work.
+3. **Canonical retros**: file the ticket retro and any standing feature-feedback retros using the Retrospective checkpoint location, naming, template, and evidence rules. Skip silently when there is nothing to record (`N/A (no new lessons this interval)` in the state file).
+4. **Scoped retro-only commit**: when this lite run wrote retro content, commit the touched retro file(s) per Surface 3. Do not create an empty checkpoint commit, and do not widen the commit to promotion, matrix, TaskList, or artifact work.
 
 **Forbidden in lite mode:**
 - promotion recommendation or sign-off harness
@@ -165,7 +165,7 @@ Lite mode is for continuity when the developer wants a small session checkpoint 
 - artifact subagent dispatch
 - full `/jStatus` (standard-mode render of `.jstatus.latest.md`); lite refreshes status only via `/jStatus --lite`
 
-**Then file retros**: after the two continuity surfaces. Use the Retrospective checkpoint authoring flow (resolve the canonical file, append or create, refresh the project symlink). Apply the **Standing feature-feedback retro directive**. When retro content changed, run the scoped retro-only commit. When there are no ticket lessons and no feature feedback, record `N/A` in the state file and do not create empty files.
+**Then file retros**: after the two continuity surfaces. Use the Retrospective checkpoint authoring flow (resolve the retro file, append or create). Apply the **Standing feature-feedback retro directive**. When retro content changed, run the scoped retro-only commit. When there are no ticket lessons and no feature feedback, record `N/A` in the state file and do not create empty files.
 
 **Lite banner:**
 
@@ -173,7 +173,7 @@ Lite mode is for continuity when the developer wants a small session checkpoint 
 ━━━ LITE CONTEXT CHECKPOINT ━━━
 Done:   state file updated; plan Status Updates row added/updated (if plan exists); retro filed / N/A; jStatus --lite refreshed / current / N/A (no quick template)
 Skipped: promotion review, matrix reconcile, checkpoint commit, TaskList, broad plan maintenance, full /jStatus
-Retro:  ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md updated / N/A; project symlink OK / N/A
+Retro:  .jswarm/work/TICKET-XXX/retro[.<kind>].md updated / N/A
 Next:   <immediate next action>
 State:  <state-file> (N lines)
 Recommend /compact now only if this lite checkpoint is enough for resume.
@@ -285,10 +285,8 @@ This state file is the post-compaction resume anchor. It is separate from the st
 List only sections actually edited (omit line if none): A/C · traceability matrix · UAT matrix · phases/tasks · Testing Strategy · Status Updates · Required Reading (+/− paths) · Critical Files · Scope · Last Updated
 
 ## Retro (this checkpoint)
-- Common real file: `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md`: created/appended this interval **or** `N/A (no new lessons this interval)`
-- Common commit: [sha] **or** N/A
-- Project symlink: `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md` → absolute path into common (worktree-safe) **or** `N/A (common-only or no ticket)`
-- Project commit: [sha] **or** N/A (same as Common commit when common-only)
+- Retro file: `.jswarm/work/TICKET-XXX/retro[.<kind>].md`: created/appended this interval **or** `N/A (no new lessons this interval)`
+- Commit: [sha] **or** N/A
 ```
 
 ### Surface 2: Planning Artifacts (PARALLEL DISPATCH)
@@ -296,7 +294,7 @@ List only sections actually edited (omit line if none): A/C · traceability matr
 **All ticket-local planning files must be updated.** The orchestrator dispatches agents in parallel, one per artifact, to maximize throughput.
 
 **Step 2.0-hygiene: ticket-folder tidy via jOps (FULL MODE ONLY; owner-standing directive 2026-07-08, fail-open).** Dispatch a `jOps` agent to tidy `.jswarm/plans/TICKET-XXX/` at the start of Surface 2 so the moves ride this checkpoint's commit:
-- **Target layout:** canonical assets STAY AT ROOT (`<KEY>.plan.*`, `<KEY>.state.md`, `.precompact.md`, `<KEY>.uat-scenarios.md`, `<KEY>.uat-scenario-steps.md` (legacy `uat-test.md`), `<KEY>.nfr*.md`, `<KEY>.regression-tests.md`, `<KEY>.deferred-items.md`, retro symlinks, `<KEY>.MOVED-MAP.md`). Loose artifacts move into subfolders: `specs/` (ticket-specs, design-inputs), `designs/` (`<KEY>.design.*`), `debug/`, `uat-results/` (evidence PNGs, session JSONs), `notes/` (worksheets, one-off notes, misc).
+- **Target layout:** canonical assets STAY AT ROOT (`<KEY>.plan.*`, `<KEY>.state.md`, `.precompact.md`, `<KEY>.uat-scenarios.md`, `<KEY>.uat-scenario-steps.md` (legacy `uat-test.md`), `<KEY>.nfr*.md`, `<KEY>.regression-tests.md`, `<KEY>.deferred-items.md`, `<KEY>.MOVED-MAP.md`). Loose artifacts move into subfolders: `specs/` (ticket-specs, design-inputs), `designs/` (`<KEY>.design.*`), `debug/`, `uat-results/` (evidence PNGs, session JSONs), `notes/` (worksheets, one-off notes, misc).
 - **In-flight safety (MANDATORY):** the orchestrator supplies an exclusion list of files referenced by currently-running lanes; dispatch prompts hold absolute paths, and moving a file a live agent will Read breaks that lane. When in doubt, DEFER the move and record it in the MOVED-MAP as `DEFERRED`.
 - **Mechanics:** `git mv` for tracked files, `mv` for untracked; append every `old → new` (and `DEFERRED`) pair to `<KEY>.MOVED-MAP.md`; update references to moved files WITHIN the ticket folder only (historical gate reports/retros elsewhere stay untouched; the MOVED-MAP resolves their stale paths); explicit-path staging only, never `git add -A`.
 - **Fail-open:** jOps unavailable, or the folder already tidy ⇒ skip silently. Lite mode NEVER runs this step.
@@ -455,30 +453,27 @@ When a project has adopted the UAT-scenario engine, WRITE scenario changes (merg
 
 ### Retrospective checkpoint (before Git commit)
 
-**Authoritative procedure:** `/jClose` **Step 2: write the retro (mandatory, autonomous)** in `skills/jClose/SKILL.md`. Precompact applies the **same location, naming, template shape, and evidence discipline** as closeout, but typically as an **append** for this session interval (phase N). Full formal closeout still runs `/jClose` when the ticket completes. Lite uses this authoring flow and the **Standing feature-feedback retro directive** without running the surrounding 4-surface work; when lite writes retro content it commits those files only.
+**Authoritative procedure:** `/jClose` **Step 2: write the retro (mandatory, autonomous)** in `skills/jClose/SKILL.md`. Precompact applies the **same location, naming, template shape, and evidence discipline** as closeout, but typically as an **append** for this session interval (phase N). Full formal closeout still runs `/jClose` when the ticket completes. Lite uses this authoring flow and the **Standing feature-feedback retro directive** without running the surrounding 4-surface work; when lite writes retro content it commits that file only.
 
-**Canonical write path (single rule: common archive + project symlink):**
+**Canonical write path (single rule, single repo, no symlink):**
 
-The retro's **real file** always lives in the common archive `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md` (committed in the `common` repo). The project repo holds only an **absolute symlink** at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md` → that file. **Never** write a real retro file under `.jswarm/plans/` (or anywhere in the project), and **never** put a retro symlink in the project root.
+The retro is one real file at `.jswarm/work/TICKET-XXX/retro.md`, exactly where `/jClose` reads and appends it. There is no second repository and no symlink: this project's own working tree is the only place a retro ever lives. **Never** write a retro file anywhere under `.jswarm/plans/`.
 
-**Resolution rule:** check `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro*.md`. If a file exists for the ticket → **append** this interval's section there. Else → **create** `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro.md`. Then create/refresh the project symlink (rule 6 + Surface 3).
+**Resolution rule:** check whether `.jswarm/work/TICKET-XXX/retro.md` exists. If it does → **append** this interval's section there. Else → **create** it from the `/jClose` retro template (below) when this interval has meaningful findings.
 
-**Authoring flow (same 3 steps `/jClose` uses, do not reorder):**
+**Authoring flow (same as `/jClose`, do not reorder):**
 
-1. **Resolve the canonical file**: append to an existing common retro or create `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro.md` from the `/jClose` retro template when this interval has meaningful findings.
-2. **Commit the real file in the `common` repo** when retro content changed this interval (`docs/retros/TICKET-XXX.retro*.md`).
-3. From the **project repo** (when an application checkout is in play), create/refresh the **absolute** symlink at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md` → the common file (below), and commit the symlink in the project repo.
+1. **Resolve the retro file**: append to it if it exists, or create `.jswarm/work/TICKET-XXX/retro.md` from the `/jClose` retro template when this interval has meaningful findings.
+2. **Commit the file** in this repo when retro content changed this interval (see Surface 3).
 
-> **Never** write a real retro file under `.jswarm/plans/` (or anywhere in the project), and **never** put a retro symlink in the project root. Both are violations of the canonical retro convention (`${JSWARM_HOME:-$HOME/dev/jswarm}/.claude/skills/retros/SKILL.md`; `/retros --apply <project>` repairs drift). A **common-only** ticket has no project symlink; the common real file is the whole deliverable.
+**Naming:**
 
-**Naming (same as `/jClose`):**
+| Use | Retro file |
+|-----|------------|
+| Default: one retro for the ticket | `.jswarm/work/TICKET-XXX/retro.md` |
+| Split by kind (DevOps/tooling vs product/code, coordination vs implementation, etc.) | `.jswarm/work/TICKET-XXX/retro.<kind>.md` |
 
-| Use | Common real file (authoritative) | Project symlink (absolute → common) |
-|-----|----------------------------------|-------------------------------------|
-| Default: one retro for the ticket | `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro.md` | `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro.md` |
-| Split by kind (DevOps/tooling vs product/code, coordination vs implementation, etc.) | `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro.<kind>.md` | `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro.<kind>.md` |
-
-Prefer **one** `TICKET-XXX.retro.md` until a **second** narrative is clearly warranted; then add `TICKET-XXX.retro.<kind>.md` and cross-link. **Exception:** the **Standing feature-feedback retro directive** requires a separate kind-file when that gate is met; those files do not replace the ticket retro. **Legacy** archive files (`TICKET-XXX-SLUG.retro.md`, date-stamped names, etc.) remain valid as the common real file when continuing an established file; the project symlink still uses the clean `TICKET-XXX.retro[.<kind>].md` name.
+Prefer **one** `retro.md` until a **second** narrative is clearly warranted; then add `retro.<kind>.md` and cross-link. **Exception:** the **Standing feature-feedback retro directive** requires a separate kind-file when that gate is met; those files do not replace the ticket retro.
 
 **Plan path** in the retro body links to the ticket's plan file: `.jswarm/plans/TICKET-XXX.plan.<desc>.md` (new) or `docs/plans/TICKET-XXX-DESCRIPTION.md` (legacy).
 
@@ -486,61 +481,34 @@ Prefer **one** `TICKET-XXX.retro.md` until a **second** narrative is clearly war
 
 1. Plan file: phases, scope changes, status updates, deferrals  
 2. `git log --oneline` for commits touching this ticket  
-3. `ls docs/tool-failure-reports/TICKET-XXX.toolfail.*.md 2>/dev/null` (from repo root or common, as applicable)  
+3. `ls docs/tool-failure-reports/TICKET-XXX.toolfail.*.md 2>/dev/null` (when applicable)  
 4. Technical design spec: `.jswarm/plans/TICKET-XXX/TICKET-XXX.specs.*.md` (new) or `docs/plans/TICKET-XXX.specs.md` (legacy), planned vs actual deltas  
 5. Feature defect logs: `TICKET-XXX-integr-fixes.md` / `TICKET-XXX-pe2e-fixes.md` (legacy) or `.jswarm/plans/TICKET-XXX/TICKET-XXX.integr-fixes.md` / `.pe2e-fixes.md` (new) if they exist  
 6. Conversation / session: stalls, rework, surprises  
 
 **Writing rules (`/jClose`-compliant):**
 
-1. **If the canonical retro file already exists:** **UPDATE only**: append new findings; add a **Changelog** row (`YYYY-MM-DD`, author, `Precompact checkpoint, phase N`); **never** overwrite existing body. For a precompact boundary, add a section such as `## Precompact, YYYY-MM-DD (phase N)` and, under **Retrospective**, include only categories with new material this interval (skip categories with no findings; do not pad with N/A). Use the same **table shape** as `/jClose`: `+` / `-` / `Δ` per category row.  
-2. **If no file exists yet** and this interval has **meaningful** findings: **create** the file using the **full markdown template `/jClose` uses**. Use **`TICKET-XXX.retro.md`** unless this interval is **only** about an orthogonal “kind” (then `TICKET-XXX.retro.<kind>.md` and link to/from any sibling retro). Populate **Depth** appropriately (often `Quick` for a mid-flight precompact). Leave follow-up polish for final `/jClose` if the ticket is not done.  
+1. **If the retro file already exists:** **UPDATE only**: append new findings; add a **Changelog** row (`YYYY-MM-DD`, author, `Precompact checkpoint, phase N`); **never** overwrite existing body. For a precompact boundary, add a section such as `## Precompact, YYYY-MM-DD (phase N)` and, under **Retrospective**, include only categories with new material this interval (skip categories with no findings; do not pad with N/A). Use the same **table shape** as `/jClose`: `+` / `-` / `Δ` per category row.  
+2. **If no file exists yet** and this interval has **meaningful** findings: **create** it using the **full markdown template `/jClose` uses**. Use **`retro.md`** unless this interval is **only** about an orthogonal "kind" (then `retro.<kind>.md` and link to/from any sibling retro). Populate **Depth** appropriately (often `Quick` for a mid-flight precompact). Leave follow-up polish for final `/jClose` if the ticket is not done.  
 3. **If no meaningful findings** this interval: **do not** create an empty file. Record in the state file **Retro** section: `N/A (no new lessons this interval)`.  
 4. **Categories** when you do write: use the `/jClose` list (Project / Domain Knowledge, Planning, Testing & QA, AI Agent Effectiveness, Tooling, Architecture / Infrastructure, UAT ↔ E2E Alignment, Other); include a category only when there is something worth recording.  
 5. **Action items:** If precompact surfaces concrete follow-ups, add rows to **Action Items** (or reference existing open rows).  
-6. **Project symlink, worktree-safe.** When the working tree is an **application repo** and you created/appended a common retro this interval, ensure **each** touched retro has an **absolute** symlink co-located with the ticket's plan artifacts:
 
-   ```bash
-   mkdir -p .jswarm/plans/TICKET-XXX
-   # absolute target ($HOME expands at ln time); -n so re-running refreshes in place
-   ln -sfn "${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/<common-basename>.md" \
-           ".jswarm/plans/TICKET-XXX/TICKET-XXX.retro.md"     # + one per <kind> file
-   ```
-
-   The target MUST be a fully-expanded **absolute** path, never relative (worktrees sit at varying depths: `.claude/worktrees/<wt>/`, even `/private/tmp/...`) and never a literal `~` (it does not expand inside a symlink and dangles). Because it is absolute, the symlink resolves in main and in every worktree and survives a worktree→main merge unchanged. **Never** place the symlink in the project root and **never** write a real retro file in the project. Skip if already correct; when working **only** in common with no app checkout, note `N/A` in state.
-
-**Discovery helpers:**
+**Discovery helper:**
 
 ```bash
-# Canonical real file (authoritative: the `common` archive)
-ls ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro*.md 2>/dev/null
-ls ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX*.retro*.md 2>/dev/null   # legacy / phased / slugged names
-
-# Project symlink (co-located with plan artifacts; points into common)
-ls -l .jswarm/plans/TICKET-XXX/TICKET-XXX.retro*.md 2>/dev/null
+ls .jswarm/work/TICKET-XXX/retro*.md 2>/dev/null
 ```
 
-**No ticket** (generic precompact): record **Retro: N/A** in `.jswarm/state/precompact-state.md` unless the session produced a portfolio-wide lesson that belongs in an existing common retro by explicit user/repo convention; do not invent orphan filenames.
+**No ticket** (generic precompact): record **Retro: N/A** in `.jswarm/state/precompact-state.md`; do not invent orphan filenames.
 
-Retro edits must be **committed in their target repo before the banner**; never leave a touched retro real file or project symlink unstaged. When both repos changed, **both** commits are required (see table below).
+Retro edits must be **committed before the banner**; never leave a touched retro file unstaged.
 
 ### Surface 3: Git Commit
 
-**Repo-aware staging** (resolve `pwd` / git root before committing):
+Everything this checkpoint touches (state, plan artifacts, and any retro file) lives in this one repo; there is no second repository to coordinate. Stage and commit them together.
 
-| Working tree | Commit in this repo | Retro real file (`docs/retros/`) |
-|---|---|---|
-| **`${JSWARM_HOME:-$HOME/dev/jswarm}`** (common-only ticket, or retro written/appended here) | Retro real file + state + plan artifacts | **Same commit** |
-| **Application project** (hai-sim-engine, etc.) | State + plan artifacts + retro **symlinks** under `.jswarm/plans/TICKET-XXX/` | **Separate commit in `${JSWARM_HOME:-$HOME/dev/jswarm}` first** |
-
-Lite's scoped retro-only commit uses this same dual-repo order but stages **only** the touched retro real files and project retro symlinks, never state, plan, matrix, or other checkpoint surfaces.
-
-**Dual-repo order (application ticket with retro content this interval):**
-
-1. `cd ${JSWARM_HOME:-$HOME/dev/jswarm}`: stage `docs/retros/TICKET-XXX.retro*.md` (+ any common-side plan/state edits); commit.
-2. From the project root: `ln -sfn` the symlink if needed; stage state, plan artifacts, and `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro*.md` symlinks; commit.
-
-Record **both** SHAs in the state file when dual-repo (`Common commit:` / `Project commit:`). When retro is **`N/A (no new lessons)`**, a single-repo checkpoint commit is enough.
+Lite's scoped retro-only commit stages **only** the touched retro file(s), never state, plan, matrix, or other checkpoint surfaces.
 
 **Actions:**
 1. Stage only this repo's checkpoint artifacts; **never `git add -A`** (respect parallel-session WIP).
@@ -552,7 +520,7 @@ checkpoint(ticket): phase N, [brief summary]
 Pre-compact checkpoint. State: .jswarm/plans/TICKET-XXX/TICKET-XXX.state.md
 ```
 
-3. Record the commit SHA (or both SHAs when dual-repo) in the state file
+3. Record the commit SHA in the state file
 
 **Nothing to commit:** Write state file anyway. Use `--allow-empty` if needed to create the checkpoint marker commit, but prefer committing real changes when they exist.
 
@@ -596,10 +564,10 @@ After writing all surfaces, emit this fixed-format banner:
 ━━━ CONTEXT CHECKPOINT ━━━
 Done:   <bulleted list of deliverables + file paths + commit SHAs>
 Artifacts updated: <list of planning files>; plan sections: <A/C, matrix, phases, Required Reading, …>
-Retro:  ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md updated / N/A; project symlink .jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md (absolute → common): OK / N/A
+Retro:  .jswarm/work/TICKET-XXX/retro[.<kind>].md updated / N/A
 Next:   <bulleted list of immediate next actions>
 State:  .jswarm/plans/TICKET-XXX/TICKET-XXX.state.md (N lines)
-Commit: <sha> <subject>  (dual-repo: Common <sha> + Project <sha>)
+Commit: <sha> <subject>
 
 Recommend /compact now. On resume, my first action is Read <state-file> + TaskList.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -620,7 +588,7 @@ Before declaring the checkpoint complete, verify ALL:
 2. ☐ **Master plan lean maintenance:** A/C checkboxes, A/C-to-Test / UAT matrix rows, phase tasks + exit criteria, Testing Strategy status, Status Updates row, Required Reading (added/removed load-bearing docs), Critical Files, and `Last Updated` reflect this interval; **no new prose blocks** added
 3. ☐ Other planning artifacts updated (specs, UAT scenarios, UAT test doc, defect trackers, or note absence of each)
 3a. ☐ **Rules/tools maintenance window:** Step 2.0-rules-tools launched in background when applicable; task ID recorded; checkpoint did not wait for it or let it delay later surfaces/commit/banner
-4. ☐ **Retro (`/jClose`-aligned; full and lite):** real file written/appended at `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md` (full template on create, **Changelog** row on append, **no overwrite** of existing body) or state records `N/A (no new lessons)`; standing feature-feedback kind-files written only when used-and-have-feedback; **common retro committed in `common` when content changed**; project symlink at `.jswarm/plans/TICKET-XXX/` is absolute + resolves or N/A; **no real retro file in the project, no symlink in the project root**; nothing left unstaged in either repo for touched retros
+4. ☐ **Retro (`/jClose`-aligned; full and lite):** real file written/appended at `.jswarm/work/TICKET-XXX/retro[.<kind>].md` (full template on create, **Changelog** row on append, **no overwrite** of existing body) or state records `N/A (no new lessons)`; standing feature-feedback kind-files written only when used-and-have-feedback; retro committed when content changed; nothing left unstaged for touched retros
 5. ☐ Git commit(s) capture working-tree changes (no uncommitted state in the repo(s) touched). Lite: this applies only to touched retros (scoped retro-only commit); state and plan Status Updates may remain uncommitted
 6. ☐ TaskList matches reality (no false `in_progress` items). Lite skips this guarantee
 7. ☐ Checkpoint banner emitted to user
@@ -714,7 +682,7 @@ Never silently assume state after a compaction. Confirm.
 3. **Commit SHA goes in the state file for full mode.** Cross-reference is mandatory after a full checkpoint commit. In lite mode, record `Commit: N/A (lite mode, no checkpoint commit)` unless this lite run made a scoped retro-only commit (record that SHA) or an earlier commit SHA is being carried forward as context.
 4. **Background agent IDs go in the state file.** Orphaned agents = lost work.
 5. **Banner is mandatory.** User needs to see what was saved and what's next.
-6. **Retro (`/jClose`-aligned, single rule; full and lite).** The real file always lives in the common archive `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/retros/TICKET-XXX.retro[.<kind>].md`; the project holds an **absolute, worktree-safe** symlink at `.jswarm/plans/TICKET-XXX/TICKET-XXX.retro[.<kind>].md`. Append-only with a Changelog row when the file exists, full template when creating; then create/refresh the project symlink (absolute target, never the project root, never a real retro file in the project). Or record **`N/A (no new lessons)`** in the state file; never silent skip. Also apply the **Standing feature-feedback retro directive**: separate kind-files for recently updated features (see the standing roster) only when used this interval and you have feedback, weighing benefits (re-work and risk avoided) against costs (time and tokens). Precompact does **not** replace final `/jClose` tracker/plan polish. Lite files retros and may make a scoped retro-only commit.
+6. **Retro (`/jClose`-aligned, single rule; full and lite).** The real file always lives at `.jswarm/work/TICKET-XXX/retro[.<kind>].md`, exactly where `/jClose` reads and appends it; there is no second repository and no symlink. Append-only with a Changelog row when the file exists, full template when creating. Or record **`N/A (no new lessons)`** in the state file; never silent skip. Also apply the **Standing feature-feedback retro directive**: separate kind-files for recently updated features (see the standing roster) only when used this interval and you have feedback, weighing benefits (re-work and risk avoided) against costs (time and tokens). Precompact does **not** replace final `/jClose` tracker/plan polish. Lite files retros and may make a scoped retro-only commit.
 7. **Plan lean maintenance (Surface 2; full mode).** Every full checkpoint updates the master plan execution snapshot: A/C, traceability matrix, UAT matrix, phases/tasks, Testing Strategy, Status Updates, **Required Reading**, Critical Files, Last Updated: status deltas only. No new A/C/tasks/phases without user approval; no Overview/Risk rewrites; no retro duplication in the plan. Lite mode writes only a scoped Status Updates row.
 
 ---
