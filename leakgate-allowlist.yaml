@@ -1,0 +1,51 @@
+# Narrow, explicit exceptions to jswarm/leakgate.py's scan. Every entry here
+# is a decision the repo owner has reviewed and accepted; keep this list as
+# short as possible, and prefer fixing the underlying occurrence (or
+# tightening what counts as a match in leakgate.py, without touching the
+# patterns in leakgate.yaml) over adding to it.
+#
+# Every entry requires path, pattern, and a specific reason — a reasonless
+# entry fails the gate outright, and an entry that stops matching (the file
+# changed, the occurrence was fixed) also fails the gate, so this list can
+# never silently rot.
+allow:
+  - path: jswarm/compliance/sanitizer.py
+    pattern: '/Users/|/home/|/root/'
+    reason: >-
+      This is the regex the sanitizer uses to detect and redact host paths;
+      it must contain the pattern text verbatim to do its job.
+
+  - path: tests/test_compliance_sanitizer_self_contained.py
+    pattern: '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+    reason: >-
+      Sample email address ("alex@example.com") the test feeds to the
+      sanitizer to prove email detection and redaction actually work;
+      removing it would gut the test.
+
+  - path: tests/test_compliance_sanitizer_self_contained.py
+    pattern: 'AKIA[0-9A-Z]{16}'
+    reason: >-
+      Sample AWS access key literal the test feeds to the sanitizer to prove
+      AWS-key detection actually works; removing it would gut the test.
+
+  - path: tests/test_compliance_sanitizer_self_contained.py
+    pattern: '-----BEGIN [A-Z ]*PRIVATE KEY-----'
+    reason: >-
+      Sample PEM private-key block header the test feeds to the sanitizer to
+      prove private-key detection actually works; removing it would gut the
+      test. (leakgate.yaml carries two near-duplicate PEM-header patterns;
+      this allows the first.)
+
+  - path: tests/test_compliance_sanitizer_self_contained.py
+    pattern: '-----BEGIN[ A-Z]*PRIVATE KEY-----'
+    reason: >-
+      Same PEM private-key block header as above, matched by leakgate.yaml's
+      second near-duplicate pattern for it; removing the sample would gut
+      the test.
+
+  - path: tests/test_compliance_sanitizer_self_contained.py
+    pattern: '/Users/|/home/|/root/'
+    reason: >-
+      Sample host path ("/Users/example/secret.txt") the test feeds to the
+      sanitizer to prove host-path detection actually works; removing it
+      would gut the test.
