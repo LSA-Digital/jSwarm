@@ -2,9 +2,9 @@
 
 **Round:** <YYYY-MM-DD> · <one-line round purpose>
 **Last refreshed:** <host-clock YYYY-MM-DDTHH:MM±HH:MM (IANA zone + abbrev) · HH:MM UTC; update on every patch>
-**Stack:** <UNVERIFIED — PREP must supply deploy id, preflight evidence, clickable UI URL, and admin identity>
-**Pre-walk:** <UNVERIFIED — PREP must supply validated pre-walk receipt>
-**Deploy status:** <UNVERIFIED — PREP must supply pending-change truth>
+**Stack:** <UNVERIFIED: PREP must supply deploy id, preflight evidence, clickable UI URL, and admin identity>
+**Pre-walk:** <UNVERIFIED: PREP must supply validated pre-walk receipt>
+**Deploy status:** <UNVERIFIED: PREP must supply pending-change truth>
 
 ## Canonical package (generated, owner-readable, and self-contained)
 **package_state:** `<DRAFT_SEALED|QA_VERIFIED|ISSUED>`
@@ -50,7 +50,7 @@ END NORMALIZED PACKAGE
 **HOT/COLD + Who:** <all OPEN bugs in HOT; known behavior in COLD; OWNER/QA assignment>
 **Journey + numbered Walk:** <specific scenario citations and self-contained numbered steps>
 **Closes / NFR:** <defect pills, AC, and relevant NFR IDs including reliability/data integrity>
-**QA handoff:** <all 13 fields complete or N/A — reason; transport decision JSON>
+**QA handoff:** <all 13 fields complete or N/A (reason); transport decision JSON>
 
 ## Definitions
 
@@ -77,17 +77,17 @@ END NORMALIZED PACKAGE
 
 The source links govern both tables; per-row citations live inside Journey and there is no separate Sources column. Journey names the specific scenarios/step sections; Walk is a numbered, self-contained do-this script. Rows move between HOT and COLD in the same patch as readiness changes. Every OPEN ledger bug is HOT with Who. Sets use creation timestamps only. Owner-openable sessions are clickable absolute links.
 
-**UAT ready?** Placeholder rows start 🔴 and are NOT test targets. PREP must replace each placeholder with truthful readiness and Who before issue. 🟡 fix in progress — do NOT test yet · 🔴 not started · ⚫ known behavior — NOT a test target. **Who** = OWNER (visual/product judgment) · QA (jQATester machine walk) · — for ⚫ rows. Every actionable HOT row's Closes cell must contain exactly one backticked `AC:<requirement-ref>` marker. Its payload is trimmed, non-empty, at most 128 characters, and contains no backtick, pipe, CR, or LF; other pills and NFR IDs may remain.
+**UAT ready?** Placeholder rows start 🔴 and are NOT test targets. PREP must replace each placeholder with truthful readiness and Who before issue. 🟡 fix in progress, do NOT test yet · 🔴 not started · ⚫ known behavior, NOT a test target. **Who** = OWNER (visual/product judgment) · QA (jQATester machine walk) · - for ⚫ rows. Every actionable HOT row's Closes cell must contain exactly one backticked `AC:<requirement-ref>` marker. Its payload is trimmed, non-empty, at most 128 characters, and contains no backtick, pipe, CR, or LF; other pills and NFR IDs may remain.
 
-| # | UAT ready? | Who | Journey (plain-English summary + SPECIFIC scenario ids + step §s) | Walk — numbered do-this steps | PASS / expected looks like | FAIL / report if | Closes (pills / exact `AC:<requirement-ref>` / relevant NFR ids) | Official GWT SHA-256 |
+| # | UAT ready? | Who | Journey (plain-English summary + SPECIFIC scenario ids + step §s) | Walk: numbered do-this steps | PASS / expected looks like | FAIL / report if | Closes (pills / exact `AC:<requirement-ref>` / relevant NFR ids) | Official GWT SHA-256 |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 🔴 | <OWNER / QA / OWNER + QA> | <what this proves — UAT-n steps §x + e2e §Jx> | <1. Do X. 2. Do Y. 3. Do Z.> | <observable outcome from cited GWT> | <explicit FAIL condition> | <`#NNN-slug` / `AC:<requirement-ref>` / relevant NFR IDs> | `<lowercase 64-hex copied from the cited official scenario gwt_sha256>` |
+| 1 | 🔴 | <OWNER / QA / OWNER + QA> | <what this proves: UAT-n steps §x + e2e §Jx> | <1. Do X. 2. Do Y. 3. Do Z.> | <observable outcome from cited GWT> | <explicit FAIL condition> | <`#NNN-slug` / `AC:<requirement-ref>` / relevant NFR IDs> | `<lowercase 64-hex copied from the cited official scenario gwt_sha256>` |
 
 ## Journeys (cold, no action needed): context, confirmed/closed rows, known behavior
 
-| # | UAT ready? | Who | Journey (plain-English summary + SPECIFIC scenario ids + step §s) | Walk — numbered do-this steps (or n/a for ⚫) | PASS / expected looks like | FAIL / report if | Closes |
+| # | UAT ready? | Who | Journey (plain-English summary + SPECIFIC scenario ids + step §s) | Walk: numbered do-this steps (or n/a for ⚫) | PASS / expected looks like | FAIL / report if | Closes |
 |---|---|---|---|---|---|---|---|
-| 2 | ⚫ | — | KNOWN — <class — bug ledger/registry source> | <path or trigger> | <expected known behavior + do-not-panic note> | <when it is reportable + what to capture> | <`#NNN-slug` → deferral home> |
+| 2 | ⚫ | - | KNOWN (<class, bug ledger/registry source>) | <path or trigger> | <expected known behavior + do-not-panic note> | <when it is reportable + what to capture> | <`#NNN-slug` → deferral home> |
 
 ## Notes (≤3 bullets)
 - <bullet>

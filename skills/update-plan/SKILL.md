@@ -7,8 +7,8 @@ description: Normalize JSWARM plan frontmatter, propose or apply explicit conten
 
 ## Safety contract (destructive skill, agent-invocable)
 - **Default is read-only / no-write.** Invoked with no args (or `--help`/`status`), this skill only inspects and reports/proposes frontmatter and content hygiene candidates; it performs NO write, apply, push, delete, remote, trim, or content-relocation/archive move.
-- **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation — or run an approved preview/dry-run first and act only on that approved plan.
-- **Agents are NOT locked out** (no `disable-model-invocation`); this contract — not frontmatter — is what gates writes, so an agent can use the read-only path freely and must pause for approval before mutating.
+- **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation, or run an approved preview/dry-run first and act only on that approved plan.
+- **Agents are NOT locked out** (no `disable-model-invocation`); this contract (not frontmatter) is what gates writes, so an agent can use the read-only path freely and must pause for approval before mutating.
 
 **Last Updated:** 2026-06-14
 

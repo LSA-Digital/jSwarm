@@ -21,10 +21,10 @@ When invoked, ALWAYS show this menu first. Do NOT skip the menu. Wait for the de
 ```
 Precompact Update Console
 ─────────────────────────
-  1. global   — Propose updates to ~/.claude/skills/jPrecompact/SKILL.md under staged-cutover
-  2. project  — Write/update .claude/precompact.local.md in the current project root
-  3. ticket   — Write/update .jswarm/plans/<TICKET-KEY>/.precompact.md in the current project
-  4. inspect  — Show current global/project/ticket precompact layers without editing
+  1. global   : Propose updates to ~/.claude/skills/jPrecompact/SKILL.md under staged-cutover
+  2. project  : Write/update .claude/precompact.local.md in the current project root
+  3. ticket   : Write/update .jswarm/plans/<TICKET-KEY>/.precompact.md in the current project
+  4. inspect  : Show current global/project/ticket precompact layers without editing
 
 Pick (1-4):
 ```
@@ -141,7 +141,7 @@ Use this option when the developer wants to understand the effective include sta
 
 ## Key Rules
 
-- ALWAYS show the menu first — never auto-select a scope.
+- ALWAYS show the menu first; never auto-select a scope.
 - ALWAYS take the developer's natural-language instructions before drafting an update.
 - ALWAYS read the target file from disk before proposing changes.
 - ALWAYS confirm a diff before writing project or ticket include files.

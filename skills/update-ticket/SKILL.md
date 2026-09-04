@@ -8,15 +8,15 @@ description: Reliable single entry point for lifecycle plan-maintenance (migrate
 ## Safety contract (destructive skill, agent-invocable)
 
 - **Default is read-only / no-write.** Invoked with no args (or `--help`/`status`), this skill only inspects and reports; it performs NO write, apply, push, delete, remote, or trim.
-- **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation — or run an approved preview/dry-run first and act only on that approved plan.
-- **Agents are NOT locked out** (no `disable-model-invocation`); this contract — not frontmatter — is what gates writes.
+- **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation, or run an approved preview/dry-run first and act only on that approved plan.
+- **Agents are NOT locked out** (no `disable-model-invocation`); this contract (not frontmatter) is what gates writes.
 
 
 **Last Updated:** 2026-06-23
 
 A reliable single entry point for lifecycle plan-maintenance. The deterministic sections are a
 thin **facade** over `jswarm/update_ticket/cli.py` (run via `.venv/bin/python`), which itself
-orchestrates the existing engine CLIs as subprocesses — no logic is reimplemented. This
+orchestrates the existing engine CLIs as subprocesses; no logic is reimplemented. This
 skill owns the ONE piece that cannot be a CLI: the interactive **promotion-review gate**.
 
 Every deterministic refresh section is **fail-open** (exit 0; a missing/malformed plan is
@@ -31,12 +31,12 @@ reported and skipped, never aborting the checkpoint) and **idempotent** (re-run 
 Load this skill when a lifecycle command delegates plan-maintenance to `/update-ticket`,
 specifically when an **interactive promotion-review gate** is required:
 
-- `/jPrecompact TICKET` **full** mode (`--preset precompact-full --interactive`) — the gate runs
+- `/jPrecompact TICKET` **full** mode (`--preset precompact-full --interactive`): the gate runs
   first, then the deterministic refresh chain.
 - Any time you need to run the promotion-review gate by preset before reconciling matrix counts.
 
 The deterministic-only callers (`/jClose` `close-refresh`, `/jGo` `implement-gate`,
-`/jPlan` `new-work-lint`) need **no** gate — they invoke `jswarm/update_ticket/cli.py`
+`/jPlan` `new-work-lint`) need **no** gate; they invoke `jswarm/update_ticket/cli.py`
 directly and never load this gate.
 
 ---
@@ -65,14 +65,14 @@ Run only when the resolved section set includes `promotion-gate`.
    `## Acceptance Criteria` checkboxes, alongside the ticket-local evidence docs
    (`*.uat-test.md`, `*.nfr-test.md`, `*.regression-test.md`).
 2. **Recommend** ONE block: for each candidate row/checkbox, `promote` only when evidence
-   positively confirms it; otherwise ⏸ **Hold** (fail-safe — never recommend promote on absent
+   positively confirms it; otherwise ⏸ **Hold** (fail-safe: never recommend promote on absent
    or ambiguous evidence).
 3. **Developer decision (blocking):** approve all / approve selected / deny / request changes /
    abort. Record each candidate's decision as `approved`, `denied`, or `held`.
-4. **Write the ticket-local promotion-decision JSON** (the frozen contract below). This artifact
-   — not prose — is what the deterministic apply step consumes.
+4. **Write the ticket-local promotion-decision JSON** (the frozen contract below). This artifact,
+   not prose, is what the deterministic apply step consumes.
 5. Run the `apply-promotions` CLI section against that artifact; it applies ONLY the
-   **approved-and-still-matching** flips (atomic — any stale/ambiguous/invalid approved entry
+   **approved-and-still-matching** flips (atomic: any stale/ambiguous/invalid approved entry
    means NO writes), then re-run the deterministic refresh/count sections.
 
 ### Frozen promotion-decision JSON contract
@@ -80,16 +80,16 @@ Run only when the resolved section set includes `promotion-gate`.
 Path: `.jswarm/plans/KEY/KEY.update-ticket.promotions.<UTC>.json`.
 
 Top-level (all required): `schema_version`, `ticket`, `plan_path`, `plan_sha256_before`
-(sha256 of the plan the decisions were made against — stale-guards concurrent edits),
+(sha256 of the plan the decisions were made against, stale-guards concurrent edits),
 `created_at`, `created_by`, `decision_scope`, `candidates[]`.
 
 Each candidate: `kind` ∈ {`uat-row`, `nfr-row`, `test-row`, `ac-checkbox`};
 `recommendation` ∈ {`promote`, `hold`}; `decision` ∈ {`approved`, `denied`, `held`};
-`expected_marker` (the CURRENT marker the decision was made against — rows ∈
+`expected_marker` (the CURRENT marker the decision was made against; rows ∈
 {`🔴 Backlogged`, `🟠 Drafted`, `🟡 Ready`}; ac-checkbox = `[ ]`); `target_marker`
-(rows = `🟢 Done`; ac-checkbox = `[x]` — no other target is allowed); `row_sha256`
+(rows = `🟢 Done`; ac-checkbox = `[x]`; no other target is allowed); `row_sha256`
 (sha256 of the current row/line, to defeat moved/reordered/duplicate/edited rows); and
-kind-specific locators — uat-row: `matrix_heading` + `scenario_id`; nfr-row: `matrix_heading`
+kind-specific locators: uat-row: `matrix_heading` + `scenario_id`; nfr-row: `matrix_heading`
 + `nfr_ref`; test-row: `(ac, test_path, test_name)`; ac-checkbox: `ac_label`.
 
 `apply-promotions` treats the decision JSON as a **frozen authorization token** and aborts with a
@@ -129,7 +129,7 @@ The wrapper is common-owned and invoked by absolute common path (it resolves its
 A preset containing `promotion-gate` (i.e. `precompact-full`) requires `--interactive` **and** a
 real blocking approval channel (TTY). Invoked without `--interactive`, or with `--interactive`
 but no TTY/blocking approval channel, the CLI prints `NON_INTERACTIVE_APPROVAL_UNAVAILABLE` and
-**exits 2 before any write** — it never auto-promotes. This is the hard safety floor: a checkpoint
+**exits 2 before any write** and never auto-promotes. This is the hard safety floor: a checkpoint
 that cannot obtain a real approval must stop, not guess.
 
 ---

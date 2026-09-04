@@ -8,8 +8,8 @@ description: Initialize a work item (tracker key or local slug), technical desig
 ## Safety contract (destructive skill, agent-invocable)
 
 - **Default is read-only / no-write.** Invoked with no args (or `--help`/`status`), this skill only inspects and reports; it performs NO write, apply, push, delete, remote, or trim.
-- **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation — or run an approved preview/dry-run first and act only on that approved plan.
-- **Agents are NOT locked out** (no `disable-model-invocation`); this contract — not frontmatter — is what gates writes, so the read-only path is freely usable and a mutation requires approval.
+- **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation, or run an approved preview/dry-run first and act only on that approved plan.
+- **Agents are NOT locked out** (no `disable-model-invocation`); this contract (not frontmatter) is what gates writes, so the read-only path is freely usable and a mutation requires approval.
 
 Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with clear Lite / rapid-vibe intent ("lite", "briefing only", "ticket + context only", or owner-approved rapid existing-UI refinement).
 

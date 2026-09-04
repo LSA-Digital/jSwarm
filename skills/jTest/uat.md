@@ -42,7 +42,7 @@ Green unit or deterministic tests, a prior walk against an older script, checkou
 
 1. Load `UAT-G1` and `UAT-R3` when owner input, a review finding, or a recorded confirmation event changes expected behavior.
 2. When a processed owner-feedback receipt, an owner or ticket boss ruling receipt, or an orchestrator verification receipt confirms an accepted behavior outcome absent from or contradictory to current GWT, update canonical `uat-scenarios`/GWT in that same work unit before `/jFix`, test or implementation dispatch, round refresh, re-seal, preparation, or any owner-ready claim; record a successor clause and never defer the update to a later lifecycle step.
-3. When a canonical GWT outcome or FAIL clause changes with an authoritative ruling receipt, or a batch dispatch/return binds shipped production behavior to a new ruling already recorded in GWT, the same batch dispatches `jTestEngineer` over unit/integration expectations; its report cites the ruling, records the superseded and successor clauses plus search seeds/results, fixes only `TEST-DRIFT`, and leaves every real defect RED—observed behavior alone never authorizes an expectation change.
+3. When a canonical GWT outcome or FAIL clause changes with an authoritative ruling receipt, or a batch dispatch/return binds shipped production behavior to a new ruling already recorded in GWT, the same batch dispatches `jTestEngineer` over unit/integration expectations; its report cites the ruling, records the superseded and successor clauses plus search seeds/results, fixes only `TEST-DRIFT`, and leaves every real defect RED. Observed behavior alone never authorizes an expectation change.
 4. After the sweep, re-derive scenario steps, the canonical `uat-test`/legacy alias, and affected acceptance wording from the amended GWT in the same work unit.
 5. Before dispatch or round refresh, retain the evidence required by those records and the triggered drift-sweep report.
 
@@ -78,13 +78,13 @@ Resolve focus from the explicit ticket, then branch, testing context, or the Mos
 2. Load `UAT-G0`; require the selected typed certification receipt: Docker retains jInfra recreate/currency evidence, while `local-process-v1` requires fresh listener lineage, content/build/fixture/config identity, served-byte binding, targeted smoke, and current-script replay N/A when UAT-D4 selects the current walk.
 3. Load `UAT-G1`; require owner GWT, derived steps, and acceptance wording to agree.
 4. Load `UAT-T1`, `UAT-R1`, `UAT-R2`, and `UAT-R8`; require the canonical path, truthful time/deploy state, Journey citations, and relevant NFRs.
-5. If any loaded stop condition fires, stop — do not prepare, materialize, or patch.
+5. If any loaded stop condition fires, stop: do not prepare, materialize, or patch.
 
 For UAT-G0, `jinfra-docker-recreate-v1` retains its certified recreate/currency path. `local-process-v1` certifies only with current listener lineage, byte-equal served production assets, and targeted smoke; a missing, stale, cross-source, or malformed receipt is `BLOCKED: stale stack`.
 
 ## Instrument-currency outcome
 
-When behavior lock is not `YES`, deterministic replay records exactly `N/A — behavior not locked; current jQATester walk required first`; the unlocked path requires a current walk receipt. Any required diagnostic run names the current step, defaults to no more than five minutes per step and fifteen minutes overall, and honors stricter project limits. It aborts at deadline and never retries unchanged. Emit `STALE-SPEC-CANDIDATE` when the current specification is stale or contradictory. Record recovery, but recovery is diagnostic only and cannot pass the original live-path outcome.
+When behavior lock is not `YES`, deterministic replay records exactly `N/A (behavior not locked; current jQATester walk required first)`; the unlocked path requires a current walk receipt. Any required diagnostic run names the current step, defaults to no more than five minutes per step and fifteen minutes overall, and honors stricter project limits. It aborts at deadline and never retries unchanged. Emit `STALE-SPEC-CANDIDATE` when the current specification is stale or contradictory. Record recovery, but recovery is diagnostic only and cannot pass the original live-path outcome.
 
 ## /jTest uat prepare delegation advisory
 
@@ -112,7 +112,7 @@ Give the subagent this compact handoff and require it to: **resolve focus** → 
 
 1. Load `UAT-G0`, `UAT-D1`, and, when applicable, `UAT-D2`.
 2. Select transport with `jswarm.qa_transport` from live exposure plus a bounded health probe, not configuration presence.
-3. Build the handoff from `docs/templates/QA_DISPATCH_HANDOFF_TEMPLATE.md`; fill all 13 fields or use `N/A — reason`.
+3. Build the handoff from `docs/templates/QA_DISPATCH_HANDOFF_TEMPLATE.md`; fill all 13 fields or use `N/A (reason)`.
 4. Field 10 carries exact scenario IDs, relevant GWT clauses verbatim, and matching step-script sections.
 5. Keep run-specific specimen IDs, environment facts, known-good walks, monitor/report/evidence paths, and expected-failure semantics in the handoff; standing browser mechanics stay in the agent contract.
 6. For combinatorial fixes, deterministic tests enumerate the full matrix on captured production-shape data and capture-replay/projection fixtures pin write-path→read-path behavior; above about 10 permutations, jQATester remains limited to a handful of journey-shape spot checks.
@@ -128,7 +128,7 @@ Use before delegating jQATester.
 4. Apply the owner-sync and test-authoring checklists.
 5. Fill execution mode, driver, runner, regression command/deferral, base URL/health, auth, state preflight, runtime monitor, report/evidence paths, and live-show callouts.
 6. Assert user-visible behavior, public APIs, console/network results, or documented evidence; internal state is diagnostic only.
-7. For backend/API/workflow UAT, include the monitor contract or an explicit `N/A — reason`.
+7. For backend/API/workflow UAT, include the monitor contract or an explicit `N/A (reason)`.
 
 ### UAT scenario JSON READ integration
 <!-- uat-scenarios:read-integration -->
