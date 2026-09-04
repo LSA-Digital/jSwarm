@@ -31,15 +31,57 @@ import sys
 from pathlib import Path
 from typing import cast
 
-TICKET_RE = re.compile(r"[A-Z][A-Z0-9]+-\d+")
+# A ticket here is a work item id per jswarm.workitem.identity: a tracker key
+# (PS-14) OR a jPlan-produced local slug (add-csv-export) -- the two are
+# interchangeable identity forms of the same contract, not a tracker-only
+# feature (see docs/superpowers/specs/2026-09-03-jswarm-public-repo-split-
+# design.md section 4). Delegate to that module rather than re-deriving the
+# pattern, so the two never drift apart.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+from jswarm.workitem import identity as _workitem_identity  # noqa: E402
+
+_ID_ALT = f"(?:{_workitem_identity.TRACKER_KEY[1:-1]}|{_workitem_identity.SLUG[1:-1]})"
+_ID_FULL_RE = re.compile(f"^{_ID_ALT}$")
+# Embedded-anywhere search, tracker-key shape only: unambiguous in free text
+# because its uppercase-letter-then-dash-digits alphabet does not occur in
+# ordinary branch names or session titles.
+_TRACKER_KEY_SEARCH_RE = re.compile(_workitem_identity.TRACKER_KEY[1:-1])
+# The documented work-branch naming convention (skills/jMerge/SKILL.md: "feat/<ID>";
+# design section 4). A slug is only read out of free text (branch name / session
+# title) after one of these prefixes -- NOT as a bare word -- because almost any
+# lowercase word (master, main, develop, ...) is also a syntactically valid slug
+# and would otherwise be misread as a work item id.
+_WORK_BRANCH_PREFIXES = ("feat/", "feature/", "fix/", "bugfix/", "hotfix/", "chore/")
 # A plan is editable only in a planning or implementation lifecycle state.
 EDITABLE_PLAN_STATUS_RE = re.compile(r"^(2\.planning|3\.implementation)\b")
 
 
 def _extract_key(value: str | None) -> str | None:
+    """Resolve a work item id given directly, e.g. the ``--active-ticket``
+    binding: the whole (stripped) value IS the id, tracker key or slug."""
     if not value:
         return None
-    match = TICKET_RE.search(value)
+    stripped = value.strip()
+    return stripped if _ID_FULL_RE.match(stripped) else None
+
+
+def _extract_key_from_text(value: str | None) -> str | None:
+    """Resolve a work item id embedded in free text: ``--branch`` or
+    ``--session-title``. A tracker key may appear anywhere (unambiguous); a
+    slug is only recognised right after a documented work-branch prefix
+    (``feat/<id>``), never as a bare word -- see ``_WORK_BRANCH_PREFIXES``."""
+    if not value:
+        return None
+    stripped = value.strip()
+    for prefix in _WORK_BRANCH_PREFIXES:
+        if stripped.startswith(prefix):
+            remainder = stripped[len(prefix):]
+            if _ID_FULL_RE.match(remainder):
+                return remainder
+            break
+    match = _TRACKER_KEY_SEARCH_RE.search(stripped)
     return match.group(0) if match else None
 
 
@@ -81,11 +123,11 @@ def resolve(
         if key:
             candidates["active-ticket"] = key
     if branch:
-        key = _extract_key(branch)
+        key = _extract_key_from_text(branch)
         if key:
             candidates["branch"] = key
     if session_title:
-        key = _extract_key(session_title)
+        key = _extract_key_from_text(session_title)
         if key:
             candidates["session-title"] = key
 

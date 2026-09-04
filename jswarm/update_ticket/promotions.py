@@ -33,10 +33,16 @@ if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
 # Reuse the existing matrix parsing/flip helpers — never re-roll matrix parsing.
+# _TICKET_RE is the shared work-item-id pattern (tracker key OR jPlan-produced
+# local slug, per jswarm.workitem.identity -- see docs/superpowers/specs/
+# 2026-09-03-jswarm-public-repo-split-design.md section 4); reused here rather
+# than redefined so a promotion decision resolves for a slug ticket exactly as
+# every other lifecycle tool does.
 from jswarm.precompact_reconcile.matrices import (  # noqa: E402
     _cells,
     _set_last_cell,
     _test_tuple,
+    _TICKET_RE,
     extract_nfr_ref,
     extract_uat_id,
     _NFR_HEADING,
@@ -59,7 +65,6 @@ _AC_EXPECTED = "[ ]"
 _AC_TARGET = "[x]"
 _AC_HEADING = "## Acceptance Criteria"
 
-_TICKET_RE = re.compile(r"^[A-Z][A-Z0-9]+-[0-9]+$")
 _HEADING_SECTION = {
     _NFR_HEADING: "nfr",
     _UAT_HEADING: "uat",

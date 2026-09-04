@@ -23,6 +23,7 @@ from jswarm.plan_status import config
 from jswarm.plan_status import frontmatter as FM
 from jswarm.plan_status import reconcile as RC
 from jswarm.update_plan import backfill, hygiene
+from jswarm.workitem import identity as _workitem_identity
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -42,9 +43,13 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-# Canonical Jira-style key. Used to validate --ticket BEFORE it ever reaches a glob,
-# so metacharacters (`*`, `?`, `[`) cannot match and mutate an arbitrary plan.
-_TICKET_RE = re.compile(r"^[A-Z][A-Z0-9]+-[0-9]+$")
+# A work item id, tracker key OR slug (jswarm.workitem.identity; see docs/superpowers/
+# specs/2026-09-03-jswarm-public-repo-split-design.md section 4). Used to validate
+# --ticket BEFORE it ever reaches a glob, so metacharacters (`*`, `?`, `[`) cannot
+# match and mutate an arbitrary plan -- the slug alphabet excludes those too.
+_TICKET_RE = re.compile(
+    f"^(?:{_workitem_identity.TRACKER_KEY[1:-1]}|{_workitem_identity.SLUG[1:-1]})$"
+)
 
 
 def _resolve_plan(args: argparse.Namespace) -> tuple[Path | None, str | None, str | None]:

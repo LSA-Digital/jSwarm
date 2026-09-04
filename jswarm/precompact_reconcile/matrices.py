@@ -567,7 +567,11 @@ def reconcile_file(plan_path: Path, uat_doc: Path | None, nfr_doc: Path | None,
 
 
 def _ticket_from_name(name: str) -> str | None:
-    m = re.match(r"^([A-Z][A-Z0-9]+-[0-9]+)\.plan\.", name)
+    """Extract the leading work item id from a canonical plan filename
+    (``<id>.plan.<description>.md``): a tracker key or a slug, per
+    jswarm.workitem.identity -- the ``.plan.`` separator is unambiguous
+    against either alphabet (neither contains a literal ``.``)."""
+    m = re.match(rf"^({_workitem_identity.TRACKER_KEY[1:-1]}|{_workitem_identity.SLUG[1:-1]})\.plan\.", name)
     return m.group(1) if m else None
 
 

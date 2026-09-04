@@ -40,6 +40,7 @@ for _path in (str(_HERE), str(_REPO_ROOT)):
         sys.path.insert(0, _path)
 
 import populate_scenario_content as _pop  # noqa: E402  (reuse load/validate/sha helpers)
+from jswarm.workitem import identity as _workitem_identity  # noqa: E402
 
 JsonObject = dict[str, object]
 
@@ -54,8 +55,13 @@ PASS_CRITERIA_HEADING = "## Pass Criteria"
 STUB_LAYERS = ("unit", "integration")
 # A runbook must carry these canonical headings (AC-2); the source template must provide them too.
 REQUIRED_HEADINGS = ("Execution strategy", "Pass Criteria")
-# AC-4 / NFR-033: the active ticket key + its folder name must match this; anything else is a refusal.
-TICKET_KEY_RE = re.compile(r"^[A-Z][A-Z0-9]+-\d+$")
+# AC-4 / NFR-033: the active ticket key + its folder name must match this; anything else is a
+# refusal. A ticket here is a work item id per jswarm.workitem.identity: a tracker key (PS-14)
+# OR a jPlan-produced local slug (add-csv-export) -- not a tracker-only feature (see docs/
+# superpowers/specs/2026-09-03-jswarm-public-repo-split-design.md section 4). The confinement
+# purpose (refuse a ticket value that could escape the active ticket folder) is served just as
+# well by the slug alphabet, which also excludes path/glob metacharacters.
+TICKET_KEY_RE = re.compile(f"^(?:{_workitem_identity.TRACKER_KEY[1:-1]}|{_workitem_identity.SLUG[1:-1]})$")
 DEFAULT_TEMPLATE = _REPO_ROOT / "docs" / "templates" / "UAT_TEST_TEMPLATE.md"
 
 
@@ -324,7 +330,10 @@ def _build_plan(
     # AC-4 / NFR-033 confinement: refuse an unsafe ticket key, and require the ticket folder's
     # basename to equal the ticket — before reading or writing anything.
     if not TICKET_KEY_RE.match(ticket):
-        raise ValueError(f"refusing unsafe --ticket {ticket!r}: must be a ticket key like ABC-123")
+        raise ValueError(
+            f"refusing unsafe --ticket {ticket!r}: must be a tracker key like ABC-123 "
+            "or a slug like add-csv-export"
+        )
     if ticket_dir.resolve().name != ticket:
         raise ValueError(
             f"--ticket-dir basename {ticket_dir.resolve().name!r} must equal --ticket {ticket!r} "

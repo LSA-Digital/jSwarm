@@ -1,16 +1,28 @@
 """A/C 3: per-project config resolver.
 
+A work item is either a tracker key (``PS-14``) or a local slug
+(``add-csv-export``) -- see ``jswarm.workitem.identity`` and section 4 of
+docs/superpowers/specs/2026-09-03-jswarm-public-repo-split-design.md. Plan
+status must work identically for either: a tracker key is only meaningful
+once a tracker is configured, but a project WITHOUT a tracker is the
+default, documented path, not a degraded one. ``enabled`` therefore no
+longer depends on a Jira key prefix being resolvable at all -- it only
+depends on this being a real, plan-tracking repo (a resolved ``.git`` root
+with a plans directory). The Jira key, when resolved, is still used to
+build ``ticket_regex`` for cross-project ownership checks on tracker-key
+tickets (see ``ticket_matches``); a slug ticket never needs one.
+
 Reads jswarm/config/active-projects.yaml (substrate, absent by default; see
 that path's ``.exists()`` guard below) to identify the project, then resolves
-the Jira key + ticket regex + plans dir. When the key cannot be resolved,
-returns enabled=False so hooks operate advisory-only (no writes).
+the Jira key + ticket regex + plans dir.
 
 Resolution order for the Jira key:
   1. Optional `jira_key:` field on the matching active-projects.yaml entry.
   2. The adopted project's own `.jswarm/config.yaml` `tracker.key_prefix`
      (the same config `jswarm.tracker.resolve.load` reads to build the live
      tracker; see `jswarm/installer/adopt.py`, which writes it).
-  3. None -> enabled=False.
+  3. None -> no tracker configured; tracker-key tickets never match, slugs
+     always do (see ``ticket_matches``).
 
 There is no built-in table mapping real project names to ticket-key
 prefixes. A project's prefix is either recorded in its own committed
@@ -20,6 +32,7 @@ all; there is nothing left to guess from.
 from __future__ import annotations
 
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, cast
@@ -28,6 +41,14 @@ try:
     import yaml
 except Exception:  # pragma: no cover - yaml is a hard dep in this repo
     yaml = None
+
+# Insert the repository root (parents[2]: plan_status/ -> jswarm/ -> repo root), not
+# jswarm/ itself (parents[1]), which would shadow the stdlib for anything under
+# jswarm/ sharing a name with it (e.g. jswarm/platform/ vs the stdlib platform module).
+_SCRIPTS_DIR = str(Path(__file__).resolve().parents[2])
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+from jswarm.workitem import identity as _workitem_identity
 
 ACTIVE_PROJECTS_REL = "jswarm/config/active-projects.yaml"
 
@@ -95,6 +116,22 @@ def _tracker_key_prefix(repo_root: Path) -> Optional[str]:
     return str(prefix) if prefix else None
 
 
+def _resolve_plans_dir(repo_root: Path) -> Path:
+    """Prefer the canonical ``.jswarm/plans`` (all new plan writes -- tracker-key or
+    slug alike -- land there per skills/jPlan/CHANGELOG.md); fall back to the legacy
+    ``docs/plans`` only when it exists and the canonical dir does not, so a project
+    that predates the ``.jswarm/plans`` move keeps resolving without migration.
+    Never requires a tracker key: plan tracking is enabled by having plans, not by
+    having a Jira prefix (see module docstring)."""
+    canonical = repo_root / ".jswarm" / "plans"
+    if canonical.exists():
+        return canonical
+    legacy = repo_root / "docs" / "plans"
+    if legacy.exists():
+        return legacy
+    return canonical
+
+
 def resolve_config(
     project_root: Optional[Path] = None,
     *,
@@ -114,7 +151,7 @@ def resolve_config(
     project_id = repo_root.name
 
     project_key: Optional[str] = None
-    source = "unresolved"
+    source = "no-tracker"
 
     # 1. active-projects.yaml match (by resolved path) with optional jira_key.
     for entry in _load_active_projects(common_root):
@@ -133,9 +170,15 @@ def resolve_config(
             project_key = configured
             source = "tracker-config"
 
-    plans_dir = repo_root / "docs" / "plans"
+    plans_dir = _resolve_plans_dir(repo_root)
     ticket_regex = rf"^{project_key}-\d+$" if project_key else None
-    enabled = bool(project_key) and plans_dir.exists()
+    # Enabled means "this is a real, plan-tracking repo" -- NOT "a tracker is
+    # configured". A tracker-free project (tracker: {adapter: none}, the default
+    # adopt writes) is the documented default path, not a degraded one: plan status
+    # must work for it exactly as it does for a Jira-tracked project. See module
+    # docstring and docs/superpowers/specs/2026-09-03-jswarm-public-repo-split-
+    # design.md section 4.
+    enabled = plans_dir.exists()
 
     return ProjectConfig(
         enabled=enabled,
@@ -144,22 +187,49 @@ def resolve_config(
         ticket_regex=ticket_regex,
         plans_dir=plans_dir if plans_dir.exists() else None,
         repo_root=repo_root,
-        source=source if project_key else "unresolved",
+        source=source if enabled else "unresolved",
     )
 
 
 def ticket_matches(config: ProjectConfig, ticket: str) -> bool:
+    """Whether ``ticket`` is a work item this project's plan-status registry owns.
+
+    Delegates identity recognition to ``jswarm.workitem.identity`` rather than a
+    private regex (see module docstring). A slug is always local to the one repo
+    ``config`` was resolved from, so it always matches -- there is no tracker
+    prefix to disambiguate against, and none is needed. A tracker key only matches
+    when it carries THIS project's configured prefix, exactly as before.
+    """
+    try:
+        work_id = _workitem_identity.parse(ticket)
+    except _workitem_identity.WorkItemIdError:
+        return False
+    if work_id.kind == "slug":
+        return True
     if not config.ticket_regex:
         return False
     return bool(re.match(config.ticket_regex, ticket))
 
 
-# A real legacy plan file is docs/plans/<KEY-NNN>-<description>.md.
-# A canonical OMO plan file is .jswarm/plans/<KEY-NNN>.plan.<description>.md.
+# A real legacy plan file is docs/plans/<KEY-NNN>-<description>.md. That naming
+# scheme predates jswarm.workitem.identity / slug support entirely (it is only
+# ever produced by an old Jira-ticket-based project migrated from before the
+# tracker-free split), so it is genuinely tracker-key-only -- left as-is, not a
+# missed instance of the identity bug. Its "-" separator would also be
+# ambiguous against a slug's own "-"-delimited alphabet with no way to tell
+# id from description apart.
+#
+# The canonical plan file, .jswarm/plans/<ID>.plan.<description>.md, is where
+# ALL new plan writes land for either identity form (see skills/jPlan/
+# CHANGELOG.md) -- its ".plan." separator is unambiguous (slugs never contain
+# a literal "."), so it accepts both a tracker key and a slug, delegating to
+# jswarm.workitem.identity rather than a private regex.
 # Suffix artifacts (KEY-NNN.specs.md etc.) and evidence/ subpaths are excluded.
 # Shared by the post-edit hook, reconciler, doctor, and backfill.
 _LEGACY_PLAN_FILE_RE = re.compile(r"^([A-Z][A-Z0-9_]+-\d+)-[^/]*\.md$")
-_JSWARM_PLAN_FILE_RE = re.compile(r"^([A-Z][A-Z0-9_]+-\d+)\.plan\.[^/]*\.md$")
+_JSWARM_PLAN_FILE_RE = re.compile(
+    rf"^((?:{_workitem_identity.TRACKER_KEY[1:-1]}|{_workitem_identity.SLUG[1:-1]}))\.plan\.[^/]*\.md$"
+)
 _EXCLUDED_DIR_PARTS = {"evidence", "retros", "templates", "plan-templates"}
 
 
