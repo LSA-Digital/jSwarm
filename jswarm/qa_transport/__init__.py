@@ -10,7 +10,7 @@ Selection (`ladder.select_transport`) is a pure function over pre-collected
 probe results and can never hang. Probe collection (`probes`) runs the real
 subprocess/network checks under hard timeouts. In-session MCP tool exposure
 can only be observed by the orchestrator (config presence != session
-exposure — QA21 2026-07-10), so it is an input, never inferred from config.
+exposure), so it is an input, never inferred from config.
 """
 
 from jswarm.qa_transport.ladder import LadderDecision, TransportProbe, select_transport

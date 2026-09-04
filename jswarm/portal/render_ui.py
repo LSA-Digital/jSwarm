@@ -130,7 +130,7 @@ def discover_default_build_input() -> dict:
     """Dynamically discover every positive contract + qa-thread example.
 
     Robust to the Phase-1 schema-hardening lane adding example fixtures
-    (e.g. ``fix-contract.has-617-build-stage-restore.json``): whatever is in
+    (e.g. ``fix-contract.demo-617-build-stage-restore.json``): whatever is in
     ``schemas/fix-decisions/examples/`` at build time is what gets rendered.
     Publication manifests are matched to contracts by their
     ``contract_schema`` when the manifest's own contract example is present.

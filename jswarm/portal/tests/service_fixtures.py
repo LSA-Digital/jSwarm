@@ -34,7 +34,7 @@ def make_publication(root: Path, publication_id: str = "pub-test-001", contract_
 
     ``manifest_digest`` may be overridden to simulate drift or tampering.
     """
-    contract_src = EXAMPLES / "fix-contract.has-617-preview-stage-truth.json"
+    contract_src = EXAMPLES / "fix-contract.demo-617-preview-stage-truth.json"
     root.mkdir(parents=True, exist_ok=True)
     contract_path = root / contract_name
     shutil.copy(contract_src, contract_path)
@@ -77,7 +77,7 @@ def make_publication(root: Path, publication_id: str = "pub-test-001", contract_
     parent_rel = contract["parent_defect_contract"]["path"]
     parent_dst = root / parent_rel
     parent_dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy(EXAMPLES / "defect-contract.has-617-charter.json", parent_dst)
+    shutil.copy(EXAMPLES / "defect-contract.demo-617-charter.json", parent_dst)
     return {
         "root": root,
         "contract_path": contract_path,

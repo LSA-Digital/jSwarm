@@ -15,7 +15,7 @@ What each probe covers:
 
 In-session MCP exposure is deliberately NOT probed here: only the orchestrator
 can observe its live tool list. It supplies that fact to the ladder directly
-(config presence != session exposure — QA21 2026-07-10).
+(config presence != session exposure).
 """
 
 from __future__ import annotations
@@ -95,7 +95,7 @@ def _preflight_command_from_manifest(manifest_path: Path) -> list[str] | None:
 
     Supported shapes, first match wins — ``uatState.preflightCommand`` is the
     REAL field shipped in project manifests (verified against an adopting
-    project's own .jswarm/e2e-manifest.json, QA21 2026-07-10); the generic
+    project's own .jswarm/e2e-manifest.json); the generic
     ``commands.preflight`` / top-level ``preflight`` shapes are fallbacks.
     """
     try:

@@ -24,7 +24,7 @@ class TransportProbe:
 
     ``direct_mcp_exposed_in_session`` is orchestrator-observed (the live tool
     list), never derived from config files: config presence != session
-    exposure (QA21 2026-07-10 field proof). There is deliberately no
+    exposure. There is deliberately no
     ``configured`` input.
     """
 
