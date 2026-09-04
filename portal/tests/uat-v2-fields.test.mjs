@@ -1,4 +1,4 @@
-// COM-391 Phase 12 RED — browser-side canonical-v2 field contracts for A/C 19, 21, 22.
+// DEMO-391 Phase 12 RED — browser-side canonical-v2 field contracts for A/C 19, 21, 22.
 //
 // These tests are deliberately failing until Phase 15 lands.  They drive the real
 // production parser (`src/lib/uat-rounds.ts`), not a copy of it.
@@ -83,17 +83,17 @@ function activeView({ appUrl = SEALED_APP_URL, journeys } = {}) {
   const built = journeys ? journeys() : [journeyOne(), journeyTwo()];
   return {
     schema: 'jswarm.test-uat.active-round-view/v2', schema_version: '2.0',
-    round_review_id: 'COM-391/round-com-391-001', ticket: 'COM-391', round_status: 'NOT_STARTED',
+    round_review_id: 'DEMO-391/round-demo-391-001', ticket: 'DEMO-391', round_status: 'NOT_STARTED',
     projection_sha256: 'c'.repeat(64), feedback_result_contract: feedbackResultContract,
     current_round: {
-      path: '.jswarm/plans/COM-391/COM-391.UAT-CURRENT-ROUND.md', sha256: 'a'.repeat(64), size: 100,
+      path: '.jswarm/plans/DEMO-391/DEMO-391.UAT-CURRENT-ROUND.md', sha256: 'a'.repeat(64), size: 100,
       package_state: 'ISSUED', source: '# Canonical round', writable: false,
       // The producer already seals app_url here; the browser has simply never read it.
       normalized_package: { schema_version: 'uat-canonical-package@2', app_url: appUrl },
       journeys: built,
     },
     feedback: {
-      path: '.jswarm/plans/COM-391/COM-391.uat-feedback.md', sha256: 'b'.repeat(64), size: 80,
+      path: '.jswarm/plans/DEMO-391/DEMO-391.uat-feedback.md', sha256: 'b'.repeat(64), size: 80,
       processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', step_entries: {}, walk_stop: null,
       step_counts: { total: 3, gray: 3, yellow: 0, green: 0 }, markerized: true, writable: true,
     },
@@ -308,7 +308,7 @@ test('A/C 19 — the parser types step_refs on a known item and marks its scope'
       const one = journeyOne();
       one.known_items = [{
         text: 'Observer capture is unavailable on this step.',
-        source_ref: 'COM-391.uat-test.md#known',
+        source_ref: 'DEMO-391.uat-test.md#known',
         step_refs: ['uat-391-1-step-02'],
       }];
       return [one, journeyTwo()];
@@ -324,7 +324,7 @@ test('A/C 19 — a legacy known item stays readable and is explicitly marked leg
   const parsed = parseActiveRoundView(activeView({
     journeys: () => {
       const one = journeyOne();
-      one.known_items = [{ text: 'A legacy journey-wide disclosure.', source_ref: 'COM-391.uat-test.md#known' }];
+      one.known_items = [{ text: 'A legacy journey-wide disclosure.', source_ref: 'DEMO-391.uat-test.md#known' }];
       return [one, journeyTwo()];
     },
   }));
@@ -355,7 +355,7 @@ for (const [name, stepRefs] of [
           const one = journeyOne();
           one.known_items = [{
             text: 'A disclosure that must not render.',
-            source_ref: 'COM-391.uat-test.md#known',
+            source_ref: 'DEMO-391.uat-test.md#known',
             step_refs: stepRefs,
           }];
           return [one, journeyTwo()];
@@ -378,8 +378,8 @@ test('A/C 19 — disclosures resolve only to their targeted steps', () => {
     journeys: () => {
       const one = journeyOne();
       one.known_items = [
-        { text: 'Only step two.', source_ref: 'COM-391.uat-test.md#known', step_refs: ['uat-391-1-step-02'] },
-        { text: 'Both steps.', source_ref: 'COM-391.uat-test.md#known', step_refs: ['uat-391-1-step-01', 'uat-391-1-step-02'] },
+        { text: 'Only step two.', source_ref: 'DEMO-391.uat-test.md#known', step_refs: ['uat-391-1-step-02'] },
+        { text: 'Both steps.', source_ref: 'DEMO-391.uat-test.md#known', step_refs: ['uat-391-1-step-01', 'uat-391-1-step-02'] },
       ];
       return [one, journeyTwo()];
     },
@@ -399,7 +399,7 @@ test('A/C 19 — targeting survives a step reorder because ordinals are not iden
       const one = journeyOne();
       one.known_items = [{
         text: 'Scope must survive a reorder.',
-        source_ref: 'COM-391.uat-test.md#known',
+        source_ref: 'DEMO-391.uat-test.md#known',
         step_refs: ['uat-391-1-step-02'],
       }];
       // Swap positions and renumber ordinals; ids are unchanged.
@@ -423,7 +423,7 @@ test('A/C 19 — a legacy disclosure is not attributed to any step card', () => 
   const parsed = parseActiveRoundView(activeView({
     journeys: () => {
       const one = journeyOne();
-      one.known_items = [{ text: 'A legacy journey-wide disclosure.', source_ref: 'COM-391.uat-test.md#known' }];
+      one.known_items = [{ text: 'A legacy journey-wide disclosure.', source_ref: 'DEMO-391.uat-test.md#known' }];
       return [one, journeyTwo()];
     },
   }));

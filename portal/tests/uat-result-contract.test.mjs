@@ -1,6 +1,6 @@
-// COM-391 Phase 8 RED — the browser half of the one authoritative result contract.
+// DEMO-391 Phase 8 RED — the browser half of the one authoritative result contract.
 //
-// Contract: `.jswarm/plans/COM-391/COM-391.design.consolidated-recommendations.md` §2 —
+// Contract: `.jswarm/plans/DEMO-391/DEMO-391.design.consolidated-recommendations.md` §2 —
 // the backend owns a versioned result contract and "the browser derives its controls
 // from it. Backend stays the final validator."
 //
@@ -18,7 +18,7 @@ import test from 'node:test';
 import * as uatRounds from '../src/lib/uat-rounds.ts';
 import { allowedDispositions } from '../src/lib/uat-rounds.ts';
 
-// Owner-facing alphabets from the COM-391 design contract, not copied from either
+// Owner-facing alphabets from the DEMO-391 design contract, not copied from either
 // implementation, so neither side serves as its own golden.
 const SPEC_ASSESSMENTS = ['ALIGNED', 'BLOCKED', 'NOT_APPLICABLE', 'NOT_OBSERVED', 'OBSERVED_FAILURE'];
 const SPEC_SEVERITIES = ['NONE', 'MINOR', 'MAJOR'];

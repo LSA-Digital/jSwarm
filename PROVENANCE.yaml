@@ -374,10 +374,10 @@ files:
   target: portal/src/components/QaThreads.astro
   sha256: fec94cebd8a1f0cf372e54db45cdd39b30ee181d68bf376424fd4ea2d6193335
 - source: decision-review-ui/src/components/home/FixUatLifecycle.astro
-  target: portal/src/components/home/FixUatLifecycle.astro
+  target: portal/src/components/landing/FixUatLifecycle.astro
   sha256: 8beb72e5e727ad30fcab14de2985510c8c91932285e28bc6ba3b3b95f2cf2f38
 - source: decision-review-ui/src/components/home/UatSummaryArea.astro
-  target: portal/src/components/home/UatSummaryArea.astro
+  target: portal/src/components/landing/UatSummaryArea.astro
   sha256: 6166b5998a74e12f8d48a30e17bc38184e86df6d499124677aedf548ca89eccb
 - source: decision-review-ui/src/components/uat/ActiveUatWorkbench.astro
   target: portal/src/components/uat/ActiveUatWorkbench.astro

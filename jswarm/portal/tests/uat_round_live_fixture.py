@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test-only, producer-faithful COM-391 live-fixture CLI.
+"""Test-only, producer-faithful DEMO-391 live-fixture CLI.
 
 This helper is deliberately not service authority: it materializes existing
 package/feedback producers and invokes the existing feedback processor.
@@ -252,8 +252,8 @@ def _seed_ledger_for_package(path: Path, package: dict[str, Any], current_round_
 
 
 def create(args: argparse.Namespace) -> dict[str, Any]:
-    if args.ticket != "COM-391":
-        raise FixtureError("test fixture is bound to COM-391")
+    if args.ticket != "DEMO-391":
+        raise FixtureError("test fixture is bound to DEMO-391")
     root = _prepare_root(Path(args.root))
     registration_path, config_path, state_path = (Path(args.registration_out).absolute(), Path(args.config_out).absolute(), Path(args.state_out).absolute())
     for path in (registration_path, config_path, state_path):
@@ -306,7 +306,7 @@ def mutate_feedback(args: argparse.Namespace) -> dict[str, Any]:
     projection = uat_feedback.parse_feedback_projection(feedback_path.read_bytes())
     entries = deepcopy(projection["entries"])
     first = next(iter(entries))
-    entries[first]["comment"] = "COM-391 deterministic external canonical feedback mutation."
+    entries[first]["comment"] = "DEMO-391 deterministic external canonical feedback mutation."
     feedback_path.write_bytes(uat_feedback.render_feedback_update(feedback_path.read_bytes(), entries))
     before = state["digests"]["feedback"]
     _record_digests(state)
@@ -350,7 +350,7 @@ def _candidate_from_feedback(feedback_path: Path) -> dict[str, Any]:
     package = projection["normalized_package"]
     journey = package["journeys"][0]
     entry = projection["entries"][journey["journey_id"]]
-    return {"schema_version": "uat-feedback-candidates@1", "candidates": [{"feedback_id": f"fixture-{journey['journey_id']}", "ticket": package["ticket"], "round_id": package["round_id"], "package_id": package["package_id"], "package_hash": package["package_hash"], "sealed_payload_sha256": package["sealed_payload_sha256"], "script_id": package["script_id"], "script_hash": package["script_hash"], "certified_build_hash": package["certified_build_hash"], "journey_id": journey["journey_id"], "requirement_ref": journey["requirement_ref"], "source": "owner", "scenario_id": journey["scenario_id"], "uat_test_anchor": journey["uat_test_anchor"], "atom_ids": journey["atom_ids"], "scenario_outcome": entry["scenario_outcome"], "finding_severity": entry["finding_severity"], "finding_disposition": entry["finding_disposition"], "summary": "Deterministic COM-391 fixture processing proof.", "observed": "Canonical feedback entry is present.", "expected": "Canonical feedback entry is processable.", "optional_identities": {}, "omissions": {"primary_pe2e": "test-only fixture", "red_test": "test-only fixture", "task": "test-only fixture", "implementation": "existing behavior"}}]}
+    return {"schema_version": "uat-feedback-candidates@1", "candidates": [{"feedback_id": f"fixture-{journey['journey_id']}", "ticket": package["ticket"], "round_id": package["round_id"], "package_id": package["package_id"], "package_hash": package["package_hash"], "sealed_payload_sha256": package["sealed_payload_sha256"], "script_id": package["script_id"], "script_hash": package["script_hash"], "certified_build_hash": package["certified_build_hash"], "journey_id": journey["journey_id"], "requirement_ref": journey["requirement_ref"], "source": "owner", "scenario_id": journey["scenario_id"], "uat_test_anchor": journey["uat_test_anchor"], "atom_ids": journey["atom_ids"], "scenario_outcome": entry["scenario_outcome"], "finding_severity": entry["finding_severity"], "finding_disposition": entry["finding_disposition"], "summary": "Deterministic DEMO-391 fixture processing proof.", "observed": "Canonical feedback entry is present.", "expected": "Canonical feedback entry is processable.", "optional_identities": {}, "omissions": {"primary_pe2e": "test-only fixture", "red_test": "test-only fixture", "task": "test-only fixture", "implementation": "existing behavior"}}]}
 
 
 def process(args: argparse.Namespace) -> dict[str, Any]:

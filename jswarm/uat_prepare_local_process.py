@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Produce and verify COM-391 local-process certification receipts.
+"""Produce and verify DEMO-391 local-process certification receipts.
 
 The ``verify`` operation deliberately rechecks live local evidence; a receipt's
 ``certification.verdict`` is never authority by itself.
@@ -30,10 +30,10 @@ if _REPOSITORY_ROOT not in sys.path:
 
 SCHEMA = "jswarm.uat.local-process-certification/v1"
 SOURCE = "local-process-v1"
-TICKET = "COM-391"
+TICKET = "DEMO-391"
 IDENTITY_ALGORITHM = "sha256-path-manifest-v1"
 CURRENT_SCRIPT = "CURRENT_SCRIPT_JQATESTER_WALK"
-ROUND_REVIEW_ID = "COM-391/round-com-391-001"
+ROUND_REVIEW_ID = "DEMO-391/round-demo-391-001"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 UTC_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$")
 TOP_LEVEL_KEYS = frozenset((
@@ -299,7 +299,7 @@ def _verify_fixture(receipt: Mapping[str, Any]) -> None:
     except Exception as error:
         raise LocalCertificationError("fixture preflight failed") from error
     if state["round_review_id"] != ROUND_REVIEW_ID or state["lifecycle"] != {"round_state": "ISSUED", "feedback_state": "UNPROCESSED"}:
-        raise LocalCertificationError("fixture state is not COM-391 fresh state")
+        raise LocalCertificationError("fixture state is not DEMO-391 fresh state")
     if Path(state["root"]).resolve() != Path(fixture["root"]).resolve(): raise LocalCertificationError("fixture root mismatch")
     config = json.loads(Path(fixture["config_path"]).read_text(encoding="utf-8"))
     if not isinstance(config, dict) or config.get("bind_host") != "127.0.0.1" or config.get("port") != 8765:
@@ -484,9 +484,9 @@ def validate_process_lineage(receipt: Mapping[str, Any], *, runner: Callable[[li
 
 
 def smoke_api(*, get: Callable[[str], tuple[int, object]], expected_current_sha256: str, expected_feedback_sha256: str) -> dict[str, object]:
-    """Assert the exact COM-391 list/detail capabilities without logging payloads."""
+    """Assert the exact DEMO-391 list/detail capabilities without logging payloads."""
     target = ROUND_REVIEW_ID
-    for path in ("/api/publications", "/api/uat-rounds", "/api/uat-rounds/COM-391%2Fround-com-391-001"):
+    for path in ("/api/publications", "/api/uat-rounds", "/api/uat-rounds/DEMO-391%2Fround-demo-391-001"):
         status, payload = get(path)
         if status != 200 or not isinstance(payload, dict):
             raise LocalCertificationError(f"API smoke failed: {path}")

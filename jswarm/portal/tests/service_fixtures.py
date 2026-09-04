@@ -92,9 +92,9 @@ def make_publication(root: Path, publication_id: str = "pub-test-001", contract_
 
 _UAT_MANIFEST = REPO_ROOT / "jswarm/tests/fixtures/com376_phase3_package/healthy-manifest.json"
 _COM391_V2_PREPARE_REQUEST = (
-    REPO_ROOT / ".jswarm/plans/COM-391/COM-391.uat-prepare-request.step-v2.json"
+    REPO_ROOT / ".jswarm/plans/DEMO-391/DEMO-391.uat-prepare-request.step-v2.json"
 )
-_COM391_SCENARIOS = REPO_ROOT / ".jswarm/plans/COM-391/COM-391.uat-scenarios.json"
+_COM391_SCENARIOS = REPO_ROOT / ".jswarm/plans/DEMO-391/DEMO-391.uat-scenarios.json"
 
 
 def com391_canonical_walkthroughs() -> dict[str, dict[str, Any]]:
@@ -134,14 +134,14 @@ def _gwt_array_digest(given: list[str], when: list[str], then: list[str]) -> str
 
 
 def make_com391_v2_manifest() -> dict[str, Any]:
-    """Load COM-391 content and project only the clarified nested v2 shape."""
+    """Load DEMO-391 content and project only the clarified nested v2 shape."""
     request = json.loads(_COM391_V2_PREPARE_REQUEST.read_text(encoding="utf-8"))
     assert isinstance(request, dict)
     raw = request.get("canonical_manifest")
     assert isinstance(raw, dict)
     manifest = deepcopy(raw)
     assert manifest.get("schema_version") == "uat-canonical-package@2"
-    assert manifest.get("ticket") == "COM-391"
+    assert manifest.get("ticket") == "DEMO-391"
     journeys = manifest.get("journeys")
     assert isinstance(journeys, list)
     for journey in journeys:
@@ -185,7 +185,7 @@ def make_com391_v2_manifest() -> dict[str, Any]:
 
 
 def make_com391_multi_lineage_v2_manifest() -> dict[str, Any]:
-    """Add reusable multiple-scenario/multiple-GWT lineage to one COM-391 step."""
+    """Add reusable multiple-scenario/multiple-GWT lineage to one DEMO-391 step."""
     manifest = make_com391_v2_manifest()
     journey = manifest["journeys"][0]
     first = journey["scenarios"][0]
@@ -213,7 +213,7 @@ def make_com391_multi_lineage_v2_manifest() -> dict[str, Any]:
 
 
 def make_active_uat_round(root: Path, *, generated_at: str | None = None, manifest: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Materialize COM-391 inputs from the real package/feedback renderers.
+    """Materialize DEMO-391 inputs from the real package/feedback renderers.
 
     This deliberately does not hand-author a Markdown acceptance lookalike. Each
     call derives a canonical package, current-round package block, feedback
@@ -223,10 +223,10 @@ def make_active_uat_round(root: Path, *, generated_at: str | None = None, manife
     assert isinstance(source_manifest, dict)
     package = build_canonical_package(source_manifest)
     materialized_at = generated_at or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    round_dir = root / ".jswarm/plans/COM-391"
+    round_dir = root / ".jswarm/plans/DEMO-391"
     round_dir.mkdir(parents=True, exist_ok=True)
-    current_round_path = round_dir / "COM-391.UAT-CURRENT-ROUND.md"
-    feedback_path = round_dir / "COM-391.uat-feedback.md"
+    current_round_path = round_dir / "DEMO-391.UAT-CURRENT-ROUND.md"
+    feedback_path = round_dir / "DEMO-391.uat-feedback.md"
     current_round = (
         render_canonical_package_block_bytes(package, package_state="ISSUED")
         + b"\n"
@@ -245,7 +245,7 @@ def make_active_uat_round(root: Path, *, generated_at: str | None = None, manife
     registration = {
         "schema": "jswarm.test-uat.active-round-source/v1",
         "schema_version": "1.0",
-        "round_review_id": "COM-391/round-fixture-001",
+        "round_review_id": "DEMO-391/round-fixture-001",
         "ticket": package["ticket"],
         "allowed_repo_root": str(root),
         "current_round_path": str(current_round_path.relative_to(root)),

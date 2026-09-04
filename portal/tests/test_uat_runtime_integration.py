@@ -1,4 +1,4 @@
-"""COM-391 Phase 4 — production-build shell and real-service integration proof."""
+"""DEMO-391 Phase 4 — production-build shell and real-service integration proof."""
 
 from __future__ import annotations
 
@@ -252,7 +252,7 @@ def test_generated_front_page_has_accessible_navigational_lifecycle_and_peer_car
     assert parser.uat_runtime_hooks == {"data-uat-summary-status", "data-uat-summary-warnings", "data-uat-summary-list"}
     assert parser.uat_cards == [], "runtime UAT cards must not be hard-coded into the static build"
     html = (built_dist / "index.html").read_text(encoding="utf-8")
-    assert "COM-391/round-newer" not in html and "COM-391/round-older" not in html
+    assert "DEMO-391/round-newer" not in html and "DEMO-391/round-older" not in html
     assert "FIX cycle" in html and "UAT TEST cycle" in html
     assert "FIX verification" in html
     # The relabelled graphic spaces the slash: "findings / feedback".
@@ -385,7 +385,7 @@ def test_generated_front_page_defers_two_canonical_uat_cards_to_runtime_api(buil
 
     assert parser.uat_runtime_hooks == {"data-uat-summary-status", "data-uat-summary-warnings", "data-uat-summary-list"}
     assert parser.uat_cards == []
-    assert "COM-391/round-newer" not in html and "COM-391/round-older" not in html
+    assert "DEMO-391/round-newer" not in html and "DEMO-391/round-older" not in html
     assert parser.fix_cards, "FIX cards remain build-time rendered while UAT cards are fetched at runtime"
 
 
@@ -615,10 +615,10 @@ def test_known_items_render_at_journey_scoring_point_without_empty_affordance(tm
     target_step_id = disclosed_manifest["journeys"][0]["steps"][0]["step_id"]
     disclosed_manifest["journeys"][0]["known_items"] = [{
         "text": disclosure_text,
-        "source_ref": "COM-391.uat-test.md#known-live-limitation",
+        "source_ref": "DEMO-391.uat-test.md#known-live-limitation",
         "step_refs": [target_step_id],
     }]
-    disclosed_manifest["known_sources_checked"].append("COM-391.uat-test.md#known-live-limitation")
+    disclosed_manifest["known_sources_checked"].append("DEMO-391.uat-test.md#known-live-limitation")
 
     disclosed_server = LiveServer(tmp_path / "disclosed", dist_dir=built_dist)
     empty_server = LiveServer(tmp_path / "empty", dist_dir=built_dist)
@@ -651,7 +651,7 @@ const targetStepId = process.argv[6];
     assert.equal((await disclosure.textContent()).includes(disclosureText), true, "the targeted limitation is rendered verbatim");
     assert.equal(
       await disclosure.locator("[data-uat-known-item-source]").getAttribute("data-uat-known-item-source"),
-      "COM-391.uat-test.md#known-live-limitation",
+      "DEMO-391.uat-test.md#known-live-limitation",
       "the disclosure keeps its canonical source reference",
     );
     assert.equal(await page.locator("[data-uat-known-items]").count(), 1, "a step-scoped disclosure is not repeated across journeys or steps");
@@ -705,7 +705,7 @@ def test_queue_cards_and_portal_theme_are_visibly_distinct_in_real_browser(tmp_p
         selected_round = server.register_active_round(fixture)
         peer_fixture = fixture.copy()
         peer_fixture["registration"] = fixture["registration"].copy()
-        peer_fixture["registration"]["round_review_id"] = "COM-391/round-fixture-002"
+        peer_fixture["registration"]["round_review_id"] = "DEMO-391/round-fixture-002"
         peer_round = server.register_active_round(peer_fixture)
 
         browser_script = tmp_path / "queue-theme-browser.cjs"

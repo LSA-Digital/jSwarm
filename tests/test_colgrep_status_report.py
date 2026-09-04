@@ -110,9 +110,9 @@ def _row_by_index(report: dict[str, Any], index_name: str) -> dict[str, Any]:
 def test_report_leads_with_active_rebuild_answer_and_active_jobs_before_recommendations():
     active_job = {
         "pid": 111,
-        "repo": "/Users/testuser/dev/common",
+        "repo": "/workspace/common",
         "elapsed_s": 3_720,
-        "log": "/Users/testuser/dev/colgrep-idx/log/common-base-rebuild-COM241.log",
+        "log": "/workspace/colgrep-idx/log/common-base-rebuild-COM241.log",
     }
     report = build_report(
         _fake_probes(scan_active_rebuilds=lambda: [active_job]),
@@ -139,9 +139,9 @@ def test_all_indices_table_carries_health_lastupdated_size_eta_estfinal_per_row(
             scan_active_rebuilds=lambda: [
                 {
                     "pid": 222,
-                    "repo": "/Users/testuser/dev/common",
+                    "repo": "/workspace/common",
                     "elapsed_s": 600,
-                    "log": "/Users/testuser/dev/colgrep-idx/log/common-base-rebuild-COM241.log",
+                    "log": "/workspace/colgrep-idx/log/common-base-rebuild-COM241.log",
                 }
             ]
         ),
@@ -440,13 +440,13 @@ def test_parse_rebuild_target_handles_memguard_wrapper():
     assert (
         _parse_rebuild_target(
             "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python /x/colgrep_mem_guard.py --cap-gb 32 -- "
-            "colgrep init -y --force-cpu /Users/testuser/dev/hai-sim-engine"
+            "colgrep init -y --force-cpu /workspace/hai-sim-engine"
         )["repo"]
-        == "/Users/testuser/dev/hai-sim-engine"
+        == "/workspace/hai-sim-engine"
     )
     assert (
-        _parse_rebuild_target("colgrep init -y --force-cpu /Users/testuser/dev/foo")["repo"]
-        == "/Users/testuser/dev/foo"
+        _parse_rebuild_target("colgrep init -y --force-cpu /workspace/foo")["repo"]
+        == "/workspace/foo"
     )
 
 
@@ -459,28 +459,28 @@ def test_parse_rebuild_target_ignores_flags_after_repo():
     """R1: a flag AFTER the repo (with its own value) must not steal the repo slot."""
     assert (
         _parse_rebuild_target(
-            "colgrep init -y --force-cpu /Users/testuser/dev/foo --index common"
+            "colgrep init -y --force-cpu /workspace/foo --index common"
         )["repo"]
-        == "/Users/testuser/dev/foo"
+        == "/workspace/foo"
     )
     assert (
         _parse_rebuild_target(
-            "/x/colgrep_mem_guard.sh --cap-gb 32 -- colgrep init /Users/testuser/dev/foo --flag value"
+            "/x/colgrep_mem_guard.sh --cap-gb 32 -- colgrep init /workspace/foo --flag value"
         )["repo"]
-        == "/Users/testuser/dev/foo"
+        == "/workspace/foo"
     )
     # Existing passing shapes must remain green: bare and mem-guard-wrapped
     # `--force-cpu <repo>` still resolve to the repo, not the interpreter.
     assert (
-        _parse_rebuild_target("colgrep init -y --force-cpu /Users/testuser/dev/foo")["repo"]
-        == "/Users/testuser/dev/foo"
+        _parse_rebuild_target("colgrep init -y --force-cpu /workspace/foo")["repo"]
+        == "/workspace/foo"
     )
     assert (
         _parse_rebuild_target(
             "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python /x/colgrep_mem_guard.py --cap-gb 32 -- "
-            "colgrep init -y --force-cpu /Users/testuser/dev/hai-sim-engine"
+            "colgrep init -y --force-cpu /workspace/hai-sim-engine"
         )["repo"]
-        == "/Users/testuser/dev/hai-sim-engine"
+        == "/workspace/hai-sim-engine"
     )
 
 
@@ -588,10 +588,10 @@ def test_scan_ps_lines_for_rebuilds_matches_overlay_build_and_refresh_if_stale()
         "  PID ELAPSED COMMAND\n"
         "  4242    05:10 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python "
         "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/colgrep-worktree build-overlay WORK-241 "
-        "--worktree /Users/testuser/dev/hai-sim-engine\n"
+        "--worktree /workspace/hai-sim-engine\n"
         "  4343    02:00 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python "
         "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/colgrep_worktree.py refresh-if-stale "
-        "/Users/testuser/dev/hai-sim-engine\n"
+        "/workspace/hai-sim-engine\n"
         "  9999    00:05 -bash\n"
     )
 
@@ -599,13 +599,13 @@ def test_scan_ps_lines_for_rebuilds_matches_overlay_build_and_refresh_if_stale()
 
     assert len(jobs) == 2
     repos = {job["repo"] for job in jobs}
-    assert "/Users/testuser/dev/hai-sim-engine" in repos
+    assert "/workspace/hai-sim-engine" in repos
     pids = {job["pid"] for job in jobs}
     assert pids == {4242, 4343}
 
     report = build_report(_fake_probes(scan_active_rebuilds=lambda: jobs), now=FIXED_NOW)
     assert report["active_rebuild"]["running"] is True
-    assert any(job["repo"] == "/Users/testuser/dev/hai-sim-engine" for job in report["active_rebuild"]["jobs"])
+    assert any(job["repo"] == "/workspace/hai-sim-engine" for job in report["active_rebuild"]["jobs"])
     markdown = render_markdown(report)
     assert "Rebuild running: YES" in markdown
 
@@ -625,7 +625,7 @@ def test_scan_ps_lines_for_rebuilds_matches_dotted_module_invocation():
     ps_stdout = (
         "  PID ELAPSED COMMAND\n"
         "  5151    03:00 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.colgrep_worktree "
-        "build-overlay WORK-241 --worktree /Users/testuser/dev/hai-sim-engine\n"
+        "build-overlay WORK-241 --worktree /workspace/hai-sim-engine\n"
         "  9999    00:05 -bash\n"
     )
 
@@ -633,7 +633,7 @@ def test_scan_ps_lines_for_rebuilds_matches_dotted_module_invocation():
 
     assert len(jobs) == 1
     assert jobs[0]["pid"] == 5151
-    assert jobs[0]["repo"] == "/Users/testuser/dev/hai-sim-engine"
+    assert jobs[0]["repo"] == "/workspace/hai-sim-engine"
 
     report = build_report(_fake_probes(scan_active_rebuilds=lambda: jobs), now=FIXED_NOW)
     assert report["active_rebuild"]["running"] is True
@@ -647,7 +647,7 @@ def test_stale_active_ops_tokens_are_non_gating_evidence(tmp_path):
     token = active_ops / "op-84905-1783561720-9e787990.json"
     token.write_text(
         '{"kind":"overlay-build","pid":84905,"started_at":"2026-07-08T12:00:00Z",'
-        '"details":{"worktree":"/Users/testuser/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-520"}}\n',
+        '"details":{"worktree":"/workspace/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-520"}}\n',
         encoding="utf-8",
     )
 
@@ -1047,7 +1047,7 @@ def test_fleet_plan_supervisor_blocked_worktree_appends_restart_after_infra_befo
                 launchd_state=lambda: _launchd_state(supervisor=True, watcher=False, health_check=True),
             ),
             _fleet_plan_snapshot(
-                path="/Users/testuser/dev/hai-sim-engine-wt-has-520",
+                path="/workspace/hai-sim-engine-wt-has-520",
                 action="fleet-supervisor-not-running",
                 next_action="start-fleet-supervisor",
                 actual_blocker="overlay-fleet-supervisor-not-running",
@@ -1090,7 +1090,7 @@ def test_fleet_plan_operator_gated_blockers_emit_advisory_not_supervisor_restart
                     launchd_state=lambda: _launchd_state(supervisor=True, watcher=True, health_check=True),
                 ),
                 _fleet_plan_snapshot(
-                    path=f"/Users/testuser/dev/hai-sim-engine-wt-{actual_blocker}",
+                    path=f"/workspace/hai-sim-engine-wt-{actual_blocker}",
                     action="blocked",
                     next_action=next_action,
                     actual_blocker=actual_blocker,
@@ -1117,7 +1117,7 @@ def test_fleet_plan_config_unresolved_blocker_emits_advisory_not_supervisor_rest
                 launchd_state=lambda: _launchd_state(supervisor=True, watcher=True, health_check=True),
             ),
             _fleet_plan_snapshot(
-                path="/Users/testuser/dev/hai-sim-engine-wt-lane-config-unresolved",
+                path="/workspace/hai-sim-engine-wt-lane-config-unresolved",
                 action="full-index-config-unresolved",
                 next_action="resolve-daemon-config",
                 actual_blocker="lane-config-unresolved",
@@ -1186,7 +1186,7 @@ def test_report_surfaces_registry_integrity_findings_row_when_violations_exist()
         "class": "api-index-equals-base",
         "ticket": "TASK-583",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/testuser/dev/hai-sim-engine-wt-has-583",
+        "worktree_path": "/workspace/hai-sim-engine-wt-has-583",
         "api_index_name": "hai-sim-engine",
         "base_index": "hai-sim-engine",
         "detail": "registry entry for ticket 'TASK-583' has api_index_name == base_index",
@@ -1252,7 +1252,7 @@ def test_report_registry_integrity_row_is_informational_not_warn_when_no_dedicat
         "class": "api-index-equals-base-informational",
         "ticket": "TASK-583",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/testuser/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-583",
+        "worktree_path": "/workspace/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-583",
         "api_index_name": "hai-sim-engine",
         "base_index": "hai-sim-engine",
         "dedicated_index_exists": False,
@@ -1277,7 +1277,7 @@ def test_report_registry_integrity_row_still_warns_when_hard_and_informational_f
         "class": "api-index-equals-base",
         "ticket": "TASK-582",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/testuser/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-582",
+        "worktree_path": "/workspace/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-582",
         "api_index_name": "hai-sim-engine",
         "base_index": "hai-sim-engine",
         "dedicated_index_exists": True,
@@ -1287,7 +1287,7 @@ def test_report_registry_integrity_row_still_warns_when_hard_and_informational_f
         "class": "api-index-equals-base-informational",
         "ticket": "TASK-583",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/testuser/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-583",
+        "worktree_path": "/workspace/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-583",
         "api_index_name": "hai-sim-engine",
         "base_index": "hai-sim-engine",
         "dedicated_index_exists": False,
@@ -1338,7 +1338,7 @@ def test_report_surfaces_status_plane_disagreement_row_when_planes_disagree():
         "class": "queue-active-watcher-dead",
         "ticket": "TASK-999",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/testuser/dev/hai-sim-engine-wt-has-999",
+        "worktree_path": "/workspace/hai-sim-engine-wt-has-999",
         "queue_state": "running",
         "watcher_state": "watcher-dead",
         "worker_pid": 999999999,

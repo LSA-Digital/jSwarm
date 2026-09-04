@@ -1,6 +1,6 @@
-"""Generic COM-108 compliance sink sanitizer.
+"""Generic compliance sink sanitizer.
 
-Upstream (common) also reuses the COM-112 finding secret/PII regex tuple
+Upstream (common) also reuses a finding secret/PII regex tuple
 (``compliance/substrate/findings.py``) here by identity. That substrate is an
 internal compliance-controls governance/reporting system (event log, dimension
 taxonomy, schema validation against its own internal docs) and is not part of
@@ -21,7 +21,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-# COM-112 substrate.findings._SECRET_PATTERNS is not imported here (see the
+# The upstream substrate.findings._SECRET_PATTERNS is not imported here (see the
 # module docstring) but three of its detectors have no local equivalent and
 # are restored below as ordinary, uncoupled regexes: bare email/PII, sk-
 # prefixed keys, and JWT-shaped tokens. The other four upstream detectors

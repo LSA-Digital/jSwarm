@@ -65,43 +65,43 @@ const baseline = {
 test('round list parser keeps valid summaries and registration warnings', () => {
   const parsed = parseRoundList({
     rounds: [{
-      round_review_id: 'COM-391/round-001', ticket: 'COM-391', package_state: 'ISSUED',
+      round_review_id: 'DEMO-391/round-001', ticket: 'DEMO-391', package_state: 'ISSUED',
       current_round_sha256: 'a'.repeat(64), feedback_sha256: 'b'.repeat(64),
       processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true,
     }],
     warnings: ['active round bad-registration skipped: source_invalid'],
   });
-  assert.equal(parsed.rounds[0].round_review_id, 'COM-391/round-001');
+  assert.equal(parsed.rounds[0].round_review_id, 'DEMO-391/round-001');
   assert.deepEqual(parsed.warnings, ['active round bad-registration skipped: source_invalid']);
 });
 
 test('round summaries require canonical generated-at UTC and sort newest-first with stable ID ties', () => {
   const parsed = parseRoundList({
     rounds: [
-      { round_review_id: 'COM-391/z', ticket: 'COM-391', package_state: 'ISSUED', current_round_sha256: 'a'.repeat(64), feedback_sha256: 'b'.repeat(64), feedback_generated_at: '2026-08-28T13:00:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
-      { round_review_id: 'COM-391/a', ticket: 'COM-391', package_state: 'ISSUED', current_round_sha256: 'c'.repeat(64), feedback_sha256: 'd'.repeat(64), feedback_generated_at: '2026-08-28T13:00:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
-      { round_review_id: 'COM-391/older', ticket: 'COM-391', package_state: 'ISSUED', current_round_sha256: 'e'.repeat(64), feedback_sha256: 'f'.repeat(64), feedback_generated_at: '2026-08-28T12:00:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
+      { round_review_id: 'DEMO-391/z', ticket: 'DEMO-391', package_state: 'ISSUED', current_round_sha256: 'a'.repeat(64), feedback_sha256: 'b'.repeat(64), feedback_generated_at: '2026-08-28T13:00:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
+      { round_review_id: 'DEMO-391/a', ticket: 'DEMO-391', package_state: 'ISSUED', current_round_sha256: 'c'.repeat(64), feedback_sha256: 'd'.repeat(64), feedback_generated_at: '2026-08-28T13:00:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
+      { round_review_id: 'DEMO-391/older', ticket: 'DEMO-391', package_state: 'ISSUED', current_round_sha256: 'e'.repeat(64), feedback_sha256: 'f'.repeat(64), feedback_generated_at: '2026-08-28T12:00:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
     ],
     warnings: [],
   });
   assert.equal(parsed.rounds[0].feedback_generated_at, '2026-08-28T13:00:00Z');
   assert.deepEqual(
     uatRounds.sortUatSummariesNewestFirst(parsed.rounds).map((item) => item.round_review_id),
-    ['COM-391/a', 'COM-391/z', 'COM-391/older'],
+    ['DEMO-391/a', 'DEMO-391/z', 'DEMO-391/older'],
   );
   assert.throws(() => parseRoundList({ rounds: [{ ...parsed.rounds[0], feedback_generated_at: 'not-a-date' }], warnings: [] }), /feedback_generated_at/);
 });
 
 test('round summaries group into canonical date bands after newest-first sorting', () => {
   const rounds = [
-    { round_review_id: 'COM-391/older', ticket: 'COM-391', package_state: 'ISSUED', current_round_sha256: 'a'.repeat(64), feedback_sha256: 'b'.repeat(64), feedback_generated_at: '2026-08-27T23:59:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
-    { round_review_id: 'COM-391/newer-b', ticket: 'COM-391', package_state: 'ISSUED', current_round_sha256: 'c'.repeat(64), feedback_sha256: 'd'.repeat(64), feedback_generated_at: '2026-08-28T09:00:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
-    { round_review_id: 'COM-391/newer-a', ticket: 'COM-391', package_state: 'ISSUED', current_round_sha256: 'e'.repeat(64), feedback_sha256: 'f'.repeat(64), feedback_generated_at: '2026-08-28T10:00:00Z', processing_state: 'PROCESSED', round_status: 'COMPLETE', writable: false },
+    { round_review_id: 'DEMO-391/older', ticket: 'DEMO-391', package_state: 'ISSUED', current_round_sha256: 'a'.repeat(64), feedback_sha256: 'b'.repeat(64), feedback_generated_at: '2026-08-27T23:59:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
+    { round_review_id: 'DEMO-391/newer-b', ticket: 'DEMO-391', package_state: 'ISSUED', current_round_sha256: 'c'.repeat(64), feedback_sha256: 'd'.repeat(64), feedback_generated_at: '2026-08-28T09:00:00Z', processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', writable: true },
+    { round_review_id: 'DEMO-391/newer-a', ticket: 'DEMO-391', package_state: 'ISSUED', current_round_sha256: 'e'.repeat(64), feedback_sha256: 'f'.repeat(64), feedback_generated_at: '2026-08-28T10:00:00Z', processing_state: 'PROCESSED', round_status: 'COMPLETE', writable: false },
   ];
   assert.equal(typeof uatRounds.groupUatSummariesByGeneratedDate, 'function');
   const bands = uatRounds.groupUatSummariesByGeneratedDate(rounds);
   assert.deepEqual(bands.map((band) => band.date), ['2026-08-28', '2026-08-27']);
-  assert.deepEqual(bands[0].rounds.map((round) => round.round_review_id), ['COM-391/newer-a', 'COM-391/newer-b']);
+  assert.deepEqual(bands[0].rounds.map((round) => round.round_review_id), ['DEMO-391/newer-a', 'DEMO-391/newer-b']);
 });
 
 
@@ -262,14 +262,14 @@ test('typed failures map to explicit owner recovery states', () => {
 
 const activeView = {
   schema: 'jswarm.test-uat.active-round-view/v2', schema_version: '2.0',
-  round_review_id: 'COM-391/round-001', ticket: 'COM-391', round_status: 'NOT_STARTED', projection_sha256: 'c'.repeat(64), feedback_result_contract: feedbackResultContract,
+  round_review_id: 'DEMO-391/round-001', ticket: 'DEMO-391', round_status: 'NOT_STARTED', projection_sha256: 'c'.repeat(64), feedback_result_contract: feedbackResultContract,
   current_round: {
-    path: '.jswarm/plans/COM-391/COM-391.UAT-CURRENT-ROUND.md', sha256: 'a'.repeat(64), size: 100,
+    path: '.jswarm/plans/DEMO-391/DEMO-391.UAT-CURRENT-ROUND.md', sha256: 'a'.repeat(64), size: 100,
     package_state: 'ISSUED', source: '# Canonical round', normalized_package: {}, writable: false,
     journeys: [
       {
         journey_id: 'journey-1', title: 'Read-only active context',
-        known_items: [{ text: 'Known journey limitation.', source_ref: 'COM-391.uat-test.md#known' }],
+        known_items: [{ text: 'Known journey limitation.', source_ref: 'DEMO-391.uat-test.md#known' }],
         scenarios: [
           { scenario_id: 'UAT-391-1', title: 'Inspect the active round', gwt: [
             { gwt_ref: 'd'.repeat(64), sha256: 'd'.repeat(64), given: ['An active round', 'A selected journey'], when: ['It is opened'], then: ['Its exact source is visible', 'Clause order is preserved'] },
@@ -293,7 +293,7 @@ const activeView = {
     ],
   },
   feedback: {
-    path: '.jswarm/plans/COM-391/COM-391.uat-feedback.md', sha256: 'b'.repeat(64), size: 80,
+    path: '.jswarm/plans/DEMO-391/DEMO-391.uat-feedback.md', sha256: 'b'.repeat(64), size: 80,
     processing_state: 'UNPROCESSED', round_status: 'NOT_STARTED', step_entries: baseline, walk_stop: null,
     step_counts: { total: 2, gray: 1, yellow: 0, green: 1 }, markerized: true, writable: true,
   },
@@ -309,7 +309,7 @@ test('active round parser accepts v2 step entries and rejects unsupported versio
   assert.equal(parsed.feedback.walk_stop, null);
   assert.equal(parsed.current_round.journeys[0].title, 'Read-only active context');
   assert.equal(parsed.current_round.journeys[0].steps[0].step_id, 'journey-1-step-01');
-  assert.deepEqual(parsed.current_round.journeys[0].known_items, [{ text: 'Known journey limitation.', source_ref: 'COM-391.uat-test.md#known' }]);
+  assert.deepEqual(parsed.current_round.journeys[0].known_items, [{ text: 'Known journey limitation.', source_ref: 'DEMO-391.uat-test.md#known' }]);
   assert.deepEqual(parsed.current_round.journeys[1].known_items, []);
   assert.throws(() => parseActiveRoundView({ ...activeView, schema_version: '3.0' }), /unsupported active UAT round schema\/version/);
   const missingContract = structuredClone(activeView);
@@ -330,7 +330,7 @@ test('round status parser and command use the exact shared four-state contract',
   ]);
   const parsed = parseRoundList({
     rounds: [{
-      round_review_id: 'COM-391/round-status', ticket: 'COM-391', package_state: 'ISSUED',
+      round_review_id: 'DEMO-391/round-status', ticket: 'DEMO-391', package_state: 'ISSUED',
       current_round_sha256: 'a'.repeat(64), feedback_sha256: 'b'.repeat(64),
       processing_state: 'UNPROCESSED', round_status: 'IN_PROGRESS', writable: true,
     }],
@@ -355,10 +355,10 @@ test('round status parser and command use the exact shared four-state contract',
     return new Response(JSON.stringify({ status: 'saved', view: { ...activeView, round_status: 'FAILED', feedback: { ...activeView.feedback, round_status: 'FAILED' } } }), { status: 200 });
   };
   try {
-    const saved = await updateRoundStatus('COM-391/round-status', command);
+    const saved = await updateRoundStatus('DEMO-391/round-status', command);
     assert.equal(saved.status, 'saved');
     assert.equal(saved.view.round_status, 'FAILED');
-    assert.equal(calls[0][0], '/api/uat-rounds/COM-391%2Fround-status/status');
+    assert.equal(calls[0][0], '/api/uat-rounds/DEMO-391%2Fround-status/status');
     assert.equal(calls[0][1].method, 'POST');
     assert.deepEqual(JSON.parse(calls[0][1].body), command);
   } finally {
@@ -533,10 +533,10 @@ test('runtime API client uses same-origin routes and accepts saved/idempotent fr
   };
   try {
     assert.deepEqual(await fetchRoundList(), { rounds: [], warnings: [] });
-    assert.equal((await fetchRoundDetail('COM-391/round-001')).current_round.writable, false);
-    const saved = await saveFeedback('COM-391/round-001', buildFeedbackCommand(baseline, 'b'.repeat(64), 'a'.repeat(64)));
+    assert.equal((await fetchRoundDetail('DEMO-391/round-001')).current_round.writable, false);
+    const saved = await saveFeedback('DEMO-391/round-001', buildFeedbackCommand(baseline, 'b'.repeat(64), 'a'.repeat(64)));
     assert.equal(saved.status, 'idempotent');
-    assert.equal(calls[1][0], '/api/uat-rounds/COM-391%2Fround-001');
+    assert.equal(calls[1][0], '/api/uat-rounds/DEMO-391%2Fround-001');
     assert.equal(calls[2][1].method, 'POST');
     const posted = JSON.parse(calls[2][1].body);
     assert.equal('current_round' in posted, false);
@@ -551,7 +551,7 @@ test('runtime API client preserves typed failures without exposing submitted com
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response(JSON.stringify({ error: { code: 'stale_feedback', message: 'feedback changed' } }), { status: 409 });
   try {
-    await assert.rejects(fetchRoundDetail('COM-391/round-001'), (error) => {
+    await assert.rejects(fetchRoundDetail('DEMO-391/round-001'), (error) => {
       assert.ok(error instanceof UatApiError);
       assert.equal(error.code, 'stale_feedback');
       assert.equal(error.status, 409);
@@ -676,7 +676,7 @@ test('generated front page requires the final lifecycle graphic and peer area ca
   assert.match(index, /data-uat-summary-status/);
   assert.match(index, /data-uat-summary-warnings/);
   assert.match(index, /data-uat-summary-list/);
-  assert.doesNotMatch(index, /COM-391\/round-newer|COM-391\/round-older/);
+  assert.doesNotMatch(index, /DEMO-391\/round-newer|DEMO-391\/round-older/);
   assert.match(index, /prefers-reduced-motion/);
   assert.match(index, /320px/);
 });
@@ -746,7 +746,7 @@ test('a draft bound to a stale baseline is discarded and never overwrites canoni
 });
 
 test('a draft can never cross rounds', () => {
-  const otherRound = { ...activeView, round_review_id: 'COM-391/round-com-391-002' };
+  const otherRound = { ...activeView, round_review_id: 'DEMO-391/round-demo-391-002' };
   const storage = memoryStorage({
     [uatRounds.draftStorageKey(otherRound.round_review_id)]: JSON.stringify({
       schema: uatRounds.LOCAL_DRAFT_SCHEMA,
@@ -799,10 +799,10 @@ test('explicit submit uses its notification route while normal saves remain pers
   };
   try {
     const command = buildFeedbackCommand(baseline, 'b'.repeat(64), 'a'.repeat(64));
-    await saveFeedback('COM-391/round-001', command);
-    const submitted = await submitFeedback('COM-391/round-001', command);
-    assert.equal(calls[0][0], '/api/uat-rounds/COM-391%2Fround-001/feedback');
-    assert.equal(calls[1][0], '/api/uat-rounds/COM-391%2Fround-001/feedback/submit');
+    await saveFeedback('DEMO-391/round-001', command);
+    const submitted = await submitFeedback('DEMO-391/round-001', command);
+    assert.equal(calls[0][0], '/api/uat-rounds/DEMO-391%2Fround-001/feedback');
+    assert.equal(calls[1][0], '/api/uat-rounds/DEMO-391%2Fround-001/feedback/submit');
     assert.equal(submitted.notification, 'submitted');
     assert.deepEqual(JSON.parse(calls[0][1].body), JSON.parse(calls[1][1].body), 'submit reuses the closed canonical command');
   } finally {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarded filesystem-destruction primitives for ColGREP tooling (COM-269).
+"""Guarded filesystem-destruction primitives for ColGREP tooling.
 
 Incident context: a blank / legacy-dot ``physical_colgrep_dir`` registry
 field previously normalized to ``Path(".")``, which resolves to the CURRENT
@@ -31,7 +31,7 @@ from typing import Callable
 
 from jswarm.host import current as _current_host
 
-_MIN_PATH_DEPTH = 3  # refuses "/", "/Users", "/Users/idengrenme"
+_MIN_PATH_DEPTH = 3  # refuses "/", a bare volume root, or a bare home directory
 _HOST_DIR_NAME = _current_host().claude_home().name  # the one place this module names the host dir
 
 
