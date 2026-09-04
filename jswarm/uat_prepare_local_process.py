@@ -577,7 +577,7 @@ def _default_dependencies(args: argparse.Namespace) -> Mapping[str, Callable[...
             raise LocalCertificationError("fixture preflight failed") from error
         return {"fixture": {"state_path": str(state_path.resolve()), "registration_path": str(registration.resolve()), "config_path": str(config.resolve()), "root": str(fixture_root.resolve()), "round_review_id": state["round_review_id"], "round_state": state["lifecycle"]["round_state"], "feedback_state": state["lifecycle"]["feedback_state"], "verified_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")}, "_state": state}
     def production_build(_parsed_args: argparse.Namespace) -> object:
-        npm = Path("/Users/idengrenme/.local/share/fnm/node-versions/v24.14.0/installation/bin/npm")
+        npm = Path("/opt/example-user/.local/share/fnm/node-versions/v24.14.0/installation/bin/npm")
         command = [str(npm), "--prefix", "decision-review-ui", "run", "build"]
         started = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         with (logs / "build.log").open("w", encoding="utf-8") as log:
@@ -589,7 +589,7 @@ def _default_dependencies(args: argparse.Namespace) -> Mapping[str, Callable[...
         return subprocess.Popen([str(root / ".venv/bin/python"), "-m", "jswarm.portal.server", "--config", str(config.resolve())], cwd=root, stdout=log, stderr=subprocess.STDOUT, text=True)
     def start_ui(_parsed_args: argparse.Namespace) -> object:
         log = (logs / "ui.log").open("w", encoding="utf-8")
-        node = "/Users/idengrenme/.local/share/fnm/node-versions/v24.14.0/installation/bin/node"
+        node = "/opt/example-user/.local/share/fnm/node-versions/v24.14.0/installation/bin/node"
         astro = root / "portal/node_modules/astro/astro.js"
         return subprocess.Popen([node, str(astro), "preview", "--host", "127.0.0.1", "--port", "4321"], cwd=root / "decision-review-ui", stdout=log, stderr=subprocess.STDOUT, text=True)
     def discover(_parsed_args: argparse.Namespace) -> object: return {"api": discover_loopback_listener(8765), "ui": discover_loopback_listener(4321)}

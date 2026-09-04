@@ -1,4 +1,4 @@
-"""COM-389 Phase 2 — decision-review UI render wrapper.
+"""Phase 2 — decision-review UI render wrapper.
 
 The supported entry point for building the decision-review-ui static site:
 
@@ -22,7 +22,7 @@ CLI:
     .venv/bin/python -m jswarm.portal.render_ui \
         --build-manifest <build-manifest.json> --out <dist-out-dir> [--force-ci]
 
-    COM-398 portal convenience: --build-only skips --build-manifest/--out and
+    portal convenience: --build-only skips --build-manifest/--out and
     builds every auto-discovered example straight into the canonical portal
     dist directory (jswarm/portal/dist), using the same npm ci
     --ignore-scripts / npm run build steps as the path above::
@@ -57,7 +57,7 @@ APP_DIR = REPO_ROOT / "decision-review-ui"
 
 # duplicated from the npm gate on purpose: hooks run outside the repo
 def resolve_fnm_bin_dir() -> str:
-    """COM-398: resolve the fnm Node bin dir for THIS machine at runtime.
+    """Resolve the fnm Node bin dir for THIS machine at runtime.
 
     Order: ``JSWARM_NODE_BIN`` env -> the resolved directory of ``node`` on PATH ->
     the newest ``~/.local/share/fnm/node-versions/*/installation/bin`` -> "" (fail open).
@@ -282,7 +282,7 @@ def build_to(build_manifest_path: Path, out_dir: Path, work_dir: Path) -> None:
     astro_build(out_dir, work_dir)
 
 
-# COM-398: the portal's canonical dist location (matches
+# The portal's canonical dist location (matches
 # deploy/decision-review/config.template.json's "dist_dir").
 DEFAULT_PORTAL_DIST_DIR = REPO_ROOT / "jswarm" / "portal" / "dist"
 
@@ -308,7 +308,7 @@ def main(argv=None) -> int:
         "--build-only",
         action="store_true",
         help=(
-            "COM-398 portal convenience: skip requiring --out and build straight into "
+            "portal convenience: skip requiring --out and build straight into "
             "the canonical portal dist directory (jswarm/portal/dist). Runs "
             "the same npm ci --ignore-scripts / npm run build steps as the normal "
             "path; nothing else changes."

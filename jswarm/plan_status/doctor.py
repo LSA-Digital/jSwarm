@@ -5,7 +5,7 @@ Reports: orphan registry entries, invalid frontmatter values, registry/frontmatt
 mismatch (drift), missing-frontmatter plans, schema-version mismatch, and stale Jira
 candidates (cached jira_synced_status != intended for the current plan_status).
 
-Follows the COM-50 menu-22 output-contract precedent (paired JSON + Markdown).
+Follows the menu-22 output-contract precedent (paired JSON + Markdown).
 """
 from __future__ import annotations
 
@@ -33,12 +33,12 @@ from jswarm.plan_status import state as S
 MAINT_JSON = "docs/devops-maint/plan-status-maint.json"
 MAINT_MD = "docs/devops-maint/plan-status-maint.md"
 
-#: COM-138 derived projections compared by the frontmatter-health pass.
+#: derived projections compared by the frontmatter-health pass.
 _DERIVED_FIELDS = ("status", "phase", "ac_complete")
 
 
 def _frontmatter_health(repo_root: Path) -> dict:
-    """COM-138 AC-11: frontmatter-accuracy health over canonical ``.jswarm/plans`` masters.
+    """AC-11: frontmatter-accuracy health over canonical ``.jswarm/plans`` masters.
 
     Three advisory findings, distinct from ``missing_frontmatter`` (which means "no
     parseable ``plan_status``"):
@@ -128,7 +128,7 @@ def run_doctor(repo_root: Path, plans_dir: Path, project_key: str) -> dict:
             "registry_version": reg.get("schema_version"), "expected": R.SCHEMA_VERSION,
         })
 
-    # COM-138 AC-11: frontmatter-accuracy health over the canonical .jswarm/plans masters
+    # AC-11: frontmatter-accuracy health over the canonical .jswarm/plans masters
     # (position / derived-field drift / malformed YAML). Advisory — folds into issue_count.
     findings.update(_frontmatter_health(repo_root))
 

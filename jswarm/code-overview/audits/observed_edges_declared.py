@@ -2,13 +2,13 @@
 
 Every observed ``trace_event`` must map to an active declared edge:
 
-* ``resolution_status == "unmapped"`` is tri-state (COM-234 fold 3 --
+* ``resolution_status == "unmapped"`` is tri-state (fold 3 --
   see `_classify_unmapped`): FAILS for a *covered* event source unless a
   ``learning-registry.jsonl`` deferral (with rationale) tolerates it;
   WARNS (never fails) for a *newly-adopted* event source while its trace
   strategy matures; and FAILS for any source that is not classified in
   either list at all (including when no ``spine-registry.json`` policy is
-  configured), which is exactly the pre-COM-234 "always fail" behavior --
+  configured), which is exactly the prior "always fail" behavior --
   every existing caller that never wires up the new registry files keeps
   behaving exactly as before.
 * ``resolution_status == "ambiguous"`` warns in non-strict mode and fails
@@ -54,7 +54,7 @@ def _load_event_source_policy(source_root: Any) -> tuple[frozenset[str], frozens
     """Load ``event_sources.covered``/``.newly_adopted`` from ``<source_root>/spine-registry.json``.
 
     A missing, unreadable, or malformed registry yields two empty sets,
-    which preserves the pre-COM-234 behavior of always failing an
+    which preserves the pre-behavior of always failing an
     unmapped event regardless of its ``source`` (see `_classify_unmapped`).
     """
 
@@ -112,12 +112,12 @@ def _classify_unmapped(
     newly_adopted_sources: frozenset[str],
     deferrals_by_event_id: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    """Tri-state disposition for one unmapped ``trace_event`` (COM-234 fold 3)."""
+    """Tri-state disposition for one unmapped ``trace_event`` (fold 3)."""
 
     event_id = event["record_id"]
     source = event.get("source")
 
-    # COM-234 fold 3 / jCritic HIGH fix: classify the event's SOURCE first --
+    # fold 3 / jCritic HIGH fix: classify the event's SOURCE first --
     # a learning-registry deferral only ever tolerates an unmapped cluster
     # from a *covered* source. Checking `deferrals_by_event_id` before source
     # classification would let a deferral entry divert an unclassified-source

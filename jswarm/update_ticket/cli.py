@@ -1,10 +1,10 @@
 """Deterministic subprocess wrapper for the plan-maintenance chain.
 
-The wrapper and the COM-167 engines it orchestrates are **common-owned tooling**: their
+The wrapper and the engines it orchestrates are **common-owned tooling**: their
 location is resolved from this file (``_TOOL_ROOT``), NOT from ``--repo-root``. ``--repo-root``
 names only the TARGET project whose plans are maintained. This lets the live-global lifecycle
 commands invoke the wrapper by an absolute common path and have it work in any project, whether
-or not that project has the engine packages propagated locally (COM-201 B2). In the test
+or not that project has the engine packages propagated locally (B2). In the test
 fixtures the wrapper is copied into the tmp repo, so ``_TOOL_ROOT`` == the tmp repo == the target
 ``--repo-root`` and behavior is identical to the legacy chain.
 """
@@ -35,7 +35,7 @@ PRESETS: dict[str, list[str]] = {
     "new-work-lint": ["lint"],
 }
 
-# Canonical execution order for every section (COM-201 M1). Explicit --sections are de-duped and
+# Canonical execution order for every section (M1). Explicit --sections are de-duped and
 # re-ordered to this sequence before running, so a manual/maintenance invocation can never run a
 # count before a migrate or a refresh after a terminal audit/lint.
 CANONICAL_ORDER = [
@@ -168,7 +168,7 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write(result.stderr)
         if section in FAIL_LOUD_SECTIONS and result.returncode != 0:
             exit_code = 1
-            break  # fail-loud (COM-201 M1): a BLOCK is terminal — never run a later section after it
+            break  # fail-loud (M1): a BLOCK is terminal — never run a later section after it
     return exit_code
 
 

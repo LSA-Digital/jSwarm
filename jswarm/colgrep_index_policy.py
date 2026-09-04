@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""COM-204 Phase 2 — ColGREP active-project ``colgrep:`` lifecycle policy + fleet coverage.
+"""Phase 2 — ColGREP active-project ``colgrep:`` lifecycle policy + fleet coverage.
 
 Extends the active-projects registry with a per-project ``colgrep:`` policy block and
 provides the fleet *coverage planner* that decides whether an active project's
@@ -21,7 +21,7 @@ Policy shape (layered over safe defaults; unspecified fields keep the default):
           cleanup_tier: active
           ambiguous_prompt: true
 
-Authorization rule (COM-204): a worktree authorizes as an active-project worktree by
+Authorization rule: a worktree authorizes as an active-project worktree by
 its RESOLVED ROOT PATH (path containment), not by a basename match. Two repos that
 share a basename must never cross-authorize. Logical index *families* (used by the
 classifier's per-family generation cap) resolve by project-id prefix, since family
@@ -58,13 +58,13 @@ VALID_CLEANUP_TIERS = ("active", "conservative", "protected")
 # Safe upper bound for the per-family retained-generation cap. A value above this is
 # almost certainly a config error (typo / merge conflict / bad operator input) that
 # would disable superseded-generation cleanup, so it fails closed to DEFAULT_POLICY
-# rather than being trusted (COM-204 Phase-2 critic MAJOR-1). The plan default is 1.
+# rather than being trusted (Phase-2 critic MAJOR-1). The plan default is 1.
 MAX_LIVE_GENERATIONS_CAP = 5
 
 # `-wt-` is the reserved structural delimiter in worktree family names
 # ({project_id}-wt-{ticket}). A project id or path-derived base name that contains it
 # is ambiguous and would let family<->project resolution cross-bleed or mis-compute a
-# base project, so it is rejected at load time (COM-204 Phase-2 critic MAJOR-3).
+# base project, so it is rejected at load time (Phase-2 critic MAJOR-3).
 RESERVED_FAMILY_DELIMITER = "-wt-"
 
 # Coverage decision vocabulary. NONE of these is ever a delete/cleanup decision —
