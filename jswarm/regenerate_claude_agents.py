@@ -1,4 +1,4 @@
-"""COM-76 Phase 4/13b — regenerate this host's live agent files from the YAML.
+"""Phase 4/13b — regenerate this host's live agent files from the YAML.
 
 This is the Claude-side regeneration helper. It assembles each live agent
 file ``<slug>.md`` in this host's agents directory
@@ -29,7 +29,7 @@ Each agent file is assembled as::
 The ``model:`` line is *derived*, never stored: Anthropic models are emitted
 as the bare base id (``claude-opus-4-7``) because the Claude Code harness
 appends ``[1m]`` and ``-high``/``-max`` suffixes produce non-existent SKUs
-(COM-76 Phase 0). Non-Anthropic models are emitted ``provider/model``.
+(Phase 0). Non-Anthropic models are emitted ``provider/model``.
 
 The ``<ROUTE:...>`` tag is derived from the claude chain: the primary hop is
 ``claude.{model,effort}``; the fallbacks are ``claude.fallbacks``. Anthropic
@@ -57,7 +57,7 @@ Modes:
 Idempotency (AC-5): after one ``--apply``, ``--check`` exits 0 and a second
 ``--apply`` changes nothing. The first ``--apply`` also performs a one-time
 normalization of ``flash-tasker`` (its ROUTE tag moves from mid-body to the
-canonical prefix position) — see COM-76 Phase 4/13b.
+canonical prefix position) — see Phase 4/13b.
 
 Usage:
   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python jswarm/regenerate_claude_agents.py
@@ -96,7 +96,7 @@ DEFAULT_AGENTS_DIR = _current_host().agents_dir()
 # disabled. Such agents emit no prefix ROUTE tag.
 DISABLED_MODEL = "disabled"
 
-# COM-398: day-0 machines have no jAgentProxy, so no GPT/GLM routing. The
+# Day-0 machines have no jAgentProxy, so no GPT/GLM routing. The
 # claude-only profile maps each canonical core to a Claude Code model alias.
 CLAUDE_ONLY_MODELS: dict[str, str] = {
     "jArchitect": "opus", "jPlanner": "opus", "jOracle": "opus", "jCritic": "opus",
@@ -118,13 +118,13 @@ def claude_only_model(slug: str, agent: dict[str, Any]) -> str:
     return CLAUDE_ONLY_MODELS.get(slug) or CLAUDE_ONLY_BY_CATEGORY.get(str(agent.get("category", "")), "sonnet")
 
 
-# COM-86: a short, MODEL-AGNOSTIC reliability clause injected into EVERY
+# A short, MODEL-AGNOSTIC reliability clause injected into EVERY
 # generated agent body from this single source of truth. It guarantees the
 # core context-survival rules are present in every dispatch even when the
 # `subagent-environment` skill is not preloaded (the skill carries the full
 # mechanics). Keep it short — detail belongs in the skill, not here.
 RELIABILITY_PREAMBLE = (
-    "<!-- COM-86: universal reliability clause -->\n"
+    "<!-- universal reliability clause -->\n"
     "**Reliability (any model):** Checkpoint your primary output to disk as soon "
     "as it is drafted **when file writes are permitted for your role** — don't "
     "hold the only copy in context. If writing reports/artifacts is prohibited "
@@ -138,15 +138,15 @@ RELIABILITY_PREAMBLE = (
     "`subagent-environment` skill."
 )
 
-# COM-91: a short, universal write-governance clause injected into EVERY
-# generated agent body alongside the COM-86 reliability clause. It tells
+# A short, universal write-governance clause injected into EVERY
+# generated agent body alongside the reliability clause. It tells
 # the model — even when the `subagent-environment` skill is not preloaded —
 # WHERE to write (zone hierarchy), HOW to name files (regex pointers), and
 # WHICH master to consult for the per-agent tier label. The per-agent
 # `Write mode:` annotation lives in each `<slug>.body.md` (Path C hybrid);
 # this clause is the model-agnostic global half.
 WRITE_GOVERNANCE_CLAUSE = (
-    "<!-- COM-91: universal write-governance clause -->\n"
+    "<!-- universal write-governance clause -->\n"
     "**Write governance (any agent):** "
     "Write mode tier is one of `read-only` | `docs-write` | `source-write`; "
     "see this agent's per-body `Write mode:` bullet for its tier. "
@@ -162,18 +162,17 @@ WRITE_GOVERNANCE_CLAUSE = (
 )
 
 DELIVERABLE_DURABILITY_CLAUSE = (
-    "<!-- COM-132: advisor deliverable-durability contract -->\n"
+    "<!-- advisor deliverable-durability contract -->\n"
     "**Deliverable durability (advisory/review/research roles):** Writing your ONE "
     "markdown deliverable file IS explicitly authorized and EXPECTED for your role. "
-    "Nothing prohibits it: a `read-only`/`docs-write` posture, the COM-86 "
+    "Nothing prohibits it: a `read-only`/`docs-write` posture, the reliability-clause "
     '"if writes are prohibited" caveat, and the orchestrator-facing ".md-write '
     'transcription tax" recovery note all mean "do not modify SOURCE files" — NOT '
     '"do not write your deliverable". Resolve any apparent read-only/write conflict '
     "in FAVOR of writing this one deliverable file. That deliverable (review, "
     "analysis, design, assessment, research report) is your PRODUCT; your final chat "
     "message is only a POINTER to it. Because a long routing-model stream can hit a "
-    "per-turn `max_tokens` continuation wall and truncate mid-run (the HAS-497 "
-    "truncation failure), write so that whatever lands on disk is ALWAYS usable: "
+    "per-turn `max_tokens` continuation wall and truncate mid-run, write so that whatever lands on disk is ALWAYS usable: "
     "(1) write your ACTUAL FINDINGS to the file EARLY and INCREMENTALLY, and put the "
     "VERDICT / most important conclusions FIRST, so even a truncated file carries the "
     "answer; "
@@ -189,7 +188,7 @@ DELIVERABLE_DURABILITY_CLAUSE = (
 )
 
 SOURCE_WRITE_NO_SCAFFOLD_CLAUSE = (
-    "<!-- COM-150: source-write no-stop-at-scaffold guard -->\n"
+    "<!-- source-write no-stop-at-scaffold guard -->\n"
     "**Source-write completion guard:** If you modify source/config/tests/docs, do not "
     "stop at scaffold-only, placeholder-only, or TODO-only output. Complete the "
     "requested implementation slice, verify it, and report any explicit blocker "
@@ -411,7 +410,7 @@ def yaml_frontmatter_value(value: Any) -> str:
     """Emit one deterministic ONE-LINE YAML value for a frontmatter mirror key.
 
     Scalars route through ``yaml_frontmatter_scalar`` (unchanged behavior).
-    Sequences (e.g. the COM-232 j-core ``tags`` list) render as a one-line YAML
+    Sequences (e.g. the j-core ``tags`` list) render as a one-line YAML
     *flow* sequence (``[a, b, c]``) that ``yaml.safe_load`` parses back to the
     identical list — PyYAML handles any escaping/quoting. Mappings and other
     non-scalar values fall through to ``yaml_frontmatter_scalar`` (which raises
@@ -445,7 +444,7 @@ def routing_description(
     are derived from source YAML, never a prior generated description, keeping
     regeneration deterministic and idempotent.
 
-    COM-398: the ``claude-only`` provider replaces the YAML's proxy-routed
+    The ``claude-only`` provider replaces the YAML's proxy-routed
     model with a Claude Code alias, so the derived "Model route: ..." clause
     (which always describes the YAML hop chain) would misdescribe the agent
     and leak the disallowed provider/model string. Omit it for that provider.
@@ -480,7 +479,7 @@ def build_frontmatter(slug: str, agent: dict[str, Any], *, provider: str = "yaml
     per-agent ``effort: low|medium|high|xhigh|max`` in frontmatter and
     maps it to Anthropic ``thinking.budget_tokens``, overriding the
     session-global ``effortLevel`` for that sub-agent dispatch
-    (`docs/plans/evidence/COM-76/COM-76.effort-level-subagent-research.md`).
+    (see the effort-level subagent research notes).
     Emitted only when ``claude.effort`` is non-null in the YAML — null
     leaves the agent at session-default effort.
     """
@@ -507,7 +506,7 @@ def build_frontmatter(slug: str, agent: dict[str, Any], *, provider: str = "yaml
     if effort:
         lines.append(f"effort: {yaml_frontmatter_scalar(effort)}")
     for key, value in fm.items():
-        # COM-232: the enriched j-core blocks mirror ``name``/``model`` inside
+        # The enriched j-core blocks mirror ``name``/``model`` inside
         # ``frontmatter`` too — skip them so they are not double-emitted (they
         # are already emitted canonically above: ``name`` from the slug,
         # ``model`` from the routing chain, and ``description`` in position).
@@ -524,7 +523,7 @@ _OPEN_TAG_RE = re.compile(r"(?m)^[ \t]*<[A-Za-z_][A-Za-z0-9_]*>")
 def inject_reliability_preamble(body_text: str) -> str:
     """Insert ``RELIABILITY_PREAMBLE`` INSIDE the body's ``<Permissions>`` block.
 
-    COM-86 A/C 2 (settled by authoritative jAgentProxy upstream capture): the
+    A/C 2 (settled by authoritative jAgentProxy upstream capture): the
     runtime parses ``<Agent_Prompt>`` and delivers its RECOGNIZED child elements
     (``<Permissions>``, ``<Role>``, …) verbatim, but DROPS free text/comments
     between the ``<Agent_Prompt>`` open tag and the first child — so a clause
@@ -554,7 +553,7 @@ def inject_reliability_preamble(body_text: str) -> str:
 def inject_write_governance(body_text: str) -> str:
     """Insert ``WRITE_GOVERNANCE_CLAUSE`` INSIDE the body's ``<Permissions>`` block.
 
-    COM-91 Path C (hybrid) — global half. Same delivery constraint as
+    Path C (hybrid) — global half. Same delivery constraint as
     ``inject_reliability_preamble`` (the runtime drops free text/comments
     between the ``<Agent_Prompt>`` open tag and the first recognized child,
     so the clause must live inside a recognized child to reach the model).
@@ -562,8 +561,8 @@ def inject_write_governance(body_text: str) -> str:
     operational meta-rules — write governance fits there alongside reliability.
 
     Idempotent: if ``WRITE_GOVERNANCE_CLAUSE`` is already present the body is
-    returned unchanged. The reliability injector deliberately lacks this guard
-    (COM-86); the governance injector adds it so re-running ``--apply`` is
+    returned unchanged. The reliability injector deliberately lacks this guard;
+    the governance injector adds it so re-running ``--apply`` is
     safe even if a body file accidentally inlined the clause manually.
 
     - Insert immediately before the first ``</Permissions>``.
@@ -586,10 +585,10 @@ def inject_write_governance(body_text: str) -> str:
 
 
 def inject_source_write_no_scaffold_guard(body_text: str, write_mode: str | None) -> str:
-    """Insert COM-150 no-stop-at-scaffold language for source-writing agents."""
+    """Insert no-stop-at-scaffold language for source-writing agents."""
     if write_mode != "source-write":
         return body_text
-    if "COM-150: source-write no-stop-at-scaffold guard" in body_text:
+    if "source-write no-stop-at-scaffold guard" in body_text:
         return body_text
     if "</Permissions>" in body_text:
         return body_text.replace(
@@ -607,7 +606,7 @@ def inject_source_write_no_scaffold_guard(body_text: str, write_mode: str | None
 def inject_deliverable_durability(body_text: str, slug: str) -> str:
     """Insert ``DELIVERABLE_DURABILITY_CLAUSE`` for markdown-deliverable advisors.
 
-    COM-132 AC-9 targets advisory/review/research agents whose markdown
+    AC-9 targets advisory/review/research agents whose markdown
     deliverable is the product. Placement mirrors ``inject_write_governance``:
     inside ``<Permissions>`` when present, otherwise after the first structured
     opening tag, otherwise prepended. Idempotent so repeated regeneration never
@@ -615,7 +614,7 @@ def inject_deliverable_durability(body_text: str, slug: str) -> str:
     """
     if slug not in DELIVERABLE_DURABILITY_AGENTS:
         return body_text
-    if "COM-132: advisor deliverable-durability contract" in body_text:
+    if "advisor deliverable-durability contract" in body_text:
         return body_text
     if "</Permissions>" in body_text:
         return body_text.replace(
@@ -635,9 +634,9 @@ def assemble_agent_file(slug: str, agent: dict[str, Any], body_text: str, *, pro
     directory (`jswarm.host.claude_code.ClaudeCodeHost.agents_dir`).
 
     Canonical layout: frontmatter, one blank line, the ROUTE tag, one blank
-    line, the body — with the COM-86 reliability preamble, the COM-91
-    write-governance clause, the COM-150 source-write no-scaffold guard, and
-    the targeted COM-132 deliverable-durability clause injected INSIDE the body's
+    line, the body — with the reliability preamble, the
+    write-governance clause, the source-write no-scaffold guard, and
+    the targeted deliverable-durability clause injected INSIDE the body's
     ``<Permissions>`` block (see ``inject_reliability_preamble``,
     ``inject_write_governance``, ``inject_source_write_no_scaffold_guard``, and
     ``inject_deliverable_durability``) so they survive to the dispatch.
@@ -646,7 +645,7 @@ def assemble_agent_file(slug: str, agent: dict[str, Any], body_text: str, *, pro
     Injection order: governance first (where to write), reliability second
     (when to checkpoint), source-write no-scaffold guard third, then durability
     last for targeted agents (write the deliverable early). This preserves the
-    existing order and keeps fallback insertion from treating the COM-132
+    existing order and keeps fallback insertion from treating the
     ``<path>`` placeholder as a tag.
     """
     frontmatter = build_frontmatter(slug, agent, provider=provider)
@@ -694,7 +693,7 @@ def regenerate_all(
     Returns ``(results, assembled)`` where ``assembled[slug]`` is the
     regenerated file content for agents whose body file was found.
 
-    COM-232 hard-cut: the source YAML intentionally keeps compatibility
+    hard-cut: the source YAML intentionally keeps compatibility
     ``alias``/``retired`` records (``routing_metadata.alias_redirect.status``)
     alongside the 17 ``canonical`` j-cores for legacy plan/history resolution.
     Those records are metadata only — they must never be assembled/emitted as
@@ -744,7 +743,7 @@ def apply_all(assembled: dict[str, str], agents_dir: Path) -> int:
 def prune_legacy_agent_files(profiles: Path, agents_dir: Path) -> list[str]:
     """Delete ``<slug>.md`` for every known alias/retired slug found in ``agents_dir``.
 
-    COM-232 hard-cut: ``--apply`` must converge the runtime agents dir to
+    hard-cut: ``--apply`` must converge the runtime agents dir to
     exactly the 17 canonical j-core files. Known compatibility alias/retired
     slugs may remain in the source YAML for legacy plan/history resolution,
     but any stray runtime file left over for them (e.g. a pre-cut
@@ -753,7 +752,7 @@ def prune_legacy_agent_files(profiles: Path, agents_dir: Path) -> list[str]:
     extension are left untouched. Returns the sorted list of slugs actually
     pruned (files that existed).
 
-    Path-containment safety (COM-232 C+): a malformed/adversarial profile
+    Path-containment safety (C+): a malformed/adversarial profile
     slug (e.g. ``"../victim"`` or an absolute-path slug) must never let
     pruning escape ``agents_dir``. Every candidate slug is validated against
     the registry's legacy-slug grammar *and* the resulting path is

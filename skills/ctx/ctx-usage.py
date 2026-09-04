@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-# CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/ctx/ctx-usage.py
-# Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-# Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy.
-
-"""COM-239 — ctx v2 subagent-self-identity resolver (Phase 1).
+"""ctx v2 subagent-self-identity resolver (Phase 1).
 
 Rewritten, cross-provider, subagent-self-resolving successor to the
 hai-sim-engine v1 ``ctx-usage.py`` skill. Fixes v1's ``_find_current_transcript()``
@@ -12,8 +8,8 @@ unrelated session's) transcript into a subagent's reading. This module does
 not port any v1 logic.
 
 Chosen Layer-B mechanism (jArchitect Phase-0 decision, recorded at
-``.jswarm/plans/COM-239/evidence/phase0/ARCH-layerb-decision.md``, countersigned
-by jOracle at ``.jswarm/plans/COM-239/evidence/phase0/ORACLE-signoff.md``): S2
+``.jswarm/plans/TICKET-XXX/evidence/phase0/ARCH-layerb-decision.md``, countersigned
+by jOracle at ``.jswarm/plans/TICKET-XXX/evidence/phase0/ORACLE-signoff.md``): S2
 content-self-location with a mandatory caller-passed literal
 ``--identity-nonce``. A subagent proves which ``agent-<agentId>.jsonl`` file
 under its own session's ``subagents/`` directory is its own by finding the
@@ -53,7 +49,7 @@ Window-registry join (context-window sizing) and full provider %/statusLine
 1M regression handling are explicitly Phase 2 — not built here. ``window`` on
 ``UsageResult`` is left ``None``.
 
-Phase 2 (COM-239) adds, on top of the Phase 1 identity resolver above:
+Phase 2 adds, on top of the Phase 1 identity resolver above:
 cross-provider ``[OUTCOME]`` usage parsing that passes the raw ``class``
 field through as ``provider`` (rather than bucketing it), a no-dependency
 ``model-windows.yaml`` line parser feeding ``resolve_model_window`` (env
@@ -159,13 +155,13 @@ def _env_get(env: Any, key: str) -> str | None:
     ``JSWARM_CTX_AGENT_ID``, ``JSWARM_CTX_MODEL_WINDOWS``,
     ``JSWARM_CTX_CREDENTIALS``, ``JSWARM_CTX_QUOTA_TIMEOUT``,
     ``JSWARM_CTX_CODEX_CREDENTIALS``, ``JARVISWARM_ROOT``, ``HOME``).
-    ``JARVISWARM_ROOT`` and ``HOME`` (Phase 7, COM-239) are read only by
+    ``JARVISWARM_ROOT`` and ``HOME`` (Phase 7) are read only by
     ``_default_outcome_log`` to resolve the default jAgentProxy OUTCOME log
     path when ``JSWARM_CTX_OUTCOME_LOG`` is unset. ``JSWARM_CTX_CREDENTIALS``
-    and ``JSWARM_CTX_QUOTA_TIMEOUT`` (Phase 8, COM-239) override the
+    and ``JSWARM_CTX_QUOTA_TIMEOUT`` (Phase 8) override the
     Anthropic OAuth credentials file path and the quota-fetch timeout used
     by ``_fetch_anthropic_usage``. ``JSWARM_CTX_CODEX_CREDENTIALS``
-    (Phase 9, COM-239) overrides the Codex/ChatGPT OAuth credentials file
+    (Phase 9) overrides the Codex/ChatGPT OAuth credentials file
     path used by ``_fetch_codex_usage`` in the same way. ``env`` may be a
     plain ``dict`` or any ``Mapping``-like object; this helper only ever
     calls ``.get``, never ``.keys()``/``.items()``/``.values()``/
@@ -193,7 +189,7 @@ def _valid_nonce_grammar(nonce: str | None) -> bool:
 def _resolve_tail_window(env: Any) -> int:
     """Resolve the identity-lookup tail-line bound (Layer B recent-window size).
 
-    Phase 2 (COM-239) renames this bound's primary env key to
+    Phase 2 renames this bound's primary env key to
     ``JSWARM_CTX_TAIL_LINES`` — ``JSWARM_CTX_WINDOW`` is exclusively the
     model-context-window-tokens override read by ``resolve_model_window``
     below and must never influence this tail-line bound. The two keys are
@@ -347,7 +343,7 @@ def resolve_current_invocation(
 ) -> Resolution:
     """Resolve the calling agent's own identity (Layer A containment + Layer B nonce match).
 
-    See the module docstring and ``.jswarm/plans/COM-239/evidence/phase0/``
+    See the module docstring and ``.jswarm/plans/TICKET-XXX/evidence/phase0/``
     for the full contract. Env access is allow-list-only via ``.get()``; this
     function never iterates ``env`` and never reads a secret-shaped key.
     """
@@ -622,7 +618,7 @@ def _coerce_int(value: str | None) -> int | None:
 def _derive_provider(fields: dict[str, str]) -> str | None:
     """Return the OUTCOME line's provider label.
 
-    Phase 2 (COM-239 T-C1..T-C3): pass the raw ``class`` field through
+    Phase 2 (T-C1..T-C3): pass the raw ``class`` field through
     verbatim (e.g. ``"openai-codex"``, ``"anthropic-direct"``) rather than
     bucketing it into a generic ``"openai"``/``"anthropic"`` label — callers
     now rely on the literal jAgentProxy provider-class string. Falls back to
@@ -641,7 +637,7 @@ def _derive_provider(fields: dict[str, str]) -> str | None:
 class _NegativeUsageError(ValueError):
     """Raised when an exact OUTCOME line carries a negative usage field.
 
-    A negative token count is not provable usage (COM-239 Phase 2 fix #3) —
+    A negative token count is not provable usage (Phase 2) —
     the caller must fail closed rather than compute a negative
     ``context_pct``.
     """
@@ -661,7 +657,7 @@ def _coerce_usage_int(value: str | None, *, field_name: str) -> int | None:
 def _compute_context_tokens(fields: dict[str, str]) -> int | None:
     """Derive ``context_tokens`` from an exact OUTCOME line's usage fields.
 
-    Precedence (COM-239 Phase 2 fix #2): ``usage_total`` wins whenever it is
+    Precedence (Phase 2): ``usage_total`` wins whenever it is
     present and valid — this is the OpenAI Responses shape jAgentProxy emits
     (``input_tokens`` -> ``usage_in``, ``total_tokens`` -> ``usage_total``),
     and ``total_tokens`` is the authoritative full-context figure even when
@@ -854,7 +850,7 @@ def _compute_context_tokens_from_anthropic_usage(usage: dict[str, Any]) -> int |
     to the Anthropic API's own field names rather than the jAgentProxy
     OUTCOME grammar's ``usage_*`` keys.
 
-    Raises ``_NegativeUsageError`` (COM-239 Phase 2 fix #4) instead of
+    Raises ``_NegativeUsageError`` (Phase 2) instead of
     returning a smaller-but-positive total when any of the three fields is a
     negative int — the same fail-closed semantics as the OUTCOME-line path's
     ``_coerce_usage_int``.
@@ -889,8 +885,8 @@ def _extract_usage_from_transcript_tail(
     last JSONL line whose ``message.model`` and ``message.usage`` yield a
     computable token count, or ``None`` if no such line exists in the tail.
 
-    Raises ``_NegativeUsageError`` (propagated to the caller), COM-239
-    Phase 2 fix #4, if a ``message.usage`` record carries a negative
+    Raises ``_NegativeUsageError`` (propagated to the caller), Phase 2,
+    if a ``message.usage`` record carries a negative
     ``input_tokens``, ``cache_creation_input_tokens``, or
     ``cache_read_input_tokens`` field — the transcript fallback must fail
     closed rather than silently skip the bad record.
@@ -940,7 +936,7 @@ def _finalize_no_usage(
     """Apply the transcript-path fallback/cross-check before failing closed.
 
     The resolved transcript path is a fallback/cross-check when the OUTCOME
-    log yields nothing usable. Phase 2 (COM-239): actually attempt to extract
+    log yields nothing usable. Phase 2: actually attempt to extract
     a usable Anthropic-shaped ``usage`` record from the caller's own bounded
     transcript tail (``usage_source="transcript-jsonl"``) before failing
     closed; Phase 1's reachability check (transcript missing/deleted is a
@@ -1153,7 +1149,7 @@ def find_usage_for_resolution(
 
 
 # ---------------------------------------------------------------------------
-# Anthropic OAuth usage endpoint quota (Phase 8, COM-239)
+# Anthropic OAuth usage endpoint quota (Phase 8)
 # ---------------------------------------------------------------------------
 #
 # Replaces the Phase 7 ccstatusline quota cache entirely: quota now comes
@@ -1373,7 +1369,7 @@ def _fetch_anthropic_usage(
 
 
 # ---------------------------------------------------------------------------
-# Provider/model-scoped quota dispatch + Codex/ChatGPT adapter (Phase 9, COM-239)
+# Provider/model-scoped quota dispatch + Codex/ChatGPT adapter (Phase 9)
 # ---------------------------------------------------------------------------
 #
 # Phase 8 hardcoded the Anthropic OAuth usage endpoint as the only quota
@@ -1782,7 +1778,7 @@ def build_report(
     reason``). On ``usage.status == "unavailable"`` the report still carries
     ``usage_source="unavailable"`` and ``reason``.
 
-    Phase 8 (COM-239): quota is generic and endpoint-driven — ``quota`` is
+    Phase 8: quota is generic and endpoint-driven — ``quota`` is
     the ordered list ``parse_quota`` produced (or ``None`` when the endpoint
     fetch failed), carried verbatim as ``report["quota"]``. The v1/Phase 7
     backcompat percentage keys (``session_usage_pct``, ``weekly_usage_pct``,
@@ -1879,7 +1875,7 @@ def _humanize_tokens(value: int | float | None) -> str:
 def _quota_parts(report: dict[str, Any]) -> str:
     """Render the generic ``quota.<label> <percent>%`` segment, in endpoint order.
 
-    Phase 8 (COM-239): no labels are hardcoded here — this renders whatever
+    Phase 8: no labels are hardcoded here — this renders whatever
     ``report["quota"]`` (the ordered list ``parse_quota`` produced) actually
     contains, one ``quota.<label> <percent>%`` term per entry, joined by
     ``", "``. This is what makes a brand-new scoped limit (a new model
@@ -1924,7 +1920,7 @@ def format_compact(report: dict[str, Any]) -> str:
 
     The quota segment (``_quota_parts``) is identical in both branches and
     renders whatever generic quota labels the endpoint actually returned
-    (Phase 8, COM-239), or ``"quota unavailable"`` when the endpoint fetch
+    (Phase 8), or ``"quota unavailable"`` when the endpoint fetch
     failed/returned nothing usable.
     """
 
@@ -1947,7 +1943,7 @@ def format_compact(report: dict[str, Any]) -> str:
 def _default_outcome_log(env: Any) -> Path | None:
     """Resolve the default jAgentProxy OUTCOME log when unconfigured.
 
-    Phase 7 (COM-239): when ``JSWARM_CTX_OUTCOME_LOG`` is unset, the original
+    Phase 7: when ``JSWARM_CTX_OUTCOME_LOG`` is unset, the original
     ``/ctx`` skill intent is to auto-resolve a sensible default rather than
     fail closed on a missing explicit override. Precedence (first existing
     file wins):
@@ -2007,16 +2003,16 @@ def main(argv: list[str] | None = None) -> int:
     Calls ``resolve_current_invocation``/``find_usage_for_resolution`` by
     bare module-global name so tests can monkeypatch either in isolation.
     The default (non-``--json``) human output is ``format_compact``'s single
-    all-info line (Phase 7, COM-239) — the prior multi-line render is
+    all-info line (Phase 7) — the prior multi-line render is
     retired.
 
-    Phase 8 (COM-239): quota is fetched directly from the Anthropic OAuth
+    Phase 8: quota is fetched directly from the Anthropic OAuth
     usage endpoint via ``_fetch_anthropic_usage``/``parse_quota`` — the
     ccstatusline cache is no longer consulted at all. A failed/unavailable
     fetch yields ``quota=None``, which ``build_report``/``format_compact``
     already render fail-closed (``"quota unavailable"``).
 
-    Phase 9 (COM-239): quota is scoped to the caller's OWN provider AND own
+    Phase 9: quota is scoped to the caller's OWN provider AND own
     model via ``fetch_quota_for_caller`` — an Anthropic caller still gets the
     Phase 8 Anthropic OAuth path unchanged, while an OpenAI/Codex caller now
     gets its own ChatGPT/Codex quota instead.
