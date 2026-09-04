@@ -53,6 +53,48 @@ def test_unadopt_restores_the_project(tmp_path):
     assert not (repo / ".jswarm/.adopted").exists()
     assert (repo / "CLAUDE.md").read_text() == "# Mine\n"
 
+# --- Regression for task-A5A2A3: adopt is documented and tested as safe to
+# re-run (e.g. to change --jira-key). Each adopt backs up the file's
+# *current* state before writing, so a second adopt's backup already
+# contains jswarm's own managed block -- unadopt must not restore from
+# that. It must reach all the way back to the state before the *first*
+# adopt, no matter how many times adopt ran in between.
+
+def test_unadopt_after_three_adopts_restores_the_true_pre_adoption_state(tmp_path):
+    repo = _repo(tmp_path, "proj6")
+    original_claude_md = "# Original rules\nDo not delete me either.\n"
+    (repo / "CLAUDE.md").write_text(original_claude_md)
+    (repo / ".claude").mkdir()
+    original_settings = '{"env": {"MINE": "1"}, "permissions": {"allow": ["Bash(ls:*)"]}}\n'
+    (repo / ".claude/settings.json").write_text(original_settings)
+
+    r1 = run("adopt", str(repo), "--jira-key", "AAA", home=tmp_path)
+    assert r1.returncode == 0, r1.stderr
+    r2 = run("adopt", str(repo), "--jira-key", "BBB", home=tmp_path)
+    assert r2.returncode == 0, r2.stderr
+    r3 = run("adopt", str(repo), "--jira-key", "CCC", home=tmp_path)
+    assert r3.returncode == 0, r3.stderr
+
+    # Sanity: after three adopts the repo really is jswarm-modified.
+    adopted_md = (repo / "CLAUDE.md").read_text()
+    assert "jswarm:begin" in adopted_md and "CCC" in adopted_md
+    import json
+    adopted_settings = json.loads((repo / ".claude/settings.json").read_text())
+    assert "hooks" in adopted_settings
+
+    r_un = run("unadopt", str(repo), home=tmp_path)
+    assert r_un.returncode == 0, r_un.stderr
+    assert not (repo / ".jswarm/.adopted").exists()
+
+    # Byte-identical restore of CLAUDE.md, not merely "no jswarm block".
+    assert (repo / "CLAUDE.md").read_text() == original_claude_md
+
+    # settings.json is back to its original keys, jswarm hooks removed,
+    # and nothing the user put there (including "permissions") was lost.
+    restored_settings = json.loads((repo / ".claude/settings.json").read_text())
+    assert restored_settings == json.loads(original_settings)
+    assert "hooks" not in restored_settings
+
 # --- Carried requirement (task-A5-brief §2, "Adoption never clobbers"):
 # re-running adopt on an already-adopted repository must replace the
 # managed block rather than appending a second one. Not one of the brief's

@@ -1,12 +1,19 @@
 """`unadopt`: undo `adopt`. Nothing the user wrote is touched.
 
-`CLAUDE.md` and `.claude/settings.json` are restored from the newest backup
-`adopt` took (`<repo>/.jswarm/backups/<utc-timestamp>/`) — the state right
-before the last `adopt` call. When a file has no backup (because `adopt`
-found nothing there to back up, meaning it did not exist before adoption),
-`unadopt` removes it rather than leaving jswarm's own content behind. As a
-fallback, when there is no backup at all to work from, the managed block and
-jswarm's own hook entries are stripped out surgically instead.
+`CLAUDE.md` and `.claude/settings.json` are restored from the *oldest*
+backup session `adopt` ever took (`<repo>/.jswarm/backups/<utc-timestamp>/`)
+-- the state right before the *first* `adopt` call, not the most recent
+one. Every `adopt` call backs up each target's current state before writing
+to it, so on a second or later `adopt` (for instance to change
+`--jira-key`), the *newest* backup already contains jswarm's own managed
+content, not the user's original. Only the oldest session was taken before
+jswarm ever touched the repo, so that is the one restore must use; this
+holds no matter how many times `adopt` has run since. When a file has no
+backup (because `adopt` found nothing there to back up, meaning it did not
+exist before adoption), `unadopt` removes it rather than leaving jswarm's
+own content behind. As a fallback, when there is no backup at all to work
+from, the managed block and jswarm's own hook entries are stripped out
+surgically instead.
 
 `.jswarm/` is removed except `backups/`, which is kept unless it is empty.
 """
@@ -79,21 +86,21 @@ def unadopt(repo: Path, *, dry_run: bool = False, home: Path | None = None) -> U
     host = current_host()
     claude_md = host.memory_path(repo)
     settings_path = host.settings_path(repo)
-    newest = backup.newest_session(repo)
+    oldest = backup.oldest_session(repo)
 
-    if newest is not None:
-        backed_up_md = newest / claude_md.name
+    if oldest is not None:
+        backed_up_md = oldest / claude_md.name
         if backed_up_md.exists():
             ctx.copy_file(backed_up_md, claude_md)
-            result.report_lines.append(f"unadopt: restored {claude_md} from {newest}")
+            result.report_lines.append(f"unadopt: restored {claude_md} from {oldest}")
         elif claude_md.exists():
             ctx.remove(claude_md)
             result.report_lines.append(f"unadopt: removed {claude_md} (did not exist before adoption)")
 
-        backed_up_settings = newest / settings_path.name
+        backed_up_settings = oldest / settings_path.name
         if backed_up_settings.exists():
             ctx.copy_file(backed_up_settings, settings_path)
-            result.report_lines.append(f"unadopt: restored {settings_path} from {newest}")
+            result.report_lines.append(f"unadopt: restored {settings_path} from {oldest}")
         elif settings_path.exists():
             ctx.remove(settings_path)
             result.report_lines.append(f"unadopt: removed {settings_path} (did not exist before adoption)")
