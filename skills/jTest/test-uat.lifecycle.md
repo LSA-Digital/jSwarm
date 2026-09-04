@@ -100,7 +100,7 @@ GWT causes `SCENARIO-GWT-SHA256-MISMATCH` and blocks prepare
 (`jswarm/uat-scenarios/query_uat_scenarios.py --verify-chain`). The jQATester
 walks the exact sealed current-round file, never a summary, and only a complete
 identity-bound PASS produces `QA_VERIFIED` and then `ISSUED`
-(`skills/test/uat/round-prep.md:11-20`).
+(`skills/jTest/uat/round-prep.md:11-20`).
 - Authoring the round request (shapes, nested GWT lineage, digest rule, pre-flight check): [`uat/round-authoring.md`](uat/round-authoring.md)
 
 ## Step-by-step: what you do and what the system does
@@ -131,7 +131,7 @@ When you run `/jTest uat feedback`, the procedure selects the **newest
 unprocessed** candidate by parsed `generated_at`, never file modification time.
 It validates the document before writing and idempotently upserts the result to
 `.jswarm/plans/<TICKET>/<TICKET>.test-traceability.md`
-(`skills/test/uat/feedback.md`;
+(`skills/jTest/uat/feedback.md`;
 `jswarm/uat_feedback.py`). Re-running a processed file does not create a second
 finding or corrupt the ledger. Owner feedback that carries defects routes to a /jFix cycle.
 

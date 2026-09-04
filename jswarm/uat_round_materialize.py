@@ -383,7 +383,7 @@ def _package_string_list(value: object, token: str, *, allow_empty: bool = False
 
 def _result_contract(*, require_runtime_match: bool = False) -> Mapping[str, object]:
     """Load and structurally validate the single controlled result-contract master."""
-    master_path = Path(__file__).resolve().parents[1] / "skills/test/uat/feedback-result-contract.json"
+    master_path = Path(__file__).resolve().parents[1] / "skills/jTest/uat/feedback-result-contract.json"
     try:
         master = json.loads(master_path.read_bytes())
     except (OSError, json.JSONDecodeError) as error:

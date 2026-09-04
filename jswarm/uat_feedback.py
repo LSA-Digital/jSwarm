@@ -231,7 +231,7 @@ def _validate_log(value, row_types: Mapping[str, str], *, allow_empty_pre_round:
 
 RESULT_CONTRACT_PATH = (
     Path(__file__).resolve().parents[1]
-    / "skills/test/uat/feedback-result-contract.json"
+    / "skills/jTest/uat/feedback-result-contract.json"
 )
 
 
