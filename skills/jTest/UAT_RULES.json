@@ -63,7 +63,7 @@
           "note": "Directive originated 2026-06-12 and was restated four times on 2026-07-12."
         },
         {
-          "key": "COM-386-CONFIRMATION-TIME-GWT-SYNC-2026-08-25",
+          "key": "RULE-386-CONFIRMATION-TIME-GWT-SYNC-2026-08-25",
           "date": "2026-08-25",
           "note": "Owner requirement: collected feedback or otherwise confirmed behavior updates canonical GWT immediately to prevent downstream drift."
         }
@@ -317,9 +317,9 @@
       ],
       "receipt_pointers": [
         {
-          "key": "HAS-520-19-NFR-520-5-2026-07-12",
+          "key": "RULE-520-19-NFR-520-5-2026-07-12",
           "date": "2026-07-12",
-          "note": "HAS-520 #19 omitted NFR-520-5 audit traceability."
+          "note": "RULE-520 #19 omitted NFR-520-5 audit traceability."
         }
       ],
       "applies_to": [
@@ -350,12 +350,12 @@
       ],
       "receipt_pointers": [
         {
-          "key": "HAS-520-FIX19-REVISE-2X-2026-07-12",
+          "key": "RULE-520-FIX19-REVISE-2X-2026-07-12",
           "date": "2026-07-12",
-          "note": "HAS-520 fix19 required two jCritic REVISE rounds after helper-direct and forged-fixture false greens."
+          "note": "RULE-520 fix19 required two jCritic REVISE rounds after helper-direct and forged-fixture false greens."
         },
         {
-          "key": "HAS-617-GWT-DRIFT-SWEEP-2026-08-25",
+          "key": "RULE-617-GWT-DRIFT-SWEEP-2026-08-25",
           "date": "2026-08-25",
           "note": "Eleven stale unit/integration expectations in two modules survived behavior rulings until an unrelated lane forced clause-by-clause attribution; localized precursor commit 78b110d7f."
         }
@@ -395,7 +395,7 @@
           "note": "Ticket-prefixed plan-folder ownership."
         },
         {
-          "key": "COM-249-SLICE-C-F06-F07",
+          "key": "RULE-249-SLICE-C-F06-F07",
           "date": "2026-07-12",
           "note": "F-06 round-file precedence over chat format and F-07 provenance lineage."
         }
@@ -490,7 +490,7 @@
       ],
       "receipt_pointers": [
         {
-          "key": "COM-307-SEMANTIC-DISPATCH-RUBRIC-GAP",
+          "key": "RULE-307-SEMANTIC-DISPATCH-RUBRIC-GAP",
           "date": "2026-07-26",
           "note": "Phase 2 governance gap: Layer-2 semantic judgment dispatch lacked its own scenario-bound rubric contract."
         }
@@ -521,7 +521,7 @@
       ],
       "receipt_pointers": [
         {
-          "key": "COM-376-UAT-D4-BEHAVIOR-LOCK",
+          "key": "RULE-376-UAT-D4-BEHAVIOR-LOCK",
           "date": "2026-08-20",
           "note": "Behavior lock selects a current-script jQATester walk before deterministic replay when lock is NO or UNKNOWN."
         }

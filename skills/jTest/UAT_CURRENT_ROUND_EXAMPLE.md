@@ -2,7 +2,7 @@
 
 **Round:** 2026-07-08 · re-observation of the four owner-reported defect fixes (#102/#103/#104/#106) + carry-forward
 **Last refreshed:** 2026-07-08T15:50-04:00 (America/New_York EDT) · 19:50 UTC
-**Stack:** recreate #14 · preflight PASS (fix sentinels in-container ×2, health 200, replay probe 4/4) · http://macstudio-lsa:8300 · admin `mike@lsa.dev`
+**Stack:** recreate #14 · preflight PASS (fix sentinels in-container ×2, health 200, replay probe 4/4) · http://devbox:8300 · admin account
 **Deploy status:** ⚠️ PENDING: #108 fix `52a59967` (HUMAN-AI token-attrs defaulting) committed, awaiting your go for recreate #15 — holds J1's HUMAN-AI leg and the `cddef070` retry. Everything else testable now.
 
 ## Definitions
@@ -31,7 +31,7 @@
 
 **UAT ready?** 🟢 test it NOW · 🟡 fix in progress — do NOT test yet · 🔴 not started
 
-**Data sources for this table (all rows summarized from, never invented):** [HAS-508.uat-scenarios.md](../../.jswarm/plans/HAS-508/HAS-508.uat-scenarios.md) · [HAS-508.uat-test.md (step script)](../../.jswarm/plans/HAS-508/HAS-508.uat-test.md) · [uat-scenarios-e2e.md](../../.jswarm/plans/HAS-508/uat-scenarios-e2e.md) · project canon [architecture.uat-scenarios.md](../architecture.uat-scenarios.md)
+**Data sources for this table (all rows summarized from, never invented):** [TICKET-XXX.uat-scenarios.md](../../.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md) · [TICKET-XXX.uat-test.md (step script)](../../.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-test.md) · [uat-scenarios-e2e.md](../../.jswarm/plans/TICKET-XXX/uat-scenarios-e2e.md) · project canon [architecture.uat-scenarios.md](../architecture.uat-scenarios.md)
 
 | # | Journey | Sources (scenario ids) | Walk (click-path, summarized) | PASS looks like | FAIL looks like | Closes |
 |---|---|---|---|---|---|---|
@@ -42,17 +42,17 @@
 
 ## Do-NOT-test / Do-NOT-panic
 
-**Data sources for this table:** [bug master ledger](../../.jswarm/plans/HAS-508.plan.ui-harvest-and-retrieval-depth.md) · [session registry](uat-bug-report-session-registry.json)
+**Data sources for this table:** [bug master ledger](../../.jswarm/plans/TICKET-XXX.plan.ui-harvest-and-retrieval-depth.md) · [session registry](uat-bug-report-session-registry.json)
 
 | Path | Why (defect id + one line) | Workaround if hit |
 |---|---|---|
 | J1 HUMAN-AI leg + rebuilding session `cddef070` — until recreate #15 | #108 (your report 13): post-gate lane normalization drops token attrs past the defaulting seam; FIXED `52a59967`, deploy awaits your go; recurrence is deterministic pre-deploy | Judge J1's DOC + COMPL sub-legs now; HUMAN-AI leg after I confirm recreate #15 |
 | Compliance toggle erroring on a fresh session (buffer error, no COMPL card) | #107 (pre-existing, NOT the deploy): compliance-shallow LLM truncated JSON, byte-identical on retry (cache-replay suspicion); disposition = your call | Retry once in a NEW session; report the session id if it repeats — not a #102 regression |
-| The 3 old heavy sessions `f47abdad` / `a323547d` / `a5d2cf28` | Replay-fragile heavy-history class (TMPRL1101) — durable fix = HAS-524 | Fresh sessions only |
-| 6+ session tabs simultaneously | #95 connection-cap starvation — ticketed (HAS-522 streaming) | Close spare tabs; hard-refresh the starved one |
-| Big multi-source `/build` returning a 500 mid-flight | #105 (traced): sync build-ack exceeds ~30s proxy budget under load — the 500 lies, the build usually succeeded; fold→HAS-524 = your pending decision | Wait ~1 min + refresh; report only if the build itself failed |
+| The 3 old heavy sessions `f47abdad` / `a323547d` / `a5d2cf28` | Replay-fragile heavy-history class (TMPRL1101) — durable fix = TICKET-YYY | Fresh sessions only |
+| 6+ session tabs simultaneously | #95 connection-cap starvation — ticketed (TICKET-ZZZ streaming) | Close spare tabs; hard-refresh the starved one |
+| Big multi-source `/build` returning a 500 mid-flight | #105 (traced): sync build-ack exceeds ~30s proxy budget under load — the 500 lies, the build usually succeeded; fold→TICKET-YYY = your pending decision | Wait ~1 min + refresh; report only if the build itself failed |
 
 ## Notes (≤3 bullets)
-- "Harvestable Research" expander is now HIDDEN on all views (your ruling; hard-refresh) — expected, not a bug; removal = HAS-523 tech debt.
+- "Harvestable Research" expander is now HIDDEN on all views (your ruling; hard-refresh) — expected, not a bug; removal = TICKET-WWW tech debt.
 - The #106 trio fix is forward-only: old sessions keep two rationale headers by design — judge the trio only on fresh sessions.
-- Your five pending decisions live in `.jswarm/plans/HAS-508/HAS-508.state.md` §MORNING OWNER DECISIONS.
+- Your five pending decisions live in `.jswarm/plans/TICKET-XXX/TICKET-XXX.state.md` §MORNING OWNER DECISIONS.
