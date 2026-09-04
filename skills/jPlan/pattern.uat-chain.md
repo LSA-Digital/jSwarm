@@ -8,8 +8,8 @@ When `Automated UAT: yes`, `/jPlan` MUST emit exactly one `## UAT Execution Trig
 
 ## Header lines
 
-**Automated UAT:** yes | no — yes only for UI/E2E/user-journey impact; backend-only/schema-only/migration-only/infrastructure-only tickets use lower-level proof and record `no — no UI/E2E impact`
-**E2E policy:** per-ticket | deferred — `per-ticket` promotes stable live-show flows into headless Playwright regression artifacts near plan completion; `deferred` moves regression E2E to feature-level verification
+**Automated UAT:** yes | no (yes only for UI/E2E/user-journey impact; backend-only/schema-only/migration-only/infrastructure-only tickets use lower-level proof and record `no (no UI/E2E impact)`)
+**E2E policy:** per-ticket | deferred (`per-ticket` promotes stable live-show flows into headless Playwright regression artifacts near plan completion; `deferred` moves regression E2E to feature-level verification)
 
 ## Plan sections
 
@@ -32,7 +32,7 @@ Rules:
 
 ## UAT-Scenario Traceability Matrix
 
-> **One row per UAT scenario** (NOT per A/C — that is the matrix above). The single Status aggregates ALL tests proving that scenario (1 scenario : many tests). `uat_complete` (derived frontmatter → HUD) = 🟢 rows / total rows. Include this matrix only when `Automated UAT: yes`; omit it for tickets with no UI/E2E impact (the field then stays absent → the HUD shows no UAT segment). `/jPrecompact` keeps the statuses truthful from the ticket-local UAT results each checkpoint (AC-10). Status cells use the 4-state ladder: 🔴 Backlogged / 🟠 Drafted / 🟡 Ready / 🟢 Done.
+> **One row per UAT scenario** (NOT per A/C; that is the matrix above). The single Status aggregates ALL tests proving that scenario (1 scenario : many tests). `uat_complete` (derived frontmatter → HUD) = 🟢 rows / total rows. Include this matrix only when `Automated UAT: yes`; omit it for tickets with no UI/E2E impact (the field then stays absent → the HUD shows no UAT segment). `/jPrecompact` keeps the statuses truthful from the ticket-local UAT results each checkpoint (AC-10). Status cells use the 4-state ladder: 🔴 Backlogged / 🟠 Drafted / 🟡 Ready / 🟢 Done.
 
 | UAT scenario | A/C served | Test(s) / Evidence | Status |
 | ------------ | ---------- | ------------------ | ------ |
@@ -46,9 +46,9 @@ Rules:
 
 **Official UAT inventory:** `[docs/plans/FEATURE-XXX-uat-scenarios.md or docs/architecture/... ]`
 
-**Local UAT scenarios:** `docs/plans/TICKET-XXX.uat-scenarios.md` — create from [`docs/templates/UAT_SCENARIO_EXTRACT_TEMPLATE.md`](UAT_SCENARIO_EXTRACT_TEMPLATE.md). This is the working slice extracted from the official inventory and may evolve during the ticket.
+**Local UAT scenarios:** `docs/plans/TICKET-XXX.uat-scenarios.md`, created from [`docs/templates/UAT_SCENARIO_EXTRACT_TEMPLATE.md`](UAT_SCENARIO_EXTRACT_TEMPLATE.md). This is the working slice extracted from the official inventory and may evolve during the ticket.
 
-**UAT doc:** `docs/plans/TICKET-XXX.uat-test.md` — derive from `TICKET-XXX.uat-scenarios.md`, create from [`docs/templates/UAT_TEST_TEMPLATE.md`](UAT_TEST_TEMPLATE.md), and use [`docs/templates/UAT_TEST_EXAMPLE.md`](UAT_TEST_EXAMPLE.md) as the model.
+**UAT doc:** `docs/plans/TICKET-XXX.uat-test.md`, derived from `TICKET-XXX.uat-scenarios.md`, created from [`docs/templates/UAT_TEST_TEMPLATE.md`](UAT_TEST_TEMPLATE.md), and using [`docs/templates/UAT_TEST_EXAMPLE.md`](UAT_TEST_EXAMPLE.md) as the model.
 
 ## Automated UAT Results
 
@@ -64,4 +64,4 @@ Rules:
 
 Use the UAT chain only after unit/integration proof. State whether execution is live-show-headed, headless automation, or diagnostic CDP; include driver, preflight, data, contracts, monitoring, durable report, and regression-promotion decision. Passing live-show flows are promoted or explicitly deferred.
 
-Provenance: `PLAN_TEMPLATE.md` / `PLAN_FEATURE_TEMPLATE.md` §§ Definition of Done-ness (UAT/NFR Status Ladder), UAT-Scenario Traceability Matrix, Automated UAT Plan, Automated UAT Results. Definition of Done-ness restored 2026-07-10 (Slice B gate-4 round-1 MAJOR-1 remediation) — byte-identical between the two source templates; see `.jswarm/plans/TICKET-XXX/TICKET-XXX.dedrift-ledger.md`.
+Provenance: `PLAN_TEMPLATE.md` / `PLAN_FEATURE_TEMPLATE.md` §§ Definition of Done-ness (UAT/NFR Status Ladder), UAT-Scenario Traceability Matrix, Automated UAT Plan, Automated UAT Results. Definition of Done-ness restored 2026-07-10 (Slice B gate-4 round-1 MAJOR-1 remediation, byte-identical between the two source templates); see `.jswarm/plans/TICKET-XXX/TICKET-XXX.dedrift-ledger.md`.

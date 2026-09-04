@@ -16,7 +16,7 @@ None.
 |-------|-----------|---------------|----------------|--------|
 | Unit | yes / no | [local behavior or helper contract] | [phase/task] | 🔴 |
 | Integration | yes / no | [API + DB / workflow / service composition] | [phase/task] | 🔴 |
-| Live Show UAT/E2E | yes / no | `docs/plans/TICKET-XXX.uat-test.md` visible browser run, or N/A — no UI/E2E impact | phase gate / plan completion | 🔴 |
+| Live Show UAT/E2E | yes / no | `docs/plans/TICKET-XXX.uat-test.md` visible browser run, or N/A (no UI/E2E impact) | phase gate / plan completion | 🔴 |
 | Regression-mode E2E/PE2E | per-ticket / deferred / N/A | [headless Playwright spec or feature-level deferral] | plan completion / feature verification | 🔴 |
 | Smoke | impacted / not impacted | [smoke command or N/A] | phase completion / closeout | 🔴 |
 
@@ -26,7 +26,7 @@ None.
 
 | A/C | UAT refs | NFR refs | Test path | Test name / evidence check | Type | How it proves A/C | Status |
 | --- | -------- | -------- | --------- | -------------------------- | ---- | ----------------- | ------ |
-| A/C 1 | UAT-___ or `N/A — no UI/E2E impact because ...` | **NFR-[n]-[DESCRIPTOR]** or `N/A — reason` | `test_file.py` | `test_name` | Unit | [acceptance proof, not implementation shape] | 🆕 New |
+| A/C 1 | UAT-___ or `N/A (no UI/E2E impact because ...)` | **NFR-[n]-[DESCRIPTOR]** or `N/A (reason)` | `test_file.py` | `test_name` | Unit | [acceptance proof, not implementation shape] | 🆕 New |
 
 ## Implementation Phases
 
@@ -122,9 +122,9 @@ None.
 | ---------- | ------------------------------------------------ |
 | Unit Tests | `[project-specific unit test command]`         |
 | Integration Tests | `[project-specific integration test command]` |
-| E2E Tests  | `[project-specific e2e test command]` — only if `E2E policy: per-ticket` |
-| Automated UAT | `jQATester` + `docs/plans/TICKET-XXX.uat-test.md` — only if `Automated UAT: yes` and UI/E2E impact exists |
-| Generated catalog validation | `[project-specific catalog generator --validate]` — only if project uses generated `TEST_CATALOG.md` |
+| E2E Tests  | `[project-specific e2e test command]` (only if `E2E policy: per-ticket`) |
+| Automated UAT | `jQATester` + `docs/plans/TICKET-XXX.uat-test.md` (only if `Automated UAT: yes` and UI/E2E impact exists) |
+| Generated catalog validation | `[project-specific catalog generator --validate]` (only if project uses generated `TEST_CATALOG.md`) |
 
 ### Todo Management
 
@@ -164,4 +164,4 @@ None.
 
 Use one TODO list per implementation phase. Apply the TDD sequence: A/C shapes tests, write the test first, observe RED, implement the smallest change, observe GREEN, then verify production intent. Keep phase exit criteria and completion gates current.
 
-Provenance: `PLAN_TEMPLATE.md` §§ Testing Strategy, Implementation Phases, Status Updates, Critical Reminders, Completion Checklist, Retrospective, Changelog; `PLAN_TEMPLATE_QUICK.md` §§ Tasks and Completion Checklist. Critical Reminders restored 2026-07-10 (Slice B gate-4 round-1 MAJOR-1 remediation) — originally FULL-only; this pattern's membership (QUICK+FULL+FEATURE) is a superset, so restoring it here also newly adds it to QUICK and FEATURE plans (homogenization-addition, ledgered; this Rules line already claimed the provenance before the restore). A legacy UAT-execution agent slug in the Completion Gates row was updated to the current roster's `jQATester` per the mapping table (see the ledger for the exact before/after string). QUICK's original flat `## Tasks` checklist is superseded by this pattern's Implementation Phases task/checkbox scaffold (`T1.1` numbered checkboxes under a phase) — ledgered as SUPERSEDED-by, not restored; see `.jswarm/plans/TICKET-XXX/TICKET-XXX.dedrift-ledger.md`. `### Phase 0: Human-Assisted Runway` and `### Phase 2: [Name]` byte-restored 2026-07-10 (Slice B gate-4 remediation, final content pass) — originally FULL-only worked-example phases in `PLAN_TEMPLATE.md`'s Implementation Phases; this pattern's bundle-shared membership means QUICK and FEATURE also newly gain both headings (homogenization-addition, ledgered in the same manner as Critical Reminders above).
+Provenance: `PLAN_TEMPLATE.md` §§ Testing Strategy, Implementation Phases, Status Updates, Critical Reminders, Completion Checklist, Retrospective, Changelog; `PLAN_TEMPLATE_QUICK.md` §§ Tasks and Completion Checklist. Critical Reminders restored 2026-07-10 (Slice B gate-4 round-1 MAJOR-1 remediation), originally FULL-only; this pattern's membership (QUICK+FULL+FEATURE) is a superset, so restoring it here also newly adds it to QUICK and FEATURE plans (homogenization-addition, ledgered; this Rules line already claimed the provenance before the restore). A legacy UAT-execution agent slug in the Completion Gates row was updated to the current roster's `jQATester` per the mapping table (see the ledger for the exact before/after string). QUICK's original flat `## Tasks` checklist is superseded by this pattern's Implementation Phases task/checkbox scaffold (`T1.1` numbered checkboxes under a phase); ledgered as SUPERSEDED-by, not restored; see `.jswarm/plans/TICKET-XXX/TICKET-XXX.dedrift-ledger.md`. `### Phase 0: Human-Assisted Runway` and `### Phase 2: [Name]` byte-restored 2026-07-10 (Slice B gate-4 remediation, final content pass), originally FULL-only worked-example phases in `PLAN_TEMPLATE.md`'s Implementation Phases; this pattern's bundle-shared membership means QUICK and FEATURE also newly gain both headings (homogenization-addition, ledgered in the same manner as Critical Reminders above).
