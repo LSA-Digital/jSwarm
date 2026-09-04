@@ -34,7 +34,7 @@ Apply bypasses as the table states: `--lite` resolves `LITE`; Feature resolves `
 
 ### Assemble the plan (MANDATORY)
 
-Run the assembler **from the CONSUMER repository root** — the working directory of the repo the ticket/plan belongs to (e.g. `~/dev/<project>`), NOT the `common` tool repo. The interpreter and the assembler script are always referenced by absolute `${JSWARM_HOME:-$HOME/dev/jswarm}/...` path; only the working directory and the relative `--out` path are consumer-repo-relative. Substituting the resolved bundle, ticket key, and plan slug:
+Run the assembler **from the CONSUMER repository root** (the working directory of the repo the ticket/plan belongs to) (e.g. `~/dev/<project>`), NOT the `common` tool repo. The interpreter and the assembler script are always referenced by absolute `${JSWARM_HOME:-$HOME/dev/jswarm}/...` path; only the working directory and the relative `--out` path are consumer-repo-relative. Substituting the resolved bundle, ticket key, and plan slug:
 
 When the assembled plan declares `Automated UAT: yes`, compose its single machine-readable trigger section during assembly with `jswarm/uat_trigger.py::compose_trigger_section`; never hand-author the JSON.
 
@@ -48,14 +48,14 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
 ```
 
 **Inputs/outputs ROOT env contract:**
-- The assembler resolves its assembly INPUTS from `skills/jPlan/` inside the `common` tool repo by default — you do not normally set anything. `NEW_WORK_TEMPLATE_ROOT` overrides that inputs directory (recovery lever only). A missing template root / manifest fails loudly with the typed **missing-inputs-root** error that names this env var — distinct from a genuinely malformed manifest.
-- The provenance RECEIPT is written into the SAME repository as the `--out` plan (derived from the output path's repo root), so running from the consumer repo root makes the receipt land in the consumer's `.jswarm/plans/<KEY>/` — where the Receipt gate below looks. `NEW_WORK_RECEIPT_ROOT` overrides the receipt's repo root (recovery lever only); do not set it in the normal flow.
+- The assembler resolves its assembly INPUTS from `skills/jPlan/` inside the `common` tool repo by default; you do not normally set anything. `NEW_WORK_TEMPLATE_ROOT` overrides that inputs directory (recovery lever only). A missing template root / manifest fails loudly with the typed **missing-inputs-root** error that names this env var, distinct from a genuinely malformed manifest.
+- The provenance RECEIPT is written into the SAME repository as the `--out` plan (derived from the output path's repo root), so running from the consumer repo root makes the receipt land in the consumer's `.jswarm/plans/<KEY>/`, where the Receipt gate below looks. `NEW_WORK_RECEIPT_ROOT` overrides the receipt's repo root (recovery lever only); do not set it in the normal flow.
 
 `--with <pattern>` is the generic, additive mechanism for a separately registered addon pattern. Use it only for an applicable, registered addon; repeat it once for each selected addon. Do not add an addon-specific question or wire a particular addon in this step unless this file defines its evidence-driven selection contract below.
 
 ### Pre-issued execution rulings → `--with preissued-rulings`
 
-Before assembly for QUICK, FULL, or FEATURE, assess the evidenced T1-T5 triggers in `pattern.preissued-rulings.md`. If one or more match, append `--with preissued-rulings`, populate only the matching library rulings plus the mandatory escalation-budget capstone, and bind each match to a ticket fact. If none match, omit the addon and section entirely. Lite always omits it, and the assembler rejects that addon/bundle combination. This is an author assessment, not a new owner question. A repository's stricter policy remains controlling—especially strict zero-red baselines, which do not qualify for T4.
+Before assembly for QUICK, FULL, or FEATURE, assess the evidenced T1-T5 triggers in `pattern.preissued-rulings.md`. If one or more match, append `--with preissued-rulings`, populate only the matching library rulings plus the mandatory escalation-budget capstone, and bind each match to a ticket fact. If none match, omit the addon and section entirely. Lite always omits it, and the assembler rejects that addon/bundle combination. This is an author assessment, not a new owner question. A repository's stricter policy remains controlling, especially strict zero-red baselines, which do not qualify for T4.
 
 ### Rapid vibe UI opt-in → `--with rapid-vibe-ui`
 
@@ -63,7 +63,7 @@ When the owner explicitly selects `rapid-vibe-ui` and the eligibility boundary i
 
 ### UAT round tracking opt-in → `--with uat-round-tracking` (B-08)
 
-When the Q7-family UAT round tracking answer is affirmative (`yes` or `on`), append `--with uat-round-tracking` to the assembler invocation above — repeat it alongside any other selected `--with` addon. When UAT round tracking is negative (`no` or `off`) or was never asked, omit `--with uat-round-tracking` — do not pass it, do not add it by default, and do not infer it from any other answer.
+When the Q7-family UAT round tracking answer is affirmative (`yes` or `on`), append `--with uat-round-tracking` to the assembler invocation above; repeat it alongside any other selected `--with` addon. When UAT round tracking is negative (`no` or `off`) or was never asked, omit `--with uat-round-tracking`; do not pass it, do not add it by default, and do not infer it from any other answer.
 
 On a nonzero assembler exit, STOP. Surface the typed exit code and stderr **verbatim** to the user. Never hand-author the plan, copy a legacy template, retry through a different assembly procedure, or continue to the plan file as a fallback.
 
@@ -101,11 +101,11 @@ Before writing the plan body, decide whether 1-3 **catalog Pattern** records app
 
 Populate the assembled plan's **Catalog Pattern Selection** section with:
 
-1. **Selected catalog Pattern IDs:** 1-3 IDs, or `N/A — [why no recurring engineering Pattern applies]`.
+1. **Selected catalog Pattern IDs:** 1-3 IDs, or `N/A ([why no recurring engineering Pattern applies])`.
 2. **Rationale:** one short reason per selected Pattern.
 3. **Alternatives / rejected Patterns:** IDs considered and why rejected; `N/A` if none.
 4. **Constraint surfaces:** plan fields, required/forbidden agent routing, required prompt clauses, anti-pattern/tradeoff warnings, evidence tests, and reviewer enforcement markers to materialize selected Pattern obligations (AC-11).
-5. **A/C-to-UAT/test/evidence map:** every acceptance criterion maps to a UAT scenario, automated test, smoke/CLI/schema proof, review artifact, or explicit N/A rationale (AC-12). Non-UI/non-E2E work still needs lower-level evidence maps plus explicit `UAT N/A — no UI/E2E impact because ...` rationale.
+5. **A/C-to-UAT/test/evidence map:** every acceptance criterion maps to a UAT scenario, automated test, smoke/CLI/schema proof, review artifact, or explicit N/A rationale (AC-12). Non-UI/non-E2E work still needs lower-level evidence maps plus explicit `UAT N/A (no UI/E2E impact because ...)` rationale.
 6. **Thin-slice proof point / stop condition:** the smallest acceptance-relevant proof to run before broad coding; stop if the proof cannot run, the evidence map is missing, or the proof no longer matches intended behavior (AC-13).
 7. **Per-job / per-Pattern NFR weighting:** reliability, compliance/security, transparency, maintainability, efficiency/readability, and any job-specific NFRs with the design/test/review consequence of dominant weights (AC-14).
 
@@ -133,7 +133,7 @@ If the story contributes to no PE2E steps, document why and delete the section.
 
 When the parent Feature plan uses the Feature Governance Rings methodology with a Mermaid dependency flowchart (per `TICKET-XXX.devops.feature-gov-rings.md` §5.5):
 
-1. Locate the Story's node in the parent's `§ Sequencing View — Companion dependency flowchart` Mermaid block
+1. Locate the Story's node in the parent's `§ Sequencing View: Companion dependency flowchart` Mermaid block
 2. Add `📋 ` prefix to the label: `S08["📋 TICKET-XXX<br/>OpenAPI Typed UI Client"]`
 3. In the `class <node-id> ...` directives at the bottom, move the node ID from the `unplanned` list to the `planned` list. **Mermaid only allows one `:::class` inline; planning state is layered via `class` directive, never chained inline.**
 4. Reconcile §6a Active table row: bump Ring column `0 → 2`; update Notes with `/jPlan Ring 2 complete YYYY-MM-DD`
@@ -146,11 +146,11 @@ Failure to update the flowchart leaves the parent's only Ring-2 visual scoreboar
 ```markdown
 **Technical Design Spec:** [TICKET-XXX.specs.<descriptive>.md](TICKET-XXX.specs.<descriptive>.md)
 **Recommended agent team:** Pattern <1|2> · review:<critic|critic-xhigh> · arch:<none|architect|architect-master> · escalation-trigger:<verbatim trigger or "none">
-**Orchestrator model & effort:** [FABL claude-fable-5 | OPUS claude-opus-4-8] · [HIGH | XHIGH throughout | HIGH with phase escalations — list them] — routes the ORCHESTRATOR session only; named j-cores stay route-pinned
-**Catalog Pattern selection:** [1-3 catalog Pattern IDs such as `PAT-001`, or `N/A — no recurring engineering Pattern selected`; keep separate from execution-team Pattern 1/2]
+**Orchestrator model & effort:** [FABL claude-fable-5 | OPUS claude-opus-4-8] · [HIGH | XHIGH throughout | HIGH with phase escalations, list them] (routes the ORCHESTRATOR session only; named j-cores stay route-pinned)
+**Catalog Pattern selection:** [1-3 catalog Pattern IDs such as `PAT-001`, or `N/A (no recurring engineering Pattern selected)`; keep separate from execution-team Pattern 1/2]
 **Testing strategy:** unit [required/upgrade/N/A]; integration [required/upgrade/N/A]; UAT [live-show-headed/headless-automation/diagnostic-cdp/no]; regression E2E [per-ticket/deferred/N/A]; smoke [impact yes/no]
-**Test data strategy:** managed cluster required for regression | managed cluster recommended for scripted UAT | exploratory-ad-hoc allowed for live UAT | N/A — [cluster IDs or setup summary]
-**Automated UAT:** yes | no — yes only for UI/E2E/user-journey impact
+**Test data strategy:** managed cluster required for regression | managed cluster recommended for scripted UAT | exploratory-ad-hoc allowed for live UAT | N/A ([cluster IDs or setup summary])
+**Automated UAT:** yes | no (yes only for UI/E2E/user-journey impact)
 **E2E policy:** per-ticket | deferred
 **Per-Phase UAT Gate:** Required only for phases with UI/E2E impact when Automated UAT: yes
 ```
@@ -170,7 +170,7 @@ Record in plan's **Testing Strategy** / **Automated UAT Plan** sections:
 - **UAT execution mode:** `live-show-headed`, `headless-automation`, or `diagnostic-cdp`
 - **Browser driver:** Playwright MCP / headed Playwright for live-show; headless project wrapper for headless-automation; Chrome DevTools MCP only with diagnostic reason for diagnostic-cdp
 - **Overlay / callouts:** enabled by default for live-show-headed; disabled only with a reason
-- **Runtime monitor:** required for live-show UAT touching backend, API, workflow, streaming, persistence, or dispatch behavior — include command/task, output path, filters, review cadence, or `N/A — [reason]`
+- **Runtime monitor:** required for live-show UAT touching backend, API, workflow, streaming, persistence, or dispatch behavior; include command/task, output path, filters, review cadence, or `N/A ([reason])`
 - **Test data strategy:** managed cluster, inline fresh setup, exploratory-ad-hoc, or N/A
 - **Regression promotion:** per-ticket headless Playwright artifact, feature-level deferred, or N/A with reason
 - **Architecture scenario merge-back:** target architecture scenario inventory path, or note that no official inventory exists yet
@@ -188,72 +188,72 @@ Substitute `TICKET-XXX` with actual ticket number and `TICKET-XXX-DESCRIPTION.md
 ### Components and features frontmatter
 
 The assembled plan seeds `components: []` and `features: []`. Fill them in:
-- **`components:`** — the logical-component id(s) this ticket contributes to (records in `docs/_JarviSWARM/components/{id}.component.yaml`). Reference each declared id in the plan body (Scope/AC). Leave `[]` (explicit, never omit) if the ticket touches no durable component. Validation is **WARN-only + fail-open** — an unknown id never blocks `/jPlan` and is **never auto-created**.
-- **`features:`** — the marketable-feature id(s) (F-MKT/MTH/TOOL/INF-N) this ticket advances; `[]` allowed.
-- **Deliberate new-component registration (only when this ticket genuinely introduces a new logical component):** create the record explicitly — `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -c "import sys; sys.path.insert(0,'jswarm/catalog'); import component_validator as cv; cv.register_component('<id>', '<F-OWNER>', layer='<layer>', lenses=['<lens>'])"` (or hand-author `docs/_JarviSWARM/components/<id>.component.yaml` per `jswarm/catalog/schema/component.schema.yaml`) with a real `owning_feature`, then populate its `artifacts[]`. Never rely on an unknown id auto-registering — it does not.
+- **`components:`**: the logical-component id(s) this ticket contributes to (records in `docs/_JarviSWARM/components/{id}.component.yaml`). Reference each declared id in the plan body (Scope/AC). Leave `[]` (explicit, never omit) if the ticket touches no durable component. Validation is **WARN-only + fail-open**; an unknown id never blocks `/jPlan` and is **never auto-created**.
+- **`features:`**: the marketable-feature id(s) (F-MKT/MTH/TOOL/INF-N) this ticket advances; `[]` allowed.
+- **Deliberate new-component registration (only when this ticket genuinely introduces a new logical component):** create the record explicitly: `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -c "import sys; sys.path.insert(0,'jswarm/catalog'); import component_validator as cv; cv.register_component('<id>', '<F-OWNER>', layer='<layer>', lenses=['<lens>'])"` (or hand-author `docs/_JarviSWARM/components/<id>.component.yaml` per `jswarm/catalog/schema/component.schema.yaml`) with a real `owning_feature`, then populate its `artifacts[]`. Never rely on an unknown id auto-registering; it does not.
 
 ### Dashboard-delivering stories (render tier)
 
-**STOP — rule-bearing module.** If the story *delivers* a dashboard (builds/publishes a dashboard UI from a data object — project, security, compliance, feature, or cross-project aggregator — as opposed to merely projecting metrics into an existing dashboard's data substrate, which is the separate "Feature-child Story Dashboard projections" module), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/dashboard-render-tier.md` in full and apply every rule (toolkit, JDS type→render-profile, deployment target, publication-safety gates, the plan's `Dashboard render tier:` line) before proceeding. Do not work from memory.
+**STOP: rule-bearing module.** If the story *delivers* a dashboard (builds/publishes a dashboard UI from a data object, project, security, compliance, feature, or cross-project aggregator, as opposed to merely projecting metrics into an existing dashboard's data substrate, which is the separate "Feature-child Story Dashboard projections" module), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/dashboard-render-tier.md` in full and apply every rule (toolkit, JDS type→render-profile, deployment target, publication-safety gates, the plan's `Dashboard render tier:` line) before proceeding. Do not work from memory.
 
 ### Outcome Metrics (Standard/Deep/Quick; skipped in Lite)
 
 Populate the plan's `## Outcome Metrics` section as part of Step 5:
 
 1. **Feature plans:** required. Propose outcome/NFR rows with measure, baseline, projected delta, executable recipe, and what falsifies "improved." If the Feature is refactor, runway, or multi-phase high-risk, instantiate or link the Feature Scoreboard.
-2. **Story/Task/Bug plans, including Quick:** optional but explicit. Propose 1-3 candidate metrics when useful; developer keeps, edits, or declines. If declined, write `Outcome metrics: declined — <reason>`. Never omit the section silently.
+2. **Story/Task/Bug plans, including Quick:** optional but explicit. Propose 1-3 candidate metrics when useful; developer keeps, edits, or declines. If declined, write `Outcome metrics: declined (<reason>)`. Never omit the section silently.
 
 ### Necessity Gate (only where the ticket builds a durable production surface)
 
-Author a `## Necessity Gate` table in the plan **only when at least one acceptance criterion adds a durable production surface** — something that persists, schedules, sweeps, or mints, **or** any new function, CLI, validator, hook, or schema meant for production use. Docs-only, greenfield, and deterministic-local-change tickets author **no section, record nothing, and pay nothing**; absence is the answer, and there is no flag to set.
+Author a `## Necessity Gate` table in the plan **only when at least one acceptance criterion adds a durable production surface**: something that persists, schedules, sweeps, or mints, **or** any new function, CLI, validator, hook, or schema meant for production use. Docs-only, greenfield, and deterministic-local-change tickets author **no section, record nothing, and pay nothing**; absence is the answer, and there is no flag to set.
 
-Where it does apply, one row per acceptance criterion, eight cells: `A/C · outcome_removed · runtime_basis · production_writer · production_reader · reaching_path · adversary / harm · verdict`. Conditional cells take `n/a — <reason>`; a bare `n/a` is rejected, because the reason is the auditable part. The verdict is `PROCEED`, `MINOR RESCOPE`, or `RETHINK PREMISE`.
+Where it does apply, one row per acceptance criterion, eight cells: `A/C · outcome_removed · runtime_basis · production_writer · production_reader · reaching_path · adversary / harm · verdict`. Conditional cells take `n/a (<reason>)`; a bare `n/a` is rejected, because the reason is the auditable part. The verdict is `PROCEED`, `MINOR RESCOPE`, or `RETHINK PREMISE`.
 
 Three things are worth knowing before you write it, because they are what the gate is for:
 
-- **`production_reader` is the load-bearing cell.** It names the caller of the new surface, and it is checked mechanically: an unresolved reader **blocks**. A reader that does not exist yet is not a plan — it is the failure this gate exists to catch. One recorded ticket shipped 3,461 lines of a complete, tested subsystem that nothing called.
-- **`none yet` and `a future ticket` are not answers.** A deferral in the writer, reader, or reaching-path cell **defers the criterion** — drop it from this ticket rather than recording an intention to build toward it. Write the writer/reader/reaching-path cells as one of three closed choices plus a one-line justification — `<cited-file:symbol>`, `named-human-decision — <who decides, and when>`, or `none-yet — <why>` — because a prose cell lets an intention pass as a plan. `none-yet` is not a soft option: it auto-verdicts `RETHINK PREMISE` and blocks. A reader that is genuinely a scheduled human decision rather than code says so in those words; that is a real answer, and it is checked by a reviewer rather than by the lint.
-- **`adversary / harm` is required only where assurance machinery is proposed** (authorization, signing, attestation, nonces, replay windows). Absent a named adversary the failure class is **neglect**, and the remedy is a default, a reminder, or a visible check — not a mechanism.
+- **`production_reader` is the load-bearing cell.** It names the caller of the new surface, and it is checked mechanically: an unresolved reader **blocks**. A reader that does not exist yet is not a plan; it is the failure this gate exists to catch. One recorded ticket shipped 3,461 lines of a complete, tested subsystem that nothing called.
+- **`none yet` and `a future ticket` are not answers.** A deferral in the writer, reader, or reaching-path cell **defers the criterion**; drop it from this ticket rather than recording an intention to build toward it. Write the writer/reader/reaching-path cells as one of three closed choices plus a one-line justification: `<cited-file:symbol>`, `named-human-decision (<who decides, and when>)`, or `none-yet (<why>)`, because a prose cell lets an intention pass as a plan. `none-yet` is not a soft option: it auto-verdicts `RETHINK PREMISE` and blocks. A reader that is genuinely a scheduled human decision rather than code says so in those words; that is a real answer, and it is checked by a reviewer rather than by the lint.
+- **`adversary / harm` is required only where assurance machinery is proposed** (authorization, signing, attestation, nonces, replay windows). Absent a named adversary the failure class is **neglect**, and the remedy is a default, a reminder, or a visible check, not a mechanism.
 
 `RETHINK PREMISE` blocks until the plan is revised, and **an implementation review cannot satisfy or overwrite it**: a reviewer scoped to a contract enforces that contract, so it cannot be what clears a doubt about whether the contract should exist at all.
 
-Enforcement lives in `lifecycle_audit.lint_necessity_gate`, reached by `/jPrecompact` and `/jClose` through the `new-work-lint` preset — the section is checked, not merely requested. Full rules: `.jswarm/plans/TICKET-XXX/designs/TICKET-XXX.design.ac1-necessity-gate.md`. Do not duplicate them here; this call-out exists to tell you when to author the section and what the gate is actually for.
+Enforcement lives in `lifecycle_audit.lint_necessity_gate`, reached by `/jPrecompact` and `/jClose` through the `new-work-lint` preset; the section is checked, not merely requested. Full rules: `.jswarm/plans/TICKET-XXX/designs/TICKET-XXX.design.ac1-necessity-gate.md`. Do not duplicate them here; this call-out exists to tell you when to author the section and what the gate is actually for.
 
-**Authoring the section is required once the plan enters implementation.** A plan that reaches its first `3.implementation.*` status without a `## Necessity Gate` heading is blocked by the same lint. This closes the one demonstrated escape: an incident-born plan that skipped `/jPlan` never authored the section, so the gate never engaged — and that ticket over-built roughly a third of its surface before anything asked whether it was needed. Plans already in implementation before this rule shipped stay validate-if-present, and a plan that has not yet entered implementation is never asked for anything.
+**Authoring the section is required once the plan enters implementation.** A plan that reaches its first `3.implementation.*` status without a `## Necessity Gate` heading is blocked by the same lint. This closes the one demonstrated escape: an incident-born plan that skipped `/jPlan` never authored the section, so the gate never engaged, and that ticket over-built roughly a third of its surface before anything asked whether it was needed. Plans already in implementation before this rule shipped stay validate-if-present, and a plan that has not yet entered implementation is never asked for anything.
 
 **One entry point for all of the above.** The right-sizing controls in this step are the necessity pass, the plan-shape conventions, and the acceptance-tier test inventory below. Use them directly when auditing a plan you did not write, rather than spreading the check across ad-hoc reading of this step.
 
 ### Plan shape: an intent clause per A/C, and naming the work you will be tempted to do
 
-Two conventions, a sentence each, authored alongside the acceptance criteria. They apply on the same terms as the Necessity Gate above — a ticket that authors no gate authors neither of these and pays nothing.
+Two conventions, a sentence each, authored alongside the acceptance criteria. They apply on the same terms as the Necessity Gate above; a ticket that authors no gate authors neither of these and pays nothing.
 
-**State the intent in one sentence, and have every A/C name the clause it serves.** Put the ticket's purpose near the top of the plan as a single sentence, then have each acceptance criterion name which clause of it that criterion serves, inline — e.g. *(serves the "finish faster" clause)*. This is not decoration. A criterion that cannot name a clause is usually a **real problem in the wrong ticket**, and plan time is the cheapest moment to move it. In one recorded case a criterion that was genuinely worth doing belonged to a different ticket entirely; three consecutive reviews kept it because it was "required by A/C 2", and it was cut the day after close.
+**State the intent in one sentence, and have every A/C name the clause it serves.** Put the ticket's purpose near the top of the plan as a single sentence, then have each acceptance criterion name which clause of it that criterion serves, inline, e.g. *(serves the "finish faster" clause)*. This is not decoration. A criterion that cannot name a clause is usually a **real problem in the wrong ticket**, and plan time is the cheapest moment to move it. In one recorded case a criterion that was genuinely worth doing belonged to a different ticket entirely; three consecutive reviews kept it because it was "required by A/C 2", and it was cut the day after close.
 
-**Make `### Out of Scope` name the *tempting* work, with follow-up pointers.** The CORE template already gives every plan this section, so it is the home — do not add a second "not building" list beside it. What it usually lacks is the part that does the work: the adjacent scope you will actually be pulled toward mid-build, each line carrying a follow-up pointer (a ticket key, or `unticketed — <reason>`). "Not included" is a boundary; "tempting, and here is where it goes instead" is a decision you can hold yourself to. Writing the temptation down is what makes a later drift toward it visible instead of natural. Two rules follow:
+**Make `### Out of Scope` name the *tempting* work, with follow-up pointers.** The CORE template already gives every plan this section, so it is the home; do not add a second "not building" list beside it. What it usually lacks is the part that does the work: the adjacent scope you will actually be pulled toward mid-build, each line carrying a follow-up pointer (a ticket key, or `unticketed (<reason>)`). "Not included" is a boundary; "tempting, and here is where it goes instead" is a decision you can hold yourself to. Writing the temptation down is what makes a later drift toward it visible instead of natural. Two rules follow:
 
-- Mid-build, work that matches no A/C, NFR, or UAT scenario gets checked against this list before it is done. Work with no home raises the stop question — *should I be doing this?* — and the honest answer is sometimes **yes**, when ground facts discovered after planning demand it. What is never acceptable is answering it silently.
-- **Adding an acceptance criterion mid-build is a check-in event, not a quiet plan edit.** A new A/C is the largest durable category a ticket can gain; adding one by editing the plan turns scope growth into paperwork, leaving the plan describing whatever got built. The check-in contract names which trigger this fires and what the review must return — `skills/jCheckin/references/checkin-review.md`.
+- Mid-build, work that matches no A/C, NFR, or UAT scenario gets checked against this list before it is done. Work with no home raises the stop question, *should I be doing this?*, and the honest answer is sometimes **yes**, when ground facts discovered after planning demand it. What is never acceptable is answering it silently.
+- **Adding an acceptance criterion mid-build is a check-in event, not a quiet plan edit.** A new A/C is the largest durable category a ticket can gain; adding one by editing the plan turns scope growth into paperwork, leaving the plan describing whatever got built. The check-in contract names which trigger this fires and what the review must return, per your host's check-in contract if one is configured.
 
 ### Freeze the acceptance-tier test inventory, per A/C
 
-Name, at plan time, the **few real end-to-end pairs that will constitute completion evidence** for each acceptance criterion: a healthy case and a counterexample, exercising the thing the way production exercises it. Spec them here, or build them through the existing pack-brief surface (`jswarm/joptimize/pack_brief.py`) — the point is that the shape of "done" is decided before implementation starts, not discovered afterwards from whatever tests accumulated.
+Name, at plan time, the **few real end-to-end pairs that will constitute completion evidence** for each acceptance criterion: a healthy case and a counterexample, exercising the thing the way production exercises it. Spec them here, or build them through the existing pack-brief surface. The point is that the shape of "done" is decided before implementation starts, not discovered afterwards from whatever tests accumulated.
 
 **This is a tier rule, not a numeric cap.** Nobody is counting tests, and no threshold gates anything. What the tier fixes is *which* tests are allowed to mean "complete":
 
-- **Acceptance tier** — the frozen pairs above. Only these are completion evidence.
-- **Supporting tier** — unit and seam tests, added freely during implementation, but only **beneath** a planned acceptance pair. They make debugging cheap. They never certify the criterion.
+- **Acceptance tier**: the frozen pairs above. Only these are completion evidence.
+- **Supporting tier**: unit and seam tests, added freely during implementation, but only **beneath** a planned acceptance pair. They make debugging cheap. They never certify the criterion.
 
-The failure this prevents is specific and recent: one ticket closed with 8,571 lines of test code and 512 green tests that certified its internal objects in detail — while both of its close-out gates failed, because nothing had tested the thing an operator would actually do. A large green suite is the most convincing possible evidence of completeness, and it is not evidence of completeness at all when its subject is the implementation's own furniture. Freezing the acceptance tier first is what keeps the suite pointed outward.
+The failure this prevents is specific and recent: one ticket closed with 8,571 lines of test code and 512 green tests that certified its internal objects in detail, while both of its close-out gates failed, because nothing had tested the thing an operator would actually do. A large green suite is the most convincing possible evidence of completeness, and it is not evidence of completeness at all when its subject is the implementation's own furniture. Freezing the acceptance tier first is what keeps the suite pointed outward.
 
-**Every test cites the A/C, UAT scenario, or NFR it evidences.** A test that cannot name one raises the same question as any other unaligned work — *should I be doing this?* — and the honest answer is sometimes yes, when implementation reveals a class of failure planning missed. The standing carve-out is that a genuinely necessary unplanned test class goes through a check-in, so it is a decision on the record rather than silent accumulation.
+**Every test cites the A/C, UAT scenario, or NFR it evidences.** A test that cannot name one raises the same question as any other unaligned work, *should I be doing this?*, and the honest answer is sometimes yes, when implementation reveals a class of failure planning missed. The standing carve-out is that a genuinely necessary unplanned test class goes through a check-in, so it is a decision on the record rather than silent accumulation.
 
 ### Security & Compliance baseline risk capture (Standard/Deep/Quick; skipped in Lite)
 
-**STOP — rule-bearing module.** For Standard/Deep/Quick (NOT Lite), during Step 5 after the plan file exists and before the Jira summary, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/security-compliance-baseline.md` in full and capture the security + compliance baseline (per-dimension applicability; `probability_before`/`impact_before` when applicable; safe `why_rationale`; `baseline_controls_context`) into the plan. This is required for lifecycle telemetry so `/jClose` has a before-state; the telemetry writer is fail-open. Do not work from memory.
+**STOP: rule-bearing module.** For Standard/Deep/Quick (NOT Lite), during Step 5 after the plan file exists and before the Jira summary, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/security-compliance-baseline.md` in full and capture the security + compliance baseline (per-dimension applicability; `probability_before`/`impact_before` when applicable; safe `why_rationale`; `baseline_controls_context`) into the plan. This is required for lifecycle telemetry so `/jClose` has a before-state; the telemetry writer is fail-open. Do not work from memory.
 
 ### Feature-child Story Dashboard projections
 
-**STOP — rule-bearing module.** If the Story belongs to a parent Feature that has a dashboard data substrate (`jswarm/feature-dashboard-system/`; data object at `docs/plans/${PARENT}.plan-data.json` / `${PARENT}.feature-dashboard.json` / legacy `.refactor-scoreboard.json`), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/feature-child-projections.md` in full and apply every rule before plan completion — Section A `projected_only` cells, the held-vs-same enum distinction (load-bearing), planned Section B/C/D rows, the validate-`--check`-FIRST-then-render gate, the dual-render projection write rules, and the `Dashboard projection:` plan line. If the parent Feature has no dashboard data object, record `Dashboard projection: N/A — parent Feature has no dashboard` in the Story plan. Do not work from memory.
+**STOP: rule-bearing module.** If the Story belongs to a parent Feature that has a dashboard data substrate (`jswarm/feature-dashboard-system/`; data object at `docs/plans/${PARENT}.plan-data.json` / `${PARENT}.feature-dashboard.json` / legacy `.refactor-scoreboard.json`), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/feature-child-projections.md` in full and apply every rule before plan completion: Section A `projected_only` cells, the held-vs-same enum distinction (load-bearing), planned Section B/C/D rows, the validate-`--check`-FIRST-then-render gate, the dual-render projection write rules, and the `Dashboard projection:` plan line. If the parent Feature has no dashboard data object, record `Dashboard projection: N/A (parent Feature has no dashboard)` in the Story plan. Do not work from memory.
 
 ### Seed `plan_status` (MANDATORY: lifecycle event + metrics freshness)
 
@@ -265,7 +265,7 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python jswarm/plan_status/cli.py reco
   --plan-file .jswarm/plans/TICKET-XXX.plan.<descriptive>.md
 ```
 
-`<SEED-STATE>` = `2.planning.detailed` for a full plan, `0.planning.lite_init` for `--lite`. This stamps `plan_status_last_updated` / `plan_status_actor` (DERIVED — never hand-edit) and records the creation event.
+`<SEED-STATE>` = `2.planning.detailed` for a full plan, `0.planning.lite_init` for `--lite`. This stamps `plan_status_last_updated` / `plan_status_actor` (DERIVED; never hand-edit) and records the creation event.
 
 ### Ceremony decision-state lint gate (BLOCKING: AC-A)
 
@@ -275,11 +275,11 @@ For full-mode Story/Task/Bug plans that ran the ceremony selector, the persisted
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/patterns/decision_state_lint.py .jswarm/plans/TICKET-XXX.plan.<descriptive>.md
 ```
 
-Both the interpreter and the script resolve by absolute common-repository path (the script does NOT live in downstream projects); only the PLAN path is target-project-relative. The command propagates failure (exit 1). `decision_state_lint.py` recomputes the High bar and the Medium-default engine baseline from `selector_signals` (it never trusts the authored `hard_high_triggers`/`engine_recommended_tier`), and requires both `engine_recommended_tier` and `jarvi_recommended_tier`, a non-empty `situational_rationale`, `owner_approved_high: true` whenever High is selected, and a `downgrade_rationale` whenever the selected tier is below a fired High bar — so a persisted decision state can neither introduce nor waive those gates. Plans with no `## Ceremony Decision State` section (lite / feature / legacy) fail open (exit 0). Fix the decision state before completing `/jPlan`; do not use `|| true` or prose substitutes.
+Both the interpreter and the script resolve by absolute common-repository path (the script does NOT live in downstream projects); only the PLAN path is target-project-relative. The command propagates failure (exit 1). `decision_state_lint.py` recomputes the High bar and the Medium-default engine baseline from `selector_signals` (it never trusts the authored `hard_high_triggers`/`engine_recommended_tier`), and requires both `engine_recommended_tier` and `jarvi_recommended_tier`, a non-empty `situational_rationale`, `owner_approved_high: true` whenever High is selected, and a `downgrade_rationale` whenever the selected tier is below a fired High bar, so a persisted decision state can neither introduce nor waive those gates. Plans with no `## Ceremony Decision State` section (lite / feature / legacy) fail open (exit 0). Fix the decision state before completing `/jPlan`; do not use `|| true` or prose substitutes.
 
 ### NFR catalog and canonical-format authoring gate (BLOCKING: R2)
 
-When the project is NFR-adopted and the ticket declares `**NFR catalog:** applicable`, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/nfr-chain.md` in full and create the required NFR working slice, machine sidecar, and—when Automated NFR is yes—derived test document. After UAT/NFR authoring, run:
+When the project is NFR-adopted and the ticket declares `**NFR catalog:** applicable`, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/nfr-chain.md` in full and create the required NFR working slice, machine sidecar, and, when Automated NFR is yes, a derived test document. After UAT/NFR authoring, run:
 
 ```bash
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/update_ticket/cli.py --ticket TICKET-XXX --repo-root . --preset new-work-lint
@@ -307,8 +307,8 @@ When `UAT round tracking: off`/`no` or unanswered, omit the seventh output and w
 <!-- v1→v2 conservation note:
 | v1 section | disposition | v2 treatment |
 | --- | --- | --- |
-| Step 5 — Write plan file (title and duplicate heading) | REWRITTEN | Renamed both headings to “Assemble plan file” to name the assembler-only plan-birth procedure; their Step 5 operator-facing role remains unchanged. |
-| Pre-plan gate (Standard + Deep only — BLOCKING) | KEPT | Retained verbatim. |
+| Step 5: Write plan file (title and duplicate heading) | REWRITTEN | Renamed both headings to “Assemble plan file” to name the assembler-only plan-birth procedure; their Step 5 operator-facing role remains unchanged. |
+| Pre-plan gate (Standard + Deep only, BLOCKING) | KEPT | Retained verbatim. |
 | Template selection | REWRITTEN | Replaced with manifest truth-table bundle resolution and assembler-only plan birth; selecting/copying a template is prohibited. |
 | Template provenance transform (MANDATORY after copy) | REWRITTEN | Replaced by assembler-owned `CORE@<v>` plus `assembled_patterns` provenance and receipt validation. |
 | Plan must follow the spec | KEPT | Retained verbatim. |
@@ -318,14 +318,14 @@ When `UAT round tracking: off`/`no` or unanswered, omit the seventh output and w
 | Parent Feature plan reconciliation (MANDATORY at end of /jPlan, before commit) | KEPT | Retained verbatim. |
 | Required plan header lines (Standard/Deep) | KEPT | Retained verbatim. |
 | When `Automated UAT: yes` and the ticket changes user-visible behavior | KEPT | Retained verbatim. |
-| Feature plans only — create defect tracker files | KEPT | Retained verbatim. |
+| Feature plans only: create defect tracker files | KEPT | Retained verbatim. |
 | Current modular additions | KEPT | Retained as the parent heading. |
 | Components and features frontmatter | REWRITTEN | Kept all obligations; changed template-seed wording to assembler-seed wording. |
 | Dashboard-delivering stories (render tier) | KEPT | Retained verbatim. |
 | Outcome Metrics (Standard/Deep/Quick; skipped in Lite) | REWRITTEN | Kept all obligations; changed selected-template wording to assembled-plan wording. |
 | Security & Compliance baseline risk capture (Standard/Deep/Quick; skipped in Lite) | KEPT | Retained verbatim. |
 | Feature-child Story Dashboard projections | KEPT | Retained verbatim. |
-| Seed `plan_status` (MANDATORY — lifecycle event + metrics freshness) | REWRITTEN | Kept command and state rules; receipt gate now precedes status stamping, and removed obsolete manual provenance-transform wording. |
-| NFR catalog and canonical-format authoring gate (BLOCKING — R2) | KEPT | Retained verbatim. |
-| `status: ACTIVE` template-default note | DROPPED — obsolete | Plan birth no longer selects or copies legacy templates; lifecycle state remains assembler-produced and `plan_status`-derived. |
+| Seed `plan_status` (MANDATORY, lifecycle event + metrics freshness) | REWRITTEN | Kept command and state rules; receipt gate now precedes status stamping, and removed obsolete manual provenance-transform wording. |
+| NFR catalog and canonical-format authoring gate (BLOCKING, R2) | KEPT | Retained verbatim. |
+| `status: ACTIVE` template-default note | DROPPED (obsolete) | Plan birth no longer selects or copies legacy templates; lifecycle state remains assembler-produced and `plan_status`-derived. |
 -->
