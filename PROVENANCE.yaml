@@ -609,16 +609,10 @@ files:
   sha256: 3f588e7c736d106da96c12df3ca73d823045b9f25c607363c12a9bc97983087b
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/SKILL.md
   target: skills/jTest/SKILL.md
-  sha256: a8c5626cae03a8d18ef3e9777c5a65ebb452f66093da5e389f8a8bbd0e0fb0fa
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/UAT_CURRENT_ROUND_EXAMPLE.md
-  target: skills/jTest/UAT_CURRENT_ROUND_EXAMPLE.md
-  sha256: 1ef6a73867112408da83150990705cb319ec8c8b300a9a4574f5ce47a7ad131d
+  sha256: 8e2da589e4793e29876bc3c4709af813c7f9c84e62b9e66227e80bb2ab226eaa
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/UAT_CURRENT_ROUND_TEMPLATE.md
   target: skills/jTest/UAT_CURRENT_ROUND_TEMPLATE.md
   sha256: 9248910554f51669f09f8c08e503d9feff6dcda70f96bee75259e5975791e5e2
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/UAT_GWT_TEST_AUTHORING_DISPATCH_TEMPLATE.md
-  target: skills/jTest/UAT_GWT_TEST_AUTHORING_DISPATCH_TEMPLATE.md
-  sha256: 2af9d173d06437f883210191232fc32380682787485d8e599bca60e8313b36e0
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/UAT_ROUND_PATTERNS.json
   target: skills/jTest/UAT_ROUND_PATTERNS.json
   sha256: 2d12e1035e2b2ab0e721ecdac79b4985166f9d8d5eb9c05bfc7aab1610113c0d
@@ -634,78 +628,9 @@ files:
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/UAT_SEMANTIC_VERDICT_CONSUMPTION_GATE.md
   target: skills/jTest/UAT_SEMANTIC_VERDICT_CONSUMPTION_GATE.md
   sha256: 00c44aec0b26871629eb1872269c3624c64c472382165a4505271218ab464019
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/assets/regression-test.template.md
-  target: skills/jTest/assets/regression-test.template.md
-  sha256: 4b2a2ddc1dfca6ad9d7e27751494ee5029ca0d6e2342138d48be1313db81a068
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/diagnose.md
-  target: skills/jTest/diagnose.md
-  sha256: 5bb546cfaf6c0ca18a46a7d8f72d461f07a69e43d057e1f8952db40e3c700cef
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/evidence/TEST_TRACEABILITY_TEMPLATE.md
-  target: skills/jTest/evidence/TEST_TRACEABILITY_TEMPLATE.md
-  sha256: 6e59f0a3527491e586f0f5631720a7291296bab1f0f02138d81636e99b7e07bd
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/evidence/consolidated-report-template.md
-  target: skills/jTest/evidence/consolidated-report-template.md
-  sha256: 8834a87a60d55db96a685d522ccf48da1d60232e05d8f0f264865554a1695c84
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/evidence/traceability-contract.md
-  target: skills/jTest/evidence/traceability-contract.md
-  sha256: 218e238d5560f44eb274028e9d819d81e406cdb79e8db8d014f4530aa0e7e16a
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/execution-protocol.md
-  target: skills/jTest/execution-protocol.md
-  sha256: 74ea1c4794a9137e37a15d19033fbc7e5b1548ea4998ac5dceac22cf7f1655c1
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/nfr/profiles/accessibility.md
-  target: skills/jTest/nfr/profiles/accessibility.md
-  sha256: 1c5f7e3b9960e76d66c318ec3e90b33330192899d585530cfbdfa8490bd4c718
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/nfr/profiles/performance.md
-  target: skills/jTest/nfr/profiles/performance.md
-  sha256: 199278c9ffc85936cb37a097c648dec99511913873570801725d97e3c05d3c9c
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/nfr/profiles/resilience.md
-  target: skills/jTest/nfr/profiles/resilience.md
-  sha256: b73e1ee71f7ac67758a2e111795b10c3f6d5969b88d93c3ffa6218935d85a2c7
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/nfr/profiles/security.md
-  target: skills/jTest/nfr/profiles/security.md
-  sha256: 3018cd4cc7c862750e1580138c8bf44d48dbe112e276c98358294245355152fe
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/nfr/verification.md
-  target: skills/jTest/nfr/verification.md
-  sha256: 46d096793d1ec723b4a1cdb1c095e902822e1bfcb64709e74915ce046f4d0692
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/regression.md
-  target: skills/jTest/regression.md
-  sha256: 07c99094cb0d160e4a429fdb39332501bd3032d16667545a8e2a27a1f83c41f6
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/strategy-and-proof.md
-  target: skills/jTest/strategy-and-proof.md
-  sha256: 2178a825ef0ba1c3a898e42857d0b15780f898f36b4488d6a2f8806a492ce225
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/test-uat.lifecycle.md
-  target: skills/jTest/test-uat.lifecycle.md
-  sha256: c851f43358720ba0c394b3aafb09a079b44fa85b110df0f93a7f765314dc5579
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat.md
-  target: skills/jTest/uat.md
-  sha256: 50fc0389a2d348b0825353d9e56c8faad48216fd9b77c3713e21b0165e474109
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat/UAT_FEEDBACK_TEMPLATE.md
-  target: skills/jTest/uat/UAT_FEEDBACK_TEMPLATE.md
-  sha256: 87e84cd821e8c9c78d48bab32c832d5d46dc0275b303939cadb48c9653b686ef
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat/feedback-result-contract.json
   target: skills/jTest/uat/feedback-result-contract.json
   sha256: 52c0748ea3288c3acff88512a4c3226f330ab1888a2233c03b82c526489d8e3a
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat/feedback.md
-  target: skills/jTest/uat/feedback.md
-  sha256: c66d7806641841a35ace9a82741f1a6621b8d2327adb083fbe792cd519a1f048
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat/notification-operation.md
-  target: skills/jTest/uat/notification-operation.md
-  sha256: 7e2c4c21632e7e57526fe2abaf831496475fb3769d06adffa2c192ea8b06cc09
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat/operations.json
-  target: skills/jTest/uat/operations.json
-  sha256: cf91ac6d5160547f2d6f5b2f5c69e1e4d122bcc3c2ff30a73ca49479436c4a1b
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat/round-authoring.md
-  target: skills/jTest/uat/round-authoring.md
-  sha256: 61b2223aca87d47900512f81ec2f3835512a5d60a9094898636084f751bab6d3
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat/round-prep.md
-  target: skills/jTest/uat/round-prep.md
-  sha256: 86770efd77b27b5903f99739cb97e67689b7384e2e1e09f607618508f304b759
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat/round-registration.md
-  target: skills/jTest/uat/round-registration.md
-  sha256: 8c36404e2d91564ccce678d371b3ca2d106d26f22899d01c44606a991e05c007
-- source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/test/uat/verification.md
-  target: skills/jTest/uat/verification.md
-  sha256: 32874211698eff284c594a551045ed8aa23e64386eaf97cb64276bc4f0c0fce5
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/uat-author-scenario/SKILL.md
   target: skills/uat-author-scenario/SKILL.md
   sha256: 2765dd71452c9d08d613c8d2803e752fa5ea0ab5b2c370bbf21283e7e506b20d
@@ -717,7 +642,7 @@ files:
   sha256: 0ee4ff5d765cbf87ab5246091816a01f04b837fef22fcb1f44191c0725d94d9f
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/uat/SKILL.md
   target: skills/jUAT/SKILL.md
-  sha256: d1aabe03232f5fd6fd110577b0a319cfbb97ae63ab078b47363d03db0d40f1c4
+  sha256: d2b8372284545553939a33f5414897bfef640553aa9689476688f1f50c20be19
 - source: docs/_CONTROLLED_CONFIG/dotclaude/user/skills/update-plan/SKILL.md
   target: skills/update-plan/SKILL.md
   sha256: 8f5611eedbb3ca0021f582027033850b86acb66abbd1784f05dfe09c5352dd25

@@ -1,103 +1,56 @@
 ---
 name: "jTest"
-description: "Symlink to the global /jTest command: single procedural entrypoint for testing strategy, UAT (scripts, execution, owner invitations), E2E, regression (creation, capture-replay, maintenance), backend-only proof, and diagnosis."
+description: "Run the project's automated tests (level 1) and an agent-led smoke walk (level 2), before a UAT round is issued."
 ---
 
-# /jTest - Testing Procedure Entry Point
+# /jTest: Automated Tests and the Agent Smoke Walk
 
-Use `/jTest` when you need to choose or execute a testing workflow. This is the single procedural entrypoint for the whole testing capability family (strategy, UAT, E2E, regression (creation, capture-replay, maintenance), backend-only proof, and diagnosis), so `CLAUDE.md` / `AGENTS.md` files can stay lean and point here.
+## Safety contract
 
-Sub-files (loaded per selected option, after `execution-protocol.md`):
+- **Read-only against the project.** `/jTest` runs the project's own test command and walks the running app; it does not change application code. Invoked with `--help`, it prints usage only.
+- **Level 2 assumes level 1 is green.** Do not walk the app while automated tests are red; fix or report the failure first.
 
-- `execution-protocol.md`: universal context-load/handoff/follow-along rules for every option
-- `uat.md`: options 2-4, Live Show scripts, jQATester execution, owner UAT invitation rounds
-- `regression.md`: options 5-8, E2E regression creation/promotion, deterministic LLM-replay capture/refresh, existing verification
-- `strategy-and-proof.md`: options 1, 9, testing strategy, backend/API/CLI-only proof
-- `diagnose.md`: option 10, diagnose a failed or flaky testing run
+## Usage
 
-## Global Command Project Localization
-
-This is a global/shared command. Project-local rendered command files are not the source of truth.
-
-For the complete developer-facing UAT cycle, ownership map, and companion navigation, read [test-uat.lifecycle.md](test-uat.lifecycle.md); this entrypoint does not duplicate that policy.
-
-Before executing any non-smoke instruction in this command:
-
-1. Determine the active project root from the current working directory.
-2. If `.claude/project-command-injections.yaml` exists, read `managed_commands.test.md`.
-3. For each configured anchor whose marker appears in this command, read its `snippet_path` or inline `content` and treat that content as if it replaced the matching `<!-- inject:... -->` marker.
-4. If a configured anchor is `required: true` but the marker is missing, the snippet is missing, or the snippet is empty, stop with `LOCALIZATION ERROR` and explain the missing anchor.
-5. If no project manifest exists, continue with the global command body as-is.
-
-If invoked with `--localization-smoke`, do only the localization pass, print the project root, each configured anchor name, whether it resolved, and the first non-empty line of each resolved snippet; then stop without running the normal command workflow.
-
-<!-- inject:project-advisories -->
-
----
-
-## MASTER INVARIANT
-
-Before executing ANY selected option: read and obey `execution-protocol.md`, THEN read the option's sub-file. The universal context-load/handoff/follow-along rules in `execution-protocol.md` bind every option (1-10), strategy and proof, and diagnose included, not only UAT/regression. Sub-files may ADD requirements; none may skip the protocol.
-
-Before choosing a UAT verification instrument, apply the [instrument selection behavior lock](uat.md#instrument-selection-behavior-lock).
-
----
-
-## Menu
-
-If the user did not specify an option, show this menu and ask for one choice:
-
-```text
-What testing workflow do you need?
-
-1. Decide testing strategy for a ticket                -> strategy-and-proof.md
-2. Create or tighten a Live Show UAT script             -> uat.md
-3. Execute Live Show UAT with jQATester                 -> uat.md
-4. Compose an owner UAT invitation round                -> uat.md
-5. Create an E2E regression test                        -> regression.md
-6. Promote Live Show UAT to E2E regression               -> regression.md
-7. Capture/refresh deterministic LLM-replay fixtures    -> regression.md
-8. Run existing E2E/regression verification              -> regression.md
-9. Prove backend/API/CLI-only work without UAT          -> strategy-and-proof.md
-10. Diagnose a failed or flaky testing run               -> diagnose.md
+```
+/jTest                  # run automated tests (level 1) and the agent smoke walk (level 2)
+/jTest --help            # usage only
 ```
 
-Do not continue until the option is clear. If a ticket is involved, capture the ticket ID and plan path.
+## Extension steps
 
----
+Run `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.ext jTest`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
 
-## Browser tool guard context (BLOCKING)
+## Step 1: Level 1, automated tests
 
-Before using any browser automation driver for testing (Playwright MCP, Chrome DevTools MCP, headed Playwright, or project wrapper browser execution), create/update this marker:
+Run the project's own test command for real: `npm test` / `pnpm test`, `pytest`, `go test ./...`, `cargo test`, or whatever this project actually uses. When it is not obvious, check `package.json`'s `scripts.test`, a `Makefile` target, or the project's own CI config rather than guessing.
 
-```json
-{
-  "source": "/jTest",
-  "status": "active",
-  "selected_option": "<1-10>",
-  "ticket": "TICKET-XXX or N/A",
-  "plan_path": "docs/plans/TICKET-XXX... or N/A",
-  "runner_command": "exact command or MCP driver",
-  "created_at": "YYYY-MM-DDTHH:MM:SSZ",
-  "expires_at": "YYYY-MM-DDTHH:MM:SSZ"
-}
+Report the true result:
+
+- Every failure, by name, with the assertion or output that failed.
+- A test that passed only after a retry: report it as flaky, not as a plain pass.
+- Skipped or excluded tests: name them; a skip is not a pass.
+
+Do not summarize from memory or from a previous run. If anything fails here, stop and report FAIL; do not continue to Step 2 on a red suite.
+
+## Step 2: Level 2, agent smoke walk
+
+Once level 1 is green, walk the user-visible surface this work item actually changed the way a person would use it, before asking a person to look. Derive the journeys to walk from the plan's acceptance criteria and `git diff <base>...HEAD` for this branch, not from memory of what the ticket was supposed to do.
+
+Reach the running app with whichever of these actually works, in order, and say which you used:
+
+1. A browser automation tool already exposed in this session.
+2. Failing that, the project's own end-to-end harness CLI (headless, project-appropriate).
+3. Failing that, exercise the same paths at the API/CLI level, and say plainly that visual coverage was **not tested**.
+
+For each journey walked, record what you did and what you saw: PASS, FAIL (with the exact mismatch), or BLOCKED (the app could not be reached, or a step's outcome could not be told apart from a similar-looking failure). Do not mark PASS on an assumption; if you could not tell, it is BLOCKED.
+
+## Step 3: Report
+
+```
+Level 1 (automated): PASS / FAIL <n> of <total> tests (list failures, flaky retries, skips)
+Level 2 (smoke walk): PASS / FAIL / BLOCKED, one line per journey walked
+Instrument used: browser tool / project e2e CLI / API-only (note if visual coverage was not tested)
 ```
 
-Write it to `.jswarm/state/testing-context.json` at the project root. Set `expires_at` no more than 4 hours after `created_at`. If `.jswarm/state/` does not exist, create it.
-
-OpenCode `devops-guards` and the Claude `pretool-e2e-wrapper-enforcement.py` hook block direct Playwright/Chrome/browser MCP testing tools when this marker is absent, expired, or not sourced from `/jTest`. This prevents agents from bypassing the testing workflow and going straight to MCP Playwright.
-
----
-
-## Final reporting format
-
-End every `/jTest` run with:
-
-- selected option
-- ticket/plan path, if any
-- docs/templates used
-- command(s) run or handoff created
-- evidence/report paths
-- PASS/FAIL/BLOCKED status
-- the next command to type: typically `/jUAT` once a round is ready to issue;
-  otherwise the specific option (`/jTest <option>`) still outstanding
+**Next:** once level 1 is green, type `/jUAT` in this project's agent session to issue a round to the local review portal.

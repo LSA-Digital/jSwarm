@@ -195,8 +195,10 @@ def test_known_dangling_references_stay_fixed():
         # jCheckin still appears in this file's changelog, narrating past
         # revisions in the past tense -- that is not a live pointer.
         ("jPrecompact/SKILL.md", ("close-ticket.md", "§3.5", "jDebug")),
-        ("jTest/diagnose.md", ("jDebug",)),
-        ("jTest/execution-protocol.md", ("jDebug",)),
+        # jTest/diagnose.md and jTest/execution-protocol.md were deleted in
+        # the jTest/jUAT public-contract cut (they carried the jDebug
+        # reference this checked); their entries here are removed with them,
+        # not weakened -- the generic sweeps above still cover skills/jTest/.
         ("jStatus/SKILL.md", ("jregister", "jdeploy", "governed catalog lifecycle")),
         ("jStatus/README.md", ("jregister", "jdeploy", "governed catalog lifecycle")),
         ("jPlan.ceremony-selector/SKILL.md", ("jregister", "jdeploy")),

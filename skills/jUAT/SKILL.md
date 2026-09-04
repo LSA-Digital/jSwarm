@@ -1,53 +1,166 @@
 ---
 name: jUAT
-description: UAT command surface used to run guided acceptance flows.
+description: Issue a UAT round to the local review portal for a human to walk, and author the scenarios a round needs first.
 ---
 
-# /jUAT: UAT scenario utilities menu
+# /jUAT: Issue a UAT Round
 
-`/jUAT` is a small, extensible menu of UAT-scenario engine utilities. It is a **thin menu**: each option delegates to an associated skill that does the work.
+## Safety contract
+
+- **Default is read-only / no-write.** Invoked with no args, `--help`, or `status`, this skill only inspects and reports; it performs no write.
+- **Confirm before any mutation.** Issuing a round (Step 4) replaces the live registration the portal serves. Run it once `/jTest` has passed and the round content is ready to show a person.
 
 ## Usage
 
 ```
-/jUAT                  # show this menu and ask which option to run
-/jUAT 1                # run option 1 directly
-/jUAT extract-assets   # run option 1 by name
-/jUAT 1 --pdf <f.pdf> --scenarios <scenarios.json>   # run option 1 with args passed through
-/jUAT 2                # run option 2 directly
-/jUAT populate-content # run option 2 by name
-/jUAT 2 --scenarios <scenarios.json>                 # run option 2 with args passed through
-/jUAT 3                # run option 3 directly
-/jUAT author-scenario  # run option 3 by name
-/jUAT 3 --scenarios <scenarios.json>                 # run option 3 with args passed through
+/jUAT                  # issue a round for the current work item
+/jUAT <work-item>       # explicit tracker key (PS-14) or slug (add-csv-export)
+/jUAT author            # author or update a scenario; do not issue a round
 ```
 
-If invoked with **no argument**, present the menu below and ask which option to run. If invoked with a **number** or **option key**, route directly to that option's skill. If an **unknown** option is given, show the menu and stop. Pass any extra arguments through to the routed skill.
+## Step 1: Resolve the work item
 
-## Menu
+Same resolution `/jClose` uses: an explicit argument parsed with `jswarm.workitem.identity.parse`; otherwise the current branch against `feat/<id>`, then the single most recently modified `.jswarm/work/*/state.json`. If neither resolves, ask which work item this is.
 
-| # | Key | Option | Skill | What it does |
-|---|-----|--------|-------|--------------|
-| 1 | `extract-assets` | Extract slide images from a PDF | `uat-extract-assets` | Extract PNGs from a user-specified PDF, match each slide labeled with a `UAT.*` scenario id, inject the image path + PDF-extracted data into the scenarios JSON, then re-render so the images embed inline. |
-| 2 | `populate-content` | Populate scenario content (preview-gated) | `uat-populate-content` | Draft scenario content (goal, use-case/GWT, walkthrough, `pm_note`) from source material into a proposals sidecar, render a PREVIEW Markdown via the real renderer **without** writing the canonical JSON, and only commit on developer approval. |
-| 3 | `author-scenario` | Author a UAT scenario + runbook + test stubs (mid-ticket, preview-gated) | `uat-author-scenario` | Mid-ticket, resolve the active in-progress ticket, author a NEW scenario (or update an existing one), generate the ticket-local `.uat-test.md` runbook, and scaffold collectable unit/integration test stubs (each preview-gated and fail-loud). |
+## Step 2: Make sure scenarios exist
 
-> More options may be added over time. Keep this command a thin menu: add a row here and put the work in a new per-option skill under `.claude/skills/`.
+Look for the canonical UAT scenarios this work item's plan names. If none exist yet, or `/jUAT author` was passed, invoke the **uat-author-scenario** skill to author (or update) one; it previews before writing and generates the scenario's test stubs. Once at least one scenario is authored, continue; if the authoring skill ended the turn waiting on approval, type `/jUAT` again once it is applied.
 
-## Routing
+## Extension steps
 
-- **Option 1 (`1` / `extract-assets`):** invoke the **`uat-extract-assets`** skill and follow its workflow end to end (gather PDF + scenarios paths → dry-run alignment report → confirm → extract + inject → re-render → report). If the user already supplied `--pdf` / `--scenarios` (or other flags), pass them through to the skill. The skill ultimately drives `jswarm/uat-scenarios/extract_uat_assets.py` via `.venv/bin/python`.
-- **Option 2 (`2` / `populate-content`):** invoke the **`uat-populate-content`** skill and follow its workflow end to end (gather scenarios + source → draft proposals sidecar → **preview** the merged result via the real renderer → present + await developer approval → **apply** → re-render). The skill MUST NOT `apply` before a `preview` has been shown and approved. Pass any supplied `--scenarios` / `--source` / `--profile` flags through. The skill drives `jswarm/uat-scenarios/populate_scenario_content.py` (`preview` / `apply`) via `.venv/bin/python`.
-- **Option 3 (`3` / `author-scenario`):** invoke the **`uat-author-scenario`** skill and follow its workflow end to end (resolve + validate the active in-progress ticket → choose NEW or UPDATE → **preview** the scenario merge → approve → **apply** + re-render → generate the ticket-local `.uat-test.md` runbook → scaffold collectable test stubs → report all paths). The skill MUST NOT write before a `preview` is shown and approved, and MUST fail loud (write nothing) when the active ticket is unresolved, closed/terminal, missing a plan, or its sources disagree. Pass any supplied `--scenarios` flag through. The skill drives `jswarm/uat-scenarios/resolve_active_ticket.py`, `create_uat_scenario.py` / `populate_scenario_content.py`, and `scaffold_uat_tests.py` via `.venv/bin/python`.
+Run `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.ext jUAT`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue.
 
-## Notes
+## Step 3: Build and validate the round request
 
-- Python via `.venv/bin/python` only (system Python is quarantined).
-- jQATester browser dispatches (any mode) are governed by the `/jTest` skill's `uat.md` §"jQATester dispatch contract": transport-ladder preflight (`PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.qa_transport ...`) + the thirteen-field handoff template (`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/templates/QA_DISPATCH_HANDOFF_TEMPLATE.md`). This menu never dispatches a browser agent without that contract.
-- The generated UAT Markdown is derived/read-only: edit the JSON (the extractor does), then regenerate. The renderer embeds `scenario.image` inline in both the `pm-summary` and `engineering` profiles.
+A round is `uat-canonical-package@2`: journeys hold **scenarios** (the GWT the Step 2 scenarios describe) and **steps** (what the person does in the app, each linking back by `gwt_ref`/`sha256` to the scenario clauses it exercises). Write `.jswarm/work/<ID>/uat-round/<ID>.uat-round-request.json`, one journey per user-facing thread this work item changed:
 
-## Next
+```json
+{
+  "schema": "jswarm.test-uat.practical-cutover-request/v1",
+  "schema_version": "1.0",
+  "ticket": "<ID>",
+  "canonical_manifest": {
+    "schema_version": "uat-canonical-package@2",
+    "ticket": "<ID>",
+    "round_id": "round-1",
+    "certified_build_hash": "<git rev-parse HEAD>",
+    "folder_path": "N/A",
+    "app_url": "<where the app runs, e.g. http://localhost:3000>",
+    "login": "<how to sign in, or \"no login required\">",
+    "observer": {"available": false, "capture": "N/A", "fallback": "<who narrates what they saw>"},
+    "recovery_policy": "SETUP_REFRESH_ONLY; POST_ACTION_REFRESH_RELOAD_RETRY_CANNOT_PASS_ORIGINAL_ATOM",
+    "known_sources_checked": ["<what you checked before writing this>"],
+    "journeys": [{
+      "journey_id": "<id>", "title": "Journey 1: <name>", "source": "manual", "uat_test_anchor": "N/A",
+      "app_link": {"href": "/", "label": "App"}, "requirement_ref": "N/A", "known_items": [],
+      "atom_ids": ["<atom-id>"],
+      "outcomes": [{"atom_id": "<atom-id>", "expected": "<one sentence>", "fail_if": ["<what would mean it failed>"]}],
+      "scenarios": [{
+        "scenario_id": "<id>", "title": "<name>",
+        "gwt": [{"gwt_ref": "<sha256, below>", "sha256": "<same>", "given": ["clause"], "when": ["clause"], "then": ["clause"]}]
+      }],
+      "steps": [{
+        "step_id": "<id>", "ordinal": 1, "name": "<short description, not the ordinal>",
+        "instruction": "<what the person does>",
+        "expected_outcome": "<one sentence>\n- <observable, if any>",
+        "scenario_links": [{"scenario_id": "<id>", "gwt_refs": ["<sha256>"]}],
+        "assessment_options": ["PASS", "FAIL", "BLOCKED", "NOT_OBSERVED"],
+        "app_link": {"href": "/", "label": "App"}
+      }]
+    }]
+  }
+}
+```
 
-After the owner walks a round in the portal: if it found something, run
-`/jFix <problem>` in this project's agent session. If the round is clean,
-run `/jClose`.
+`gwt_ref` and `sha256` are the digest of the exact clause arrays, and must be recomputed after any wording change:
+
+```bash
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python - <<'PY'
+import hashlib, json
+given, when, then = ["clause"], ["clause"], ["clause"]  # the exact arrays above
+payload = json.dumps({"given": given, "when": when, "then": then}, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+print(hashlib.sha256(payload).hexdigest())
+PY
+```
+
+Validate before writing anything further; this writes nothing and reports every problem at once:
+
+```bash
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/uat_round_materialize.py preflight-manifest \
+  --request .jswarm/work/<ID>/uat-round/<ID>.uat-round-request.json
+```
+
+Fix and re-run until it prints `VALID:`.
+
+## Step 4: Issue the round
+
+Record that this content is ready to show a person, at `.jswarm/work/<ID>/uat-round/<ID>.uat-acceptance-evidence.json`. This is the agent's own sign-off after `/jTest`'s smoke walk, not the human owner's verdict; the human's verdict is what walking the round in the portal produces.
+
+```json
+{
+  "schema": "jswarm.test-uat.practical-acceptance-evidence/v1",
+  "schema_version": "1.0",
+  "round_review_id": "<ID>/round-1",
+  "verdict": "ACCEPTED",
+  "accepted_by": "ticket-boss",
+  "accepted_at": "<UTC ISO-8601>",
+  "journey_step_counts": {"<journey-id>": "<step count>"},
+  "step_counts": {"total": "<sum of the above>"},
+  "request_sha256": "<sha256 of the request file's parsed JSON, canonical form, below>"
+}
+```
+
+```bash
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python - .jswarm/work/<ID>/uat-round/<ID>.uat-round-request.json <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+request = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+payload = json.dumps(request, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+print(hashlib.sha256(payload).hexdigest())
+PY
+```
+
+Then cut over. This renders and writes the round, feedback shell, handoff, receipt, and traceability ledger, and registers the round with the portal, atomically:
+
+```bash
+TICKET="<ID>"; ROUND_REVIEW_ID="$TICKET/round-1"
+WORK=".jswarm/work/$TICKET/uat-round"
+CONFIG="${HOME}/.jswarm/decision-review/config.json"
+${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.uat_practical_cutover practical-cutover \
+  --authorized-by ticket-boss \
+  --note "issued via /jUAT" \
+  --request "$WORK/$TICKET.uat-round-request.json" \
+  --acceptance-evidence "$WORK/$TICKET.uat-acceptance-evidence.json" \
+  --config "$CONFIG" \
+  --archive-dir "$WORK/history/$(date -u +%Y%m%dT%H%M%SZ)" \
+  --current-round "$WORK/$TICKET.UAT-CURRENT-ROUND.md" \
+  --feedback "$WORK/$TICKET.uat-feedback.md" \
+  --handoff "$WORK/$TICKET.uat-handoff.json" \
+  --receipt "$WORK/$TICKET.uat-cutover-receipt.json" \
+  --ledger "$WORK/$TICKET.uat-traceability.md" \
+  --service-pid "${HOME}/.jswarm/decision-review/service.pid" \
+  --round-review-id "$ROUND_REVIEW_ID"
+```
+
+**Reissuing after `/jFix`:** cutover refuses to replace a round the portal is currently serving. Stop it first (`./install.sh portal --stop` from the jSwarm clone), rerun the block above with the same `$ROUND_REVIEW_ID`, then restart (`./install.sh portal --background`).
+
+Confirm the portal is up and the round is listed before telling anyone to look:
+
+```bash
+curl --fail --silent --show-error http://127.0.0.1:8766/api/health >/dev/null
+curl --fail --silent --show-error http://127.0.0.1:8766/api/uat-rounds | grep -q "$ROUND_REVIEW_ID" || echo "round missing from /api/uat-rounds"
+```
+
+If the portal is not running yet, start it from the jSwarm clone: `./install.sh portal --background`, then repeat the two checks above.
+
+## Step 5: Summary
+
+```
+✅ <ID> UAT round issued
+
+Round: <ID>/round-1
+Portal: http://localhost:8766/uat/?round=<ID>%2Fround-1
+Request/evidence: .jswarm/work/<ID>/uat-round/
+```
+
+**Next:** open the URL above and walk the round yourself, or send it to whoever owns acceptance. If the round finds something, run `/jFix <problem>` in this project's agent session. If it comes back clean, run `/jClose`.
