@@ -25,12 +25,12 @@ PHASE_ONE_MANAGED_COMMANDS = frozenset({JPLAN_COMMAND_KEY, "implement.md", "test
 # Commands that MAY be declared `state: managed` in a project manifest (validation allowlist).
 # Superset of the auto-bootstrap set. Two members are opt-in PER PROJECT and deliberately NOT
 # auto-scaffolded (they stay out of PHASE_ONE_MANAGED_COMMANDS):
-#   - close-ticket.md  — COM-123 component-governance gate (only common wires it).
-#   - code-overview.md — COM-122 UAT-scenario engine adopters (HAS-488 wired hai-sim-engine).
+#   - close-ticket.md  — component-governance gate (only common wires it).
+#   - code-overview.md — UAT-scenario engine adopters (already wired for hai-sim-engine).
 #     Real global command named code-overview.md, in this host's commands directory
 #     (`jswarm.host.claude_code.ClaudeCodeHost.commands_dir`), with three inject anchors;
-#     added to the allowlist by COM-128 WS4 so an adopter manifest validates and its
-#     jPlan parameters resolve (the allowlist was stale relative to HAS-488).
+#     added to the allowlist by WS4 so an adopter manifest validates and its
+#     jPlan parameters resolve (the allowlist was stale relative to that adopter).
 MANAGED_COMMAND_ALLOWLIST = PHASE_ONE_MANAGED_COMMANDS | frozenset(
     {LEGACY_JPLAN_COMMAND_KEY, "close-ticket.md", "code-overview.md", "uat-round.md"}
 )
@@ -80,7 +80,7 @@ class InspectResult:
 
 @dataclass(frozen=True)
 class InspectSkillResult:
-    """COM-294 Phase 2: localization inspection result for a managed skill.
+    """Phase 2: localization inspection result for a managed skill.
 
     Serialization (CLI JSON payload) yields exactly these six fields; keep this
     dataclass's field set aligned with the stable JSON contract.
@@ -165,7 +165,7 @@ JIRA_KEY_PARAMETER = "jira_project_key"
 
 
 def resolve_jira_project_key(project_root: Path) -> str | None:
-    """COM-398: resolve the Jira project key for ``project_root``.
+    """Resolve the Jira project key for ``project_root``.
 
     Order: ``managed_commands.jPlan.md.parameters.jira_project_key`` in the
     project manifest (fail-open reader) -> the built-in ``PROJECT_IDENTITIES``
@@ -301,7 +301,7 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
         raise CommandInjectionError("Manifest version must be exactly 1")
 
     managed_commands = manifest.get("managed_commands")
-    # COM-294 Phase 2: managed_skills is an additive, optional sibling block.
+    # Phase 2: managed_skills is an additive, optional sibling block.
     # managed_commands may be absent/{} only when managed_skills is present —
     # a manifest declaring neither block is still structurally invalid.
     managed_skills = manifest.get("managed_skills")
@@ -322,7 +322,7 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
                 f"Unsupported command state '{state}' for {command_name}"
             )
 
-        # COM-128 WS4: optional per-project parameter defaults. Structurally a
+        # WS4: optional per-project parameter defaults. Structurally a
         # `parameters:` block, when present, must be a mapping of scalar defaults.
         # This is the fail-LOUD structural gate (caught by audit-project); the
         # fail-OPEN resolution layer is command_parameters_for_project().
@@ -332,7 +332,7 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
                 f"parameters for {command_name} must be a mapping if present"
             )
 
-        # COM-128 WS1+WS4 governance: per-project defaults must NOT reopen the
+        # WS1+WS4 governance: per-project defaults must NOT reopen the
         # over-escalation hole WS1 closes. The jPlan alias group may not pre-default
         # the review tier to critic-xhigh or the architecture tier to architect-master —
         # both are trigger-gated by the agent-team rubric, never a standing default.
@@ -376,7 +376,7 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
                     f"Anchor {command_name}:{anchor_name} must specify exactly one of content or snippet_path"
                 )
 
-    # COM-294 Phase 2: managed_skills structural gate (fail-loud here; the live
+    # Phase 2: managed_skills structural gate (fail-loud here; the live
     # resolution layer — inspect_skill_for_project — stays fail-open per spec).
     if managed_skills is not None:
         if not isinstance(managed_skills, dict):
@@ -428,7 +428,7 @@ def command_mode_for_project(
 def command_parameters_for_project(
     project_root: Path, command_name: str, manifest: dict[str, Any] | None = None
 ) -> dict[str, Any]:
-    """Fail-open reader for per-project command parameter defaults (COM-128 WS4).
+    """Fail-open reader for per-project command parameter defaults (WS4).
 
     Returns the `parameters:` mapping declared under
     ``managed_commands.<command_name>`` in the project's manifest at
@@ -526,7 +526,7 @@ def inspect_command_for_project(
 
 
 def _skill_config(manifest: dict[str, Any], skill_name: str) -> dict[str, Any]:
-    """Fail-loud low-level reader for ``managed_skills.<skill_name>`` (COM-294).
+    """Fail-loud low-level reader for ``managed_skills.<skill_name>``.
 
     Mirrors ``_command_config`` but for the additive skill-localization block.
     Does not itself apply overlay-path safety filtering — see
@@ -594,7 +594,7 @@ def _safe_overlay_path(project_root: Path, raw_path: str) -> str | None:
 def inspect_skill_for_project(
     project_root: Path, skill_name: str, manifest: dict[str, Any] | None = None
 ) -> InspectSkillResult:
-    """Fail-open localization inspection for a managed skill (COM-294 Phase 2).
+    """Fail-open localization inspection for a managed skill (Phase 2).
 
     This NEVER raises. An absent, unreadable, malformed, or unknown-version
     manifest falls back to ``configured_state="unmanaged"`` with a warning —
@@ -655,7 +655,7 @@ def inspect_skill_for_project(
         )
 
     warnings: list[str] = []
-    # COM-294 Phase 2 round-2 (R5): managed_skills.<skill> permits exactly
+    # Phase 2 round-2 (R5): managed_skills.<skill> permits exactly
     # `state` and `overlay_path`. Any other declared field is noise the seam
     # never reads for anything — warn (fail-open) so the jOptimize audit
     # surface can flag it, rather than silently accepting arbitrary keys.
@@ -1469,7 +1469,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 # Internal alias kept for callers/tests that address the CLI entry point as a
-# "private" module function (COM-398).
+# "private" module function.
 _main = main
 
 

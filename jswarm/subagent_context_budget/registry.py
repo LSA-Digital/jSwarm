@@ -11,9 +11,9 @@ Public API:
   load_profiles(path)      -> ProfileRegistry
   model_windows_key(provider, model, model_keys) -> str
 
-Runtime selection (COM-76 Phase 7):
+Runtime selection (Phase 7):
   - runtime="claude" (default) resolves the Claude Code primary from the
-    legacy agent_primary_model map — unchanged pre-COM-76 behavior.
+    legacy agent_primary_model map — unchanged prior behavior.
   - runtime="opencode" resolves the OpenCode primary from the schema-v2
     agents.<slug>.opencode.primary block.
   The category band is runtime-agnostic; the two runtimes differ in
@@ -159,7 +159,7 @@ class ProfileRegistry:
         self._slotting: dict[str, str] = dict(data.get("agent_slotting") or {})
         self._primary_model: dict[str, str] = dict(data.get("agent_primary_model") or {})
         self._overrides: dict[str, dict] = dict(data.get("overrides") or {})
-        # v2 key — load-bearing source of truth for routing (COM-76).
+        # v2 key — load-bearing source of truth for routing.
         # If missing (v1-only YAML), this is an empty dict and consumers fall
         # back to the legacy keys.
         self._agents: dict[str, dict] = dict(data.get("agents") or {})
@@ -200,7 +200,7 @@ class ProfileRegistry:
     def iter_dispatchable_agents(self) -> dict[str, dict]:
         """Return only canonical, runtime-dispatchable agent records.
 
-        COM-232 hard-cut: alias/retired records are compatibility metadata
+        hard-cut: alias/retired records are compatibility metadata
         for legacy plan/history resolution (``resolve_agent_slug`` still
         resolves them) — they must never be surfaced as something the
         runtime could dispatch. Narrowed from ``dict(self._agents)`` (56) to
@@ -285,7 +285,7 @@ class ProfileRegistry:
 
     @property
     def model_override_allow_all(self) -> bool:
-        """COM-232 global allow-all flag: root-level ``model_override_allow_all``.
+        """global allow-all flag: root-level ``model_override_allow_all``.
 
         Sibling of ``agents:``/``categories:`` in the profiles root mapping.
         ``True`` only when the raw value is the literal boolean ``True`` —
@@ -350,7 +350,7 @@ def load_profiles(path: Optional[Path] = None) -> ProfileRegistry:
 
 
 # --------------------------------------------------------------------------- #
-# COM-232 fail-loud override validation (unknown_model / unknown_effort)
+# fail-loud override validation (unknown_model / unknown_effort)
 # --------------------------------------------------------------------------- #
 #
 # "Allow any model" (model_override_allow_all) must mean "any KNOWN model",
@@ -421,7 +421,7 @@ def validate_model_literal(model: str, *, model_windows_path: Optional[Path] = N
 
 _MODEL_WINDOWS_REL_PATH = "docs/_CONTROLLED_CONFIG/model-windows.yaml"
 
-# Generic family-prefix pairing rule (COM-232 fail-loud spec §D.2) — no
+# Generic family-prefix pairing rule (fail-loud spec §D.2) — no
 # per-model table, only a coarse provider-family check so a request like
 # ``provider=openai model=claude-sonnet-5`` is caught as internally
 # inconsistent regardless of whether either literal is independently known.
@@ -451,7 +451,7 @@ def validate_provider_model_pairing(provider: str, model: str) -> dict:
     ``glm-*`` -> zai. A model outside every known family prefix is not
     constrained by this check (it only fires on a *recognized* mismatch).
 
-    COM-232 fail-loud FIX CYCLE 2 (main-lane jCritic FINDING 2 — HIGH): some
+    fail-loud FIX CYCLE 2 (main-lane jCritic FINDING 2 — HIGH): some
     provider families (e.g. Z.ai's ``zai/glm-5.1`` in model-windows.yaml) key
     their ``models:`` entries with an explicit ``<provider>/<stem>`` prefix,
     unlike the bare stems every other family uses. A "/" in the model literal
@@ -543,7 +543,7 @@ def resolve_effort(
 ) -> EffortResolution:
     """Resolve an agent slug plus optional effort into an executable runtime route.
 
-    COM-227 6C makes effort an explicit dispatch parameter. Resolution is
+    6C makes effort an explicit dispatch parameter. Resolution is
     fail-closed: selected efforts must be declared by the canonical core's
     ``effort_tiers`` and backed by ``tier_policy`` for the requested runtime.
     Fixed no-effort micro cores declare ``effort_tiers: []`` and only accept a
@@ -688,7 +688,7 @@ def _resolve_claude_model(
     Reads the legacy ``agent_primary_model`` map — mirror-consistent with the
     v2 schema's per-agent ``claude`` provider block (``model`` field under
     ``agents.<slug>``, provider key ``claude``; enforced by the schema-v2
-    tests), so the default lookup path is unchanged from the pre-COM-76
+    tests), so the default lookup path is unchanged from the prior
     registry.
     """
     model_slug = profiles.primary_model_slug(slug)
@@ -760,11 +760,11 @@ def lookup_agent(
     ``runtime`` selects which runtime's primary model backs the lookup:
 
       - ``"claude"`` (default) — the Claude Code primary. Preserves the
-        pre-COM-76 behavior exactly.
+        prior behavior exactly.
       - ``"opencode"`` — the OpenCode primary from the schema-v2
         ``agents.<slug>.opencode.primary`` block.
 
-    The category band is runtime-agnostic (an agent-intrinsic COM-49 budget
+    The category band is runtime-agnostic (an agent-intrinsic budget
     class), so the two runtimes differ in ``derived_budget_tokens`` only when
     they back the agent with models of different context windows.
     """
@@ -794,12 +794,12 @@ def lookup_agent(
     else:
         model = _resolve_claude_model(resolved_slug, profiles, models, is_fallback)
 
-    # COM-232: an alias that pins a non-default effort tier via default_effort_override
+    # An alias that pins a non-default effort tier via default_effort_override
     # dispatches at THAT tier's model, which can differ from the canonical's default model
     # (e.g. architect-master -> jArchitect xhigh -> claude-fable-5, a 1M model). Band the
     # window/budget against the effective dispatch model so the generated catalog and derived
     # budget do not drift from routing truth. Canonical / no-override lookups are unchanged
-    # (pre-COM-76 behavior preserved); fail-open on any resolution error.
+    # (prior behavior preserved); fail-open on any resolution error.
     if default_effort_override:
         try:
             eff = resolve_effort(
@@ -863,7 +863,7 @@ def resolve_model_override(
 ) -> dict:
     """Resolve a requested model override against the per-core allowlist policy.
 
-    COM-232 D-1 Stage 0: ``model_override_policy`` is a default-DENY control —
+    D-1 Stage 0: ``model_override_policy`` is a default-DENY control —
     a canonical core with no policy block (or no matching entry) rejects with
     ``reason=model_not_allowed``. This never raises; every outcome is a
     structured ``{status, reason}`` (rejected) or ``{status, provider, model,
@@ -891,7 +891,7 @@ def resolve_model_override(
     if not isinstance(canonical_block, dict) or alias_status(canonical_block) != "canonical":
         return {"status": "rejected", "reason": "uncanonical_agent"}
 
-    # COM-232 global allow-all: when the profiles root sets
+    # global allow-all: when the profiles root sets
     # ``model_override_allow_all: true``, ANY provider/model/effort tuple is
     # authorized for ANY canonical agent — gated only by the HMAC capability
     # upstream (mint/Stage-1/Stage-2), never by an enumerated allowlist. This

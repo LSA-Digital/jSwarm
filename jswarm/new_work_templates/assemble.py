@@ -66,7 +66,7 @@ def _default_receipt_root(out: Path | None) -> Path:
     ``<consumer>/.jswarm/plans/<KEY>/<KEY>.assembly-receipts.ndjson`` in the SAME repository the
     plan is written to. Anchoring the receipt on the output path (its ``.jswarm`` path component,
     else an on-disk repo marker, else the plan's own directory) makes the receipt writer and that
-    gate structurally unable to disagree — the HAS-548/HAS-549 A2 silent wrong-repo write, where
+    gate structurally unable to disagree — the A2 silent wrong-repo write, where
     ``receipt_root`` defaulted to the assembler's ``ROOT`` (``common``) rather than the consumer.
     """
     if out is None:
@@ -96,7 +96,7 @@ def _missing_root_message(kind: str, root: Path, env_var: str, detail: str) -> s
     """Actionable typed-error text for an absent inputs ROOT: names the root and its env override."""
     return (
         f"missing inputs root ({kind}): {detail}. Resolved {kind} root: {root}. "
-        f"Set {env_var} to the correct directory (post COM-254 T2.5 the jPlan assembly inputs live "
+        f"Set {env_var} to the correct directory (post T2.5 the jPlan assembly inputs live "
         f"under skills/jPlan)."
     )
 
@@ -104,7 +104,7 @@ def _missing_root_message(kind: str, root: Path, env_var: str, detail: str) -> s
 def _validate_roots(inputs: Inputs) -> None:
     """Fail loudly with a typed error when a resolved inputs ROOT is absent — a DISTINCT condition
     from a manifest that is present but malformed (which stays exit 9). Names the missing root and
-    the env override to set (HAS-548 A1: a moved template root was mislabeled 'malformed manifest',
+    the env override to set (A1: a moved template root was mislabeled 'malformed manifest',
     steering diagnosis toward repairing the manifest instead of the dangling default)."""
     template_root = inputs.template_root
     if not template_root.is_dir():
@@ -137,7 +137,7 @@ def _read_manifest(root: Path) -> dict[str, Any]:
         raw = path.read_text(encoding="utf-8")
     except FileNotFoundError as exc:
         # A missing manifest FILE is a dangling inputs ROOT, not malformed CONTENT. Splitting it
-        # off exit 9 stops the HAS-548 mislabel that sent diagnosis toward "repair the manifest".
+        # off exit 9 stops the mislabel that sent diagnosis toward "repair the manifest".
         raise AssemblyError(
             MISSING_INPUTS_ROOT,
             _missing_root_message(
@@ -800,9 +800,9 @@ def _validate_tolerance(entrypoint: str, plan: Path) -> None:
         # Materialize placeholder-shaped matrix examples only inside the isolated fixture so
         # lifecycle-audit sees a valid authoring candidate without changing assembled bytes.
         fixture_text = text.replace("**NFR-[n]-[DESCRIPTOR]**", "NFR-001-TOLERANCE")
-        isolated = plan_dir / "COM-249.plan.tolerance.md"
+        isolated = plan_dir / "DEMO-249.plan.tolerance.md"
         isolated.write_text(fixture_text, encoding="utf-8")
-        legacy = docs_plans / "COM-249-tolerance.md"
+        legacy = docs_plans / "DEMO-249-tolerance.md"
         legacy.write_text(fixture_text, encoding="utf-8")
         scripts = ROOT / "jswarm"
         python = sys.executable
@@ -812,7 +812,7 @@ def _validate_tolerance(entrypoint: str, plan: Path) -> None:
             "plan_status.templates": "from plan_status.templates import read_template_meta; assert read_template_meta(__import__('pathlib').Path(__import__('sys').argv[1]))['exists']",
             "plan_status.reconcile": "from plan_status.reconcile import normalize_plan_file; normalize_plan_file(__import__('pathlib').Path(__import__('sys').argv[1]))",
             "catalog.build_catalog": "import importlib.util,sys; s=importlib.util.spec_from_file_location('catalog_build',sys.argv[1]); m=importlib.util.module_from_spec(s); sys.modules[s.name]=m; s.loader.exec_module(m); assert m._first_fenced_frontmatter(__import__('pathlib').Path(sys.argv[2]).read_text()) is not None",
-            "feature-dashboard.render": "import importlib.util,sys; s=importlib.util.spec_from_file_location('feature_render',sys.argv[1]); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); assert m._load_frontmatter_plan_statuses({'COM-249'}, __import__('pathlib').Path(sys.argv[2]))",
+            "feature-dashboard.render": "import importlib.util,sys; s=importlib.util.spec_from_file_location('feature_render',sys.argv[1]); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); assert m._load_frontmatter_plan_statuses({'DEMO-249'}, __import__('pathlib').Path(sys.argv[2]))",
         }
         if entrypoint in code:
             extra = [str(isolated)]
@@ -829,15 +829,15 @@ def _validate_tolerance(entrypoint: str, plan: Path) -> None:
                 stdin=json.dumps({"tool_input": {"file_path": str(isolated)}, "session_id": "tolerance"}),
             )
         elif entrypoint == "update_ticket:new-work-lint":
-            _run_boundary([python, str(ROOT / "jswarm/update_ticket/cli.py"), "--ticket", "COM-249", "--repo-root", str(repo), "--preset", "new-work-lint"], cwd=repo, env=base_env)
+            _run_boundary([python, str(ROOT / "jswarm/update_ticket/cli.py"), "--ticket", "DEMO-249", "--repo-root", str(repo), "--preset", "new-work-lint"], cwd=repo, env=base_env)
         elif entrypoint == "lifecycle_audit":
-            _run_boundary([python, str(ROOT / "jswarm/precompact_reconcile/lifecycle_audit.py"), "--ticket", "COM-249", "--repo-root", str(repo), "--lint"], cwd=repo, env=base_env)
+            _run_boundary([python, str(ROOT / "jswarm/precompact_reconcile/lifecycle_audit.py"), "--ticket", "DEMO-249", "--repo-root", str(repo), "--lint"], cwd=repo, env=base_env)
         elif entrypoint == "rows_cli":
-            _run_boundary([python, str(ROOT / "jswarm/precompact_reconcile/rows_cli.py"), "--ticket", "COM-249", "--repo-root", str(repo)], cwd=repo, env=base_env)
+            _run_boundary([python, str(ROOT / "jswarm/precompact_reconcile/rows_cli.py"), "--ticket", "DEMO-249", "--repo-root", str(repo)], cwd=repo, env=base_env)
         elif entrypoint == "update_plan.cli":
             _run_boundary([python, str(ROOT / "jswarm/update_plan/cli.py"), "--plan", str(isolated), "--apply"], cwd=repo, env=base_env)
         elif entrypoint == "plan_status.cli":
-            _run_boundary([python, str(ROOT / "jswarm/plan_status/cli.py"), "--project-root", str(repo), "bind", "COM-249"], cwd=repo, env=base_env)
+            _run_boundary([python, str(ROOT / "jswarm/plan_status/cli.py"), "--project-root", str(repo), "bind", "DEMO-249"], cwd=repo, env=base_env)
         elif entrypoint == "plan_status.backfill":
             _run_boundary([python, str(ROOT / "jswarm/plan_status/backfill.py"), "--project-root", str(repo), "--normalize"], cwd=repo, env=base_env)
         elif entrypoint == "update_plan.backfill":
@@ -845,7 +845,7 @@ def _validate_tolerance(entrypoint: str, plan: Path) -> None:
         elif entrypoint == "plan_status.doctor":
             _run_boundary([python, str(ROOT / "jswarm/plan_status/doctor.py"), "--project-root", str(repo)], cwd=repo, env=base_env)
         elif entrypoint == "uat-scenarios.resolve_active_ticket":
-            _run_boundary([python, str(ROOT / "jswarm/uat-scenarios/resolve_active_ticket.py"), "--plans-dir", str(plan_dir), "--active-ticket", "COM-249"], cwd=repo, env=base_env)
+            _run_boundary([python, str(ROOT / "jswarm/uat-scenarios/resolve_active_ticket.py"), "--plans-dir", str(plan_dir), "--active-ticket", "DEMO-249"], cwd=repo, env=base_env)
 
         artifacts = {
             "posttool-plan-status-reconcile": "hook_reconciled",
