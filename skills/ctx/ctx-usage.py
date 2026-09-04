@@ -23,7 +23,7 @@ bounded to reading only ``<session>.jsonl``. All ambiguity resolves to
 
 Layer B (subagent, within the Layer-A-bounded set): the single
 ``agent-<agentId>.jsonl`` whose recent content contains the exact literal
-nonce (as a full token — no substring/boundary collisions) wins, IF AND ONLY
+nonce (as a full token, no substring/boundary collisions) wins, IF AND ONLY
 IF: filename ``agentId`` == JSONL line ``agentId``, JSONL ``sessionId`` == the
 env session id, JSONL ``isSidechain == true``, and the file's real path
 resolves inside the session's ``subagents/`` directory (no symlink escape,
@@ -33,7 +33,7 @@ or any of those invariants failing => ``unavailable``.
 Usage lookup (``find_usage_for_resolution``): parses raw jAgentProxy
 ``[OUTCOME]`` key=value log lines using the same grammar as
 ``jswarm/jagentproxy_cost/aggregate.py:parse_outcome_line`` /
-``_normalize_usage`` (reimplemented locally here — this module is
+``_normalize_usage`` (reimplemented locally here: this module is
 stdlib-only/no-dependency and must not import ``aggregate.py``, which pulls in
 a non-stdlib YAML dependency, and must not reuse its *aggregated* terminal
 rows, which drop ``agentId`` in favor of an ``agent`` slug). Lines are
@@ -42,11 +42,11 @@ filtered by the resolved ``session_id`` + ``agent_id`` + ``role``, then by
 transcript path is a documented fallback/cross-check: Phase 1 does not
 implement transcript-based usage extraction (no frozen regression test
 requires that positive path), but it does check whether the fallback is even
-reachable — if the transcript itself is missing, that is reported as the more
+reachable; if the transcript itself is missing, that is reported as the more
 specific, more actionable failure.
 
 Window-registry join (context-window sizing) and full provider %/statusLine
-1M regression handling are explicitly Phase 2 — not built here. ``window`` on
+1M regression handling are explicitly Phase 2, not built here. ``window`` on
 ``UsageResult`` is left ``None``.
 
 Phase 2 adds, on top of the Phase 1 identity resolver above:
@@ -115,11 +115,11 @@ class UsageResult:
             ``status == "unavailable"``. ``None`` when ``status == "ok"``.
         context_pct: ``round(context_tokens / window * 100, 1)``, or ``None``
             when either input is unavailable. Phase 2.
-        usage_source: Which source produced this result — one of
+        usage_source: Which source produced this result: one of
             ``"jagentproxy-outcome-log"``, ``"transcript-jsonl"``, or
             ``"unavailable"``. Phase 2; defaults to ``"unavailable"`` so
             Phase-1-shaped construction sites keep working unchanged.
-        window_source: How ``window`` was resolved — one of ``"env"``,
+        window_source: How ``window`` was resolved: one of ``"env"``,
             ``"registry"``, ``"heuristic-1m"``, ``"default"``, or ``None``
             when ``window`` itself is ``None``. Phase 2.
     """
@@ -190,7 +190,7 @@ def _resolve_tail_window(env: Any) -> int:
     """Resolve the identity-lookup tail-line bound (Layer B recent-window size).
 
     Phase 2 renames this bound's primary env key to
-    ``JSWARM_CTX_TAIL_LINES`` — ``JSWARM_CTX_WINDOW`` is exclusively the
+    ``JSWARM_CTX_TAIL_LINES``. ``JSWARM_CTX_WINDOW`` is exclusively the
     model-context-window-tokens override read by ``resolve_model_window``
     below and must never influence this tail-line bound. The two keys are
     deliberately not aliased: reading ``JSWARM_CTX_WINDOW`` here would let a
@@ -222,7 +222,7 @@ def _is_escaped(entry: Path, allowed_root: Path) -> bool:
 
     Fails closed: any resolution error (broken symlink, permission issue) is
     treated as an escape. Resolving the real path is a metadata operation
-    (readlink-equivalent) — it does not read the target's content, so this
+    (readlink-equivalent); it does not read the target's content, so this
     check rejects a symlink escape without ever following/reading it.
     """
 
@@ -364,7 +364,7 @@ def resolve_current_invocation(
 
     if role == "main":
         # Layer A containment: main/orchestrator role reads ONLY its own
-        # <session>.jsonl — never inspects subagents/ at all.
+        # <session>.jsonl; never inspects subagents/ at all.
         # The real transcript lives at the project-root level, as a SIBLING
         # of the <session>/ subagents directory (<project>/<session>.jsonl),
         # not nested inside <project>/<session>/<session>.jsonl.
@@ -384,7 +384,7 @@ def resolve_current_invocation(
             reason=None,
         )
 
-    # role == "subagent" — Layer A bounds ALL reads to <session>/subagents/;
+    # role == "subagent": Layer A bounds ALL reads to <session>/subagents/;
     # <session>.jsonl (the parent transcript) is never opened below.
     if not _valid_nonce_grammar(identity_nonce):
         return _unavailable_resolution(
@@ -421,7 +421,7 @@ def resolve_current_invocation(
                     continue
                 filename_agent_id = match.group(1)
 
-                # Reject a symlink escape BEFORE opening — realpath resolution is
+                # Reject a symlink escape BEFORE opening: realpath resolution is
                 # metadata-only and does not follow/read the escaped target.
                 if _is_escaped(entry, allowed_root):
                     escape_detected = True
@@ -432,7 +432,7 @@ def resolve_current_invocation(
                     continue
 
                 # TOCTOU (O-5): re-validate containment immediately after the
-                # open that located the nonce — the entry may have been swapped
+                # open that located the nonce; the entry may have been swapped
                 # for a symlink escape during that very read.
                 if _is_escaped(entry, allowed_root):
                     escape_detected = True
@@ -440,7 +440,7 @@ def resolve_current_invocation(
 
                 # fd-anchored TOCTOU close (jCritic P1 HIGH): the pathname-based
                 # scan above only proves a nonce appears somewhere under a path
-                # that resolves safely both BEFORE and AFTER the read — it never
+                # that resolves safely both BEFORE and AFTER the read; it never
                 # proves the BYTES actually read came from that safe file. A
                 # descriptor-level content swap during the read (the underlying
                 # fd silently pointing elsewhere for that one read) defeats a
@@ -583,7 +583,7 @@ def _parse_outcome_line(line: str) -> dict[str, str] | None:
     """Parse one raw ``[OUTCOME]`` line into its key=value fields.
 
     Same grammar as ``jswarm/jagentproxy_cost/aggregate.py:parse_outcome_line``
-    / ``_normalize_usage``, reimplemented locally (stdlib-only — this module
+    / ``_normalize_usage``, reimplemented locally (stdlib-only: this module
     must not import ``aggregate.py``, which pulls in a non-stdlib YAML
     dependency, nor reuse its *aggregated* terminal rows, which drop
     ``agentId`` in favor of an ``agent`` slug).
@@ -620,7 +620,7 @@ def _derive_provider(fields: dict[str, str]) -> str | None:
 
     Phase 2 (T-C1..T-C3): pass the raw ``class`` field through
     verbatim (e.g. ``"openai-codex"``, ``"anthropic-direct"``) rather than
-    bucketing it into a generic ``"openai"``/``"anthropic"`` label — callers
+    bucketing it into a generic ``"openai"``/``"anthropic"`` label; callers
     now rely on the literal jAgentProxy provider-class string. Falls back to
     a coarse model-prefix guess only when ``class`` itself is absent.
     """
@@ -637,7 +637,7 @@ def _derive_provider(fields: dict[str, str]) -> str | None:
 class _NegativeUsageError(ValueError):
     """Raised when an exact OUTCOME line carries a negative usage field.
 
-    A negative token count is not provable usage (Phase 2) —
+    A negative token count is not provable usage (Phase 2);
     the caller must fail closed rather than compute a negative
     ``context_pct``.
     """
@@ -658,7 +658,7 @@ def _compute_context_tokens(fields: dict[str, str]) -> int | None:
     """Derive ``context_tokens`` from an exact OUTCOME line's usage fields.
 
     Precedence (Phase 2): ``usage_total`` wins whenever it is
-    present and valid — this is the OpenAI Responses shape jAgentProxy emits
+    present and valid: this is the OpenAI Responses shape jAgentProxy emits
     (``input_tokens`` -> ``usage_in``, ``total_tokens`` -> ``usage_total``),
     and ``total_tokens`` is the authoritative full-context figure even when
     ``usage_in`` is also present. Falls back to the Anthropic
@@ -821,7 +821,7 @@ def _read_tail_text(path: Path, max_bytes: int) -> str:
     """Read ``path``, bounded to its last ``max_bytes`` (NFR-PERF).
 
     ``max_bytes <= 0`` (jCritic P1 MEDIUM) is clamped to
-    ``_DEFAULT_MAX_TAIL_BYTES`` rather than being treated as "unbounded" — a
+    ``_DEFAULT_MAX_TAIL_BYTES`` rather than being treated as "unbounded"; a
     caller passing ``0``/negative must never disable the bound and force a
     whole-file read.
     """
@@ -852,7 +852,7 @@ def _compute_context_tokens_from_anthropic_usage(usage: dict[str, Any]) -> int |
 
     Raises ``_NegativeUsageError`` (Phase 2) instead of
     returning a smaller-but-positive total when any of the three fields is a
-    negative int — the same fail-closed semantics as the OUTCOME-line path's
+    negative int; the same fail-closed semantics as the OUTCOME-line path's
     ``_coerce_usage_int``.
     """
 
@@ -888,7 +888,7 @@ def _extract_usage_from_transcript_tail(
     Raises ``_NegativeUsageError`` (propagated to the caller), Phase 2,
     if a ``message.usage`` record carries a negative
     ``input_tokens``, ``cache_creation_input_tokens``, or
-    ``cache_read_input_tokens`` field — the transcript fallback must fail
+    ``cache_read_input_tokens`` field; the transcript fallback must fail
     closed rather than silently skip the bad record.
     """
 
@@ -1212,7 +1212,7 @@ def parse_quota(response: dict[str, Any]) -> list[dict[str, Any]] | None:
 
     Prefers ``response["limits"]`` (a list) when present and non-empty,
     mapping each entry via ``_quota_label_for_limit_entry`` while preserving
-    endpoint order — this is the turbulent-safe path: a brand-new scoped
+    endpoint order; this is the turbulent-safe path: a brand-new scoped
     limit appears automatically with no code change. Falls back to the
     top-level ``five_hour``/``seven_day``/``seven_day_opus``/``seven_day_sonnet``
     windows (``percent`` = each block's ``utilization``) only when ``limits``
@@ -1319,12 +1319,12 @@ def _fetch_anthropic_usage(
     Reads the OAuth access token from ``credentials_path`` (the JSON shape
     Claude Code itself writes: ``{"claudeAiOauth": {"accessToken": "..."}}``)
     and calls ``opener(url, headers=..., timeout=timeout)`` where ``url`` is
-    always the literal endpoint URL — the token is carried ONLY in the
+    always the literal endpoint URL; the token is carried ONLY in the
     ``Authorization`` header, never in the URL.
 
-    CRITICAL SECURITY (NFR-SEC): this function fails closed on EVERY error —
+    CRITICAL SECURITY (NFR-SEC): this function fails closed on EVERY error:
     missing/unreadable credentials file, missing token, non-200 status,
-    ``socket.timeout``, malformed JSON, or any other exception — by catching
+    ``socket.timeout``, malformed JSON, or any other exception, by catching
     broadly and returning ``None``. It never re-raises and never inspects or
     persists ``str(exc)`` anywhere, because an exception message raised by a
     transport layer could itself contain the ``Authorization`` header (and
@@ -1363,7 +1363,7 @@ def _fetch_anthropic_usage(
         return parsed
     except Exception:
         # Fail closed on every error class (missing file, bad JSON, HTTP
-        # error, socket.timeout, transport exception, ...). Never propagate —
+        # error, socket.timeout, transport exception, ...). Never propagate:
         # an exception's message may itself carry the Authorization header.
         return None
 
@@ -1462,7 +1462,7 @@ def parse_codex_quota(
     includes ONLY the entry (or entries, in list order) whose ``limit_name``
     (lower-cased) equals the caller's own base model name (the same
     effort-suffix-stripped, lower-cased normalization used by
-    ``resolve_model_window`` above) — this is what keeps a Spark-only limit
+    ``resolve_model_window`` above); this is what keeps a Spark-only limit
     scoped to Spark callers and invisible to e.g. a ``gpt-5.4-mini`` caller.
 
     Malformed entries (wrong types, missing fields) are skipped defensively
@@ -1514,7 +1514,7 @@ def resolve_quota_provider(usage: UsageResult) -> str | None:
     containing ``gpt``/``codex``/``openai``, or a provider containing
     ``openai``/``codex``, resolves to ``"openai"``. A model containing
     ``glm``, or a provider containing ``zai``/``glm``, resolves to
-    ``"glm"`` (a documented stub — Phase 9 does not implement a GLM/Z.ai
+    ``"glm"`` (a documented stub; Phase 9 does not implement a GLM/Z.ai
     quota adapter). A ``claude``-named model or an ``anthropic`` provider
     resolves to ``"anthropic"`` on explicit evidence. An unknown/unset
     model and provider returns ``None`` instead of defaulting to
@@ -1593,13 +1593,13 @@ def _fetch_codex_usage(
     Mirrors ``_fetch_anthropic_usage`` exactly, adapted to the Codex/CLIProxyAPI
     credentials shape (``{"access_token": ..., "account_id": ..., "disabled": ...}``,
     reused via ``_read_credentials_object``) and headers (``Authorization: Bearer
-    <access_token>`` plus ``ChatGPT-Account-Id: <account_id>``) — the token and
+    <access_token>`` plus ``ChatGPT-Account-Id: <account_id>``); the token and
     account id are carried ONLY in headers, never in the URL.
 
-    CRITICAL SECURITY (NFR-SEC): fails closed on every error — missing/unreadable
+    CRITICAL SECURITY (NFR-SEC): fails closed on every error: missing/unreadable
     or ``disabled`` credentials, a missing token or account id, non-200 status,
     ``socket.timeout``, malformed JSON, a non-dict JSON body, or any other
-    exception — by catching broadly and returning ``None``. It never re-raises
+    exception, by catching broadly and returning ``None``. It never re-raises
     and never inspects or persists ``str(exc)`` anywhere, because an exception
     raised by a transport layer could itself contain the ``Authorization``
     header. ``env`` is accepted for interface symmetry with
@@ -1641,7 +1641,7 @@ def _fetch_codex_usage(
     except Exception:
         # Fail closed on every error class (missing/disabled credentials, bad
         # JSON, HTTP error, socket.timeout, transport exception, ...). Never
-        # propagate — an exception's message may itself carry the
+        # propagate: an exception's message may itself carry the
         # Authorization header or the ChatGPT-Account-Id.
         return None
 
@@ -1667,8 +1667,8 @@ def fetch_quota_for_caller(
       ``parse_codex_quota`` (this caller's own ``usage.model``). The
       ``anthropic_opener``/``anthropic_credentials_path`` are never touched.
     - anything else (e.g. ``"glm"``): returns ``None`` without calling any
-      opener — a documented stub; Phase 9 does not implement a GLM/Z.ai
-      quota adapter.
+      opener (a documented stub; Phase 9 does not implement a GLM/Z.ai
+      quota adapter).
 
     Any credentials-path/timeout argument left ``None`` is resolved from
     ``env`` the same way ``main()`` resolves it today (``_resolve_credentials_path``,
@@ -1778,13 +1778,13 @@ def build_report(
     reason``). On ``usage.status == "unavailable"`` the report still carries
     ``usage_source="unavailable"`` and ``reason``.
 
-    Phase 8: quota is generic and endpoint-driven — ``quota`` is
+    Phase 8: quota is generic and endpoint-driven; ``quota`` is
     the ordered list ``parse_quota`` produced (or ``None`` when the endpoint
     fetch failed), carried verbatim as ``report["quota"]``. The v1/Phase 7
     backcompat percentage keys (``session_usage_pct``, ``weekly_usage_pct``,
     ``weekly_fable_pct``, ``weekly_opus_pct``, ``weekly_sonnet_pct``) are
     derived by looking up the ``"5h"``/``"7d"``/``"fable"``/``"opus"``/
-    ``"sonnet"`` labels in ``quota`` — ``None`` when that label is absent, so
+    ``"sonnet"`` labels in ``quota``; ``None`` when that label is absent, so
     a turbulent-safe endpoint response (a new/renamed model family) never
     breaks these fixed keys, it just leaves them ``None``.
     ``session_reset_in``/``weekly_reset_in`` are derived the same way, via
@@ -1848,7 +1848,7 @@ def _humanize_tokens(value: int | float | None) -> str:
     zero/dot trimmed>M`` (e.g. ``1000000 -> "1M"``, ``1500000 -> "1.5M"``);
     ``>=1_000`` renders the same way with a ``k`` suffix (e.g.
     ``552771 -> "552.8k"``, ``200000 -> "200k"``); below that, the bare int.
-    ``None`` renders as ``"?"`` — ``format_compact`` never calls this for a
+    ``None`` renders as ``"?"``; ``format_compact`` never calls this for a
     ``None`` token/window on the "ok" branch (that branch requires both to be
     present), so ``"?"`` is a defensive fallback only.
     """
@@ -1875,7 +1875,7 @@ def _humanize_tokens(value: int | float | None) -> str:
 def _quota_parts(report: dict[str, Any]) -> str:
     """Render the generic ``quota.<label> <percent>%`` segment, in endpoint order.
 
-    Phase 8: no labels are hardcoded here — this renders whatever
+    Phase 8: no labels are hardcoded here; this renders whatever
     ``report["quota"]`` (the ordered list ``parse_quota`` produced) actually
     contains, one ``quota.<label> <percent>%`` term per entry, joined by
     ``", "``. This is what makes a brand-new scoped limit (a new model
@@ -1910,12 +1910,12 @@ def format_compact(report: dict[str, Any]) -> str:
     """Render the ``--json``-equivalent ``report`` as ONE compact all-info line.
 
     Identical shape for the orchestrator (``report["agent_id"] is None``) and
-    a subagent — nothing about role changes the template. Two branches:
+    a subagent; nothing about role changes the template. Two branches:
 
     - Usable usage (``report["reason"] is None``):
       ``ctx <tok>/<window> <pct>% | <model>[ <provider>] | src:<usage_source> |
       <quota parts>``.
-    - Unavailable usage (``report["reason"] is not None``): no model block —
+    - Unavailable usage (``report["reason"] is not None``): no model block;
       ``ctx unavailable (<reason>) | src:<usage_source> | <quota parts>``.
 
     The quota segment (``_quota_parts``) is identical in both branches and
@@ -1954,7 +1954,7 @@ def _default_outcome_log(env: Any) -> Path | None:
        handling, which is unchanged and still fails closed).
 
     Reads ``JARVISWARM_ROOT``/``HOME`` via ``.get()`` only (no wholesale
-    ``env`` iteration, no secret-shaped keys) and never raises — a missing or
+    ``env`` iteration, no secret-shaped keys) and never raises; a missing or
     unreadable candidate simply falls through to the next tier.
     """
 
@@ -2003,17 +2003,17 @@ def main(argv: list[str] | None = None) -> int:
     Calls ``resolve_current_invocation``/``find_usage_for_resolution`` by
     bare module-global name so tests can monkeypatch either in isolation.
     The default (non-``--json``) human output is ``format_compact``'s single
-    all-info line (Phase 7) — the prior multi-line render is
+    all-info line (Phase 7); the prior multi-line render is
     retired.
 
     Phase 8: quota is fetched directly from the Anthropic OAuth
-    usage endpoint via ``_fetch_anthropic_usage``/``parse_quota`` — the
+    usage endpoint via ``_fetch_anthropic_usage``/``parse_quota``; the
     ccstatusline cache is no longer consulted at all. A failed/unavailable
     fetch yields ``quota=None``, which ``build_report``/``format_compact``
     already render fail-closed (``"quota unavailable"``).
 
     Phase 9: quota is scoped to the caller's OWN provider AND own
-    model via ``fetch_quota_for_caller`` — an Anthropic caller still gets the
+    model via ``fetch_quota_for_caller``; an Anthropic caller still gets the
     Phase 8 Anthropic OAuth path unchanged, while an OpenAI/Codex caller now
     gets its own ChatGPT/Codex quota instead.
     """
