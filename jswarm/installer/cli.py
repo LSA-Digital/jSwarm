@@ -75,11 +75,46 @@ def _install_skills(ctx, home: Path, source: Path, timestamp: str) -> None:
     if not skills_source.is_dir():
         print(f"  skills: {skills_source} not found, skipping")
         return
-    for skill_dir in sorted(p for p in skills_source.iterdir() if p.is_dir()):
+
+    real_skill_dirs = sorted(p for p in skills_source.iterdir() if p.is_dir() and p.name != "_shims")
+    real_names_lower = {p.name.lower() for p in real_skill_dirs}
+
+    # Real skills first, shims second: a rename that only changed case (e.g.
+    # jsetup -> jSetup) leaves the deprecated shim's name identical to the
+    # real skill's name on the case-insensitive filesystem every supported
+    # host uses, so `dest_root/jsetup` and `dest_root/jSetup` are the *same*
+    # destination directory. Installing both, in either order, would let one
+    # silently overwrite the other -- landing the deprecation-stub content
+    # under the real skill's name, or vice versa. Real skills install first
+    # so identity is never in doubt; the shim loop below then skips any shim
+    # whose name collides case-insensitively with a real skill instead of
+    # clobbering it.
+    for skill_dir in real_skill_dirs:
         dest = dest_root / skill_dir.name
         if dest.exists():
             backup_mod.backup_path(ctx, home, dest, timestamp)
         ctx.copy_tree(skill_dir, dest)
+
+    shims_source = skills_source / "_shims"
+    if not shims_source.is_dir():
+        return
+    # _shims/ is a source-tree grouping directory only. Each child is a
+    # deprecation-alias skill that must land at its own discoverable
+    # top-level name (dest_root/<alias>), exactly like a real skill -- not
+    # nested under a literal "_shims" directory, which nothing that
+    # discovers skills by top-level name would ever find.
+    for shim_dir in sorted(p for p in shims_source.iterdir() if p.is_dir()):
+        if shim_dir.name.lower() in real_names_lower:
+            print(
+                f"  skills: shim '{shim_dir.name}' skipped -- its name is a case-only "
+                f"variant of a real skill already installed at {dest_root / shim_dir.name}, "
+                "the same path on a case-insensitive filesystem"
+            )
+            continue
+        shim_dest = dest_root / shim_dir.name
+        if shim_dest.exists():
+            backup_mod.backup_path(ctx, home, shim_dest, timestamp)
+        ctx.copy_tree(shim_dir, shim_dest)
 
 
 def _install_portal_config(ctx, home: Path, source: Path, timestamp: str) -> None:
