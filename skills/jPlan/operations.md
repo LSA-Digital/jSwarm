@@ -106,9 +106,9 @@ Legacy-safe: plans with no ceremony selection / no-selection recorded remain val
 
 10. **Enable PM/PO Jira rollup comments for this ticket?** `[no (default) / yes]`
    - **Default: No.** Rollup comments are OFF unless the developer opts in here — this is the single opt-in moment (asked once at `/jPlan`). Record the answer as the plan-frontmatter flag `rollup_comments: on|off`.
-   - **yes** → frontmatter `rollup_comments: on`. When on, `/jPrecompact` (full) and `/jClose` render a PO-altitude **po-ticket-outcome** via `/plain-english` and post it as a comment on the story/task Jira issue; for a Feature child they also post a PM-altitude **pm-feature-rollup** on the Feature issue (refreshed at `/feature-reconcile`). The producing plan records a deep link to each comment; if Jira is unavailable a local receipt is written instead. This is for non-technical PM/PO readers — no markdown-file or dev-env step is ever required of them.
+   - **yes** → frontmatter `rollup_comments: on`. **Not implemented in this distribution:** the PO-altitude rendering this flag was designed to opt into is not available here; `/jClose` Step 3 always posts its own plain tracker comment (retro link, plan link, next step) regardless of this flag.
    - **no** (default) → frontmatter `rollup_comments: off` (or omit). No rollup comment is ever posted.
-   - Independent of the existing `/jClose` retro (Step 3.5) and work-completed (Step 3.6) comments.
+   - Independent of the existing `/jClose` tracker comment (Step 3).
 
 <!-- HAS-340: per-project worktree policy lives below this anchor. Projects opt in
      via .claude/project-command-injections.yaml + a snippet at
