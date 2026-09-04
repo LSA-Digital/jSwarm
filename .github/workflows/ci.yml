@@ -7,6 +7,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version-file: "portal/.nvmrc" }
       - run: python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
       - run: .venv/bin/python -m pytest -q
       - run: .venv/bin/python -m jswarm.leakgate
+      # Slow, real npm ci + astro build + live-server boot smoke test for the
+      # portal (excluded from the default `pytest -q` run by pytest.ini's
+      # `addopts = -m "not portal_build"`); run explicitly here so a portal
+      # that cannot build or start fails CI instead of only being discovered
+      # by a human opening a browser.
+      - run: .venv/bin/python -m pytest -q -m portal_build
