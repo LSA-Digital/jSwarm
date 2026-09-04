@@ -4,13 +4,17 @@ Upstream (common) also reuses the COM-112 finding secret/PII regex tuple
 (``compliance/substrate/findings.py``) here by identity. That substrate is an
 internal compliance-controls governance/reporting system (event log, dimension
 taxonomy, schema validation against its own internal docs) and is not part of
-this repository. This public copy carries only its own local generic
-publish-sink hardening layer below -- PEM keys, host-local paths, and a
-comprehensive key-like-token set (GitHub/GitLab/Slack/npm/PyPI/AWS/Bearer/
-generic secret-assignment patterns, the same family jswarm/leakgate.yaml
-already declares) -- which was always meant to stand on its own, not
-substitute for the substrate tuple. The redaction boundary here is narrower
-than upstream's by that one tuple's worth of additional detectors, not absent.
+this repository, so this public copy does not import it. Instead this module
+carries its own local, self-contained pattern set: PEM key blocks, host-local
+paths, a key-like-token set (GitHub/GitLab/Slack/npm/PyPI/AWS/Bearer/generic
+secret-assignment patterns), plus bare email addresses, ``sk-``-prefixed keys,
+and JWT-shaped tokens -- ordinary, generic regexes with no coupling to the
+enterprise substrate, restored here from the same family jswarm/leakgate.yaml
+already declares for commits (this module is the equivalent check at install
+time: jswarm/installer/preflight/__init__.py and jswarm/installer/installer/
+services/leak_gate.py both gate on it). This is a local pattern set, not a
+governance-backed one: it detects what is listed above and nothing the
+upstream substrate additionally covers beyond that.
 """
 from __future__ import annotations
 
@@ -18,9 +22,17 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-# COM-112 substrate.findings._SECRET_PATTERNS deliberately not carried here --
-# see the module docstring above.
-_SECRET_PATTERNS: tuple[re.Pattern[str], ...] = ()
+# COM-112 substrate.findings._SECRET_PATTERNS is not imported here (see the
+# module docstring) but three of its detectors have no local equivalent and
+# are restored below as ordinary, uncoupled regexes: bare email/PII, sk-
+# prefixed keys, and JWT-shaped tokens. The other four upstream detectors
+# (AKIA, PEM private key, host-local paths, Bearer) are already covered by
+# this module's own patterns further down.
+_SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"),
+    re.compile(r"sk-[A-Za-z0-9_-]{12,}", re.IGNORECASE),
+    re.compile(r"eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}", re.IGNORECASE),
+)
 
 _REDACTION_MARKER = "[REDACTED]"
 _PEM_PRIVATE_KEY_BLOCK_PATTERN = re.compile(
@@ -57,7 +69,11 @@ _KEY_LIKE_TOKEN_PATTERNS = (
 
 
 def _sanitize_string(value: str) -> str:
-    """Redact complete secret tokens while keeping COM-112 detectors authoritative."""
+    """Redact PEM keys, host-local paths, this module's own key-like-token set,
+    bare email addresses, ``sk-``-prefixed keys, and JWT-shaped tokens.
+
+    A local pattern set (see the module docstring), not a governance-backed one.
+    """
 
     sanitized = _PEM_PRIVATE_KEY_BLOCK_PATTERN.sub(_REDACTION_MARKER, value)
     sanitized = _PEM_PRIVATE_KEY_END_MARKER_PATTERN.sub(_REDACTION_MARKER, sanitized)
