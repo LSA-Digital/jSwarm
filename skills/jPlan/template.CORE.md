@@ -31,21 +31,21 @@ features: []
 
 # TICKET-XXX: Feature Title
 
-> **⚡ ORCHESTRATOR EFFORT:** run this orchestrator on **[claude-fable-5 | claude-opus-4-8] at [HIGH | XHIGH]**. [List phase escalations, or "No escalation."] At each escalation boundary the orchestrator MUST remind the owner to switch the session effort, and back afterwards. Source of truth: [parent feature plan] §Orchestrator model routing. — delete this block only if the project has no orchestrator-routing policy
+> **⚡ ORCHESTRATOR EFFORT:** run this orchestrator on **[claude-fable-5 | claude-opus-4-8] at [HIGH | XHIGH]**. [List phase escalations, or "No escalation."] At each escalation boundary the orchestrator MUST remind the owner to switch the session effort, and back afterwards. Source of truth: [parent feature plan] §Orchestrator model routing. (Delete this block only if the project has no orchestrator-routing policy.)
 
 **Last Updated:** YYYY-MM-DD
 
 **Jira Ticket:** [TICKET-XXX](https://your-jira.atlassian.net/browse/TICKET-XXX)
-**Parent:** [PARENT-XXX (Epic Title) — delete if none]
-**Technical Design Spec:** [TICKET-XXX.specs.md](TICKET-XXX.specs.md) — delete for Quick plans that do not use a spec
+**Parent:** [PARENT-XXX (Epic Title), delete if none]
+**Technical Design Spec:** [TICKET-XXX.specs.md](TICKET-XXX.specs.md) (delete for Quick plans that do not use a spec)
 **Recommended agent team:** Pattern <1|2> · review:<critic|critic-xhigh> · arch:<none|architect|architect-master> · escalation-trigger:<verbatim trigger or "none">
-**Orchestrator model & effort:** [FABL claude-fable-5 | OPUS claude-opus-4-8] · [HIGH | XHIGH throughout | HIGH with phase escalations — list them] — routes the ORCHESTRATOR session only; named j-cores stay route-pinned
-**Ceremony tier:** Low | Medium | High | N/A — legacy/no-selection
-**Effective pattern:** [compiled H/M/L preset key such as `l1.story.medium-standard`, or `N/A — legacy/no-selection`]
+**Orchestrator model & effort:** [FABL claude-fable-5 | OPUS claude-opus-4-8] · [HIGH | XHIGH throughout | HIGH with phase escalations, list them] (routes the ORCHESTRATOR session only; named j-cores stay route-pinned)
+**Ceremony tier:** Low | Medium | High | N/A (legacy/no-selection)
+**Effective pattern:** [compiled H/M/L preset key such as `l1.story.medium-standard`, or `N/A (legacy/no-selection)`]
 **Testing strategy:** unit [required/upgrade/N/A]; integration [required/upgrade/N/A]; live-show UAT [yes only if UI/E2E impact / no]; regression E2E [per-ticket/deferred/N/A]; smoke [impact yes/no]
-**UAT state policy:** fresh-created | curated-existing | diagnostic-broken | N/A — use N/A when `Automated UAT: no`; default to fresh-created for live-show UAT; existing data requires named IDs and preflight
-**Test data strategy:** managed cluster required for regression | managed cluster recommended for scripted UAT | exploratory-ad-hoc allowed for live UAT | N/A — [cluster IDs or setup summary]
-**Status:** Tracked via frontmatter `status:` field (ACTIVE → READY_FOR_MERGE → DONE) — see [state-machine.md](../../../docs/merge/state-machine.md)
+**UAT state policy:** fresh-created | curated-existing | diagnostic-broken | N/A (use N/A when `Automated UAT: no`); default to fresh-created for live-show UAT; existing data requires named IDs and preflight
+**Test data strategy:** managed cluster required for regression | managed cluster recommended for scripted UAT | exploratory-ad-hoc allowed for live UAT | N/A ([cluster IDs or setup summary])
+**Status:** Tracked via frontmatter `status:` field (ACTIVE → READY_FOR_MERGE → DONE); see [state-machine.md](../../../docs/merge/state-machine.md)
 
 ---
 

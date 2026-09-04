@@ -20,19 +20,19 @@ If found: read the relevant feature inventories and extract the scenarios this t
 
 If the project has `tests/TEST_CATALOG.md`:
 
-**Search 1 — Existing tests for this ticket's functionality:**
+**Search 1: existing tests for this ticket's functionality:**
 ```bash
 grep -i "<feature_keywords>" tests/TEST_CATALOG.md | head -30
 ```
 
-**Search 2 — E2E tests where this ticket is a PREREQUISITE:**
+**Search 2: E2E tests where this ticket is a PREREQUISITE:**
 
-Step A — Find your ticket in the Feature-to-Ticket mapping:
+Step A: find your ticket in the Feature-to-Ticket mapping:
 ```bash
 grep "TICKET-XXX" tests/TEST_CATALOG.md | head -10
 ```
 
-Step B — Search for E2E tests listing that Feature as a prerequisite:
+Step B: search for E2E tests listing that Feature as a prerequisite:
 ```bash
 grep -B2 "F-XX" tests/TEST_CATALOG.md | grep -E "^### E2E-|Prerequisites:" | head -20
 ```
@@ -73,11 +73,11 @@ Outputs of Step 3A:
 
 The scenario extract is the ticket's living UAT slice; it may evolve during `/jGo`. The executable UAT doc can start as a draft, but it must already contain the impacted scenarios, environment details, execution strategy, exact runtime contract (if needed), evidence/report path, and a concrete handoff packet for `jQATester` before `/jGo` delegates.
 
-**Per-Phase UAT expectations (MANDATORY when Automated UAT applies):** If the ticket has UI/E2E/user-journey impact and `Automated UAT: yes`, `TICKET-XXX.uat-test.md` must define automated UAT expectations for each applicable phase — not just a single end-of-ticket verification. Each phase section lists the UAT scenarios that validate that phase's user-visible deliverables, referencing `docs/architecture/architecture.uat-scenarios.md` for the master inventory. During `/jGo`, a phase without UAT expectations BLOCKS until they're added. Backend-only, schema-only, migration-only, infrastructure-only, or tooling-only phases record `Automated UAT: no — no UI/E2E impact` and use lower-level proof.
+**Per-Phase UAT expectations (MANDATORY when Automated UAT applies):** If the ticket has UI/E2E/user-journey impact and `Automated UAT: yes`, `TICKET-XXX.uat-test.md` must define automated UAT expectations for each applicable phase, not just a single end-of-ticket verification. Each phase section lists the UAT scenarios that validate that phase's user-visible deliverables, referencing `docs/architecture/architecture.uat-scenarios.md` for the master inventory. During `/jGo`, a phase without UAT expectations BLOCKS until they're added. Backend-only, schema-only, migration-only, infrastructure-only, or tooling-only phases record `Automated UAT: no (no UI/E2E impact)` and use lower-level proof.
 
 ### Step 3A.5: UAT Pre-flight 5-question check (MANDATORY when `Automated UAT: yes`)
 
-Skip entirely when `Automated UAT: no — no UI/E2E impact`.
+Skip entirely when `Automated UAT: no (no UI/E2E impact)`.
 
 For each scenario in the extracted UAT file, answer:
 
@@ -89,7 +89,7 @@ For each scenario in the extracted UAT file, answer:
 | 4 | Does the scenario depend on a **timing window** (mid-dispatch, pre-commit)? If window ≤30s on dev, does an integration test already cover it? | Proceed | Push timing assertion to integration test; browser UAT only corroborates path is active |
 | 5 | Is the journey **multi-stream** (browse + logs + API-read + evidence-write in parallel)? | Plan orchestrator-supplied monitor/API/evidence context for `jQATester` | Single-stream → simpler `jQATester` handoff |
 
-Record results in `TICKET-XXX.uat-scenarios.md` under a `## UAT Pre-flight` section. Any scenario that fails checks 1–4 **MUST be re-scoped** before the executable UAT doc is written — do not carry known-infeasible scenarios into `TICKET-XXX.uat-test.md`.
+Record results in `TICKET-XXX.uat-scenarios.md` under a `## UAT Pre-flight` section. Any scenario that fails checks 1–4 **MUST be re-scoped** before the executable UAT doc is written; do not carry known-infeasible scenarios into `TICKET-XXX.uat-test.md`.
 
 
 ## Bounded overview first: only when the project adopted the scenarios engine (WS3)
@@ -101,9 +101,9 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
   inspect-command --project-root <PROJECT_ROOT> --command-name code-overview.md
 ```
 
-Adoption requires **both** `mode: managed` **and** `code-overview-scenario-source` present in the emitted `anchors` list. A project can manage `code-overview.md` for `code-overview-required-reading` / `code-overview-smoke-config` alone, with **no** canonical scenarios JSON — that is **not** adoption. Anything short of both ⇒ not adopted.
+Adoption requires **both** `mode: managed` **and** `code-overview-scenario-source` present in the emitted `anchors` list. A project can manage `code-overview.md` for `code-overview-required-reading` / `code-overview-smoke-config` alone, with **no** canonical scenarios JSON; that is **not** adoption. Anything short of both ⇒ not adopted.
 
 - **If adopted →** run `/code-overview <scenario-grouping>` **first** as the bounded, UX-aligned overview pass (scenario-grouping framing, ≤12 / hard-20 tool budget, ≥3× speedup benchmark vs an unbounded trawl). Then let ColGREP enrich the already-bounded pathway with the Step 3A/C-keyword searches in this module.
-- **If NOT adopted →** skip `/code-overview` entirely and use the architecture-first ColGREP search in this module. **Never advise `/code-overview` where no canonical scenarios JSON exists** — it depends on the engine and would mislead on a non-adopting project.
+- **If NOT adopted →** skip `/code-overview` entirely and use the architecture-first ColGREP search in this module. **Never advise `/code-overview` where no canonical scenarios JSON exists**: it depends on the engine and would mislead on a non-adopting project.
 
 hai-sim-engine is the live first adopter (manifest wires `code-overview.md` → `docs/architecture/architecture.uat-scenarios.json`).

@@ -46,7 +46,7 @@ Why this is required: subagent self-context is resolved by locating the single `
 
 ### Runtime note: orchestrator Bash subprocess is classified as a subagent
 
-In the current Claude Code runtime, the orchestrator's own `Bash` tool runs its subprocess with `CLAUDE_CODE_CHILD_SESSION=1` set, so a plain `ctx` call made from the orchestrator's Bash tool is classified as a subagent invocation and returns `unavailable` (no identity nonce was supplied for it). Subagents are the primary supported path here — invoke with `--identity-nonce`. To read the orchestrator's own session context directly, invoke `ctx-usage.py` in true main-mode with `CLAUDE_CODE_CHILD_SESSION` cleared from the environment. Separately, the F-49 `jswarm-ctx-widget.py` HUD already owns reading the orchestrator's own statusline context, so most callers never need this workaround.
+In the current Claude Code runtime, the orchestrator's own `Bash` tool runs its subprocess with `CLAUDE_CODE_CHILD_SESSION=1` set, so a plain `ctx` call made from the orchestrator's Bash tool is classified as a subagent invocation and returns `unavailable` (no identity nonce was supplied for it). Subagents are the primary supported path here: invoke with `--identity-nonce`. To read the orchestrator's own session context directly, invoke `ctx-usage.py` in true main-mode with `CLAUDE_CODE_CHILD_SESSION` cleared from the environment. Separately, the F-49 `jswarm-ctx-widget.py` HUD already owns reading the orchestrator's own statusline context, so most callers never need this workaround.
 
 ## What it reports
 
@@ -73,17 +73,17 @@ Set `JSWARM_CTX_MODEL_WINDOWS` to point at an alternate registry file when testi
 
 ### Quota data: scoped to the caller's OWN provider and model (Phase 9)
 
-Quota reflects the **caller's own provider**, resolved from the usage record's model/provider (`resolve_quota_provider`), then dispatched to a per-provider adapter (`fetch_quota_for_caller`). A caller never shows another provider's quota — a gpt subagent shows its OpenAI/Codex quota, a Claude caller shows its Anthropic quota. An **unknown/unidentified** provider fetches **no** quota and makes **no** network call (fail-closed dispatch isolation).
+Quota reflects the **caller's own provider**, resolved from the usage record's model/provider (`resolve_quota_provider`), then dispatched to a per-provider adapter (`fetch_quota_for_caller`). A caller never shows another provider's quota: a gpt subagent shows its OpenAI/Codex quota, a Claude caller shows its Anthropic quota. An **unknown/unidentified** provider fetches **no** quota and makes **no** network call (fail-closed dispatch isolation).
 
 - **Anthropic caller** (`claude*`) → `GET https://api.anthropic.com/api/oauth/usage`. OAuth token read header-only from `~/.claude/.credentials.json` (`claudeAiOauth.accessToken`, or `JSWARM_CTX_CREDENTIALS`). Response `limits[]` parsed generically/turbulent-safely: `kind:"session"`→`5h`, `kind:"weekly_all"`→`7d`, `kind:"weekly_scoped"`→scope model `display_name` lowercased (`fable`/`opus`/`sonnet`/…); unknown kinds pass through; when `limits[]` is absent, top-level `five_hour`/`seven_day` utilization is used.
-- **OpenAI / gpt / Codex caller** (`gpt`/`codex`/`openai`) → `GET https://chatgpt.com/backend-api/wham/usage`. OAuth `access_token` + `account_id` read header-only from `~/.cli-proxy-api/codex-*.json` (a non-`disabled` entry; or `JSWARM_CTX_CODEX_CREDENTIALS`), sent only in the `Authorization: Bearer` and `ChatGPT-Account-Id` headers. Windows are labeled by duration: `primary_window` (18000s)→`5h`, `secondary_window` (604800s)→`7d` (other durations humanized); `reset_at` (unix epoch) is converted to a countdown. **Model-scoped:** the account-wide `additional_rate_limits[]` (per-model scoped limits such as `gpt-5.3-codex-spark`, the micro-agent model) is filtered to **only the limit whose name matches the caller's own model** — so a spark micro-agent shows its `gpt-5.3-codex-spark` limit, while a `gpt-5.4-mini`/`gpt-5.5` caller shows only `5h`/`7d`. A window with a missing/non-numeric percent is treated as unusable (skipped).
+- **OpenAI / gpt / Codex caller** (`gpt`/`codex`/`openai`) → `GET https://chatgpt.com/backend-api/wham/usage`. OAuth `access_token` + `account_id` read header-only from `~/.cli-proxy-api/codex-*.json` (a non-`disabled` entry; or `JSWARM_CTX_CODEX_CREDENTIALS`), sent only in the `Authorization: Bearer` and `ChatGPT-Account-Id` headers. Windows are labeled by duration: `primary_window` (18000s)→`5h`, `secondary_window` (604800s)→`7d` (other durations humanized); `reset_at` (unix epoch) is converted to a countdown. **Model-scoped:** the account-wide `additional_rate_limits[]` (per-model scoped limits such as `gpt-5.3-codex-spark`, the micro-agent model) is filtered to **only the limit whose name matches the caller's own model**, so a spark micro-agent shows its `gpt-5.3-codex-spark` limit, while a `gpt-5.4-mini`/`gpt-5.5` caller shows only `5h`/`7d`. A window with a missing/non-numeric percent is treated as unusable (skipped).
 - **GLM / Z.ai caller** (`glm`/`zai`) → documented stub behind the same dispatch seam (no quota endpoint wired yet) → `quota unavailable`.
 
-Every adapter reads its credential with the same fd-anchored, `O_NOFOLLOW`, regular-file, size-bounded read; uses the token/account header-only; never logs/echoes/persists it; runs on a bounded timeout; and **fails closed independently** — any missing credential, `disabled` account, non-200, timeout, network error, or malformed body yields no quota for that caller rather than an error, and never breaks the context line or another provider's quota. This supersedes the earlier Phase-8 Anthropic-only quota path and the still-earlier ccstatusline-cache source.
+Every adapter reads its credential with the same fd-anchored, `O_NOFOLLOW`, regular-file, size-bounded read; uses the token/account header-only; never logs/echoes/persists it; runs on a bounded timeout; and **fails closed independently**: any missing credential, `disabled` account, non-200, timeout, network error, or malformed body yields no quota for that caller rather than an error, and never breaks the context line or another provider's quota. This supersedes the earlier Phase-8 Anthropic-only quota path and the still-earlier ccstatusline-cache source.
 
 ## Output
 
-A single compact all-info line is the default human-readable output (Phase 7) — nothing is hidden, and the shape is **identical** whether the caller is the orchestrator (`agent_id` is `null`) or a subagent:
+A single compact all-info line is the default human-readable output (Phase 7); nothing is hidden, and the shape is **identical** whether the caller is the orchestrator (`agent_id` is `null`) or a subagent:
 
 ```text
 ctx <context_tokens>/<window> <context_pct>% | <model>[ <provider>] | src:<usage_source> | quota.5h <n>%, quota.7d <n>%, quota.fable <n>%[, quota.opus <n>%, quota.sonnet <n>%]
@@ -91,7 +91,7 @@ ctx <context_tokens>/<window> <context_pct>% | <model>[ <provider>] | src:<usage
 
 - `<context_tokens>`/`<window>` are humanized (`552771` -> `552.8k`, `1000000` -> `1M`, `200000` -> `200k`).
 - `<context_pct>` is rounded to the nearest whole percent.
-- The quota segment renders **one `quota.<label> <percent>%` part per limit the caller's provider adapter returned, in order** — nothing is hidden. For an Anthropic caller the labels are typically `5h`/`7d`/`fable`(/`opus`/`sonnet`); for an OpenAI/Codex caller `5h`/`7d`(+ the caller's own model-scoped limit, e.g. `gpt-5.3-codex-spark`). The set is whatever the caller's provider currently tracks (turbulent-safe + model-scoped).
+- The quota segment renders **one `quota.<label> <percent>%` part per limit the caller's provider adapter returned, in order**; nothing is hidden. For an Anthropic caller the labels are typically `5h`/`7d`/`fable`(/`opus`/`sonnet`); for an OpenAI/Codex caller `5h`/`7d`(+ the caller's own model-scoped limit, e.g. `gpt-5.3-codex-spark`). The set is whatever the caller's provider currently tracks (turbulent-safe + model-scoped).
 - When the endpoint is unavailable (missing credential, timeout, non-200, network/parse error), the quota segment renders `quota unavailable` and the context line is still emitted.
 
 When usage is unavailable, the model block is dropped and the line reads:
@@ -119,7 +119,7 @@ The JSON report contains these fields:
 | `window_source` | `env`, `registry`, `heuristic-1m`, `default`, or `null`. |
 | `usage_source` | `jagentproxy-outcome-log`, `transcript-jsonl`, or `unavailable`. |
 | `reason` | Failure reason when unavailable, otherwise `null`. |
-| `quota` | Ordered list of every limit the caller's own provider adapter returned (Anthropic `/api/oauth/usage` or OpenAI/Codex `wham/usage`, model-scoped), each `{label, percent, resets_at}`; `null` when the adapter is unavailable, the caller's provider is unknown, or it's the GLM stub (fail-closed). Turbulent-safe — new limits appear automatically. |
+| `quota` | Ordered list of every limit the caller's own provider adapter returned (Anthropic `/api/oauth/usage` or OpenAI/Codex `wham/usage`, model-scoped), each `{label, percent, resets_at}`; `null` when the adapter is unavailable, the caller's provider is unknown, or it's the GLM stub (fail-closed). Turbulent-safe: new limits appear automatically. |
 | `session_usage_pct` | Convenience: percent of the `5h` (session) quota entry, or `null`. Derived from `quota`. |
 | `weekly_usage_pct` | Convenience: percent of the `7d` (weekly-all) quota entry, or `null`. Derived from `quota`. |
 | `weekly_fable_pct` | Convenience: percent of the `fable` quota entry, or `null` when the caller's provider quota has no Fable limit (e.g. a non-Anthropic caller). Derived from `quota`. |
@@ -132,7 +132,7 @@ On failure, the command still emits the report. It sets `usage_source` to `unava
 
 ## Environment variables
 
-The implementation reads only an allow-list of named variables via direct lookup. It never enumerates the environment and never reads secret-shaped variables such as `*_KEY`, `*_SECRET`, or `*_TOKEN`. Provider OAuth credentials are **not** read from the environment — they are read from their credentials files (Anthropic: `~/.claude/.credentials.json` / `JSWARM_CTX_CREDENTIALS`; OpenAI/Codex: `~/.cli-proxy-api/codex-*.json` / `JSWARM_CTX_CODEX_CREDENTIALS`) solely for the caller's read-only provider quota GET, used header-only, and never logged/echoed/persisted.
+The implementation reads only an allow-list of named variables via direct lookup. It never enumerates the environment and never reads secret-shaped variables such as `*_KEY`, `*_SECRET`, or `*_TOKEN`. Provider OAuth credentials are **not** read from the environment; they are read from their credentials files (Anthropic: `~/.claude/.credentials.json` / `JSWARM_CTX_CREDENTIALS`; OpenAI/Codex: `~/.cli-proxy-api/codex-*.json` / `JSWARM_CTX_CODEX_CREDENTIALS`) solely for the caller's read-only provider quota GET, used header-only, and never logged/echoed/persisted.
 
 Supported user-facing overrides:
 
@@ -150,7 +150,7 @@ The script also reads Claude Code/session variables needed for operation: `CLAUD
 
 ## `/ctx` command
 
-A thin `/ctx` slash command wraps this skill for interactive use — see `docs/_CONTROLLED_CONFIG/dotclaude/user/commands/ctx.md`. It documents the orchestrator path (clear `CLAUDE_CODE_CHILD_SESSION` so the call resolves as main-session, not subagent) and the agent path (pass a fresh `--identity-nonce ctx-nonce:<...>`).
+A thin `/ctx` slash command wraps this skill for interactive use; see `docs/_CONTROLLED_CONFIG/dotclaude/user/commands/ctx.md`. It documents the orchestrator path (clear `CLAUDE_CODE_CHILD_SESSION` so the call resolves as main-session, not subagent) and the agent path (pass a fresh `--identity-nonce ctx-nonce:<...>`).
 
 ## Limitations
 
