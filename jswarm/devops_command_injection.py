@@ -11,6 +11,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+_HERE = Path(__file__).resolve().parent
+# Insert the repository root (parent of jswarm/), not jswarm/ itself: this makes
+# `import jswarm.host` resolve whether this file is run directly by path (as
+# /jPlan's documented `${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/devops_command_injection.py`
+# invocation does) or imported as a module. Run by bare path with no fix, Python
+# puts this file's own directory (jswarm/) on sys.path[0], and `import jswarm.host`
+# fails with "No module named 'jswarm'" -- there is no jswarm/jswarm/ subpackage.
+# Same pattern as jswarm/plan_status/cli.py.
+sys.path.insert(0, str(_HERE.parent))
+
 from jswarm.host import current as _current_host
 
 
