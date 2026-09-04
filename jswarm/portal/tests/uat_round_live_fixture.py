@@ -30,7 +30,7 @@ from jswarm.uat_round_materialize import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-LEDGER_TEMPLATE = REPO_ROOT / "jswarm/tests/fixtures/com376_phase3_feedback/healthy-has617-ledger.md"
+LEDGER_TEMPLATE = REPO_ROOT / "jswarm/tests/fixtures/uat_round_feedback/healthy-ledger.md"
 STATE_SCHEMA = "jswarm.test-uat.live-fixture-state/v1"
 _LAST_STDOUT = ""
 
@@ -200,7 +200,7 @@ def _emit(value: dict[str, Any]) -> None:
 
 def _materialize_active_round(root: Path, ticket: str, round_id: str) -> dict[str, Any]:
     """Render a fresh active round from canonical producer inputs, not rewrites."""
-    manifest_path = REPO_ROOT / "jswarm/tests/fixtures/com376_phase3_package/healthy-manifest.json"
+    manifest_path = REPO_ROOT / "jswarm/tests/fixtures/uat_round_package/healthy-manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not isinstance(manifest, dict):
         raise FixtureError("canonical producer manifest must be an object")

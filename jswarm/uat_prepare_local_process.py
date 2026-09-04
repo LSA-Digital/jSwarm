@@ -258,7 +258,7 @@ def _identity_manifests(project_root: Path) -> dict[str, str]:
     ui = [ui_root / name for name in ("package.json", "package-lock.json", "astro.config.mjs", "tailwind.config.mjs", "tsconfig.json")]
     public_root = ui_root / "public"
     ui.extend(_regular_tree(ui_root / "src")); ui.extend(_regular_tree(public_root) if public_root.exists() else [])
-    fixture = [project_root / "jswarm/portal/tests/uat_round_live_fixture.py", project_root / "jswarm/tests/fixtures/com376_phase3_package/healthy-manifest.json", project_root / "jswarm/tests/fixtures/com376_phase3_feedback/healthy-has617-ledger.md"]
+    fixture = [project_root / "jswarm/portal/tests/uat_round_live_fixture.py", project_root / "jswarm/tests/fixtures/uat_round_package/healthy-manifest.json", project_root / "jswarm/tests/fixtures/uat_round_feedback/healthy-ledger.md"]
     dist_root = ui_root / "dist"; dist = _regular_tree(dist_root)
     if not (dist_root / "index.html").is_file() or not (dist_root / "uat/index.html").is_file():
         raise LocalCertificationError("production dist lacks required pages")

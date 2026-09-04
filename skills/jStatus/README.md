@@ -1,6 +1,6 @@
 # jStatus
 
-> **Generally available**: canonical JSWARM user skill; registered and deployed through the governed catalog lifecycle.
+> **Generally available**: the canonical, catalog-recognized `jStatus` pattern (as opposed to a ticket-local instance -- see Pattern availability below).
 
 `jStatus` produces one evidence-backed ticket status report in two places: chat and `.jswarm/plans/<TICKET-XXX>/.jstatus.latest.md`. The chat and file render are intentionally identical. The latest file is overwritten on each render so it remains the current report, not an append-only log.
 
@@ -26,7 +26,7 @@ For `TICKET-XXX`, the plan folder is `.jswarm/plans/TICKET-XXX/`, and the skill 
 | Pattern | Availability | Use |
 |---|---|---|
 | `standard@1` | Generally available | A compact Product-Engineer report with Technical Terms, Background / Relevant Context, Product Manager View, and Software Engineering Details. |
-| `has617-l1-pipeline@1` | ticket-local instance | 's L1 operational-pipeline vocabulary, stage table, direct blocker-to-outcome table, spend/envelope fields, review verdicts, and A/C 1–9 alignment. It is not a common catalog asset. |
+| `TICKET-XXX-l1-pipeline@1` | ticket-local instance | This pattern's L1 operational-pipeline vocabulary, stage table, direct blocker-to-outcome table, spend/envelope fields, review verdicts, and A/C 1–9 alignment. It is not a common catalog asset. |
 
 A `--template` selector must exactly match either a generally available catalog identity or the identity of the already-materialized ticket-local template, always in `name@version` form. An unversioned or unknown selector is invalid; explain it and show the available choices instead of guessing. When the ticket-local template is absent, the authoring flow offers `standard@1` and materializes it only after explicit confirmation. A missing or malformed selection fails open with an explanation and falls back to `standard@1`; it never blocks ticket progress.
 
@@ -43,7 +43,3 @@ Use `unknown` for an unavailable fact and `unmeasured` for a measurement that wa
 When a report uses an existing diagram, the template names its authoritative evidence source and the renderer pulls it from there, preserving labels and shape rather than redrawing it from memory. Sample rows are scaffolding rather than limits: blocker and review-verdict tables expand or contract to cover all material evidence.
 
 Generated frontmatter records `generated_at`, `ticket`, `template`, `trigger`, `repository_head`, and orchestrator model `status_owner`. `status_owner` is the runtime's orchestrator model identifier, or `unknown` when unavailable; never infer it or substitute an agent/core identity. A human-readable timestamp follows the frontmatter immediately.
-
-## Generally available lifecycle
-
-The canonical source is the controlled-config user skill in the JSWARM common repository. `/jregister` prepares and validates its catalog closure; `/jdeploy` materializes and verifies that closure at the live user-skill target. Ticket-local `.jstatus.template.md` and `.jstatus.latest.md` files remain project evidence and are not catalog assets.

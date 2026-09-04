@@ -90,7 +90,7 @@ def make_publication(root: Path, publication_id: str = "pub-test-001", contract_
     }
 
 
-_UAT_MANIFEST = REPO_ROOT / "jswarm/tests/fixtures/com376_phase3_package/healthy-manifest.json"
+_UAT_MANIFEST = REPO_ROOT / "jswarm/tests/fixtures/uat_round_package/healthy-manifest.json"
 _COM391_V2_PREPARE_REQUEST = (
     REPO_ROOT / ".jswarm/plans/DEMO-391/DEMO-391.uat-prepare-request.step-v2.json"
 )

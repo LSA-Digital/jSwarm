@@ -5,7 +5,7 @@ description: Render evidence-backed ticket status reports from a selected, versi
 
 # jStatus
 
-> **Generally available**: canonical JSWARM user skill; registered and deployed through the governed catalog lifecycle.
+> **Generally available**: the canonical, catalog-recognized `jStatus` pattern (as opposed to a ticket-local instance).
 
 ## Purpose
 
@@ -45,7 +45,7 @@ The generally available catalog starts with:
 
 - `standard@1`: four-section Product-Engineer status.
 
-Projects and tickets may carry already-materialized, versioned local patterns. For example, 's `has617-l1-pipeline@1` remains in that ticket's plan folder; local patterns are instances, not generally available catalog assets.
+Projects and tickets may carry already-materialized, versioned local patterns. For example, a ticket's `TICKET-XXX-l1-pipeline@1` remains in that ticket's plan folder; local patterns are instances, not generally available catalog assets.
 
 ## Quick mode
 
@@ -156,9 +156,3 @@ Few-shot category definitions (illustrative, from field instances):
 - **Ceremony**: process or evidence work whose primary output is procedural conformance rather than product behavior or new defect knowledge. E.g. a 12-phase provable-deletion cutover on a disposable pre-production stack (DevOps · Importance LOW · Effort HIGH · "owner cancelled; lean clear-all achieves the same outcome in minutes"); a promotion sign-off harness rendering counts nobody consumes (DevOps · LOW · LOW).
 - **Assurance**: work that raises confidence in correctness: tests, reviews, replay floors, triage, mutation-resistance proofs. E.g. within-deployment replay determinism batteries (DevOps · HIGH · MEDIUM · "protects crash recovery, real user-facing failure class"); a four-round adversarial contract review chain (DevOps · MEDIUM · HIGH · "caught 11 real findings, but later rounds re-proved settled scope: split verdict"); a vacuous-test hunt with executed mutation proof (DevOps · HIGH · MEDIUM · "found 3 tests green for the wrong reason").
 - **Security/privacy**: authN/Z, data protection, secrets handling, privacy NFRs. E.g. an upload identity check (sha256 == content_hash) with a 409-mismatch discriminator test (Product · HIGH · LOW); credential non-logging rails (Product · HIGH · LOW).
-
-## Generally available lifecycle
-
-The canonical source is the controlled-config user skill in the JSWARM common repository. Catalog changes are prepared and validated with `/jregister`; `/jdeploy` materializes and verifies the registered closure at the live user-skill target. Ticket-local `.jstatus.template.md` and `.jstatus.latest.md` files remain project evidence and are never promoted as catalog assets.
-
-TODO (maintainer): run `/jregister prepare` and then `/jdeploy` for this catalog change; this edit prepares the master only and does not run either lifecycle step.
