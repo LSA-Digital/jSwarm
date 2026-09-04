@@ -20,7 +20,7 @@ A finding or other recorded confirmation that changes expected behavior returns 
 | File | Purpose | Audience (process/tooling/human) | Author |
 | --- | --- | --- | --- |
 | `uat-scenarios.md` | Official scenario/GWT source of truth for the ticket | Process (chain binds `gwt_sha256`) + human | You + agent via `/jUAT author` |
-| `uat-scenario-steps.md` | Delivery-journey runbook per scenario — the modern name for legacy `uat-test.md` | Human + process (jQATester pre-walk source) | You + agent via `/jUAT author` |
+| `uat-scenario-steps.md` | Delivery-journey runbook per scenario (the modern name for legacy `uat-test.md`) | Human + process (jQATester pre-walk source) | You + agent via `/jUAT author` |
 | `uat-test.md` | Legacy alias of `uat-scenario-steps.md`, resolved by the chain when the canonical file is absent; at issuance PREP gates it as the owner walk script | Human (owner walk) + tooling (chain-verifier fallback; A4 walk-script gate) | You + agent via `/jUAT author` |
 | `<TICKET>.UAT-CURRENT-ROUND.md` | Sealed round package (`DRAFT_SEALED` → `ISSUED`) with gate cards and bound identities | Process + tooling (issuance gates, exact-file walk) | `jswarm/uat_round_materialize.py` via `/jTest uat prepare` |
 | `<TICKET>.uat-feedback.md` | Pre-filled owner feedback document with per-journey verdict slots | Human (owner) + tooling (`jswarm/uat_feedback.py`) | `jswarm/uat_prepare.py` at `ISSUED` |
@@ -154,7 +154,7 @@ of inventing a defect.
 
 `UAT_FEEDBACK_TEMPLATE.md` and `UAT_CURRENT_ROUND_TEMPLATE.md` are controlled
 masters. Change them only at their controlled-config master paths through the
-controlled-config workflow—never by editing deployed copies.
+controlled-config workflow, never by editing deployed copies.
 
 ## Detailed navigation
 
@@ -162,7 +162,7 @@ controlled-config workflow—never by editing deployed copies.
 - [UAT round preparation](uat/round-prep.md)
 - [Feedback ingestion](uat/feedback.md)
 - [Traceability contract](evidence/traceability-contract.md)
-- [NFR verification support](nfr/verification.md) — supporting contract only;
+- [NFR verification support](nfr/verification.md): supporting contract only;
   no active `/jTest nfr verify` route.
 
 `execution-protocol.md` and `strategy-and-proof.md` remain their own procedures

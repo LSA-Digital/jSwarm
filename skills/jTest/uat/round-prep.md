@@ -24,8 +24,8 @@ after those checks pass.
 
 `/jTest uat prepare` executes through `jswarm/uat_prepare.py`: use `--ticket`, `--request-json <PATH|->`, optional `--report`, and `--json-out`; fixture code calls `run_prepare()` directly. The request is transient input, while PREP owns sealing and report consumption only.
 
-Authoring the request itself — journey/scenario/step shapes, nested GWT lineage,
-the digest rule, and the `preflight-manifest` check to run before prepare — is
+Authoring the request itself (journey/scenario/step shapes, nested GWT lineage,
+the digest rule, and the `preflight-manifest` check to run before prepare) is
 [`round-authoring.md`](round-authoring.md). Check the manifest there first; a
 shape error found at prepare or cutover is the same error found expensively.
 
@@ -60,7 +60,7 @@ JINFRA=("${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" "${JSWARM_HOME:-$HOM
 
 Continue only when the receipt reports a clean `PASS` with exit `0` and contains no `warn` result. A warning is blocking, even when jInfra exits `0`; any `warn`, especially stale-derived-cache, stops preparation until remediated. For stale-derived-cache, apply the engine recommendation `docker compose up -d --force-recreate --renew-anon-volumes <service>`, rerun `--currency`, and do not proceed until clean. Record the jInfra JSON receipt path with the round. Container health and deployment identity do not prove that the served surface is current, and test suites structurally cannot see it; this gate is the only connection between jInfra's derived-cache knowledge and UAT.
 
-**This currency gate is IN ADDITION to — not a substitute for — the selected source-typed certified build receipt the executable prep gate requires** (`uat_prepare.py` demands `certification.verdict == "certified"`). jInfra mints certification only through a confirmed unforced `--docker-recreate` with clean identical HEAD and an unscoped currency PASS: a `--currency`-only run, however clean, cannot certify, because generation currency is still blind to process staleness on bind-mounted services (a running process older than its re-read-on-restart inputs passes file-level currency) — the recreate is what makes "running = current" true, not just plausible. So a Docker round prep on a current stack still performs one confirmed recreate to mint the certified receipt; under the advisory worker-safety default this carries no waiver ceremony. If the process-staleness check lands in the engine, currency-clean-at-identical-HEAD may become sufficient to certify and this paragraph will be revised — until then the recreate requirement is the honest cost, stated here so no lane rediscovers the prose/executable split.
+**This currency gate is IN ADDITION to (not a substitute for) the selected source-typed certified build receipt the executable prep gate requires** (`uat_prepare.py` demands `certification.verdict == "certified"`). jInfra mints certification only through a confirmed unforced `--docker-recreate` with clean identical HEAD and an unscoped currency PASS: a `--currency`-only run, however clean, cannot certify, because generation currency is still blind to process staleness on bind-mounted services (a running process older than its re-read-on-restart inputs passes file-level currency): the recreate is what makes "running = current" true, not just plausible. So a Docker round prep on a current stack still performs one confirmed recreate to mint the certified receipt; under the advisory worker-safety default this carries no waiver ceremony. If the process-staleness check lands in the engine, currency-clean-at-identical-HEAD may become sufficient to certify and this paragraph will be revised. Until then the recreate requirement is the honest cost, stated here so no lane rediscovers the prose/executable split.
 
 ### `local-process-v1`
 

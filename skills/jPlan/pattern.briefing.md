@@ -4,8 +4,8 @@
 
 ## Header lines
 
-**Planning mode:** Lite (briefing only — no implementation plan in this file)
-**Deeper planning:** deferred — run full `/jPlan` when ready
+**Planning mode:** Lite (briefing only, no implementation plan in this file)
+**Deeper planning:** deferred; run full `/jPlan` when ready
 
 ## Plan sections
 
@@ -13,7 +13,7 @@
 [Narrative + user examples]
 
 ## Context
-[What we know: systems, constraints, links — still not a solution write-up]
+[What we know: systems, constraints, links; still not a solution write-up]
 
 ## Not in this briefing (intentionally deferred)
 Full technical design, phases, tasks, tests/UAT plan, and `/jGo` scaffolding. Create later via `/jPlan` without Lite.
