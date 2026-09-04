@@ -24,8 +24,8 @@
       "receipt_pointers": [
         {
           "key": "STALE-STACK-LINEAGE",
-          "date": "2026-07-08",
-          "note": "Incidents on 2026-07-05 and 2026-07-08."
+          "date": "2026-01-01",
+          "note": "A stopped or stale local process or container can keep serving old content while everything upstream looks current; certification must prove fresh runtime lineage, not just that something is listening on the port."
         }
       ],
       "applies_to": [
@@ -58,14 +58,14 @@
       ],
       "receipt_pointers": [
         {
-          "key": "OWNER-SYNC-2026-07-12",
-          "date": "2026-07-12",
-          "note": "Directive originated 2026-06-12 and was restated four times on 2026-07-12."
+          "key": "OWNER-SYNC-GWT-UPDATE",
+          "date": "2026-01-01",
+          "note": "When owner feedback or a ruling confirms a behavior that current GWT does not reflect, updating GWT later (at prep or close) lets the drift compound; update it in the same work unit."
         },
         {
-          "key": "RULE-386-CONFIRMATION-TIME-GWT-SYNC-2026-08-25",
-          "date": "2026-08-25",
-          "note": "Owner requirement: collected feedback or otherwise confirmed behavior updates canonical GWT immediately to prevent downstream drift."
+          "key": "CONFIRMATION-TIME-GWT-SYNC",
+          "date": "2026-01-01",
+          "note": "Confirmed behavior updates canonical GWT immediately, not at the next convenient checkpoint, to prevent downstream drift."
         }
       ],
       "applies_to": [
@@ -96,9 +96,9 @@
       ],
       "receipt_pointers": [
         {
-          "key": "FRESHNESS-108",
-          "date": "2026-07-08",
-          "note": "Round stayed stale after fix #108."
+          "key": "ROUND-FRESHNESS",
+          "date": "2026-01-01",
+          "note": "A round's header timestamp and deploy-status statement can quietly go stale after a fix lands; keep them truthful on every patch, not just at round creation."
         }
       ],
       "applies_to": [
@@ -126,8 +126,8 @@
       "receipt_pointers": [
         {
           "key": "SOURCES-JOURNEY-WALK",
-          "date": "2026-07-11",
-          "note": "Sources-column removal and Journey/Walk contract."
+          "date": "2026-01-01",
+          "note": "An uncited journey row invites invented content; source every row from named scenario/step assets and cite above the table rather than adding a separate Sources column."
         }
       ],
       "applies_to": [
@@ -157,8 +157,8 @@
       "receipt_pointers": [
         {
           "key": "OWNER-SYNC-DRIFT",
-          "date": "2026-07-12",
-          "note": "Owner expectation sync and GWT tightening lineage."
+          "date": "2026-01-01",
+          "note": "Missing or wrong intent content is drift, not a downstream formatting problem; fix the owner-owned scenario first, then derived steps and round content."
         }
       ],
       "applies_to": [
@@ -189,8 +189,8 @@
       "receipt_pointers": [
         {
           "key": "HOT-COLD-TIMESTAMP-SETS",
-          "date": "2026-07-09",
-          "note": "Two-table split and timestamp-only Sets."
+          "date": "2026-01-01",
+          "note": "A single mixed-temperature journey table and semantically named Sets both erode over time; keep HOT and COLD separate and name Sets only by creation timestamp."
         }
       ],
       "applies_to": [
@@ -219,9 +219,9 @@
       ],
       "receipt_pointers": [
         {
-          "key": "FRESHNESS-108",
-          "date": "2026-07-08",
-          "note": "Continuous freshness receipt #108."
+          "key": "ROUND-FRESHNESS",
+          "date": "2026-01-01",
+          "note": "A round that isn't patched in the same work unit as a readiness, deploy, or defect change goes stale immediately; treat the round as part of that work unit, not a follow-up."
         }
       ],
       "applies_to": [
@@ -251,8 +251,8 @@
       "receipt_pointers": [
         {
           "key": "ASSET-LOOKUP-CONTRACT",
-          "date": "2026-07-08",
-          "note": "Definitions, pill keys, and owner-openable session links are mandatory lookup assets."
+          "date": "2026-01-01",
+          "note": "A referenced term, defect, commit, or session with no lookup entry or link makes the round unreadable without tribal knowledge; Definitions, Keys & Sets, and clickable session links are mandatory, not optional polish."
         }
       ],
       "applies_to": [
@@ -285,8 +285,8 @@
       "receipt_pointers": [
         {
           "key": "OPEN-LEDGER-COMPLETE",
-          "date": "2026-07-09",
-          "note": "Repeatable bug-clearing and both-ledgers contract."
+          "date": "2026-01-01",
+          "note": "An OPEN bug missing from the HOT table, or ledgers that disagree, lets a known defect fall through; refresh the bug ledger, round, and changed QA steps together after every fix or deploy cycle."
         }
       ],
       "applies_to": [
@@ -317,9 +317,9 @@
       ],
       "receipt_pointers": [
         {
-          "key": "RULE-520-19-NFR-520-5-2026-07-12",
-          "date": "2026-07-12",
-          "note": "RULE-520 #19 omitted NFR-520-5 audit traceability."
+          "key": "NFR-CITATION-GAP",
+          "date": "2026-01-01",
+          "note": "A reliability-class defect (durability, recoverability, honest/visible failure, audit traceability, data integrity) that doesn't name the NFR it threatens makes the gap invisible to anyone scanning by NFR."
         }
       ],
       "applies_to": [
@@ -350,14 +350,14 @@
       ],
       "receipt_pointers": [
         {
-          "key": "RULE-520-FIX19-REVISE-2X-2026-07-12",
-          "date": "2026-07-12",
-          "note": "RULE-520 fix19 required two jCritic REVISE rounds after helper-direct and forged-fixture false greens."
+          "key": "VERBATIM-GWT-BINDING",
+          "date": "2026-01-01",
+          "note": "A test bound to a paraphrased or helper-derived expectation instead of the verbatim GWT clause can pass while proving nothing about the clause itself; bind every satisfying test to the clause's own production or user-visible boundary."
         },
         {
-          "key": "RULE-617-GWT-DRIFT-SWEEP-2026-08-25",
-          "date": "2026-08-25",
-          "note": "Eleven stale unit/integration expectations in two modules survived behavior rulings until an unrelated lane forced clause-by-clause attribution; localized precursor commit 78b110d7f."
+          "key": "GWT-DRIFT-SWEEP",
+          "date": "2026-01-01",
+          "note": "When accepted behavior changes, any unit or integration test whose expectation depended on the old behavior can keep passing against retired behavior indefinitely unless something forces a clause-by-clause sweep; reconcile to the cited ruling, never to observed behavior alone."
         }
       ],
       "applies_to": [
@@ -391,13 +391,13 @@
       "receipt_pointers": [
         {
           "key": "TICKET-OWNED-ROUND",
-          "date": "2026-07-09",
-          "note": "Ticket-prefixed plan-folder ownership."
+          "date": "2026-01-01",
+          "note": "A round with no fixed, ticket-owned path drifts into ad hoc locations and formats; instantiate it at the canonical ticket-plan path from a controlled template."
         },
         {
-          "key": "RULE-249-SLICE-C-F06-F07",
-          "date": "2026-07-12",
-          "note": "F-06 round-file precedence over chat format and F-07 provenance lineage."
+          "key": "ROUND-FILE-PRECEDENCE",
+          "date": "2026-01-01",
+          "note": "The durable round file is the canonical record; a short chat-format summary is convenience only and must link back to it, never substitute for it or drift out of sync with it."
         }
       ],
       "applies_to": [
@@ -426,9 +426,9 @@
       ],
       "receipt_pointers": [
         {
-          "key": "QA15-QA21",
-          "date": "2026-07-10",
-          "note": "QA15 2026-07-08; QA16/QA17 2026-07-09; QA21 2026-07-10."
+          "key": "QA-DISPATCH-HANDOFF",
+          "date": "2026-01-01",
+          "note": "Dispatching QA against an unprobed or wrong transport, or with an incomplete handoff, wastes the run before it starts; probe transport health with the canonical ladder and fill every required handoff field first."
         }
       ],
       "applies_to": [
@@ -458,9 +458,9 @@
       ],
       "receipt_pointers": [
         {
-          "key": "COVERAGE-ILLUSION-2026-07-12",
-          "date": "2026-07-12",
-          "note": "Fake test anchors x2, telemetry extras-only test, and forged connectivity_repair fixture."
+          "key": "COVERAGE-ILLUSION",
+          "date": "2026-01-01",
+          "note": "A test can look like coverage while proving nothing: it asserts against a fixture it also wrote, exercises only a telemetry/logging side effect, or duplicates an existing anchor under a new name. Enumerate the full permutation matrix in deterministic tests on captured production-shape data instead of trusting a handful of QA spot checks to catch combinatorial gaps."
         }
       ],
       "applies_to": [
@@ -490,9 +490,9 @@
       ],
       "receipt_pointers": [
         {
-          "key": "RULE-307-SEMANTIC-DISPATCH-RUBRIC-GAP",
-          "date": "2026-07-26",
-          "note": "Phase 2 governance gap: Layer-2 semantic judgment dispatch lacked its own scenario-bound rubric contract."
+          "key": "SEMANTIC-DISPATCH-RUBRIC-GAP",
+          "date": "2026-01-01",
+          "note": "Layer-2 semantic judgment dispatched against a defect narrative or a paraphrased expectation, instead of a scenario-bound verbatim rubric, can drift from the scenario it is meant to judge."
         }
       ],
       "applies_to": [
@@ -521,9 +521,9 @@
       ],
       "receipt_pointers": [
         {
-          "key": "RULE-376-UAT-D4-BEHAVIOR-LOCK",
-          "date": "2026-08-20",
-          "note": "Behavior lock selects a current-script jQATester walk before deterministic replay when lock is NO or UNKNOWN."
+          "key": "BEHAVIOR-LOCK-INSTRUMENT-ORDER",
+          "date": "2026-01-01",
+          "note": "Deterministic replay is only trustworthy once behavior is locked; when the lock is NO or UNKNOWN, a current-script QA walk must run first so replay isn't built on a moving target."
         }
       ],
       "applies_to": [

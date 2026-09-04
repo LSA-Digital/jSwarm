@@ -1,34 +1,32 @@
 # UAT rule receipts reference
 
-Cold historical evidence only. Active imperatives and stop conditions live exclusively in `UAT_RULES.json`; routine loaders do not read this file.
+Lesson reference only. Active imperatives and stop conditions live exclusively in `UAT_RULES.json`; routine loaders do not read this file. Each row is why the paired rule exists, stated as a general lesson, not a record of a specific dated event.
 
-| Canonical key | Receipt / historical contract | Date / lineage | Active binding |
-|---|---|---|---|
-| `STALE-STACK-LINEAGE` | Stale-stack owner incident lineage | 2026-07-05 and 2026-07-08 | UAT-G0 |
-| `OWNER-SYNC-2026-07-12` | Owner-expectation sync directive | Originated 2026-06-12; restated four times 2026-07-12 | UAT-G1 |
-| `FRESHNESS-108` | Freshness receipt | #108, 2026-07-08 | UAT-R1, UAT-R5 |
-| `SOURCES-JOURNEY-WALK` | Sources-column removal and Journey/Walk contract | 2026-07-11 | UAT-R2 |
-| `OWNER-SYNC-DRIFT` | Missing/wrong intent is an upstream drift alarm | 2026-07-12 | UAT-R3 |
-| `RULE-386-CONFIRMATION-TIME-GWT-SYNC-2026-08-25` | Confirmation-time GWT synchronization | Owner requirement: collected feedback or otherwise confirmed behavior updates canonical GWT immediately; 2026-08-25 | UAT-G1 |
-| `HOT-COLD-TIMESTAMP-SETS` | HOT/COLD split and timestamp-only Sets | 2026-07-09 | UAT-R4 |
-| `ASSET-LOOKUP-CONTRACT` | Definitions, pill keys, and owner-openable session links | 2026-07-08 | UAT-R6 |
-| `OPEN-LEDGER-COMPLETE` | OPEN-ledger, Who, executable-step, and both-ledgers completeness | 2026-07-09 | UAT-R7 |
-| `RULE-520-19-NFR-520-5-2026-07-12` | NFR citation failure | RULE-520 #19; NFR-520-5; 2026-07-12 | UAT-R8 |
-| `RULE-520-FIX19-REVISE-2X-2026-07-12` | GWT test-contract failure | RULE-520 fix19; two jCritic REVISE rounds; 2026-07-12 | UAT-R9 |
-| `RULE-617-GWT-DRIFT-SWEEP-2026-08-25` | GWT-change unit/integration drift sweep | RULE-617 eleven stale expectations in two modules; clause-by-clause attribution all TEST-DRIFT; localized precursor 78b110d7f; 2026-08-25 | UAT-R9 |
-| `TICKET-OWNED-ROUND` | Ticket-prefixed plan-folder ownership and controlled template | 2026-07-09 | UAT-T1 |
-| `RULE-249-SLICE-C-F06-F07` | F-06 precedence/provenance: round file over chat | RULE-249 Slice C F-06/F-07 | UAT-T1 |
-| `QA15-QA21` | QA dispatch receipts: transport and complete handoff | QA15 2026-07-08; QA16/QA17 2026-07-09; QA21 2026-07-10 | UAT-D1 |
-| `COVERAGE-ILLUSION-2026-07-12` | Coverage-illusion class | fake test anchors ×2; telemetry extras-only test; forged `connectivity_repair` fixture; week of 2026-07-12 | UAT-D2 |
-| `RULE-307-SEMANTIC-DISPATCH-RUBRIC-GAP` | Semantic judgment dispatch had no scenario-bound rubric contract | RULE-307 Phase 2, 2026-07-26 | UAT-D3 |
-| `RULE-376-UAT-D4-BEHAVIOR-LOCK` | Behavior-lock instrument-order contract | 2026-08-20 | UAT-D4 |
+| Canonical key | Lesson | Active binding |
+|---|---|---|
+| `STALE-STACK-LINEAGE` | A stale or stopped runtime can keep serving old content while everything upstream looks current | UAT-G0 |
+| `OWNER-SYNC-GWT-UPDATE` | Confirmed behavior that current GWT doesn't reflect must update GWT in the same work unit, not later | UAT-G1 |
+| `ROUND-FRESHNESS` | A round's header and deploy-status statement must stay truthful on every patch, not just at creation | UAT-R1, UAT-R5 |
+| `SOURCES-JOURNEY-WALK` | An uncited journey row invites invented content; source every row and cite above the table | UAT-R2 |
+| `OWNER-SYNC-DRIFT` | Missing or wrong intent content is upstream drift, not a downstream formatting problem | UAT-R3 |
+| `CONFIRMATION-TIME-GWT-SYNC` | Confirmed behavior updates canonical GWT immediately, not at the next convenient checkpoint | UAT-G1 |
+| `HOT-COLD-TIMESTAMP-SETS` | A mixed-temperature journey table and semantically named Sets both erode over time | UAT-R4 |
+| `ASSET-LOOKUP-CONTRACT` | A referenced term, defect, commit, or session with no lookup entry makes the round unreadable | UAT-R6 |
+| `OPEN-LEDGER-COMPLETE` | An OPEN bug missing from HOT, or disagreeing ledgers, lets a known defect fall through | UAT-R7 |
+| `NFR-CITATION-GAP` | A reliability-class defect that doesn't name the NFR it threatens makes the gap invisible | UAT-R8 |
+| `VERBATIM-GWT-BINDING` | A test bound to a paraphrase or a helper-derived expectation instead of the verbatim clause can pass while proving nothing | UAT-R9 |
+| `GWT-DRIFT-SWEEP` | When behavior changes, tests elsewhere whose expectations depended on the old behavior can keep passing against retired behavior unless something forces a clause-by-clause sweep | UAT-R9 |
+| `TICKET-OWNED-ROUND` | A round with no fixed, ticket-owned path drifts into ad hoc locations and formats | UAT-T1 |
+| `ROUND-FILE-PRECEDENCE` | The durable round file is canonical; a chat-format summary is convenience only and must link back to it | UAT-T1 |
+| `QA-DISPATCH-HANDOFF` | Dispatching QA against an unprobed transport or an incomplete handoff wastes the run before it starts | UAT-D1 |
+| `COVERAGE-ILLUSION` | A test can look like coverage while proving nothing: asserting on a fixture it also wrote, exercising only a telemetry side effect, or duplicating an anchor under a new name | UAT-D2 |
+| `SEMANTIC-DISPATCH-RUBRIC-GAP` | Semantic judgment dispatched against a narrative or a paraphrase, instead of a scenario-bound verbatim rubric, can drift from the scenario it's meant to judge | UAT-D3 |
+| `BEHAVIOR-LOCK-INSTRUMENT-ORDER` | Deterministic replay is only trustworthy once behavior is locked; an unlocked behavior needs a current-script walk first | UAT-D4 |
 
 ## Receipt interpretation
 
-- QA15 established executable specimen facts and known-good walks for UAT-D1. It is not the source for UAT-R6's round-file lookup-section contract.
-- QA16 and QA17 established standing browser mechanics and post-action mutation verification.
-- QA21 established transport health probing and the complete 13-field dispatch handoff.
-- The RULE-520 #19 / NFR-520-5 miss established relevance-filtered NFR citation for reliability defects and defect narratives, including data-integrity failures.
-- The RULE-520 fix19 REVISE history established verbatim GWT binding and production-boundary proof.
-- RULE-249 Slice C F-06/F-07 establishes that the durable round file has precedence over the short chat-format summary and preserves the provenance link.
-- RULE-307 Phase 2 establishes that Layer-2 semantic judgment dispatch requires its own scenario-bound `judgment_rubric`, distinct from UAT-D1's transport/handoff concern.
+- ROUND-FRESHNESS binds both UAT-R1 (round header truthfulness) and UAT-R5 (same-work-unit patching): the same underlying lesson, two different points of enforcement.
+- NFR-CITATION-GAP established relevance-filtered NFR citation for reliability defects and defect narratives, including data-integrity failures.
+- VERBATIM-GWT-BINDING established verbatim GWT binding and production-boundary proof as the bar for a satisfying test.
+- ROUND-FILE-PRECEDENCE establishes that the durable round file has precedence over the short chat-format summary and preserves the provenance link.
+- SEMANTIC-DISPATCH-RUBRIC-GAP establishes that Layer-2 semantic judgment dispatch requires its own scenario-bound `judgment_rubric`, distinct from UAT-D1's transport/handoff concern.
