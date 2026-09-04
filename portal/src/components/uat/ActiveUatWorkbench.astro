@@ -385,10 +385,10 @@
     }
   }
 
-  function showFailure(code: string, focus = true) {
+  function showFailure(code: string, focus = true, detailMessage?: string) {
     const failure = describeFailure(code);
     alertTitle.textContent = failure.title;
-    alertMessage.textContent = failure.message;
+    alertMessage.textContent = detailMessage ?? failure.message;
     alertPanel.dataset.uatState = failure.state;
     if (failure.state === "stale-feedback" || failure.state === "stale-round") alertPanel.setAttribute("data-uat-stale", "");
     else alertPanel.removeAttribute("data-uat-stale");
@@ -1176,13 +1176,22 @@
     const linkRegion = make("div", "mt-4 rounded border border-jw-line bg-jw-surface px-3 py-2 text-sm");
     linkRegion.setAttribute("data-uat-app-link-scope", effectiveLink.source);
     const provenance = effectiveLink.source === "step" ? "Step link" : effectiveLink.source === "journey" ? "Journey link" : "Application base";
-    const appLink = make("a", "font-bold text-jw-blue underline decoration-2 underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue", effectiveLink.label ?? "Open application");
-    appLink.setAttribute("data-uat-app-link", "");
-    appLink.setAttribute("href", effectiveLink.href);
-    appLink.setAttribute("target", "_blank");
-    appLink.setAttribute("rel", "noopener noreferrer");
-    appLink.setAttribute("referrerpolicy", "no-referrer");
-    linkRegion.append(make("span", "mr-2 text-xs font-bold uppercase tracking-[0.1em] text-jw-muted", provenance), appLink);
+    if (effectiveLink.source === "base" && effectiveLink.href === "N/A") {
+      // No step/journey-specific link and the round's own app_url is the
+      // documented "no running application" escape hatch -- there is
+      // nothing to open, so say that plainly instead of rendering a link
+      // to the literal string "N/A".
+      linkRegion.setAttribute("data-uat-no-app", "");
+      linkRegion.append(make("span", "mr-2 text-xs font-bold uppercase tracking-[0.1em] text-jw-muted", provenance), make("span", "text-jw-muted", "No application for this round (N/A)"));
+    } else {
+      const appLink = make("a", "font-bold text-jw-blue underline decoration-2 underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue", effectiveLink.label ?? "Open application");
+      appLink.setAttribute("data-uat-app-link", "");
+      appLink.setAttribute("href", effectiveLink.href);
+      appLink.setAttribute("target", "_blank");
+      appLink.setAttribute("rel", "noopener noreferrer");
+      appLink.setAttribute("referrerpolicy", "no-referrer");
+      linkRegion.append(make("span", "mr-2 text-xs font-bold uppercase tracking-[0.1em] text-jw-muted", provenance), appLink);
+    }
     const scenarios = make("div", "mt-4 flex min-w-0 flex-wrap gap-3");
     scenarios.setAttribute("aria-label", `${step.scenario_links.length} linked scenario${step.scenario_links.length === 1 ? "" : "s"}`);
     for (const linkedScenario of resolveLinkedScenarioBlocks(journey, step)) scenarios.append(renderScenarioSquare(linkedScenario));
@@ -1360,12 +1369,26 @@
     practiceBanner.classList.toggle("hidden", !nextView.fixture);
     practiceReset.classList.toggle("hidden", !nextView.fixture?.resettable);
     setText("[data-uat-round-title]", `${nextView.ticket} / ${nextView.round_review_id}`);
-    appUrlLink.hidden = !nextView.current_round.app_url;
-    appUrlLink.href = nextView.current_round.app_url;
-    appUrlLink.textContent = nextView.current_round.app_url;
-    appUrlLink.target = "_blank";
-    appUrlLink.rel = "noopener noreferrer";
-    appUrlLink.referrerPolicy = "no-referrer";
+    const roundAppUrl = nextView.current_round.app_url;
+    appUrlLink.hidden = !roundAppUrl;
+    if (roundAppUrl && roundAppUrl !== "N/A") {
+      appUrlLink.removeAttribute("data-uat-no-app");
+      appUrlLink.href = roundAppUrl;
+      appUrlLink.textContent = roundAppUrl;
+      appUrlLink.target = "_blank";
+      appUrlLink.rel = "noopener noreferrer";
+      appUrlLink.referrerPolicy = "no-referrer";
+    } else if (roundAppUrl === "N/A") {
+      // "N/A" is the documented escape hatch for a ticket with no running
+      // application -- there is nothing to link to, so render a plain
+      // explanation instead of a broken "N/A" anchor.
+      appUrlLink.removeAttribute("href");
+      appUrlLink.removeAttribute("target");
+      appUrlLink.removeAttribute("rel");
+      appUrlLink.removeAttribute("referrerpolicy");
+      appUrlLink.textContent = "No application for this round (N/A)";
+      appUrlLink.setAttribute("data-uat-no-app", "");
+    }
     setText("[data-uat-package-state]", nextView.current_round.package_state);
     setText("[data-uat-processing-state]", nextView.feedback.processing_state);
     setText("[data-uat-package-state-summary]", nextView.current_round.package_state);
@@ -1436,8 +1459,17 @@
       renderView(await fetchRoundDetail(roundId));
     } catch (error) {
       loading.classList.add("hidden");
-      const code = error instanceof UatApiError ? error.code : "source_invalid";
-      showFailure(code);
+      if (error instanceof UatApiError) {
+        showFailure(error.code);
+      } else {
+        // Not a service failure -- the round data itself did not parse (a
+        // genuine client-side bug or an unexpected/malformed shape).
+        // `fetchRoundDetail` already logs the real cause to the console;
+        // surface it in the failure copy too instead of only the generic
+        // "source_invalid" boilerplate.
+        const detail = error instanceof Error ? error.message : String(error);
+        showFailure("source_invalid", true, `${describeFailure("source_invalid").message} (${detail})`);
+      }
     }
   }
 

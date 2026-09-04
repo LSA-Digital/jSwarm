@@ -388,13 +388,19 @@ function stringArray(value: unknown, label: string): string[] {
   return value.map((item, index) => string(item, `${label}[${index}]`));
 }
 
-function safeAppUrl(value: unknown, label: string): string {
+export function safeAppUrl(value: unknown, label: string): string {
   const raw = string(value, label);
-  if (!raw || /[\u0000-\u001f\u007f]/.test(raw)) throw new TypeError(`${label} must be a safe absolute HTTP(S) URL`);
+  // "N/A" is the documented escape hatch for a ticket with no running
+  // application (a pure library change, a CLI-only change, etc.) -- see
+  // uat_round_materialize.py::_validate_app_url, which accepts it literally
+  // rather than as a URL. Mirror that here instead of feeding it to `new
+  // URL()`, which throws for any non-URL string.
+  if (raw === "N/A") return raw;
+  if (!raw || /[\u0000-\u001f\u007f]/.test(raw)) throw new TypeError(`${label} must be a safe absolute HTTP(S) URL or the literal "N/A"`);
   let parsed: URL;
-  try { parsed = new URL(raw); } catch { throw new TypeError(`${label} must be a safe absolute HTTP(S) URL`); }
+  try { parsed = new URL(raw); } catch { throw new TypeError(`${label} must be a safe absolute HTTP(S) URL or the literal "N/A"`); }
   if (!["http:", "https:"].includes(parsed.protocol) || parsed.username || parsed.password) {
-    throw new TypeError(`${label} must be a safe absolute HTTP(S) URL`);
+    throw new TypeError(`${label} must be a safe absolute HTTP(S) URL or the literal "N/A"`);
   }
   return raw;
 }
@@ -411,11 +417,20 @@ function parseAppLink(value: unknown, label: string, appUrl: string): AppLink | 
       || (!href.startsWith("/") && !/^https?:\/\//.test(href))) {
     throw new TypeError(`${label}.href must be a safe same-origin link`);
   }
-  const base = new URL(appUrl);
-  let resolved: URL;
-  try { resolved = new URL(href, base); } catch { throw new TypeError(`${label}.href must be a safe same-origin link`); }
-  if (!["http:", "https:"].includes(resolved.protocol) || resolved.origin !== base.origin || resolved.username || resolved.password) {
-    throw new TypeError(`${label}.href must be a safe same-origin link`);
+  // "N/A" (see safeAppUrl above) has no real origin to resolve an absolute
+  // link against. The documented convention for this case is a same-origin
+  // relative href (e.g. "/"), which the format check above already confirmed
+  // -- mirrors uat_round_materialize.py::_validate_app_link's early return
+  // for a leading-"/" href.
+  if (appUrl === "N/A") {
+    if (!href.startsWith("/")) throw new TypeError(`${label}.href must be a safe same-origin link`);
+  } else {
+    const base = new URL(appUrl);
+    let resolved: URL;
+    try { resolved = new URL(href, base); } catch { throw new TypeError(`${label}.href must be a safe same-origin link`); }
+    if (!["http:", "https:"].includes(resolved.protocol) || resolved.origin !== base.origin || resolved.username || resolved.password) {
+      throw new TypeError(`${label}.href must be a safe same-origin link`);
+    }
   }
   const parsed: AppLink = { href };
   if (link.label !== undefined) {
@@ -924,7 +939,21 @@ export async function fetchRoundList(): Promise<RoundList> {
 }
 
 export async function fetchRoundDetail(roundId: string): Promise<ActiveRoundView> {
-  return parseActiveRoundView(await requestJson(`/api/uat-rounds/${encodeURIComponent(roundId)}`));
+  const payload = await requestJson(`/api/uat-rounds/${encodeURIComponent(roundId)}`);
+  try {
+    return parseActiveRoundView(payload);
+  } catch (error) {
+    // A parse failure here means the round's own data did not match this
+    // parser's contract (a genuine client-side bug, or a documented backend
+    // field/value this parser has not been taught yet -- see safeAppUrl's
+    // "N/A" handling above for a case that used to hit exactly this).
+    // Before this, the caller silently mapped any non-UatApiError to a
+    // generic "source_invalid" banner with nothing logged, so the failure
+    // was undiagnosable without reading source. Log the real cause here,
+    // once, at the point of failure.
+    console.error(`Active UAT round ${roundId} failed to parse:`, error);
+    throw error;
+  }
 }
 
 export async function updateRoundStatus(roundId: string, command: RoundStatusUpdateCommand): Promise<SaveResponse> {

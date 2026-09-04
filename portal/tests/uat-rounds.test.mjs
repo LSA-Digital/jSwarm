@@ -320,6 +320,52 @@ test('active round parser accepts v2 step entries and rejects unsupported versio
   );
 });
 
+test('safeAppUrl accepts the documented "N/A" no-application escape hatch and still rejects everything else unsafe', () => {
+  // Mirrors uat_round_materialize.py::_validate_app_url's documented
+  // escape hatch for a ticket with no running application: "N/A" must be
+  // accepted literally, not fed to `new URL()` (which throws for it).
+  assert.equal(uatRounds.safeAppUrl('N/A', 'app_url'), 'N/A');
+  assert.equal(uatRounds.safeAppUrl('http://localhost:3000', 'app_url'), 'http://localhost:3000');
+  assert.throws(() => uatRounds.safeAppUrl('', 'app_url'), /app_url must be a safe absolute HTTP\(S\) URL or the literal "N\/A"/);
+  assert.throws(() => uatRounds.safeAppUrl('not a url', 'app_url'), /app_url must be a safe absolute HTTP\(S\) URL or the literal "N\/A"/);
+  assert.throws(() => uatRounds.safeAppUrl('ftp://example.com', 'app_url'), /app_url must be a safe absolute HTTP\(S\) URL or the literal "N\/A"/);
+  assert.throws(() => uatRounds.safeAppUrl('javascript:alert(1)', 'app_url'), /app_url must be a safe absolute HTTP\(S\) URL or the literal "N\/A"/);
+});
+
+test('active round parser honors the "N/A" app_url escape hatch end to end and still renders real round content', () => {
+  const noAppView = structuredClone(activeView);
+  noAppView.current_round.normalized_package = { app_url: 'N/A' };
+  // Before the fix, this threw a plain TypeError from `new URL("N/A")` and
+  // the whole round -- including its real journeys/steps -- never parsed.
+  const parsed = parseActiveRoundView(noAppView);
+  assert.equal(parsed.current_round.app_url, 'N/A');
+  assert.equal(parsed.current_round.journeys[0].title, 'Read-only active context');
+  assert.equal(parsed.current_round.journeys[0].steps[0].step_id, 'journey-1-step-01');
+  assert.equal(parsed.current_round.journeys[1].steps[0].step_id, 'journey-2-step-01');
+
+  // The fallback "open application base" link resolves to the literal "N/A"
+  // marker -- the component layer is responsible for not rendering that as
+  // a broken anchor, but the library must not throw producing it.
+  const effective = uatRounds.resolveEffectiveAppLink(
+    parsed.current_round.journeys[0].steps[0],
+    parsed.current_round.journeys[0],
+    parsed.current_round.app_url,
+  );
+  assert.deepEqual(effective, { href: 'N/A', label: 'Open application base', source: 'base' });
+
+  // A same-origin-relative app_link (the documented convention, e.g. "/")
+  // is still valid on top of an "N/A" app_url.
+  const withRelativeLink = structuredClone(noAppView);
+  withRelativeLink.current_round.journeys[0].app_link = { href: '/', label: 'App' };
+  const parsedWithLink = parseActiveRoundView(withRelativeLink);
+  assert.deepEqual(parsedWithLink.current_round.journeys[0].app_link, { href: '/', label: 'App' });
+
+  // An absolute app_link cannot be resolved against a nonexistent "N/A"
+  // origin, so it is correctly rejected rather than silently accepted.
+  const withAbsoluteLink = structuredClone(noAppView);
+  withAbsoluteLink.current_round.journeys[0].app_link = { href: 'https://example.com/', label: 'App' };
+  assert.throws(() => parseActiveRoundView(withAbsoluteLink), /app_link\.href must be a safe same-origin link/);
+});
 
 test('round status parser and command use the exact shared four-state contract', async () => {
   assert.deepEqual(uatRounds.ROUND_STATUS_OPTIONS, [

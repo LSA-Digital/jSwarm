@@ -186,3 +186,45 @@ def test_issued_uat_round_content_is_served_over_the_same_route_a_human_opens(bu
         assert "ATOM-1" in detail_text, "the issued round's real outcome content is not present in what the page fetches"
     finally:
         server.close()
+
+
+def test_issued_uat_round_with_no_application_url_is_still_served_with_real_content(built_dist, tmp_path):
+    """Regression test for the public-split B (portal) UAT defect: a round whose
+    ``app_url`` is the literal string ``"N/A"`` -- the documented escape hatch
+    ``jswarm/uat_round_materialize.py::_validate_app_url`` accepts for a work
+    item with no running application (a pure library or CLI-only change) --
+    must still be a real, walkable round once issued.
+
+    Before the fix, this exact package materialized and served correctly
+    (the backend has always accepted "N/A"), but the portal's own frontend
+    parser (``portal/src/lib/uat-rounds.ts::safeAppUrl``) called ``new
+    URL("N/A")``, which throws, and the browser showed a generic "Canonical
+    source is invalid" banner instead of the round -- a defect only visible
+    by actually opening the round in a browser (see
+    ``portal/tests/uat-rounds.test.mjs`` for a direct unit test of the fixed
+    parser against this exact shape of data, which is what actually guards
+    against a regression in the parsing behavior this test's HTTP layer
+    cannot exercise on its own). This test guards the server side of the
+    same contract: the round must still issue and serve real content, not a
+    404 or an empty stub, when app_url is "N/A".
+    """
+    from jswarm.portal.tests.service_fixtures import LiveServer, make_active_uat_round
+
+    server = LiveServer(tmp_path, dist_dir=built_dist)
+    try:
+        manifest = _minimal_v1_round_manifest()
+        manifest["app_url"] = "N/A"
+        fixture = make_active_uat_round(server.approved_root, manifest=manifest)
+        round_id = server.register_active_round(fixture)
+
+        with urllib.request.urlopen(f"{server.client.base}/uat/?round={round_id}", timeout=10) as resp:
+            assert resp.status == 200, "GET /uat/?round=<id> must not 404 for an app_url: N/A round"
+
+        status, detail = server.client.get(f"/api/uat-rounds/{round_id}")
+        assert status == 200, "the app_url: N/A round must still be issued and fetchable, not rejected"
+        detail_text = str(detail)
+        assert detail["current_round"]["normalized_package"]["app_url"] == "N/A"
+        assert "session-expiry-walkthrough" in detail_text, "the issued round's real journey content is not present in what the page fetches"
+        assert "ATOM-1" in detail_text, "the issued round's real outcome content is not present in what the page fetches"
+    finally:
+        server.close()
