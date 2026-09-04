@@ -55,7 +55,7 @@ def _cmd_check(args: argparse.Namespace) -> int:
         return 2
     if missing:
         print("check: required items missing (see fix lines above)")
-        print("Next: ./install.sh install --dry-run   (here, in the jSwarm clone)")
+        print("Next: run the fix commands above, then ./install.sh check   (here, in the jSwarm clone)")
         return 1
     print("check: all prerequisites present")
     print("Next: ./install.sh install --dry-run   (here, in the jSwarm clone)")

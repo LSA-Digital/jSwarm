@@ -20,7 +20,20 @@ class ClaudeCodeHost:
     name: str = "claude-code"
 
     def is_present(self) -> bool:
-        return shutil.which("claude") is not None or self.claude_home().is_dir()
+        """Whether this host can actually be used: whether the `claude`
+        lifecycle binary is runnable from `PATH`.
+
+        The only caller (`jswarm.platform.macos.MacOSPlatform._agent_host_check`,
+        feeding the `check` prerequisites report) uses this to tell a new user
+        "you can run Claude Code commands." A bare `~/.claude` directory does
+        not mean that -- it can be a leftover from an old install, a dotfiles
+        template, or anything else that creates the directory without the
+        binary -- so it must not satisfy presence on its own. Every other
+        caller in this codebase (skills_dir, agents_dir, memory_path, and the
+        rest) reads a *path* under `claude_home()` without gating on
+        `is_present()` first; those are unaffected by this method's meaning.
+        """
+        return shutil.which("claude") is not None
 
     def claude_home(self) -> Path:
         """The global Claude Code config directory: `~/.claude`.
