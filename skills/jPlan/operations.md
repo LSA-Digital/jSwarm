@@ -18,8 +18,8 @@ Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with
 | 2 | **Session renamed** | Always | See Step 2B | ? |
 | 3 | **Technical design spec written** | Standard + Deep (skipped in Lite) | Write to `.jswarm/plans/TICKET-XXX/TICKET-XXX.specs.<descriptive>.md` | ? |
 | 4 | **Plan file written** | Always | Write master to `.jswarm/plans/TICKET-XXX.plan.<descriptive>.md` (frontmatter `status: ACTIVE` per state machine; per-ticket artifact subfolder `.jswarm/plans/TICKET-XXX/` auto-created on first artifact write) | ? |
-| 5 | **Ticket-local UAT scenario extract written** | When `Automated UAT: yes` and ticket changes user-visible behavior (never in Lite) | Write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md` from `UAT_SCENARIO_EXTRACT_TEMPLATE.md` | ? |
-| 6 | **Executable UAT doc written** | When `Automated UAT: yes` and ticket changes user-visible behavior (never in Lite) | Write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-test.md` from `UAT_TEST_TEMPLATE.md` | ? |
+| 5 | **Ticket-local UAT scenario extract written** | When `Automated UAT: yes` and ticket changes user-visible behavior (never in Lite) | Write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md` as the working slice extracted from the official UAT inventory | ? |
+| 6 | **Executable UAT doc written** | When `Automated UAT: yes` and ticket changes user-visible behavior (never in Lite) | Write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-test.md` from `docs/templates/UAT_TEST_TEMPLATE.md` | ? |
 
 **Lite** (`--lite` / "briefing only"): Outputs **1, 2, 4** only. Plan file is a **briefing**: problem/opportunity, rich context, user-provided examples, scope, acceptance criteria. **Do not** "solve" the work in that document.
 
@@ -50,7 +50,7 @@ Ask these together in a single message:
 3. If new: Issue type? `[Task / Story / Bug / Subtask / Feature]`
    - **Feature** = multi-story epic-child with own user stories. Uses `PLAN_FEATURE_TEMPLATE.md`.
    - **Feature requires Standard (2) or Deep (3) depth.** Quick (1) is not allowed for Features.
-4. Scope and acceptance criteria? Author FEW HIGH-LEVEL A/C that each summarize a cluster of UAT scenarios/NFRs (1 A/C : N, never 1:1), with perspective flexibility, per `docs/agent-system/ac-uat-nfr-traceability.design.md`.
+4. Scope and acceptance criteria? Author FEW HIGH-LEVEL A/C that each summarize a cluster of UAT scenarios/NFRs (1 A/C : N, never 1:1), with perspective flexibility.
 
 <!-- jPlan.ceremony-selector:hml -->
 ### H/M/L ceremony selector (Story/Task/Bug full mode only)
@@ -78,12 +78,10 @@ Legacy-safe: plans with no ceremony selection / no-selection recorded remain val
 5. Planning depth? `[1=Quick / 2=Standard / 3=Deep]`
 6. **Ticket execution agent team + review/architecture tiers** (for `/jGo` and `/jFix`). Reply with Pattern `1` or `2`. The review tier and architecture tier are decided by **rubric, not by gut feel**: this is what stops overuse of `jCritic` at xhigh effort / `jArchitect` at xhigh effort.
 
-   **STOP. Before answering Q6, read `docs/jplan/agent-team-rubric.md` in full and apply its rubric to determine the review tier and the architecture tier.** Use the `agent-team-advisor` skill with `lifecycle_stage: plan` to select dynamic topology and staffing: read the agent-team catalog index first and use its fallback on failure; never block.
+   **STOP. Before answering Q6, read [`agent-team-rubric.md`](agent-team-rubric.md) in full and apply its rubric to determine the review tier and the architecture tier.** (Dynamic catalog-driven topology/staffing selection is not part of this public core release -- use the rubric's inline guidance directly; see its own note.)
    - **Step 5 writes the inherited plan-header line** (consumed verbatim by `/jGo` and `/jFix`):
      `**Recommended agent team:** Pattern <1|2> · review:<critic|critic-xhigh> · arch:<none|architect|architect-master> · escalation-trigger:<verbatim trigger or "none">`
-   - **Immediately after the `Recommended agent team` line, the planner emits:**
-     `**Agent-team catalog selection:** ATP-NNN@V`
-   - **Keep the frozen-header capture and record** any override/pin and escalation above the default (`jCritic` at xhigh effort / `jArchitect` / `jArchitect` at xhigh effort) in the plan; log the escalation to `docs/jplan/agent-escalation-log.md` with its trigger + `outcome / warranted`.
+   - **Keep the frozen-header capture and record** any override/pin and escalation above the default (`jCritic` at xhigh effort / `jArchitect` / `jArchitect` at xhigh effort) in the plan.
 
 7. **Automated UAT needed?** `[yes / no]`
    - **yes**: only when ticket has UI/E2E/user-journey impact. After implementation + lower-level tests pass, `jQATester` executes `TICKET-XXX.uat-test.md` against the running app in the declared mode. Standard live-show driver: Playwright MCP headed/foreground or headed Playwright. Headless automation never claimed as developer-watched Live Show UAT. Chrome DevTools MCP only for documented Chrome/CDP diagnostic exception. Catches bugs unit tests miss: event propagation, CSS rendering, data flow, stale caches, confusing user journeys.
@@ -91,7 +89,7 @@ Legacy-safe: plans with no ceremony selection / no-selection recorded remain val
    - Default `yes` only when UI/E2E/user-journey impact is clear. Otherwise default `no` with `Automated UAT: no (no UI/E2E impact)`.
    - When **yes**: plan includes UAT phase/gate; UAT doc declares execution mode, browser driver, visible-browser expectation, overlay/callout mode, runtime monitor command/task (or N/A reason), report path, evidence path before `/jGo` delegates.
    - **UAT document chain:** official high-level UAT inventory → `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md` (extracted working slice) → `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-test.md` (derived from extracted).
-   - **UAT templates:** `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/templates/UAT_SCENARIO_EXTRACT_TEMPLATE.md`, `UAT_TEST_TEMPLATE.md`, `UAT_REPORT_TEMPLATE.md`, `UAT_TEST_EXAMPLE.md`.
+   - **UAT test-doc template:** `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/templates/UAT_TEST_TEMPLATE.md`; `jswarm/uat-scenarios/scaffold_uat_tests.py` scaffolds `TICKET-XXX.uat-test.md` from it.
 
 8. **E2E test policy?** `[per-ticket / deferred (Recommended)]`
    - **per-ticket**: stable live-show flows promoted to durable headless Playwright regression artifacts near the **end of the ticket**, not as per-phase gate.
@@ -191,8 +189,7 @@ When a project has adopted the UAT-scenario engine (canonical scenarios JSON + g
 
 When MCP tools fail during `/jPlan` (Jira creation, ColGREP timeout), file a report **immediately**.
 
-**Write to:** `docs/tool-failure-reports/TICKET-XXX.toolfail.TOOLCATEGORY.YYYYMMDD.md`
-**Template:** `docs/templates/TOOL_FAILURE_REPORT_TEMPLATE.md`
+**Write to:** `docs/tool-failure-reports/TICKET-XXX.toolfail.TOOLCATEGORY.YYYYMMDD.md`, capturing: the failing tool/category, timestamp, the exact call and error, consecutive-failure count, and the workaround used (if any).
 
 File when: 3+ consecutive failures, blocking timeouts, auth errors, consistent wrong data. Continue with workarounds after filing.
 

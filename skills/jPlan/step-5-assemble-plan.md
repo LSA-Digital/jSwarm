@@ -159,7 +159,7 @@ Quick (depth 1) plans: include **Recommended agent team**, **Automated UAT**, **
 
 ### When `Automated UAT: yes` and the ticket changes user-visible behavior
 
-For `rapid-vibe-ui`, use the pattern-owned living-contract schema instead of the normal extracted-scenario template and do not create a duplicate executable UAT doc. For all other plans, write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md` from `docs/templates/UAT_SCENARIO_EXTRACT_TEMPLATE.md`. Populate with:
+For `rapid-vibe-ui`, use the pattern-owned living-contract schema instead of the normal extracted-scenario template and do not create a duplicate executable UAT doc. For all other plans, write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md` as the ticket-local working slice of the official UAT inventory. Populate with:
 - Path to the official high-level UAT inventory (if found)
 - Only the ticket-relevant extracted scenarios
 - Which scenarios are **Modified / Extended / New**
@@ -178,8 +178,8 @@ Record in plan's **Testing Strategy** / **Automated UAT Plan** sections:
 ### Feature plans only: create defect tracker files
 
 When issue type is Feature, create these two files alongside the plan file:
-1. Copy `docs/templates/INTEGR_FIXES_TEMPLATE.md` → `.jswarm/plans/TICKET-{NUMBER}/TICKET-{NUMBER}.integr-fixes.md`
-2. Copy `docs/templates/PE2E_FIXES_TEMPLATE.md` → `.jswarm/plans/TICKET-{NUMBER}/TICKET-{NUMBER}.pe2e-fixes.md`
+1. Create `.jswarm/plans/TICKET-{NUMBER}/TICKET-{NUMBER}.integr-fixes.md`: a defect tracker with one row per integration defect found while running phase integration tests (status `OPEN` → `FIXED` → `VERIFIED`, one line each).
+2. Create `.jswarm/plans/TICKET-{NUMBER}/TICKET-{NUMBER}.pe2e-fixes.md`: a defect tracker with one row per PE2E-journey defect found, plus its screenshot evidence reference (same status lifecycle).
 
 Substitute `TICKET-XXX` with actual ticket number and `TICKET-XXX-DESCRIPTION.md` with actual plan filename. These accumulate defects across all phases during `/jGo`. Do NOT create them for Story/Task/Bug plans.
 
@@ -194,7 +194,7 @@ The assembled plan seeds `components: []` and `features: []`. Fill them in:
 
 ### Dashboard-delivering stories (render tier)
 
-**STOP: rule-bearing module.** If the story *delivers* a dashboard (builds/publishes a dashboard UI from a data object, project, security, compliance, feature, or cross-project aggregator, as opposed to merely projecting metrics into an existing dashboard's data substrate, which is the separate "Feature-child Story Dashboard projections" module), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/dashboard-render-tier.md` in full and apply every rule (toolkit, JDS type→render-profile, deployment target, publication-safety gates, the plan's `Dashboard render tier:` line) before proceeding. Do not work from memory.
+Dashboard delivery (building/publishing a dashboard UI from a data object, project, security, compliance, feature, or cross-project aggregator) is not part of this public core release -- see `pattern.dashboard-render-tier.md`. Record `Dashboard render tier: N/A (dashboard delivery not available in this release)` and move on.
 
 ### Outcome Metrics (Standard/Deep/Quick; skipped in Lite)
 
@@ -249,11 +249,11 @@ The failure this prevents is specific and recent: one ticket closed with 8,571 l
 
 ### Security & Compliance baseline risk capture (Standard/Deep/Quick; skipped in Lite)
 
-**STOP: rule-bearing module.** For Standard/Deep/Quick (NOT Lite), during Step 5 after the plan file exists and before the Jira summary, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/security-compliance-baseline.md` in full and capture the security + compliance baseline (per-dimension applicability; `probability_before`/`impact_before` when applicable; safe `why_rationale`; `baseline_controls_context`) into the plan. This is required for lifecycle telemetry so `/jClose` has a before-state; the telemetry writer is fail-open. Do not work from memory.
+For Standard/Deep/Quick (NOT Lite), during Step 5 after the plan file exists and before the Jira summary, capture the security + compliance baseline into the plan's `## Security & Compliance Baseline` table (per-dimension applicability; `probability_before`/`impact_before` when applicable; safe `why_rationale`; `baseline_controls_context`) -- see `pattern.security-baseline.md` for the table shape.
 
 ### Feature-child Story Dashboard projections
 
-**STOP: rule-bearing module.** If the Story belongs to a parent Feature that has a dashboard data substrate (`jswarm/feature-dashboard-system/`; data object at `docs/plans/${PARENT}.plan-data.json` / `${PARENT}.feature-dashboard.json` / legacy `.refactor-scoreboard.json`), read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/feature-child-projections.md` in full and apply every rule before plan completion: Section A `projected_only` cells, the held-vs-same enum distinction (load-bearing), planned Section B/C/D rows, the validate-`--check`-FIRST-then-render gate, the dual-render projection write rules, and the `Dashboard projection:` plan line. If the parent Feature has no dashboard data object, record `Dashboard projection: N/A (parent Feature has no dashboard)` in the Story plan. Do not work from memory.
+Feature-child dashboard projection (`jswarm/feature-dashboard-system/`) is not part of this public core release -- see `pattern.dashboard-projections.md`. Record `Dashboard projection: N/A (dashboard delivery not available in this release)` in the Story plan and move on.
 
 ### Seed `plan_status` (MANDATORY: lifecycle event + metrics freshness)
 
@@ -279,7 +279,7 @@ Both the interpreter and the script resolve by absolute common-repository path (
 
 ### NFR catalog and canonical-format authoring gate (BLOCKING: R2)
 
-When the project is NFR-adopted and the ticket declares `**NFR catalog:** applicable`, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jplan/nfr-chain.md` in full and create the required NFR working slice, machine sidecar, and, when Automated NFR is yes, a derived test document. After UAT/NFR authoring, run:
+When the project is NFR-adopted and the ticket declares `**NFR catalog:** applicable`, create the required NFR working slice (`TICKET-XXX.nfr.md`, carrying the canonical `## A/C-to-NFR Index` table -- see `pattern.nfr-chain.md`), its machine sidecar (`TICKET-XXX.nfr-proposals.json`), and, when Automated NFR is yes, a derived test document. After UAT/NFR authoring, run:
 
 ```bash
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/update_ticket/cli.py --ticket TICKET-XXX --repo-root . --preset new-work-lint

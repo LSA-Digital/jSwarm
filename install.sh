@@ -126,9 +126,10 @@ cmd_install() {
       echo "  would run  : skills -> ~/.claude/skills"
       echo "  would run  : portal_config -> ~/.jswarm/decision-review/config.json"
       if [[ "$colgrep" -eq 1 ]]; then
-        echo "  would run  : colgrep (needs ripgrep; brew install ripgrep)"
+        echo "  colgrep    : NOT IMPLEMENTED in this release; --with-colgrep sets up nothing. See docs/getting-started.md."
       fi
       ok "DRY-RUN complete. Re-run without --dry-run to apply."
+      echo "Next: $(basename "$0") install   (here, in the jSwarm clone) to apply it."
       return 0
     fi
     step "install: python venv ($JSWARM_HOME/.venv)"
@@ -226,6 +227,7 @@ cmd_uninstall() {
   local py; py="$(resolve_py_or_empty)"
   if [[ -z "$py" ]]; then
     ok "uninstall: nothing found to remove (no working install)."
+    echo "Next: nothing further required -- there is nothing installed."
     return 0
   fi
   local args=(uninstall)
@@ -303,15 +305,17 @@ cmd_portal() {
   if [[ "$dry" -eq 1 ]]; then
     local mode="foreground"; [[ "$bg" -eq 1 ]] && mode="background"
     warn "would run in the $mode: $py -m jswarm.portal.server --config $cfg"
+    echo "Next: $(basename "$0") portal   (here, in the jSwarm clone) to apply it."
     return 0
   fi
   if [[ "$bg" -eq 1 ]]; then
     mkdir -p "$HOME/.jswarm/decision-review"
     ( cd "$JSWARM_HOME" && nohup "$py" -m jswarm.portal.server --config "$cfg" >"$HOME/.jswarm/decision-review/server.log" 2>&1 & echo $! >"$HOME/.jswarm/decision-review/server.pid" )
     ok "started in background (pid $(cat "$HOME/.jswarm/decision-review/server.pid")); log: ~/.jswarm/decision-review/server.log"
-    ok "stop it with: $(basename "$0") portal --stop"
+    echo "Next: $(basename "$0") portal --stop   (here, in the jSwarm clone) when you're done."
   else
     ok "starting in the foreground (Ctrl-C to stop)"
+    echo "Next: Ctrl-C to stop   (here, in this terminal)."
     ( cd "$JSWARM_HOME" && exec "$py" -m jswarm.portal.server --config "$cfg" )
   fi
 }

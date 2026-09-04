@@ -14,7 +14,6 @@ the working directory set to the jSwarm clone (`$JSWARM_HOME`), so that
 from __future__ import annotations
 
 import argparse
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -76,7 +75,23 @@ def _install_skills(ctx, home: Path, source: Path, timestamp: str) -> None:
         print(f"  skills: {skills_source} not found, skipping")
         return
 
-    real_skill_dirs = sorted(p for p in skills_source.iterdir() if p.is_dir() and p.name != "_shims")
+    # ColGREP is not implemented in this release (a decision on shipping it for v0.1.0
+    # is pending with the owner). colgrep-search and code-overview both depend on MCP
+    # tools (colgrep_search, colgrep_list_dev_indices, ...) that nothing in this
+    # installer sets up, so installing them would leave a silently non-functional
+    # command sitting in the user's command surface -- unacceptable, per the same
+    # standard --with-colgrep is held to. Excluded rather than installed with a
+    # "not available" banner: colgrep-search is `user-invocable: false`, designed to
+    # be copied verbatim into other skills' subagent-dispatch prompts, so a banner at
+    # its own top would not stop that reliance.
+    _NOT_YET_AVAILABLE_SKILLS = {"colgrep-search", "code-overview"}
+    real_skill_dirs = sorted(
+        p for p in skills_source.iterdir()
+        if p.is_dir() and p.name != "_shims" and p.name not in _NOT_YET_AVAILABLE_SKILLS
+    )
+    for name in sorted(_NOT_YET_AVAILABLE_SKILLS):
+        if (skills_source / name).is_dir():
+            print(f"  skills: {name} skipped -- requires ColGREP, not implemented in this release")
     real_names_lower = {p.name.lower() for p in real_skill_dirs}
 
     # Real skills first, shims second: a rename that only changed case (e.g.
@@ -144,14 +159,18 @@ def _install_colgrep(args: argparse.Namespace) -> bool:
     if not args.with_colgrep:
         print("  colgrep: skipped (pass --with-colgrep to enable)")
         return False
-    if shutil.which("rg") is None:
-        print(
-            "  colgrep: skipped - missing optional dependency ripgrep. "
-            "Install with: brew install ripgrep, then re-run: ./install.sh install --with-colgrep"
-        )
-        return False
-    print("  colgrep: ripgrep found; colgrep search is available (build a project index from /jSetup)")
-    return True
+    # Honest status, not a readiness check: this does not install ColGREP, does not
+    # configure a service, and does not register the colgrep_search /
+    # colgrep_list_dev_indices / colgrep_search_content MCP tools the colgrep-search
+    # skill calls. ripgrep presence (the old check here) is not what ColGREP needs --
+    # it just happened to be what this stub tested, which is exactly the false
+    # signal this message replaces. Never reports success and never completes a step.
+    print(
+        "  colgrep: NOT IMPLEMENTED in this release. --with-colgrep sets up nothing: "
+        "no ColGREP install, no service, no colgrep_search / colgrep_list_dev_indices / "
+        "colgrep_search_content MCP tools. See docs/getting-started.md for current status."
+    )
+    return False
 
 
 def _cmd_install(args: argparse.Namespace) -> int:
@@ -215,12 +234,14 @@ def _cmd_install(args: argparse.Namespace) -> int:
     print()
     if args.dry_run:
         print("DRY-RUN complete. Re-run without --dry-run to apply.")
+        print("Next: ./install.sh install   (here, in the jSwarm clone) to apply it.")
         return 0
     if state == "complete":
         print("jSwarm installed.")
         print("Next: ./install.sh verify   (here, in the jSwarm clone)")
         return 0
     print("install: partial (see the steps above). Re-run: ./install.sh install")
+    print("Next: ./install.sh install   (here, in the jSwarm clone) to finish it.")
     return 1
 
 
@@ -280,6 +301,7 @@ def _cmd_adopt(args: argparse.Namespace) -> int:
     print()
     if args.dry_run:
         print("DRY-RUN complete. Re-run without --dry-run to adopt.")
+        print(f"Next: ./install.sh adopt {result.repo}   (here, in the jSwarm clone) to apply it.")
         return 0
     print(f"adopt: {result.repo} is adopted.")
     print(f"Next: /jSetup   (agent session, opened in {result.repo})")
@@ -294,6 +316,9 @@ def _cmd_unadopt(args: argparse.Namespace) -> int:
         print(line)
     if args.dry_run:
         print("DRY-RUN complete. Re-run without --dry-run to unadopt.")
+        print(f"Next: ./install.sh unadopt {args.repo}   (here, in the jSwarm clone) to apply it.")
+        return 0
+    print("Next: nothing further required -- adopt it again with ./install.sh adopt <repo-path>   (here, in the jSwarm clone) if needed.")
     return 0
 
 
@@ -320,6 +345,7 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
     if args.dry_run:
         pieces = ", ".join(["skills", "portal_config"] + (["colgrep"] if "colgrep" in lock.steps_completed else []))
         print(f"DRY-RUN: would redeploy {pieces} and rewrite {lockfile.lock_path(home)}")
+        print("Next: ./install.sh upgrade   (here, in the jSwarm clone) to apply it.")
         return 0
 
     timestamp = backup_mod.utc_timestamp()
@@ -402,6 +428,7 @@ def _cmd_uninstall(args: argparse.Namespace) -> int:
         print("uninstall: no adopted repositories on record.")
 
     if args.dry_run:
+        print("Next: ./install.sh uninstall   (here, in the jSwarm clone) to apply it.")
         return 0
 
     _stop_portal_daemon(ctx, home)
@@ -430,6 +457,7 @@ def _cmd_uninstall(args: argparse.Namespace) -> int:
             ctx.remove_tree(jswarm_dir)
 
     print("uninstall: done.")
+    print("Next: nothing further required -- jSwarm is uninstalled. Re-run ./install.sh install   (here, in the jSwarm clone) to reinstall.")
     return 0
 
 

@@ -14,6 +14,6 @@ The story delivers a dashboard UI from a data object rather than only projecting
 
 ## Rules
 
-Read `docs/jplan/dashboard-render-tier.md` in full before proceeding. Apply the toolkit, JDS type-to-render-profile mapping, deployment target, and publication-safety gates. This pattern is for delivering a dashboard; Feature-child projections use the distinct dashboard-projections pattern.
+Dashboard rendering (the render-profile toolkit, JDS type-to-render-profile mapping, deployment target, and publication-safety gates) is not part of this public core release. Record `Dashboard render tier: N/A (dashboard delivery not available in this release)` and proceed without the render-tier section. This pattern is for delivering a dashboard; Feature-child projections use the distinct dashboard-projections pattern, which carries the same note.
 
 Provenance: `step-5-assemble-plan.md` § Dashboard-delivering stories (render tier).

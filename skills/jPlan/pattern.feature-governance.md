@@ -113,8 +113,8 @@ The orchestrating agent should **coordinate and delegate** to specialized sub-ag
 > Map this Feature to the project's official UAT catalog. Ticket-level UAT docs for child stories should modify, extend, or add to these scenarios rather than inventing unrelated one-off flows.
 >
 > When a child ticket needs running-app acceptance verification, create:
-> 1. `docs/plans/TICKET-XXX.uat-scenarios.md` from [`docs/templates/UAT_SCENARIO_EXTRACT_TEMPLATE.md`](UAT_SCENARIO_EXTRACT_TEMPLATE.md) as the ticket-local extracted working slice of the official inventory
-> 2. `docs/plans/TICKET-XXX.uat-test.md` from [`docs/templates/UAT_TEST_TEMPLATE.md`](UAT_TEST_TEMPLATE.md) as the executable verifier doc derived from that extracted slice
+> 1. `docs/plans/TICKET-XXX.uat-scenarios.md` as the ticket-local extracted working slice of the official inventory
+> 2. `docs/plans/TICKET-XXX.uat-test.md` from `docs/templates/UAT_TEST_TEMPLATE.md` as the executable verifier doc derived from that extracted slice
 >
 > At `/jClose`, validated scenario changes from the ticket-local extracted file should merge back into the official inventory here, with focused user confirmation on overwrites or ambiguous intended behavior.
 

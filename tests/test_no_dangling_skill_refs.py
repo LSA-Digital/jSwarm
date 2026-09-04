@@ -87,9 +87,15 @@ _ILLUSTRATIVE_FILES = {"UAT_CURRENT_ROUND_EXAMPLE.md"}
 def find_broken_relative_links(skills_root: Path) -> list[str]:
     """Relative paths (`[text](../...)` or bare `` `../...` ``) that don't resolve.
 
-    Links that ultimately resolve under docs/ (owned by a separate,
-    concurrently-edited workstream) or under a runtime-only `.jswarm/` path
-    are not actionable here and are excluded.
+    Links that ultimately resolve under a runtime-only `.jswarm/` path are
+    not actionable here and are excluded -- that tree only exists once a
+    project has been initialized, not in this repo's own checkout.
+
+    Links resolving under docs/ are NOT excluded: skills instruct readers to
+    open those documents, so a skill pointing at a docs/ page that doesn't
+    exist is exactly the class of dangling reference this test exists to
+    catch (see docs/merge/preflight.md and docs/merge/state-machine.md,
+    which went missing under the old exclusion for a long time undetected).
     """
     broken = []
     for md in sorted(skills_root.rglob("*.md")):
@@ -102,10 +108,55 @@ def find_broken_relative_links(skills_root: Path) -> list[str]:
             for href in hrefs:
                 resolved = (md.parent / href).resolve()
                 parts = resolved.parts
-                if "docs" in parts or ".jswarm" in parts:
+                if ".jswarm" in parts:
                     continue
                 if not resolved.exists():
                     broken.append(f"{md.relative_to(skills_root.parent)}:{n}: {href}")
+    return broken
+
+
+# A skill instructing an agent to open "``${JSWARM_HOME:-$HOME/dev/jswarm}/docs/X``" is
+# citing this repo's own docs/ tree by an absolute-install-path spelling rather than a
+# relative link -- the broken-relative-link check above can't see it (no `../`), but it
+# is exactly the same defect: a reader (or agent) sent to open a file that isn't there.
+# This repo consistently uses this exact spelling for its own docs (never for a path in
+# the *consuming* project, which is written bare, e.g. `docs/plans/TICKET-XXX...md`), so
+# the prefix is an unambiguous, mechanical signal -- no risk of flagging a project-relative
+# path by mistake.
+JSWARM_HOME_DOCS_RE = re.compile(r"`\$\{JSWARM_HOME[^}]*\}/(docs/[A-Za-z0-9_./-]+\.(?:md|json))`")
+# Per-project runtime paths spelled out as a naming *convention* (a ticket key, a category,
+# a date), never a literal file in this repo -- same idea as excluding `.jswarm/` above.
+_PLACEHOLDER_TOKENS = ("TICKET-XXX", "FEATURE-XXX", "TOOLCATEGORY", "YYYYMMDD")
+
+
+def find_broken_jswarm_home_docs_refs(skills_root: Path) -> list[str]:
+    """Backtick-quoted ``${JSWARM_HOME:-...}/docs/...`` references that don't resolve.
+
+    Found via a broader sweep after the docs/ exclusion above was removed: skills sent
+    readers to `docs/jplan/*`, `docs/agent-system/*`, and `docs/templates/*` documents
+    that only ever existed in the private monorepo this repo was split from, never
+    copied here. A `## Changelog` section (or a file literally named CHANGELOG.md) is
+    exempt: it narrates past revisions in the past tense, not a live pointer.
+    """
+    broken = []
+    for md in sorted(skills_root.rglob("*.md")):
+        if md.name in _ILLUSTRATIVE_FILES or md.name == "CHANGELOG.md":
+            continue
+        text = md.read_text(encoding="utf-8", errors="replace")
+        lines = text.splitlines()
+        changelog_from = next(
+            (i for i, line in enumerate(lines) if line.strip().lower() == "## changelog"),
+            None,
+        )
+        for n, line in enumerate(lines, 1):
+            if changelog_from is not None and n - 1 >= changelog_from:
+                break
+            for m in JSWARM_HOME_DOCS_RE.finditer(line):
+                relpath = m.group(1)
+                if any(token in relpath for token in _PLACEHOLDER_TOKENS):
+                    continue
+                if not (REPO_ROOT / relpath).exists():
+                    broken.append(f"{md.relative_to(skills_root.parent)}:{n}: {relpath}")
     return broken
 
 
@@ -167,6 +218,11 @@ def test_helpers_catch_a_planted_dangling_reference(tmp_path):
 def test_skill_relative_links_resolve():
     broken = find_broken_relative_links(SKILLS_ROOT)
     assert not broken, "dangling relative link(s) in skills/:\n" + "\n".join(broken)
+
+
+def test_no_broken_jswarm_home_docs_references():
+    broken = find_broken_jswarm_home_docs_refs(SKILLS_ROOT)
+    assert not broken, "dangling ${JSWARM_HOME}/docs/... reference(s):\n" + "\n".join(broken)
 
 
 def test_no_unresolved_slash_commands_anywhere_in_skills():

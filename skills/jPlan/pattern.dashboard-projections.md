@@ -14,6 +14,6 @@ A Story has a parent Feature with a dashboard data substrate.
 
 ## Rules
 
-Read `docs/jplan/feature-child-projections.md` in full. Preserve the held-versus-same enum distinction, write projected-only Section A cells and planned Section B/C/D rows, run validation `--check` before rendering, and follow the dual-render projection rules. If the parent has no dashboard data object, record the required N/A header line.
+Feature-child dashboard projection is not part of this public core release: `jswarm/feature-dashboard-system/` does not ship in this repo. Record `Dashboard projection: N/A (dashboard delivery not available in this release)` and proceed without the projection section.
 
 Provenance: `step-5-assemble-plan.md` § Feature-child Story Dashboard projections.

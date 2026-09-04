@@ -17,6 +17,6 @@ None.
 
 ## Rules
 
-After creating the plan and before its Jira summary, read `docs/jplan/security-compliance-baseline.md` in full. Capture each dimension’s applicability and, where applicable, `probability_before`, `impact_before`, safe `why_rationale`, and `baseline_controls_context`; this supplies lifecycle telemetry’s before-state. The telemetry writer remains fail-open.
+After creating the plan and before its Jira summary, fill in the table above: each dimension's applicability and, where applicable, its probability-before, impact-before, and a safe rationale naming the baseline controls already in place.
 
 Provenance: `step-5-assemble-plan.md` § Security & Compliance baseline risk capture.

@@ -22,7 +22,7 @@ Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with
 | 5 | **Ticket-local UAT scenario extract written** | Automated UAT + user-visible behavior; never Lite | `operations.md` |
 | 6 | **Executable UAT doc written** | Automated UAT + user-visible behavior; never Lite | `operations.md` |
 | 7 | **UAT round initialized in a non-ready state** | UAT round tracking: on | `step-5-assemble-plan.md` |
-| 8 | **Bug evidence pack deposited** (`<plans-root>/TICKET-XXX/design-inputs/` per [`BUG_EVIDENCE_PACK_TEMPLATE.md`](../../docs/templates/BUG_EVIDENCE_PACK_TEMPLATE.md)) | **Every DEFECT ticket, ALL modes incl. Lite** (Bug issue type, or Story/Task chartering a bug/defect follow-up from triage, review finding, or UAT report) | `mode-lite.md` Lite Step 2a (Lite) / this gate (full modes) |
+| 8 | **Bug evidence pack deposited** (`<plans-root>/TICKET-XXX/design-inputs/`; see Output 8 detail below) | **Every DEFECT ticket, ALL modes incl. Lite** (Bug issue type, or Story/Task chartering a bug/defect follow-up from triage, review finding, or UAT report) | `mode-lite.md` Lite Step 2a (Lite) / this gate (full modes) |
 
 **If you finish without all required outputs for the chosen mode, you have FAILED.** Do not ask user about next steps until required outputs are done.
 

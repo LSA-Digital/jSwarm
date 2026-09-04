@@ -35,9 +35,16 @@ Required (this is exactly what `./install.sh check` verifies):
 Only if you use the related feature:
 
 - **fnm and Node 24** are needed for the local review portal.
-- **ripgrep** is needed only for optional ColGREP code search (`install --with-colgrep`):
-  `brew install ripgrep`.
 - **A Jira account and project** are needed only if you connect a project to Jira.
+
+ColGREP semantic code search is **not implemented in this release**. The
+`install --with-colgrep` flag exists but sets up nothing: it does not install
+ColGREP, configure a service, or register the MCP tools (`colgrep_search`,
+`colgrep_list_dev_indices`, `colgrep_search_content`, ...) the `colgrep-search`
+skill would call. That skill, and `code-overview` (which depends on it), are
+not installed in this release. A decision on shipping ColGREP for a future
+release is pending; this page will be updated with real setup steps once it
+lands.
 
 ## 2. Clone jSwarm
 
@@ -71,9 +78,9 @@ run `check` again until it is clean.
 
 `--dry-run` prints every write the installer would make and changes nothing.
 Every subcommand that writes anything supports `--dry-run`, and `--dry-run`
-never writes anything at all. Add `--with-colgrep` if you want optional code
-search and already have ripgrep installed (`brew install ripgrep`); skip it
-the first time.
+never writes anything at all. Skip `--with-colgrep`: ColGREP is not
+implemented in this release (see [What this guide supports](#1-before-you-start)
+above), and the flag sets up nothing.
 
 The installer builds the Python virtual environment under `~/dev/jswarm/.venv`,
 copies each command in `skills/` into `~/.claude/skills/<name>`, which is the

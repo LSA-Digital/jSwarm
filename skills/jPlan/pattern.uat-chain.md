@@ -46,9 +46,9 @@ Rules:
 
 **Official UAT inventory:** `[docs/plans/FEATURE-XXX-uat-scenarios.md or docs/architecture/... ]`
 
-**Local UAT scenarios:** `docs/plans/TICKET-XXX.uat-scenarios.md`, created from [`docs/templates/UAT_SCENARIO_EXTRACT_TEMPLATE.md`](UAT_SCENARIO_EXTRACT_TEMPLATE.md). This is the working slice extracted from the official inventory and may evolve during the ticket.
+**Local UAT scenarios:** `docs/plans/TICKET-XXX.uat-scenarios.md`, the working slice extracted from the official inventory. May evolve during the ticket.
 
-**UAT doc:** `docs/plans/TICKET-XXX.uat-test.md`, derived from `TICKET-XXX.uat-scenarios.md`, created from [`docs/templates/UAT_TEST_TEMPLATE.md`](UAT_TEST_TEMPLATE.md), and using [`docs/templates/UAT_TEST_EXAMPLE.md`](UAT_TEST_EXAMPLE.md) as the model.
+**UAT doc:** `docs/plans/TICKET-XXX.uat-test.md`, derived from `TICKET-XXX.uat-scenarios.md` and created from `docs/templates/UAT_TEST_TEMPLATE.md` (`jswarm/uat-scenarios/scaffold_uat_tests.py` scaffolds it).
 
 ## Automated UAT Results
 

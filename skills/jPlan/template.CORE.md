@@ -26,7 +26,7 @@ features: []
 #   /jPlan --lite -> 0.planning.lite_init ; /jPlan -> 2.planning.detailed
 #   /jGo -> 3.implementation.phase_N.<descr> ; Plan Completion -> 5.closed.ready_for_merge
 #   /jClose -> 4.closed.all_ac_met then 6.closed.merged ; terminal.wont_do / terminal.deferred
-# Canonical: docs/agent-system/plan-status-state-machine.md and docs/plans/TICKET-XXX.specs.md
+# Canonical: docs/plans/TICKET-XXX.specs.md
 ---
 
 # TICKET-XXX: Feature Title
@@ -45,7 +45,7 @@ features: []
 **Testing strategy:** unit [required/upgrade/N/A]; integration [required/upgrade/N/A]; live-show UAT [yes only if UI/E2E impact / no]; regression E2E [per-ticket/deferred/N/A]; smoke [impact yes/no]
 **UAT state policy:** fresh-created | curated-existing | diagnostic-broken | N/A (use N/A when `Automated UAT: no`); default to fresh-created for live-show UAT; existing data requires named IDs and preflight
 **Test data strategy:** managed cluster required for regression | managed cluster recommended for scripted UAT | exploratory-ad-hoc allowed for live UAT | N/A ([cluster IDs or setup summary])
-**Status:** Tracked via frontmatter `status:` field (ACTIVE → READY_FOR_MERGE → DONE); see [state-machine.md](../../../docs/merge/state-machine.md)
+**Status:** Tracked via frontmatter `status:` field (ACTIVE → READY_FOR_MERGE → DONE); see [state-machine.md](../../docs/merge/state-machine.md)
 
 ---
 
@@ -70,7 +70,7 @@ features: []
 ## Acceptance Criteria
 
 > Synced with Jira ticket. Update both.
-> Author A/C as few, high-level summaries of UAT/NFR clusters (1 A/C : N, not 1:1), with perspective flexibility; see `docs/agent-system/ac-uat-nfr-traceability.design.md`.
+> Author A/C as few, high-level summaries of UAT/NFR clusters (1 A/C : N, not 1:1), with perspective flexibility.
 
 - [ ] **A/C 1:** [Description]
 - [ ] **A/C 2:** [Description]

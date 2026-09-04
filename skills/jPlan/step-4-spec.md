@@ -35,12 +35,6 @@ find .jswarm/plans -maxdepth 2 -name "*.research.*.md" 2>/dev/null | head -10
 
 Record everything read in the spec's **Input Documents** section. If no architecture docs exist, note that; it signals the project may need them.
 
-### 4B: Read the technical design spec template
-
-```
-Read docs/templates/TECH_DESIGN_SPEC_TEMPLATE.md
-```
-
 ### 4C: Populate the technical design spec
 
 Write to: `.jswarm/plans/TICKET-XXX/TICKET-XXX.specs.<descriptive>.md`

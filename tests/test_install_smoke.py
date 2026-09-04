@@ -38,10 +38,21 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 SHIM_NAMES = {"close-ticket", "fix", "implement", "jsetup", "merge", "new-work", "test", "uat"}
 
+# colgrep-search and code-overview both depend on ColGREP MCP tools (colgrep_search,
+# colgrep_list_dev_indices, ...) this installer does not set up -- ColGREP is not
+# implemented in this release (a decision on shipping it for v0.1.0 is pending with the
+# owner). jswarm.installer.cli._install_skills deliberately excludes both rather than
+# installing a silently non-functional command; see test_neither_colgrep_dependent_skill_is_installed.
+NOT_YET_AVAILABLE_SKILLS = {"colgrep-search", "code-overview"}
+
 
 def _real_skill_names() -> set[str]:
     skills_dir = REPO_ROOT / "skills"
-    return {p.name for p in skills_dir.iterdir() if p.is_dir() and p.name != "_shims"}
+    return {
+        p.name
+        for p in skills_dir.iterdir()
+        if p.is_dir() and p.name != "_shims" and p.name not in NOT_YET_AVAILABLE_SKILLS
+    }
 
 
 @pytest.fixture(scope="module")
@@ -73,6 +84,15 @@ def test_every_real_skill_lands_at_its_own_top_level_directory(installed_home):
     for name in _real_skill_names():
         skill_md = dest / name / "SKILL.md"
         assert skill_md.is_file(), f"skill '{name}' did not land at {skill_md}"
+
+
+def test_neither_colgrep_dependent_skill_is_installed(installed_home):
+    # Leaving these installed but silently non-functional (they call MCP tools that do
+    # not exist without ColGREP) is not acceptable, so the installer excludes them
+    # entirely rather than installing them with a "requires X" banner.
+    dest = installed_home / ".claude" / "skills"
+    for name in NOT_YET_AVAILABLE_SKILLS:
+        assert not (dest / name).exists(), f"'{name}' should not be installed (requires ColGREP)"
 
 
 def test_every_shim_is_discoverable_at_its_own_top_level_name(installed_home):
