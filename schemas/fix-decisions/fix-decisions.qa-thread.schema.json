@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://common.lsa.dev/schemas/fix-decisions/qa-thread/v1.0",
+  "$id": "https://jswarm.example/schemas/fix-decisions/qa-thread/v1.0",
   "title": "Fix-Decision Q&A Thread",
   "description": "Generic question-and-answer thread (owner expansion 2026-08-27): any question, any anchor, free-floating allowed. Q&A is a first-class object, not a receipt kind; receipts are decisions only. Threads are mutable-with-history: messages append and status transitions (unlike immutable receipts).",
   "type": "object",

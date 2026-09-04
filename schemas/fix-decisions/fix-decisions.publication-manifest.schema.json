@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://common.lsa.dev/schemas/fix-decisions/publication-manifest/v1.0",
+  "$id": "https://jswarm.example/schemas/fix-decisions/publication-manifest/v1.0",
   "title": "Fix-Decision Publication Manifest",
   "description": "Records the publication of a contract: the digest is computed over the exact JSON bytes of the contract at publication time, avoiding the self-digest paradox. Also binds the ticket-local receipt directory, allowed repository root, and fix-settings authority for auto gates.",
   "type": "object",

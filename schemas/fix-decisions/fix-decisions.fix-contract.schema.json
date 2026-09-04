@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://common.lsa.dev/schemas/fix-decisions/fix-contract/v1.0",
+  "$id": "https://jswarm.example/schemas/fix-decisions/fix-contract/v1.0",
   "title": "Fix-Decision Fix Contract",
   "description": "Envelope plus repair specialization. Must bind to its parent defect contract by exact path and digest, declare first-repair-authorizing status, and carry a parent_scope_trace (defect_key + in-scope disposition) for every authorized defect leg. Revisions within approved scope are first_repair_authorizing=false publications, not a third gate.",
   "allOf": [
@@ -72,7 +72,7 @@
     },
     "legacy": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "$id": "https://common.lsa.dev/schemas/fix-decisions/fix-contract/v1.0",
+      "$id": "https://jswarm.example/schemas/fix-decisions/fix-contract/v1.0",
       "title": "Fix-Decision Fix Contract",
       "description": "Envelope plus repair specialization. Must bind to its parent defect contract by exact path and digest, declare first-repair-authorizing status, and carry a parent_scope_trace (defect_key + in-scope disposition) for every authorized defect leg. Revisions within approved scope are first_repair_authorizing=false publications, not a third gate.",
       "type": "object",
@@ -1027,7 +1027,7 @@
         },
         "body": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
-          "$id": "https://common.lsa.dev/schemas/fix-decisions/fix-contract/v1.0",
+          "$id": "https://jswarm.example/schemas/fix-decisions/fix-contract/v1.0",
           "title": "Fix-Decision Fix Contract",
           "description": "Envelope plus repair specialization. Must bind to its parent defect contract by exact path and digest, declare first-repair-authorizing status, and carry a parent_scope_trace (defect_key + in-scope disposition) for every authorized defect leg. Revisions within approved scope are first_repair_authorizing=false publications, not a third gate.",
           "type": "object",

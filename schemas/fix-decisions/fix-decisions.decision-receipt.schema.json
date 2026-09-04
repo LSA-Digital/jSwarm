@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://common.lsa.dev/schemas/fix-decisions/decision-receipt/v1.1",
+  "$id": "https://jswarm.example/schemas/fix-decisions/decision-receipt/v1.1",
   "title": "Fix-Decision Receipt",
   "description": "Immutable decision receipt bound to the exact contract path and digest visible at submit time. v1.1 (owner expansion 2026-08-27): receipts are DECISIONS ONLY (approve/deny/comment); question/answer moved to the separate qa-thread schema, cross-linked by the optional thread_id field. Approve/deny may carry an optional comment; a standalone comment receipt requires comment. Human approvals capture the required vocabulary; settings-authorized receipts record the settings path/digest and authorization_source auto. Unknown fields fail closed except the x_extension namespace.",
   "type": "object",

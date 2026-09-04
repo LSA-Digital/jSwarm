@@ -219,7 +219,7 @@ DELIVERABLE_DURABILITY_AGENTS = frozenset(
 def infer_provider(model: str) -> str:
     """Infer the provider for a model id.
 
-    A namespaced id (``lsadigital/gemma-...``, ``zai/glm-5.2``) already carries
+    A namespaced id (``openrouter/gemma-...``, ``zai/glm-5.2``) already carries
     its provider as the first path segment. Bare stems keep the historical
     prefix rules. Mirrors ``infer_provider`` in ``migrate_agent_assignment_to_v2.py``.
     """
@@ -239,9 +239,9 @@ def infer_provider(model: str) -> str:
 def namespaced_model_id(provider: str, model: str) -> str:
     """Join ``provider/model`` without doubling an already-matching prefix.
 
-    ``lsadigital`` + ``lsadigital/gemma-...`` stays the official id.
-    ``openai`` + ``lsadigital/gemma-...`` keeps the OpenCode transport prefix
-    so remap can become ``cliproxy/lsadigital/gemma-...``.
+    ``openrouter`` + ``openrouter/gemma-...`` stays the official id.
+    ``openai`` + ``openrouter/gemma-...`` keeps the OpenCode transport prefix
+    so remap can become ``cliproxy/openrouter/gemma-...``.
     """
     model_s = (model or "").strip()
     provider_s = (provider or "").strip()
@@ -272,7 +272,7 @@ def build_model_line(claude: dict[str, Any], opencode: dict[str, Any]) -> str:
 
     Anthropic → bare base id (the harness appends ``[1m]``; effort suffixes
     produce non-existent SKUs). An already-namespaced official id is kept as-is
-    (``lsadigital/gemma-...``). Other bare stems become ``provider/model``.
+    (``openrouter/gemma-...``). Other bare stems become ``provider/model``.
     A disabled agent mirrors its OpenCode disabled marker (``zai/disabled``).
     """
     model = str(claude.get("model", ""))

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://common.lsa.dev/schemas/fix-decisions/defect-contract/v1.0",
+  "$id": "https://jswarm.example/schemas/fix-decisions/defect-contract/v1.0",
   "title": "Fix-Decision Defect Contract",
   "description": "Envelope plus defect specialization. Drives Gate 1 (defect-contract-scope) WITHOUT repair implementation authority: repair_authority is restricted to none / pending-owner-approval, and every defect carries a pre-declared preliminary-scope disposition.",
   "allOf": [
@@ -72,7 +72,7 @@
     },
     "legacy": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "$id": "https://common.lsa.dev/schemas/fix-decisions/defect-contract/v1.0",
+      "$id": "https://jswarm.example/schemas/fix-decisions/defect-contract/v1.0",
       "title": "Fix-Decision Defect Contract",
       "description": "Envelope plus defect specialization. Drives Gate 1 (defect-contract-scope) WITHOUT repair implementation authority: repair_authority is restricted to none / pending-owner-approval, and every defect carries a pre-declared preliminary-scope disposition.",
       "type": "object",
@@ -823,7 +823,7 @@
         },
         "body": {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
-          "$id": "https://common.lsa.dev/schemas/fix-decisions/defect-contract/v1.0",
+          "$id": "https://jswarm.example/schemas/fix-decisions/defect-contract/v1.0",
           "title": "Fix-Decision Defect Contract",
           "description": "Envelope plus defect specialization. Drives Gate 1 (defect-contract-scope) WITHOUT repair implementation authority: repair_authority is restricted to none / pending-owner-approval, and every defect carries a pre-declared preliminary-scope disposition.",
           "type": "object",

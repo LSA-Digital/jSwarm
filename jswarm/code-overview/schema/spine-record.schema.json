@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lsa.dev/schemas/code-overview/spine-record.schema.json",
+  "$id": "https://jswarm.example/schemas/code-overview/spine-record.schema.json",
   "title": "code-overview seam-spine record envelope",
   "description": "Generic (Layer A) schema for the code-overview v2 seam-spine JSONL. Each line is one typed record. This manifest is the single source of truth for required fields, per-record-type D-1 ID grammar (segment count + numeric-ordinal requirement), field type/enum constraints, cross-record graph-reference fields, and the schema-major migration policy; schema/__init__.py loads it at runtime instead of duplicating the shape in Python.",
   "type": "object",

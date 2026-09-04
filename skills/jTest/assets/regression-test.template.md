@@ -1,6 +1,6 @@
 # TICKET-XXX: Regression Test Result — <accepted UAT scenario id>
 
-**Ticket:** [TICKET-XXX](https://lsadigital.atlassian.net/browse/TICKET-XXX)  
+**Ticket:** [TICKET-XXX](https://your-jira.atlassian.net/browse/TICKET-XXX)  
 **Accepted UAT scenario:** `<UAT.SCENARIO.ID>`  
 **UAT scenario doc:** `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md`  
 **UAT scenario-steps source:** `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenario-steps.md#<phase-or-branch>` (legacy `TICKET-XXX.uat-test.md`)  

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://common.lsa.dev/schemas/fix-decisions/contract-envelope/v1.0",
+  "$id": "https://jswarm.example/schemas/fix-decisions/contract-envelope/v1.0",
   "title": "Fix-Decision Contract Envelope",
   "description": "Shared envelope for defect contracts and fix contracts. The canonical source file must NOT carry its own SHA-256; publication manifests compute and record the digest over exact JSON bytes. Review-hardened 2026-08-27: gate_kind, contract_status, and parent relation are closed enums; revision_policy is typed per SC-14; PM anchoring is required for native contracts (legacy-migration conversion exempt).",
   "type": "object",

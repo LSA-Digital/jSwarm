@@ -35,7 +35,7 @@ features: []
 
 **Last Updated:** YYYY-MM-DD
 
-**Jira Ticket:** [TICKET-XXX](https://lsadigital.atlassian.net/browse/TICKET-XXX)
+**Jira Ticket:** [TICKET-XXX](https://your-jira.atlassian.net/browse/TICKET-XXX)
 **Parent:** [PARENT-XXX (Epic Title) — delete if none]
 **Technical Design Spec:** [TICKET-XXX.specs.md](TICKET-XXX.specs.md) — delete for Quick plans that do not use a spec
 **Recommended agent team:** Pattern <1|2> · review:<critic|critic-xhigh> · arch:<none|architect|architect-master> · escalation-trigger:<verbatim trigger or "none">

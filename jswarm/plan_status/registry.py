@@ -22,7 +22,7 @@ from typing import Any, Callable, cast
 
 from . import state as S
 
-SCHEMA_URI = "https://lsa.dev/schemas/plan-status/v1.json"
+SCHEMA_URI = "https://jswarm.example/schemas/plan-status/v1.json"
 SCHEMA_VERSION = 1
 REGISTRY_FILENAME = ".jPlanStatus.json"
 CANONICAL_READ_MODEL_REL = Path(".jswarm/ops/read-models/plan-status.json")
