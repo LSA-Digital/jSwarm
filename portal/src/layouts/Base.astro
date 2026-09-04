@@ -1,0 +1,177 @@
+---
+// COM-389 — base layout for the decision-review UI. Mobile-first, semantic,
+// keyboard-accessible. Deterministic: no timestamps, no generator meta.
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem("decision-review-theme");
+          if (stored === "light" || stored === "dark") document.documentElement.dataset.theme = stored;
+        } catch {}
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen bg-jw-bg text-jw-fg font-sans leading-relaxed antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-jw-surface focus:px-3 focus:py-2 focus:shadow"
+    >Skip to main content</a>
+    <div class="flex justify-end px-4 pt-3 sm:px-6 sm:pt-4 lg:px-8">
+      <button
+        type="button"
+        data-theme-toggle
+        class="inline-flex min-h-11 items-center gap-2 rounded-full border border-jw-line bg-jw-surface px-4 py-2 text-sm font-bold text-jw-fg shadow-sm transition-colors hover:border-jw-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue"
+        aria-label="Use dark mode"
+      >
+        <span data-theme-toggle-mark aria-hidden="true">◐</span>
+        <span data-theme-toggle-label>Dark mode</span>
+      </button>
+    </div>
+    <slot />
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const button = document.querySelector("[data-theme-toggle]");
+        const label = button?.querySelector("[data-theme-toggle-label]");
+        const media = window.matchMedia("(prefers-color-scheme: dark)");
+        const explicitTheme = () => root.dataset.theme === "light" || root.dataset.theme === "dark" ? root.dataset.theme : null;
+        const effectiveTheme = () => explicitTheme() || (media.matches ? "dark" : "light");
+        const render = () => {
+          if (!(button instanceof HTMLButtonElement) || !(label instanceof HTMLElement)) return;
+          const next = effectiveTheme() === "dark" ? "light" : "dark";
+          label.textContent = `${next[0].toUpperCase()}${next.slice(1)} mode`;
+          button.setAttribute("aria-label", `Use ${next} mode`);
+          button.setAttribute("aria-pressed", String(explicitTheme() !== null));
+        };
+        button?.addEventListener("click", () => {
+          const next = effectiveTheme() === "dark" ? "light" : "dark";
+          root.dataset.theme = next;
+          try { localStorage.setItem("decision-review-theme", next); } catch {}
+          render();
+        });
+        media.addEventListener?.("change", () => { if (!explicitTheme()) render(); });
+        render();
+      })();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light dark;
+    --jw-blue: 26 79 160;
+    --jw-on-accent: 255 255 255;
+    --jw-red: 179 38 30;
+    --jw-line: 198 203 211;
+    --jw-muted: 82 88 98;
+    --jw-bg: 247 248 250;
+    --jw-fg: 31 35 41;
+    --jw-warn: 161 92 0;
+    --jw-ok: 15 107 58;
+    --jw-surface: 255 255 255;
+    --jw-surface-muted: 237 240 244;
+    --jw-header-bg: 255 255 255;
+    --jw-queue: 237 240 244;
+    --jw-queue-selected: 255 255 255;
+    --jw-high: 179 38 30;
+    --jw-high-soft: 253 231 231;
+    --jw-med: 161 92 0;
+    --jw-med-soft: 253 236 200;
+    --jw-low: 15 107 58;
+    --jw-low-soft: 227 243 232;
+    --jw-crit: 122 31 26;
+    --jw-crit-soft: 251 217 214;
+    --jw-info: 58 90 138;
+    --jw-info-soft: 227 235 247;
+    --jw-status-pass: 15 107 58;
+    --jw-status-pass-soft: 227 243 232;
+    --jw-status-fail: 179 38 30;
+    --jw-status-fail-soft: 253 231 231;
+    --jw-status-caution: 155 86 0;
+    --jw-status-caution-soft: 253 236 200;
+    --jw-status-na: 58 90 138;
+    --jw-status-na-soft: 227 235 247;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --jw-blue: 138 180 248;
+      --jw-on-accent: 13 17 23;
+      --jw-red: 255 180 171;
+      --jw-line: 73 83 98;
+      --jw-muted: 174 184 199;
+      --jw-bg: 13 17 23;
+      --jw-fg: 237 241 247;
+      --jw-warn: 244 192 106;
+      --jw-ok: 116 214 154;
+      --jw-surface: 24 31 42;
+      --jw-surface-muted: 34 43 57;
+      --jw-header-bg: 24 31 42;
+      --jw-queue: 17 24 32;
+      --jw-queue-selected: 36 47 63;
+      --jw-high: 255 180 171;
+      --jw-high-soft: 75 31 31;
+      --jw-med: 244 192 106;
+      --jw-med-soft: 70 53 26;
+      --jw-low: 116 214 154;
+      --jw-low-soft: 24 60 40;
+      --jw-crit: 255 158 149;
+      --jw-crit-soft: 85 30 30;
+      --jw-info: 170 199 255;
+      --jw-info-soft: 28 53 87;
+      --jw-status-pass: 116 214 154;
+      --jw-status-pass-soft: 24 60 40;
+      --jw-status-fail: 255 180 171;
+      --jw-status-fail-soft: 75 31 31;
+      --jw-status-caution: 244 192 106;
+      --jw-status-caution-soft: 70 53 26;
+      --jw-status-na: 170 199 255;
+      --jw-status-na-soft: 28 53 87;
+    }
+  }
+  :root[data-theme="dark"] {
+    --jw-blue: 138 180 248;
+    --jw-on-accent: 13 17 23;
+    --jw-red: 255 180 171;
+    --jw-line: 73 83 98;
+    --jw-muted: 174 184 199;
+    --jw-bg: 13 17 23;
+    --jw-fg: 237 241 247;
+    --jw-warn: 244 192 106;
+    --jw-ok: 116 214 154;
+    --jw-surface: 24 31 42;
+    --jw-surface-muted: 34 43 57;
+    --jw-header-bg: 24 31 42;
+    --jw-queue: 17 24 32;
+    --jw-queue-selected: 36 47 63;
+    --jw-high: 255 180 171;
+    --jw-high-soft: 75 31 31;
+    --jw-med: 244 192 106;
+    --jw-med-soft: 70 53 26;
+    --jw-low: 116 214 154;
+    --jw-low-soft: 24 60 40;
+    --jw-crit: 255 158 149;
+    --jw-crit-soft: 85 30 30;
+    --jw-info: 170 199 255;
+    --jw-info-soft: 28 53 87;
+    --jw-status-pass: 116 214 154;
+    --jw-status-pass-soft: 24 60 40;
+    --jw-status-fail: 255 180 171;
+    --jw-status-fail-soft: 75 31 31;
+    --jw-status-caution: 244 192 106;
+    --jw-status-caution-soft: 70 53 26;
+    --jw-status-na: 170 199 255;
+    --jw-status-na-soft: 28 53 87;
+  }
+  body { background-color: rgb(var(--jw-bg)); color: rgb(var(--jw-fg)); }
+</style>

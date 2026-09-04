@@ -1,0 +1,138 @@
+---
+const FIX = [
+  { name: "Diagnose", d: "M 392.3 91.8 A 150 150 0 0 0 243.8 70.9 L 228.9 108.4 L 263.3 119.1 A 98 98 0 0 1 360.3 132.8 Z", x: 317.3, y: 87.2, r: 8.0 },
+  { name: "Contract", d: "M 229.6 77.6 A 150 150 0 0 0 150.1 204.8 L 178.3 233.7 L 202.1 206.6 A 98 98 0 0 1 254.0 123.5 Z", x: 194.8, y: 144.3, r: -58.0 },
+  { name: "Repair", d: "M 150.4 220.5 A 150 150 0 0 0 234.2 344.8 L 272.1 330.8 L 257.0 298.1 A 98 98 0 0 1 202.2 216.8 Z", x: 197.2, y: 279.3, r: 56.0 },
+  { name: "Prove", d: "M 248.7 351.0 A 150 150 0 0 0 388.2 331.4 L 393.6 291.4 L 357.6 289.3 A 98 98 0 0 1 266.5 302.1 Z", x: 317.3, y: 332.8, r: -8.0 },
+];
+const UAT = [
+  { name: "Prepare", d: "M 567.7 91.8 A 150 150 0 0 1 716.2 70.9 L 731.1 108.4 L 696.7 119.1 A 98 98 0 0 0 599.7 132.8 Z", x: 642.7, y: 87.2, r: -8.0 },
+  { name: "Execute", d: "M 730.4 77.6 A 150 150 0 0 1 809.9 204.8 L 781.7 233.7 L 757.9 206.6 A 98 98 0 0 0 706.0 123.5 Z", x: 765.2, y: 144.3, r: 58.0 },
+  { name: "Observe", d: "M 809.6 220.5 A 150 150 0 0 1 725.8 344.8 L 687.9 330.8 L 703.0 298.1 A 98 98 0 0 0 757.8 216.8 Z", x: 762.8, y: 279.3, r: -56.0 },
+  { name: "Feedback", d: "M 711.3 351.0 A 150 150 0 0 1 571.8 331.4 L 566.4 291.4 L 602.4 289.3 A 98 98 0 0 0 693.5 302.1 Z", x: 642.7, y: 332.8, r: 8.0 },
+];
+---
+<section
+  data-fix-uat-lifecycle
+  data-lifecycle-loop="continuous"
+  data-lifecycle-shape="infinity"
+  data-order="static"
+  aria-label="FIX and UAT TEST lifecycle"
+  class="lifecycle-shell"
+>
+  <div class="lifecycle-heading">
+    <div>
+      <p class="lifecycle-kicker">One continuous quality loop</p>
+      <h2>Decide with evidence. Test the result. Return what was learned.</h2>
+    </div>
+    <p class="lifecycle-note">The diagram explains the handoff; the review and feedback cards below remain the navigation.</p>
+  </div>
+
+  <div class="lifecycle-diagram">
+    <svg viewBox="0 0 960 420" role="img" aria-labelledby="lifecycle-title lifecycle-description" focusable="false">
+      <title id="lifecycle-title">FIX and UAT TEST lifecycle</title>
+      <desc id="lifecycle-description">One continuous figure-eight loop. The blue left lobe is the FIX cycle — diagnose, contract, repair, prove. The green right lobe is the UAT TEST cycle — prepare, execute, observe, feedback. A dark band of continuous acceptance crosses through the middle, carrying FIX verification into UAT TEST and returning findings and feedback to FIX.</desc>
+
+      <defs>
+        <path id="lifecycle-band-path" d="M 322 322 C 400 300 560 128 640 104"></path>
+      </defs>
+
+      <g class="crossing" data-lifecycle-direction="fix-to-uat">
+        <use href="#lifecycle-band-path" class="crossing-band"></use>
+        <text class="crossing-label" dy="6">
+          <textPath href="#lifecycle-band-path" startOffset="50%" text-anchor="middle">Continuous acceptance</textPath>
+        </text>
+      </g>
+
+      <g data-lifecycle-half="fix" data-color="blue" class="lobe lobe-fix">
+        {FIX.map((s) => (
+          <g data-lifecycle-stage={s.name.toLowerCase()}>
+            <path class="lobe-band" d={s.d}></path>
+            <text class="lobe-label" x={s.x} y={s.y} text-anchor="middle" dominant-baseline="middle" transform={`rotate(${s.r} ${s.x} ${s.y})`}>{s.name}</text>
+          </g>
+        ))}
+      </g>
+
+      <g data-lifecycle-half="uat" data-color="green" class="lobe lobe-uat">
+        {UAT.map((s) => (
+          <g data-lifecycle-stage={s.name.toLowerCase()}>
+            <path class="lobe-band" d={s.d}></path>
+            <text class="lobe-label" x={s.x} y={s.y} text-anchor="middle" dominant-baseline="middle" transform={`rotate(${s.r} ${s.x} ${s.y})`}>{s.name}</text>
+          </g>
+        ))}
+      </g>
+
+      <g class="lobe-caption">
+        <a href="/fix/" aria-label="Open FIX cycle publications" data-lifecycle-caption-link="fix" class="caption-link">
+          <text x="300" y="216" text-anchor="middle" class="caption-title caption-fix" style="text-decoration-line:underline;text-decoration-thickness:1.5px;text-underline-offset:3px">FIX cycle</text>
+        </a>
+        <text x="300" y="240" text-anchor="middle" class="caption-detail">review · decide · verify</text>
+        <a href="/uat/" aria-label="Open UAT TEST cycle rounds" data-lifecycle-caption-link="uat" class="caption-link">
+          <text x="660" y="216" text-anchor="middle" class="caption-title caption-uat" style="text-decoration-line:underline;text-decoration-thickness:1.5px;text-underline-offset:3px">UAT TEST cycle</text>
+        </a>
+        <text x="660" y="240" text-anchor="middle" class="caption-detail">exercise · observe · report</text>
+      </g>
+
+      <g class="handoff">
+        <text x="480" y="34" text-anchor="middle" data-lifecycle-direction="fix-to-uat">FIX verification → UAT TEST</text>
+        <text x="480" y="404" text-anchor="middle" data-lifecycle-direction="uat-to-fix">FIX ← findings / feedback</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="lifecycle-mobile">
+    <span class="mobile-half-fix"><a href="/fix/" aria-label="Open FIX cycle publications" data-lifecycle-caption-link="fix">FIX cycle</a><i>diagnose · contract · repair · prove</i></span>
+    <b data-lifecycle-direction="fix-to-uat">FIX verification → UAT TEST</b>
+    <span class="mobile-half-uat"><a href="/uat/" aria-label="Open UAT TEST cycle rounds" data-lifecycle-caption-link="uat">UAT TEST cycle</a><i>prepare · execute · observe · feedback</i></span>
+    <b data-lifecycle-direction="uat-to-fix">FIX ← findings / feedback</b>
+  </div>
+</section>
+
+<style is:inline>
+  .lifecycle-shell{margin-top:2rem;border:1px solid #dadce0;border-top:4px solid #202124;background:#fff;padding:clamp(1rem,3vw,1.75rem);box-shadow:0 10px 30px rgba(32,33,36,.06)}
+  .lifecycle-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;border-bottom:1px solid #dadce0;padding-bottom:1rem}
+  .lifecycle-kicker{margin:0;color:#1a4fa0;font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+  .lifecycle-heading h2{max-width:42rem;margin:.35rem 0 0;font-size:clamp(1.15rem,2.5vw,1.65rem);line-height:1.2;letter-spacing:-.02em}
+  .lifecycle-note{max-width:20rem;margin:0;color:#5f6368;font-size:.82rem;line-height:1.45}
+  .lifecycle-diagram{margin-top:1rem;overflow:hidden}
+  .lifecycle-diagram svg{display:block;width:100%;height:auto;min-height:210px;max-width:1040px;margin-inline:auto}
+
+  .lobe-band{stroke:#fff;stroke-width:3;stroke-linejoin:round}
+  .lobe-fix .lobe-band{fill:#2f7bd6}
+  .lobe-fix g:nth-child(2) .lobe-band{fill:#3f88de}
+  .lobe-fix g:nth-child(3) .lobe-band{fill:#2a6fc4}
+  .lobe-fix g:nth-child(4) .lobe-band{fill:#1f5da8}
+  .lobe-uat .lobe-band{fill:#2e9e63}
+  .lobe-uat g:nth-child(2) .lobe-band{fill:#38ab6e}
+  .lobe-uat g:nth-child(3) .lobe-band{fill:#258b55}
+  .lobe-uat g:nth-child(4) .lobe-band{fill:#1a7345}
+  .lobe-label{fill:#fff;font-size:23px;font-weight:800;letter-spacing:.01em}
+
+  .crossing-band{fill:none;stroke:#12294d;stroke-width:46;stroke-linecap:butt}
+  .crossing-label{fill:#fff;font-size:19px;font-weight:800;letter-spacing:.02em}
+
+  .caption-title{font-size:19px;font-weight:800;letter-spacing:.01em}
+  .caption-link{cursor:pointer;outline:none}
+  .caption-link:focus-visible{outline:3px solid currentColor;outline-offset:4px}
+  .caption-fix{fill:#1a4fa0}
+  .caption-uat{fill:#0f6b3a}
+  .caption-detail{fill:#5f6368;font-size:12px;font-weight:650;letter-spacing:.05em}
+  .handoff text{fill:#202124;font-size:14px;font-weight:800}
+
+  .lifecycle-mobile{display:none}
+  @media (prefers-reduced-motion:reduce){.lifecycle-shell *{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+  @media (max-width:560px){
+    .lifecycle-heading{display:block}.lifecycle-note{margin-top:.75rem;max-width:none}
+    .lifecycle-diagram{display:none}
+    .lifecycle-mobile{display:grid;grid-template-columns:1fr;gap:.5rem;margin-top:1rem;text-align:center}
+    .lifecycle-mobile span{border:2px solid #dadce0;background:#fff;padding:.75rem;font-size:.95rem;font-weight:800}
+    .lifecycle-mobile a{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
+    .lifecycle-mobile a:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+    .lifecycle-mobile i{display:block;margin-top:.25rem;color:#5f6368;font-size:.72rem;font-style:normal;font-weight:650;letter-spacing:.04em}
+    .lifecycle-mobile .mobile-half-fix{border-left:6px solid #1a4fa0}
+    .lifecycle-mobile .mobile-half-uat{border-right:6px solid #0f6b3a}
+    .lifecycle-mobile b{padding:.25rem;color:#1a4fa0;font-size:.75rem;letter-spacing:.02em}
+    .lifecycle-mobile b:last-child{color:#0f6b3a}
+  }
+  @media (max-width:320px){.lifecycle-shell{padding:.85rem}.lifecycle-heading h2{font-size:1.05rem}.lifecycle-note{font-size:.78rem}}
+</style>

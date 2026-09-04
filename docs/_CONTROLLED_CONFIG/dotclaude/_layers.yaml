@@ -1,0 +1,37 @@
+# CONFIG-CONTROLLED — COM-176 controlled-config layer registry.
+# This file is mastered here under docs/_CONTROLLED_CONFIG/dotclaude/ and is the
+# single source of truth for which physical contexts exist and where each one
+# deploys. Edit it here; it is read by deploy.py / verify_dotclaude_topology.py /
+# adopt.py / migrate_one_home.py via jswarm/deploy/layers.py.
+#
+# ONE-HOME / ONE-TARGET MODEL: each context = exactly one deploy target. This is a
+# registry of physical contexts only — NOT a precedence registry. Runtime
+# precedence (enterprise > user > repo) is Claude Code's own cascade, never the
+# deploy engine. Do NOT add rank / precedence / may_target / target_contexts /
+# targets / mask fields — the loader rejects them on purpose (COM-176 spec §2).
+schema: com176.layers.v1-one-home
+root: docs/_CONTROLLED_CONFIG/dotclaude
+layers:
+  enterprise:
+    enabled: false
+    dir: enterprise
+    deploy_target:
+      kind: path
+      path: /opt/lsadigital/claude/.claude
+    description: Enterprise-managed Claude Code context. Disabled until an enterprise location is provisioned.
+
+  user:
+    enabled: true
+    dir: user
+    deploy_target:
+      kind: root_arg
+      arg: home_root
+    description: Operator user-level Claude Code context, normally ~/.claude.
+
+  repo.common:
+    enabled: true
+    dir: repo.common
+    deploy_target:
+      kind: root_arg
+      arg: common_root
+    description: This common checkout's project-local .claude context.

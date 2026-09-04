@@ -1,0 +1,80 @@
+{
+  "schema_version": "jswarm.test-uat.feedback-result/v2",
+  "canonical_assessments": [
+    "PASS",
+    "FAIL",
+    "BLOCKED",
+    "NOT_OBSERVED",
+    "NOT_APPLICABLE"
+  ],
+  "required_assessments": [
+    "PASS",
+    "FAIL",
+    "BLOCKED",
+    "NOT_OBSERVED"
+  ],
+  "optional_assessments": [
+    "NOT_APPLICABLE"
+  ],
+  "assessment_aliases": {
+    "ALIGNED": "PASS",
+    "OBSERVED_FAILURE": "FAIL"
+  },
+  "assessment_outcomes": {
+    "PASS": "PASS",
+    "FAIL": "FAIL",
+    "BLOCKED": "BLOCKED",
+    "NOT_OBSERVED": "NOT_RUN",
+    "NOT_APPLICABLE": "N/A"
+  },
+  "cells": [
+    ["PASS", "NONE", "SATISFIED"],
+    ["PASS", "NONE", "ANSWERED-NO-CHANGE"],
+    ["PASS", "NONE", "REJECTED-BY-OWNER"],
+    ["PASS", "MINOR", "ACCEPTED-BY-OWNER"],
+    ["PASS", "MINOR", "OPEN"],
+    ["FAIL", "NONE", "OPEN"],
+    ["FAIL", "MINOR", "OPEN"],
+    ["FAIL", "MAJOR", "OPEN"],
+    ["BLOCKED", "NONE", "BLOCKED"],
+    ["NOT_RUN", "NONE", "OPEN"],
+    ["N/A", "NONE", "N/A"]
+  ],
+  "system_cells": [
+    ["INCOMPLETE", "NONE", "OPEN"]
+  ],
+  "no_finding_ledger_projection": {
+    "PASS": ["PASS", "NONE", "SATISFIED"],
+    "FAIL": ["FAIL", "NONE", "OPEN"],
+    "BLOCKED": ["BLOCKED", "NONE", "BLOCKED"],
+    "NOT_OBSERVED": ["NOT_RUN", "NONE", "OPEN"],
+    "NOT_APPLICABLE": ["N/A", "NONE", "N/A"]
+  },
+  "pristine_completion": {
+    "complete": true,
+    "assessment": "PASS",
+    "finding_severity": null,
+    "finding_disposition": null
+  },
+  "observation_required": {
+    "PASS": false,
+    "FAIL": false,
+    "BLOCKED": false,
+    "NOT_OBSERVED": false,
+    "NOT_APPLICABLE": false
+  },
+  "entry_schema_version": "jswarm.test-uat.feedback-update/v3",
+  "aggregate_verdicts": [
+    "PASS",
+    "PASS_WITH_FINDINGS",
+    "FAIL",
+    "BLOCKED",
+    "INCOMPLETE"
+  ],
+  "legacy_default_assessment_options": [
+    "PASS",
+    "FAIL",
+    "BLOCKED",
+    "NOT_OBSERVED"
+  ]
+}

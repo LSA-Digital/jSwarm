@@ -1,0 +1,3052 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://common.lsa.dev/schemas/fix-decisions/fix-contract/v1.0",
+  "title": "Fix-Decision Fix Contract",
+  "description": "Envelope plus repair specialization. Must bind to its parent defect contract by exact path and digest, declare first-repair-authorizing status, and carry a parent_scope_trace (defect_key + in-scope disposition) for every authorized defect leg. Revisions within approved scope are first_repair_authorizing=false publications, not a third gate.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "document_type": {
+            "const": "contract-member"
+          }
+        },
+        "required": [
+          "document_type"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/root_member"
+          },
+          {
+            "$ref": "#/$defs/delta_member"
+          }
+        ]
+      },
+      "else": {
+        "$ref": "#/$defs/legacy"
+      }
+    }
+  ],
+  "$defs": {
+    "sha256Hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "rfc3339Utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "sectionId": {
+      "type": "string",
+      "pattern": "^s[0-9]+(-[0-9]+)*-[a-z0-9][a-z0-9-]*$"
+    },
+    "sectionEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_id",
+        "title",
+        "body"
+      ],
+      "properties": {
+        "section_id": {
+          "$ref": "#/$defs/sectionId"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string"
+        },
+        "subsections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sectionEntry"
+          }
+        }
+      }
+    },
+    "legacy": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://common.lsa.dev/schemas/fix-decisions/fix-contract/v1.0",
+      "title": "Fix-Decision Fix Contract",
+      "description": "Envelope plus repair specialization. Must bind to its parent defect contract by exact path and digest, declare first-repair-authorizing status, and carry a parent_scope_trace (defect_key + in-scope disposition) for every authorized defect leg. Revisions within approved scope are first_repair_authorizing=false publications, not a third gate.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "schema_version",
+        "document_type",
+        "contract_id",
+        "ticket",
+        "cycle_key",
+        "contract_version",
+        "contract_slug",
+        "issued_by",
+        "issued_at",
+        "invocation_origin",
+        "source_path",
+        "parent_contracts",
+        "evidence_refs",
+        "intent",
+        "contract_status",
+        "gate_kind",
+        "gate_mode",
+        "required_approval_vocabulary",
+        "repair_authority",
+        "revision_policy",
+        "decision",
+        "summary",
+        "pm_view",
+        "terminal_outcome",
+        "pm_anchor_map",
+        "scope",
+        "defects",
+        "flow",
+        "risks",
+        "cost_timeline",
+        "detail_refs",
+        "sections",
+        "uat_route",
+        "vendor_policy",
+        "parent_defect_contract",
+        "first_repair_authorizing",
+        "authorized_defects",
+        "implementation_boundaries",
+        "causal_test_obligations",
+        "connected_proof",
+        "counterexamples",
+        "rollout",
+        "batch_tail_policy",
+        "revision_behavior",
+        "must_still_work",
+        "fix_settings_path",
+        "fix_settings_sha256"
+      ],
+      "properties": {
+        "schema": {
+          "const": "jswarm.fix-decisions.fix-contract/v1"
+        },
+        "schema_version": {
+          "enum": [
+            "1.0",
+            "1.1"
+          ],
+          "description": "v1.1 (COM-389 Phase 5 review round, additive): cost_timeline.paragraphs, evidence_refs[].description, detail_refs[].label, terminal_outcome.incompleteness_guardrails, defects[].source_key, pm_view[].rationale, pm_anchor_map[].source_technical_references, approval_vocabulary_derivation."
+        },
+        "document_type": {
+          "const": "fix-contract"
+        },
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ticket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "issued_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issued_at": {
+          "$ref": "#/$defs/rfc3339Utc"
+        },
+        "invocation_origin": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "conversion"
+          ],
+          "properties": {
+            "conversion": {
+              "enum": [
+                "native",
+                "legacy-migration"
+              ],
+              "description": "legacy-migration exempts the document from PM anchoring minimums (converted historical contracts never had PM anchor tables)."
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "parent_contracts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "relation"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256Hex"
+              },
+              "relation": {
+                "enum": [
+                  "supersedes",
+                  "prior-diagnosis",
+                  "parent-defect-contract",
+                  "evidence"
+                ]
+              }
+            }
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ref"
+            ],
+            "properties": {
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "locator": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string",
+                "description": "v1.1: verbatim evidence description from the source."
+              }
+            }
+          }
+        },
+        "intent": {
+          "const": "repair-authorizing"
+        },
+        "contract_status": {
+          "enum": [
+            "draft",
+            "issued-awaiting-owner-approval",
+            "approved",
+            "denied",
+            "superseded",
+            "informational"
+          ]
+        },
+        "gate_kind": {
+          "const": "fix-contract-digest"
+        },
+        "gate_mode": {
+          "enum": [
+            "owner-authorized",
+            "auto"
+          ]
+        },
+        "required_approval_vocabulary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_vocabulary_derivation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source_section_id",
+            "source_ceremony_text",
+            "derived_template",
+            "disposition"
+          ],
+          "properties": {
+            "source_section_id": {
+              "$ref": "#/$defs/sectionId",
+              "description": "The section of THIS contract whose prose is the derivation source (verified to exist in sections[] by cross-field review; the era ceremonies predate template vocabulary)."
+            },
+            "source_ceremony_text": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Verbatim ceremony text from the source document that governs approval."
+            },
+            "derived_template": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The canonical template phrase recorded in required_approval_vocabulary."
+            },
+            "disposition": {
+              "enum": [
+                "derived-for-migration",
+                "verbatim"
+              ],
+              "description": "verbatim: the source carried an exact template phrase. derived-for-migration: the template was derived from the recorded ceremony; the ceremony prose survives verbatim in the referenced section."
+            }
+          }
+        },
+        "repair_authority": {
+          "enum": [
+            "owner-gated",
+            "approved"
+          ],
+          "description": "owner-gated until the exact-digest owner approval receipt exists; approved only after conversion of a recorded approval."
+        },
+        "revision_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "approval_behavior",
+            "digest_discipline",
+            "within_scope_revisions",
+            "scope_widening_rule"
+          ],
+          "properties": {
+            "approval_behavior": {
+              "enum": [
+                "owner-stop-for-this-exact-path-and-reported-sha256"
+              ]
+            },
+            "digest_discipline": {
+              "enum": [
+                "every-revision-new-digest",
+                "immutable-single-issuance"
+              ],
+              "description": "Machine vocabulary derived from the exemplar headers. every-revision-new-digest: every revision receives a new path-or-version and sha256; every downstream packet and receipt must cite the current exact digest. immutable-single-issuance: the file is sealed once and never edited; any change is a new contract. Verbatim era prose belongs in revision_policy.description."
+            },
+            "within_scope_revisions": {
+              "enum": [
+                "auto-included-without-owner-stop",
+                "owner-stop-per-revision"
+              ]
+            },
+            "scope_widening_rule": {
+              "enum": [
+                "returns-to-owner-before-issuance"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "description": "Free-form human prose preserving the original contract's wording."
+            }
+          }
+        },
+        "decision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "pm_view": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "anchor",
+              "quote"
+            ],
+            "properties": {
+              "anchor": {
+                "type": "string",
+                "minLength": 1
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1,
+                "description": "v1.1: verbatim rationale prose from the source intent-anchor subsection."
+              }
+            }
+          }
+        },
+        "terminal_outcome": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "statement"
+          ],
+          "properties": {
+            "statement": {
+              "type": "string",
+              "minLength": 1
+            },
+            "incompleteness_guardrails": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Verbatim 'a repair is incomplete if it only \u2026' guardrails from the source terminal-outcome section."
+            },
+            "bullets": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "pm_anchor_map": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "technical_sections",
+              "controlling_sentence",
+              "how_it_serves"
+            ],
+            "properties": {
+              "technical_sections": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "source_technical_references": {
+                "type": "string",
+                "minLength": 1,
+                "description": "v1.1: the verbatim free-prose reference cell ('Sections 11 DEF-5 root cause and 12.1 source projection') before resolution to derived section ids."
+              },
+              "controlling_sentence": {
+                "type": "string",
+                "minLength": 1
+              },
+              "how_it_serves": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "in_scope",
+            "out_of_scope"
+          ],
+          "properties": {
+            "in_scope": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "item"
+                ],
+                "properties": {
+                  "item": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "out_of_scope": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "item",
+                  "reason"
+                ],
+                "properties": {
+                  "item": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "defects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "conviction"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_key": {
+                "type": "string",
+                "minLength": 1,
+                "description": "v1.1: the verbatim composite key from the source defect table (e.g. 'DEF-5 / B138 class 1') when it differs from the normalized key."
+              },
+              "conviction": {
+                "type": "string",
+                "minLength": 1
+              },
+              "authorization": {
+                "type": "string"
+              },
+              "fixed_means": {
+                "type": "string"
+              },
+              "preliminary_scope_analysis": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "disposition"
+                ],
+                "properties": {
+                  "disposition": {
+                    "enum": [
+                      "in-scope",
+                      "covered-by-ticket",
+                      "recommend-new-ticket"
+                    ]
+                  },
+                  "covered_by_ticket_key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Required when disposition is covered-by-ticket: the ticket/defect key under which the work is already covered."
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "probe_constraints": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "flow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "representation"
+          ],
+          "properties": {
+            "representation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "body": {
+              "type": "string"
+            }
+          }
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "priority",
+              "risk",
+              "guardrail"
+            ],
+            "properties": {
+              "priority": {
+                "type": "string",
+                "minLength": 1
+              },
+              "risk": {
+                "type": "string",
+                "minLength": 1
+              },
+              "impact": {
+                "type": "string"
+              },
+              "guardrail": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "cost_timeline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "paragraphs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "v1.1: every paragraph of the source cost/timeline note, verbatim; text carries the first."
+            }
+          }
+        },
+        "detail_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ref"
+            ],
+            "properties": {
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "locator": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "v1.1: verbatim pointer label from the source detail appendix."
+              }
+            }
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "section_id",
+              "title",
+              "body"
+            ],
+            "properties": {
+              "section_id": {
+                "$ref": "#/$defs/sectionId"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "body": {
+                "type": "string"
+              },
+              "subsections": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/sectionEntry"
+                }
+              }
+            }
+          }
+        },
+        "fix_settings_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fix_settings_sha256": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "uat_route": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vendor_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_defect_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "first_repair_authorizing": {
+          "type": "boolean"
+        },
+        "authorized_defects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "parent_scope_trace"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "parent_scope_trace": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "defect_contract",
+                  "defect_key",
+                  "disposition"
+                ],
+                "properties": {
+                  "defect_contract": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "defect_key": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "disposition": {
+                    "enum": [
+                      "in-scope"
+                    ],
+                    "description": "Only an in-scope disposition in the parent defect contract authorizes a repair leg; covered-by-ticket and recommend-new-ticket authorize nothing here."
+                  }
+                }
+              },
+              "authorization": {
+                "type": "string"
+              },
+              "fixed_means": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "implementation_boundaries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "causal_test_obligations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "obligation"
+            ],
+            "properties": {
+              "obligation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "defect_key": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "connected_proof": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "obligation"
+          ],
+          "properties": {
+            "obligation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "seams": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "counterexamples": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "description"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "counterexample",
+                  "fault-seed",
+                  "canary"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "defect_key": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "rollout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "plan"
+          ],
+          "properties": {
+            "plan": {
+              "type": "string",
+              "minLength": 1
+            },
+            "deployment_ordering": {
+              "type": "string"
+            }
+          }
+        },
+        "batch_tail_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "revision_behavior": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "within_scope",
+            "scope_widening"
+          ],
+          "properties": {
+            "within_scope": {
+              "type": "string",
+              "minLength": 1
+            },
+            "scope_widening": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "must_still_work": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "not": {
+              "required": [
+                "provenance"
+              ],
+              "properties": {
+                "provenance": {
+                  "required": [
+                    "conversion"
+                  ],
+                  "properties": {
+                    "conversion": {
+                      "const": "legacy-migration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "description": "Native contracts must be PM-anchored (pm_anchoring_precheck); legacy migrations are exempt.",
+            "properties": {
+              "pm_view": {
+                "minItems": 1
+              },
+              "pm_anchor_map": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ],
+      "$defs": {
+        "sha256Hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rfc3339Utc": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+        },
+        "sectionId": {
+          "type": "string",
+          "pattern": "^s[0-9]+(-[0-9]+)*-[a-z0-9][a-z0-9-]*$"
+        },
+        "sectionEntry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "section_id",
+            "title",
+            "body"
+          ],
+          "properties": {
+            "section_id": {
+              "$ref": "#/$defs/sectionId"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "body": {
+              "type": "string"
+            },
+            "subsections": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/sectionEntry"
+              }
+            }
+          }
+        }
+      }
+    },
+    "root_member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "schema_version",
+        "document_type",
+        "member_kind",
+        "contract_id",
+        "contract_version",
+        "ticket",
+        "cycle_key",
+        "body",
+        "effective_sha256"
+      ],
+      "properties": {
+        "schema": {
+          "const": "jswarm.fix-decisions.fix-contract/v1"
+        },
+        "schema_version": {
+          "const": "1.1"
+        },
+        "document_type": {
+          "const": "contract-member"
+        },
+        "member_kind": {
+          "enum": [
+            "root",
+            "delta"
+          ]
+        },
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ticket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://common.lsa.dev/schemas/fix-decisions/fix-contract/v1.0",
+          "title": "Fix-Decision Fix Contract",
+          "description": "Envelope plus repair specialization. Must bind to its parent defect contract by exact path and digest, declare first-repair-authorizing status, and carry a parent_scope_trace (defect_key + in-scope disposition) for every authorized defect leg. Revisions within approved scope are first_repair_authorizing=false publications, not a third gate.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "schema_version",
+            "document_type",
+            "contract_id",
+            "ticket",
+            "cycle_key",
+            "contract_version",
+            "contract_slug",
+            "issued_by",
+            "issued_at",
+            "invocation_origin",
+            "source_path",
+            "parent_contracts",
+            "evidence_refs",
+            "intent",
+            "contract_status",
+            "gate_kind",
+            "gate_mode",
+            "required_approval_vocabulary",
+            "repair_authority",
+            "revision_policy",
+            "decision",
+            "summary",
+            "pm_view",
+            "terminal_outcome",
+            "pm_anchor_map",
+            "scope",
+            "defects",
+            "flow",
+            "risks",
+            "cost_timeline",
+            "detail_refs",
+            "sections",
+            "uat_route",
+            "vendor_policy",
+            "parent_defect_contract",
+            "first_repair_authorizing",
+            "authorized_defects",
+            "implementation_boundaries",
+            "causal_test_obligations",
+            "connected_proof",
+            "counterexamples",
+            "rollout",
+            "batch_tail_policy",
+            "revision_behavior",
+            "must_still_work",
+            "fix_settings_path",
+            "fix_settings_sha256",
+            "business_header"
+          ],
+          "properties": {
+            "schema": {
+              "const": "jswarm.fix-decisions.fix-contract/v1"
+            },
+            "schema_version": {
+              "enum": [
+                "1.0",
+                "1.1"
+              ],
+              "description": "v1.1 (COM-389 Phase 5 review round, additive): cost_timeline.paragraphs, evidence_refs[].description, detail_refs[].label, terminal_outcome.incompleteness_guardrails, defects[].source_key, pm_view[].rationale, pm_anchor_map[].source_technical_references, approval_vocabulary_derivation."
+            },
+            "document_type": {
+              "const": "fix-contract"
+            },
+            "contract_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "ticket": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cycle_key": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contract_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contract_slug": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            },
+            "issued_by": {
+              "type": "string",
+              "minLength": 1
+            },
+            "issued_at": {
+              "$ref": "#/$defs/rfc3339Utc"
+            },
+            "invocation_origin": {
+              "type": "string",
+              "minLength": 1
+            },
+            "source_path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "conversion"
+              ],
+              "properties": {
+                "conversion": {
+                  "enum": [
+                    "native",
+                    "legacy-migration"
+                  ],
+                  "description": "legacy-migration exempts the document from PM anchoring minimums (converted historical contracts never had PM anchor tables)."
+                },
+                "note": {
+                  "type": "string"
+                }
+              }
+            },
+            "parent_contracts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "path",
+                  "relation"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sha256": {
+                    "$ref": "#/$defs/sha256Hex"
+                  },
+                  "relation": {
+                    "enum": [
+                      "supersedes",
+                      "prior-diagnosis",
+                      "parent-defect-contract",
+                      "evidence"
+                    ]
+                  }
+                }
+              }
+            },
+            "evidence_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "ref"
+                ],
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "locator": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "v1.1: verbatim evidence description from the source."
+                  }
+                }
+              }
+            },
+            "intent": {
+              "const": "repair-authorizing"
+            },
+            "contract_status": {
+              "enum": [
+                "draft",
+                "issued-awaiting-owner-approval",
+                "approved",
+                "denied",
+                "superseded",
+                "informational"
+              ]
+            },
+            "gate_kind": {
+              "const": "fix-contract-digest"
+            },
+            "gate_mode": {
+              "enum": [
+                "owner-authorized",
+                "auto"
+              ]
+            },
+            "required_approval_vocabulary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "approval_vocabulary_derivation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_section_id",
+                "source_ceremony_text",
+                "derived_template",
+                "disposition"
+              ],
+              "properties": {
+                "source_section_id": {
+                  "$ref": "#/$defs/sectionId",
+                  "description": "The section of THIS contract whose prose is the derivation source (verified to exist in sections[] by cross-field review; the era ceremonies predate template vocabulary)."
+                },
+                "source_ceremony_text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Verbatim ceremony text from the source document that governs approval."
+                },
+                "derived_template": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The canonical template phrase recorded in required_approval_vocabulary."
+                },
+                "disposition": {
+                  "enum": [
+                    "derived-for-migration",
+                    "verbatim"
+                  ],
+                  "description": "verbatim: the source carried an exact template phrase. derived-for-migration: the template was derived from the recorded ceremony; the ceremony prose survives verbatim in the referenced section."
+                }
+              }
+            },
+            "repair_authority": {
+              "enum": [
+                "owner-gated",
+                "approved"
+              ],
+              "description": "owner-gated until the exact-digest owner approval receipt exists; approved only after conversion of a recorded approval."
+            },
+            "revision_policy": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "approval_behavior",
+                "digest_discipline",
+                "within_scope_revisions",
+                "scope_widening_rule"
+              ],
+              "properties": {
+                "approval_behavior": {
+                  "enum": [
+                    "owner-stop-for-this-exact-path-and-reported-sha256"
+                  ]
+                },
+                "digest_discipline": {
+                  "enum": [
+                    "every-revision-new-digest",
+                    "immutable-single-issuance"
+                  ],
+                  "description": "Machine vocabulary derived from the exemplar headers. every-revision-new-digest: every revision receives a new path-or-version and sha256; every downstream packet and receipt must cite the current exact digest. immutable-single-issuance: the file is sealed once and never edited; any change is a new contract. Verbatim era prose belongs in revision_policy.description."
+                },
+                "within_scope_revisions": {
+                  "enum": [
+                    "auto-included-without-owner-stop",
+                    "owner-stop-per-revision"
+                  ]
+                },
+                "scope_widening_rule": {
+                  "enum": [
+                    "returns-to-owner-before-issuance"
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Free-form human prose preserving the original contract's wording."
+                }
+              }
+            },
+            "decision": {
+              "type": "string",
+              "minLength": 1
+            },
+            "summary": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "pm_view": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "anchor",
+                  "quote"
+                ],
+                "properties": {
+                  "anchor": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "quote": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "v1.1: verbatim rationale prose from the source intent-anchor subsection."
+                  }
+                }
+              }
+            },
+            "terminal_outcome": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "statement"
+              ],
+              "properties": {
+                "statement": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "incompleteness_guardrails": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": "Verbatim 'a repair is incomplete if it only \u2026' guardrails from the source terminal-outcome section."
+                },
+                "bullets": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "pm_anchor_map": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "technical_sections",
+                  "controlling_sentence",
+                  "how_it_serves"
+                ],
+                "properties": {
+                  "technical_sections": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "source_technical_references": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "v1.1: the verbatim free-prose reference cell ('Sections 11 DEF-5 root cause and 12.1 source projection') before resolution to derived section ids."
+                  },
+                  "controlling_sentence": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "how_it_serves": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "scope": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "in_scope",
+                "out_of_scope"
+              ],
+              "properties": {
+                "in_scope": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "item"
+                    ],
+                    "properties": {
+                      "item": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "reason": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "out_of_scope": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "item",
+                      "reason"
+                    ],
+                    "properties": {
+                      "item": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "defects": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "key",
+                  "conviction"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "source_key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "v1.1: the verbatim composite key from the source defect table (e.g. 'DEF-5 / B138 class 1') when it differs from the normalized key."
+                  },
+                  "conviction": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "authorization": {
+                    "type": "string"
+                  },
+                  "fixed_means": {
+                    "type": "string"
+                  },
+                  "preliminary_scope_analysis": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "disposition"
+                    ],
+                    "properties": {
+                      "disposition": {
+                        "enum": [
+                          "in-scope",
+                          "covered-by-ticket",
+                          "recommend-new-ticket"
+                        ]
+                      },
+                      "covered_by_ticket_key": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Required when disposition is covered-by-ticket: the ticket/defect key under which the work is already covered."
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "disposition": {
+                              "const": "covered-by-ticket"
+                            }
+                          },
+                          "required": [
+                            "disposition"
+                          ]
+                        },
+                        "then": {
+                          "required": [
+                            "covered_by_ticket_key"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "probe_constraints": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "flow": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "representation"
+              ],
+              "properties": {
+                "representation": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "body": {
+                  "type": "string"
+                }
+              }
+            },
+            "risks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "priority",
+                  "risk",
+                  "guardrail"
+                ],
+                "properties": {
+                  "priority": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "risk": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "impact": {
+                    "type": "string"
+                  },
+                  "guardrail": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "cost_timeline": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "paragraphs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": "v1.1: every paragraph of the source cost/timeline note, verbatim; text carries the first."
+                }
+              }
+            },
+            "detail_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "ref"
+                ],
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "locator": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "v1.1: verbatim pointer label from the source detail appendix."
+                  }
+                }
+              }
+            },
+            "sections": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "section_id",
+                  "title",
+                  "body"
+                ],
+                "properties": {
+                  "section_id": {
+                    "$ref": "#/$defs/sectionId"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "body": {
+                    "type": "string"
+                  },
+                  "subsections": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/sectionEntry"
+                    }
+                  }
+                }
+              }
+            },
+            "fix_settings_path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fix_settings_sha256": {
+              "$ref": "#/$defs/sha256Hex"
+            },
+            "uat_route": {
+              "type": "string",
+              "minLength": 1
+            },
+            "vendor_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "parent_defect_contract": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "sha256"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            },
+            "first_repair_authorizing": {
+              "type": "boolean"
+            },
+            "authorized_defects": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "key",
+                  "parent_scope_trace"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "parent_scope_trace": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "defect_contract",
+                      "defect_key",
+                      "disposition"
+                    ],
+                    "properties": {
+                      "defect_contract": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "defect_key": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "disposition": {
+                        "enum": [
+                          "in-scope"
+                        ],
+                        "description": "Only an in-scope disposition in the parent defect contract authorizes a repair leg; covered-by-ticket and recommend-new-ticket authorize nothing here."
+                      }
+                    }
+                  },
+                  "authorization": {
+                    "type": "string"
+                  },
+                  "fixed_means": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "implementation_boundaries": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "causal_test_obligations": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "obligation"
+                ],
+                "properties": {
+                  "obligation": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "defect_key": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "connected_proof": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "obligation"
+              ],
+              "properties": {
+                "obligation": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "seams": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "counterexamples": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "description"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "counterexample",
+                      "fault-seed",
+                      "canary"
+                    ]
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "defect_key": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "rollout": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "plan"
+              ],
+              "properties": {
+                "plan": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "deployment_ordering": {
+                  "type": "string"
+                }
+              }
+            },
+            "batch_tail_policy": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "revision_behavior": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "within_scope",
+                "scope_widening"
+              ],
+              "properties": {
+                "within_scope": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "scope_widening": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "must_still_work": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "business_header": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "blocks",
+                "ticket_refs",
+                "nfr_refs",
+                "fixed_means",
+                "disposition_now",
+                "cycle"
+              ],
+              "properties": {
+                "blocks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "id",
+                      "text"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "text": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                },
+                "ticket_refs": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "ticket",
+                    "ac_ids",
+                    "objective"
+                  ],
+                  "properties": {
+                    "ticket": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "ac_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 1
+                    },
+                    "objective": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                "nfr_refs": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "ids"
+                      ],
+                      "properties": {
+                        "ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "minItems": 1
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "none_reason"
+                      ],
+                      "properties": {
+                        "none_reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "fixed_means": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "disposition_now": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "cycle": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "cycle_id",
+                    "mode",
+                    "shape",
+                    "parent_ref"
+                  ],
+                  "properties": {
+                    "cycle_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "mode": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "shape": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "parent_ref": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "required": [
+                    "provenance"
+                  ],
+                  "properties": {
+                    "provenance": {
+                      "required": [
+                        "conversion"
+                      ],
+                      "properties": {
+                        "conversion": {
+                          "const": "legacy-migration"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "description": "Native contracts must be PM-anchored (pm_anchoring_precheck); legacy migrations are exempt.",
+                "properties": {
+                  "pm_view": {
+                    "minItems": 1
+                  },
+                  "pm_anchor_map": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          ],
+          "$defs": {
+            "sha256Hex": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "rfc3339Utc": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+            },
+            "sectionId": {
+              "type": "string",
+              "pattern": "^s[0-9]+(-[0-9]+)*-[a-z0-9][a-z0-9-]*$"
+            },
+            "sectionEntry": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "section_id",
+                "title",
+                "body"
+              ],
+              "properties": {
+                "section_id": {
+                  "$ref": "#/$defs/sectionId"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "body": {
+                  "type": "string"
+                },
+                "subsections": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/sectionEntry"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "effective_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "parent_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_effective_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "member_kind": {
+                "const": "root"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "parent_ref"
+                  ]
+                },
+                {
+                  "required": [
+                    "parent_effective_sha256"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delta_member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "schema_version",
+        "document_type",
+        "member_kind",
+        "contract_id",
+        "contract_version",
+        "ticket",
+        "cycle_key",
+        "body",
+        "effective_sha256"
+      ],
+      "properties": {
+        "schema": {
+          "const": "jswarm.fix-decisions.fix-contract/v1"
+        },
+        "schema_version": {
+          "const": "1.1"
+        },
+        "document_type": {
+          "const": "contract-member"
+        },
+        "member_kind": {
+          "enum": [
+            "root",
+            "delta"
+          ]
+        },
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ticket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "contract_id",
+            "contract_version",
+            "business_header_patch",
+            "changes",
+            "change_summary"
+          ],
+          "properties": {
+            "schema": {
+              "const": "jswarm.fix-decisions.contract-delta/v1"
+            },
+            "contract_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contract_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "business_header_patch": {
+              "type": "object"
+            },
+            "changes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "op",
+                  "path",
+                  "value"
+                ],
+                "properties": {
+                  "op": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "value": {}
+                }
+              }
+            },
+            "change_summary": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "effective_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "parent_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_effective_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "member_kind": {
+                "const": "delta"
+              }
+            },
+            "required": [
+              "member_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "parent_ref",
+              "parent_effective_sha256"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "jswarm.fix-decisions.fix-contract/v1"
+    },
+    "schema_version": {},
+    "document_type": {},
+    "contract_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ticket": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cycle_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "issued_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issued_at": {
+      "$ref": "#/$defs/rfc3339Utc"
+    },
+    "invocation_origin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "conversion"
+      ],
+      "properties": {
+        "conversion": {
+          "enum": [
+            "native",
+            "legacy-migration"
+          ],
+          "description": "legacy-migration exempts the document from PM anchoring minimums (converted historical contracts never had PM anchor tables)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "parent_contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "relation"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "$ref": "#/$defs/sha256Hex"
+          },
+          "relation": {
+            "enum": [
+              "supersedes",
+              "prior-diagnosis",
+              "parent-defect-contract",
+              "evidence"
+            ]
+          }
+        }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ref"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "locator": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "description": "v1.1: verbatim evidence description from the source."
+          }
+        }
+      }
+    },
+    "intent": {
+      "const": "repair-authorizing"
+    },
+    "contract_status": {
+      "enum": [
+        "draft",
+        "issued-awaiting-owner-approval",
+        "approved",
+        "denied",
+        "superseded",
+        "informational"
+      ]
+    },
+    "gate_kind": {
+      "const": "fix-contract-digest"
+    },
+    "gate_mode": {
+      "enum": [
+        "owner-authorized",
+        "auto"
+      ]
+    },
+    "required_approval_vocabulary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_vocabulary_derivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_section_id",
+        "source_ceremony_text",
+        "derived_template",
+        "disposition"
+      ],
+      "properties": {
+        "source_section_id": {
+          "$ref": "#/$defs/sectionId",
+          "description": "The section of THIS contract whose prose is the derivation source (verified to exist in sections[] by cross-field review; the era ceremonies predate template vocabulary)."
+        },
+        "source_ceremony_text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Verbatim ceremony text from the source document that governs approval."
+        },
+        "derived_template": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The canonical template phrase recorded in required_approval_vocabulary."
+        },
+        "disposition": {
+          "enum": [
+            "derived-for-migration",
+            "verbatim"
+          ],
+          "description": "verbatim: the source carried an exact template phrase. derived-for-migration: the template was derived from the recorded ceremony; the ceremony prose survives verbatim in the referenced section."
+        }
+      }
+    },
+    "repair_authority": {
+      "enum": [
+        "owner-gated",
+        "approved"
+      ],
+      "description": "owner-gated until the exact-digest owner approval receipt exists; approved only after conversion of a recorded approval."
+    },
+    "revision_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approval_behavior",
+        "digest_discipline",
+        "within_scope_revisions",
+        "scope_widening_rule"
+      ],
+      "properties": {
+        "approval_behavior": {
+          "enum": [
+            "owner-stop-for-this-exact-path-and-reported-sha256"
+          ]
+        },
+        "digest_discipline": {
+          "enum": [
+            "every-revision-new-digest",
+            "immutable-single-issuance"
+          ],
+          "description": "Machine vocabulary derived from the exemplar headers. every-revision-new-digest: every revision receives a new path-or-version and sha256; every downstream packet and receipt must cite the current exact digest. immutable-single-issuance: the file is sealed once and never edited; any change is a new contract. Verbatim era prose belongs in revision_policy.description."
+        },
+        "within_scope_revisions": {
+          "enum": [
+            "auto-included-without-owner-stop",
+            "owner-stop-per-revision"
+          ]
+        },
+        "scope_widening_rule": {
+          "enum": [
+            "returns-to-owner-before-issuance"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "Free-form human prose preserving the original contract's wording."
+        }
+      }
+    },
+    "decision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "pm_view": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "anchor",
+          "quote"
+        ],
+        "properties": {
+          "anchor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "description": "v1.1: verbatim rationale prose from the source intent-anchor subsection."
+          }
+        }
+      }
+    },
+    "terminal_outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statement"
+      ],
+      "properties": {
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "incompleteness_guardrails": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Verbatim 'a repair is incomplete if it only \u2026' guardrails from the source terminal-outcome section."
+        },
+        "bullets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pm_anchor_map": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "technical_sections",
+          "controlling_sentence",
+          "how_it_serves"
+        ],
+        "properties": {
+          "technical_sections": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "source_technical_references": {
+            "type": "string",
+            "minLength": 1,
+            "description": "v1.1: the verbatim free-prose reference cell ('Sections 11 DEF-5 root cause and 12.1 source projection') before resolution to derived section ids."
+          },
+          "controlling_sentence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "how_it_serves": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "in_scope",
+        "out_of_scope"
+      ],
+      "properties": {
+        "in_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item"
+            ],
+            "properties": {
+              "item": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "out_of_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item",
+              "reason"
+            ],
+            "properties": {
+              "item": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "defects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "conviction"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "v1.1: the verbatim composite key from the source defect table (e.g. 'DEF-5 / B138 class 1') when it differs from the normalized key."
+          },
+          "conviction": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authorization": {
+            "type": "string"
+          },
+          "fixed_means": {
+            "type": "string"
+          },
+          "preliminary_scope_analysis": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "disposition"
+            ],
+            "properties": {
+              "disposition": {
+                "enum": [
+                  "in-scope",
+                  "covered-by-ticket",
+                  "recommend-new-ticket"
+                ]
+              },
+              "covered_by_ticket_key": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Required when disposition is covered-by-ticket: the ticket/defect key under which the work is already covered."
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "disposition": {
+                      "const": "covered-by-ticket"
+                    }
+                  },
+                  "required": [
+                    "disposition"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "covered_by_ticket_key"
+                  ]
+                }
+              }
+            ]
+          },
+          "probe_constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "representation"
+      ],
+      "properties": {
+        "representation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string"
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "priority",
+          "risk",
+          "guardrail"
+        ],
+        "properties": {
+          "priority": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risk": {
+            "type": "string",
+            "minLength": 1
+          },
+          "impact": {
+            "type": "string"
+          },
+          "guardrail": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "cost_timeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "paragraphs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "v1.1: every paragraph of the source cost/timeline note, verbatim; text carries the first."
+        }
+      }
+    },
+    "detail_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ref"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "locator": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "v1.1: verbatim pointer label from the source detail appendix."
+          }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "section_id",
+          "title",
+          "body"
+        ],
+        "properties": {
+          "section_id": {
+            "$ref": "#/$defs/sectionId"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "body": {
+            "type": "string"
+          },
+          "subsections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/sectionEntry"
+            }
+          }
+        }
+      }
+    },
+    "fix_settings_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fix_settings_sha256": {
+      "$ref": "#/$defs/sha256Hex"
+    },
+    "uat_route": {
+      "type": "string",
+      "minLength": 1
+    },
+    "vendor_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parent_defect_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "first_repair_authorizing": {
+      "type": "boolean"
+    },
+    "authorized_defects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "parent_scope_trace"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "parent_scope_trace": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "defect_contract",
+              "defect_key",
+              "disposition"
+            ],
+            "properties": {
+              "defect_contract": {
+                "type": "string",
+                "minLength": 1
+              },
+              "defect_key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "disposition": {
+                "enum": [
+                  "in-scope"
+                ],
+                "description": "Only an in-scope disposition in the parent defect contract authorizes a repair leg; covered-by-ticket and recommend-new-ticket authorize nothing here."
+              }
+            }
+          },
+          "authorization": {
+            "type": "string"
+          },
+          "fixed_means": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "implementation_boundaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "causal_test_obligations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "obligation"
+        ],
+        "properties": {
+          "obligation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "defect_key": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "connected_proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "obligation"
+      ],
+      "properties": {
+        "obligation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "counterexamples": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "description"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "counterexample",
+              "fault-seed",
+              "canary"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "defect_key": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rollout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan"
+      ],
+      "properties": {
+        "plan": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deployment_ordering": {
+          "type": "string"
+        }
+      }
+    },
+    "batch_tail_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "revision_behavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "within_scope",
+        "scope_widening"
+      ],
+      "properties": {
+        "within_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_widening": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "must_still_work": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}

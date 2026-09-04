@@ -1,0 +1,400 @@
+---
+// COM-389 — one review page per contract: SC-12 frame (sections 1-11) + full
+// contract body with stable section anchors + PM anchor table + section-
+// anchored Q&A threads. Mobile-first, semantic headings/tables, keyboard
+// operable, status announcements region.
+import Base from "../../layouts/Base.astro";
+import QaThreads from "../../components/QaThreads.astro";
+import { loadReviewData, type SectionNode } from "../../lib/load-data";
+
+export function getStaticPaths() {
+  const data = loadReviewData();
+  return data.contracts.map((contract) => ({
+    params: { contract: contract.slug },
+    props: { contract },
+  }));
+}
+
+const { contract } = Astro.props;
+const vm = contract.view_model;
+const identity = vm.identity;
+const publicationId = identity.publication_id ?? "";
+const approvalVocabulary = String(vm.gate.required_approval_vocabulary ?? "");
+const isInformational = identity.publication_kind === "informational";
+
+const scopeRows: Array<{ in: string; out: string }> = (() => {
+  const out = vm.scope.out_of_scope.map(
+    (r) => (r.reason ? `${r.item}: ${r.reason}` : r.item),
+  );
+  const size = Math.max(vm.scope.in_scope.length, out.length, 1);
+  return Array.from({ length: size }, (_, i) => ({
+    in: vm.scope.in_scope[i] ?? "",
+    out: out[i] ?? "",
+  }));
+})();
+
+function sectionThreads(sectionId: string) {
+  return contract.qa_threads.filter(
+    (t) => t.anchor && t.anchor.section_id === sectionId,
+  );
+}
+
+function scopeCells(sections: string[]) {
+  return sections.join(", ");
+}
+---
+<Base title={`Contract Review — ${identity.cycle_key} · ${identity.document_type} ${identity.contract_version}`}>
+  <main id="main" class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <p class="text-sm">
+      <a
+        href="/"
+        class="text-jw-blue underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-jw-blue"
+      >← All publications</a>
+    </p>
+    <h1 class="mt-2 text-2xl font-bold">
+      Contract Review — {identity.cycle_key} · {identity.document_type} {identity.contract_version}
+    </h1>
+
+    <section class="mt-4 rounded border border-jw-line bg-jw-surface p-4" aria-label="Contract identity">
+      <dl class="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+        <div><dt class="font-medium text-jw-muted">Contract ID</dt><dd>{identity.contract_id}</dd></div>
+        <div><dt class="font-medium text-jw-muted">Status</dt><dd>{identity.contract_status}</dd></div>
+        <div><dt class="font-medium text-jw-muted">Gate</dt><dd>{identity.gate_kind} ({identity.gate_mode})</dd></div>
+        <div><dt class="font-medium text-jw-muted">Schema</dt><dd class="font-mono text-xs">{identity.schema} v{identity.schema_version}</dd></div>
+        <div class="sm:col-span-2"><dt class="font-medium text-jw-muted">Canonical path</dt><dd class="font-mono text-xs break-all">{identity.canonical_path}</dd></div>
+        <div class="sm:col-span-2"><dt class="font-medium text-jw-muted">SHA-256</dt><dd class="font-mono text-xs break-all">{identity.sha256}</dd></div>
+      </dl>
+    </section>
+
+    <!-- Status announcements region (accessibility contract) -->
+    <p
+      id="status-region"
+      role="status"
+      aria-live="polite"
+      class="sr-only"
+    >
+      Contract review page loaded. Digest {identity.sha256}.
+    </p>
+
+    <nav class="mt-6" aria-label="Review sections">
+      <ol class="flex list-none flex-wrap gap-2 p-0 text-sm">
+        {[
+          ["#decision", "1. Decision"],
+          ["#summary", "2. Summary"],
+          ["#scope", "3. Scope"],
+          ["#defects", "4. Defects"],
+          ["#flow", "5. Flow"],
+          ["#risks", "6. Risks"],
+          ["#cost", "7. Cost"],
+          ["#details", "8. Details"],
+          ["#pm", "10. PM view"],
+          ["#full-contract", "Full contract"],
+        ].map(([href, label]) => (
+          <li>
+            <a
+              href={href}
+              class="rounded-full border border-jw-line bg-jw-surface px-3 py-1 text-jw-blue underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-jw-blue"
+            >{label}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <section id="decision" class="mt-8">
+      <h2 class="text-xl font-semibold">1. THE DECISION</h2>
+      <p class="mt-2">{vm.decision}</p>
+    </section>
+
+    <section id="summary" class="mt-8">
+      <h2 class="text-xl font-semibold">2. SUMMARY</h2>
+      <ul class="mt-2 list-disc space-y-2 pl-6">
+        {vm.summary.map((bullet) => <li>{bullet}</li>)}
+      </ul>
+    </section>
+
+    <section id="scope" class="mt-8">
+      <h2 class="text-xl font-semibold">3. SCOPE TABLE</h2>
+      <div class="mt-2 overflow-x-auto">
+        <table class="w-full min-w-[32rem] border-collapse text-sm">
+          <caption class="sr-only">In-scope versus out-of-scope items with reasons</caption>
+          <thead>
+            <tr class="border-b border-jw-line text-left">
+              <th scope="col" class="py-2 pr-4 font-semibold">In scope now</th>
+              <th scope="col" class="py-2 font-semibold">Out of scope, with reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scopeRows.map((row) => (
+              <tr class="border-b border-jw-line align-top">
+                <td class="py-2 pr-4">{row.in}</td>
+                <td class="py-2">{row.out}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="defects" class="mt-8">
+      <h2 class="text-xl font-semibold">4. DEFECT / LEG TABLE</h2>
+      <div class="mt-2 overflow-x-auto">
+        <table class="w-full min-w-[40rem] border-collapse text-sm">
+          <caption class="sr-only">Defect keys, conviction states, authorization, and fixed-means</caption>
+          <thead>
+            <tr class="border-b border-jw-line text-left">
+              <th scope="col" class="py-2 pr-4 font-semibold">Key</th>
+              <th scope="col" class="py-2 pr-4 font-semibold">Conviction state</th>
+              <th scope="col" class="py-2 pr-4 font-semibold">Authorization</th>
+              <th scope="col" class="py-2 font-semibold">FIXED means</th>
+            </tr>
+          </thead>
+          <tbody>
+            {vm.defects.map((d) => (
+              <tr class="border-b border-jw-line align-top">
+                <td class="py-2 pr-4 font-mono text-xs">{d.key}</td>
+                <td class="py-2 pr-4">{d.conviction}</td>
+                <td class="py-2 pr-4">{d.authorization}</td>
+                <td class="py-2">{d.fixed_means}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {vm.authorized_defects.length > 0 && (
+        <div class="mt-4">
+          <h3 class="text-base font-semibold">Authorized defects — parent-scope trace</h3>
+          <div class="mt-2 overflow-x-auto">
+            <table class="w-full min-w-[40rem] border-collapse text-sm">
+              <caption class="sr-only">Authorized defects with parent defect-contract scope trace and disposition</caption>
+              <thead>
+                <tr class="border-b border-jw-line text-left">
+                  <th scope="col" class="py-2 pr-4 font-semibold">Key</th>
+                  <th scope="col" class="py-2 pr-4 font-semibold">Disposition</th>
+                  <th scope="col" class="py-2 pr-4 font-semibold">Defect contract</th>
+                  <th scope="col" class="py-2 font-semibold">Fixed means</th>
+                </tr>
+              </thead>
+              <tbody>
+                {vm.authorized_defects.map((d) => (
+                  <tr class="border-b border-jw-line align-top">
+                    <td class="py-2 pr-4 font-mono text-xs">{d.key}</td>
+                    <td class="py-2 pr-4">{d.parent_scope_trace.disposition ?? ""}</td>
+                    <td class="py-2 pr-4 font-mono text-xs break-all">{d.parent_scope_trace.defect_contract ?? ""}</td>
+                    <td class="py-2">{d.fixed_means}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </section>
+
+    <section id="flow" class="mt-8">
+      <h2 class="text-xl font-semibold">5. FLOW DIAGRAM</h2>
+      <pre class="mt-2 overflow-x-auto rounded border border-jw-line bg-jw-surface-muted p-4 font-mono text-xs leading-5"><code>{vm.flow.body}</code></pre>
+    </section>
+
+    <section id="risks" class="mt-8">
+      <h2 class="text-xl font-semibold">6. RISKS &amp; GUARDRAILS</h2>
+      <div class="mt-2 overflow-x-auto">
+        <table class="w-full min-w-[40rem] border-collapse text-sm">
+          <caption class="sr-only">Risks with delivery impact and guardrails</caption>
+          <thead>
+            <tr class="border-b border-jw-line text-left">
+              <th scope="col" class="py-2 pr-4 font-semibold">Priority and risk</th>
+              <th scope="col" class="py-2 pr-4 font-semibold">Impact</th>
+              <th scope="col" class="py-2 font-semibold">Guardrail</th>
+            </tr>
+          </thead>
+          <tbody>
+            {vm.risks.map((r) => (
+              <tr class="border-b border-jw-line align-top">
+                <td class="py-2 pr-4"><span class="font-medium">{r.priority}</span>: {r.risk}</td>
+                <td class="py-2 pr-4">{r.impact}</td>
+                <td class="py-2">{r.guardrail}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="cost" class="mt-8">
+      <h2 class="text-xl font-semibold">7. COST &amp; TIMELINE NOTE</h2>
+      <p class="mt-2">{vm.cost_timeline}</p>
+    </section>
+
+    <section id="details" class="mt-8">
+      <h2 class="text-xl font-semibold">8. DETAIL APPENDIX — POINTERS ONLY</h2>
+      <ul class="mt-2 list-disc space-y-1 pl-6 text-sm">
+        {vm.detail_refs.map((ref) => (
+          <li class="font-mono text-xs break-all">{ref.ref}{ref.locator ? `:${ref.locator}` : ""}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section id="authority" class="mt-8">
+      <h2 class="text-xl font-semibold">9. AUTHORITY, APPROVAL, AND REVISION CONTRACT</h2>
+      <dl class="mt-2 grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+        <div><dt class="font-medium text-jw-muted">Repair authority</dt><dd>{String(vm.gate.repair_authority ?? "")}</dd></div>
+        <div><dt class="font-medium text-jw-muted">Intent</dt><dd>{String(vm.gate.intent ?? "")}</dd></div>
+        <div><dt class="font-medium text-jw-muted">First repair-authorizing</dt><dd>{vm.gate.first_repair_authorizing ? "yes" : "no"}</dd></div>
+        <div><dt class="font-medium text-jw-muted">Approval vocabulary</dt><dd>{String(vm.gate.required_approval_vocabulary ?? "")}</dd></div>
+        {vm.gate.fix_settings_path ? (
+          <div class="sm:col-span-2">
+            <dt class="font-medium text-jw-muted">Fix settings</dt>
+            <dd class="font-mono text-xs break-all">{String(vm.gate.fix_settings_path)} (sha256 {String(vm.gate.fix_settings_sha256 ?? "")})</dd>
+          </div>
+        ) : null}
+      </dl>
+    </section>
+
+    {publicationId && (
+      <section
+        id="decision-actions"
+        class="mt-8 rounded border-2 border-jw-blue bg-jw-surface p-4 sm:p-5"
+        aria-labelledby="decision-actions-title"
+        data-publication-id={publicationId}
+        data-approval-vocabulary={approvalVocabulary}
+        data-informational={isInformational ? "true" : "false"}
+      >
+        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-jw-blue">Owner action</p>
+        <h2 id="decision-actions-title" class="mt-1 text-xl font-semibold">Decision and comments</h2>
+        <p class="mt-2 text-sm text-jw-muted">
+          Actions bind to the exact contract digest displayed above. If the contract changes before submission, the service refuses the action and writes no receipt.
+        </p>
+        <div class="mt-4">
+          <label for="decision-comment" class="block text-sm font-semibold">Comment <span class="font-normal text-jw-muted">(optional for approve/deny; required for standalone comment)</span></label>
+          <textarea
+            id="decision-comment"
+            rows="5"
+            maxlength="20000"
+            class="mt-2 w-full rounded border border-jw-line bg-jw-bg p-3 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue"
+            placeholder="Add context, denial reason, or a standalone comment…"
+          ></textarea>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-3">
+          {!isInformational && (
+            <>
+              <button type="button" data-decision-action="deny" class="min-h-11 rounded border-2 border-jw-danger px-4 py-2 text-sm font-semibold text-jw-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-danger">DENY</button>
+              <button type="button" data-decision-action="approve" class="min-h-11 rounded bg-jw-blue px-4 py-2 text-sm font-semibold text-jw-on-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue">APPROVE EXACT DIGEST</button>
+            </>
+          )}
+          <button type="button" data-decision-action="comment" class="min-h-11 rounded border border-jw-line px-4 py-2 text-sm font-semibold text-jw-blue underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue">SAVE COMMENT</button>
+        </div>
+        <p id="decision-action-status" class="mt-4 min-h-6 text-sm font-medium" role="status" aria-live="polite"></p>
+      </section>
+    )}
+
+    <section id="pm" class="mt-8">
+      <h2 class="text-xl font-semibold">10. PM VIEW AND TERMINAL OUTCOME</h2>
+      <ul class="mt-2 list-none space-y-2 p-0">
+        {vm.pm_view.map((p) => (
+          <li><span class="font-medium">{p.anchor}:</span> {p.quote}</li>
+        ))}
+      </ul>
+      <p class="mt-3"><span class="font-medium">Terminal outcome.</span> {vm.terminal_outcome}</p>
+
+      <h3 class="mt-6 text-base font-semibold">PM anchor map</h3>
+      <div class="mt-2 overflow-x-auto">
+        <table class="w-full min-w-[40rem] border-collapse text-sm">
+          <caption class="sr-only">Product-manager anchor map from owner sentences to technical sections</caption>
+          <thead>
+            <tr class="border-b border-jw-line text-left">
+              <th scope="col" class="py-2 pr-4 font-semibold">Technical sections</th>
+              <th scope="col" class="py-2 pr-4 font-semibold">Controlling owner sentence</th>
+              <th scope="col" class="py-2 font-semibold">How it serves the outcome</th>
+            </tr>
+          </thead>
+          <tbody>
+            {vm.pm_anchor_map.map((m) => (
+              <tr class="border-b border-jw-line align-top">
+                <td class="py-2 pr-4 font-mono text-xs">{scopeCells(m.technical_sections)}</td>
+                <td class="py-2 pr-4">{m.controlling_sentence}</td>
+                <td class="py-2">{m.how_it_serves}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="full-contract" class="mt-10">
+      <h2 class="text-xl font-semibold">FULL CONTRACT</h2>
+      <p class="mt-1 text-sm text-jw-muted">
+        The summary above frames the authority; the full contract body follows verbatim with stable section anchors.
+      </p>
+      <div class="mt-4 space-y-8">
+        {vm.sections.map((section) => (
+          <article id={section.section_id} class="rounded border border-jw-line bg-jw-surface p-4 scroll-mt-4">
+            <h3 class="text-lg font-semibold">{section.title}</h3>
+            <p class="mt-2 whitespace-pre-line text-sm">{section.body}</p>
+            {(section.subsections ?? []).map((sub: SectionNode) => (
+              <div id={sub.section_id} class="mt-4 scroll-mt-4">
+                <h4 class="text-base font-semibold">{sub.title}</h4>
+                <p class="mt-1 whitespace-pre-line text-sm">{sub.body}</p>
+                <QaThreads threads={sectionThreads(sub.section_id)} headingLevel={5} />
+              </div>
+            ))}
+            <QaThreads threads={sectionThreads(section.section_id)} headingLevel={4} />
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+  <script is:inline>
+    (() => {
+      const panel = document.getElementById("decision-actions");
+      if (!panel) return;
+      const publicationId = panel.dataset.publicationId;
+      const approvalVocabulary = panel.dataset.approvalVocabulary || "";
+      const comment = document.getElementById("decision-comment");
+      const status = document.getElementById("decision-action-status");
+      const buttons = [...panel.querySelectorAll("[data-decision-action]")];
+      const setBusy = (busy) => buttons.forEach((button) => { button.disabled = busy; button.setAttribute("aria-disabled", String(busy)); });
+      const setStatus = (text, error = false) => {
+        status.textContent = text;
+        status.className = `mt-4 min-h-6 text-sm font-medium ${error ? "text-jw-danger" : "text-jw-success"}`;
+      };
+      buttons.forEach((button) => button.addEventListener("click", async () => {
+        const action = button.dataset.decisionAction;
+        const commentText = comment.value.trim();
+        if (action === "comment" && !commentText) {
+          setStatus("Enter a comment before saving.", true);
+          comment.focus();
+          return;
+        }
+        if (action === "approve" && !window.confirm("Approve this exact contract digest? This writes an immutable approval receipt.")) return;
+        if (action === "deny" && !window.confirm("Deny this exact contract digest?")) return;
+        const nonce = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        const body = {
+          action,
+          actor: "owner",
+          idempotency_key: `${action}-${publicationId}-${nonce}`,
+        };
+        if (commentText) body.comment = commentText;
+        if (action === "approve") body.required_approval_vocabulary = approvalVocabulary;
+        setBusy(true);
+        setStatus(`Submitting ${action}…`);
+        try {
+          const response = await fetch(`/api/publications/${encodeURIComponent(publicationId)}/actions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result?.error?.message || `Request failed (${response.status})`);
+          const receiptId = result?.receipt?.receipt_id || "receipt written";
+          setStatus(`${action.toUpperCase()} recorded — ${receiptId}`);
+          if (action === "comment") comment.value = "";
+        } catch (error) {
+          setStatus(error instanceof Error ? error.message : String(error), true);
+        } finally {
+          setBusy(false);
+        }
+      }));
+    })();
+  </script>
+</Base>

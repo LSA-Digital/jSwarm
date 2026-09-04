@@ -1,0 +1,26 @@
+{
+  "name": "@common/decision-review-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "COM-389 — sibling Astro+Tailwind build-time-static decision-review render tier (SC-12 contract review pages from validated fix-decision JSON).",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0 <25.0.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "5.18.2",
+    "@astrojs/tailwind": "6.0.0",
+    "@astrojs/check": "0.9.4",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.2",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1"
+  }
+}

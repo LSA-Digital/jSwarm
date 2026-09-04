@@ -1,0 +1,2451 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://common.lsa.dev/schemas/fix-decisions/defect-contract/v1.0",
+  "title": "Fix-Decision Defect Contract",
+  "description": "Envelope plus defect specialization. Drives Gate 1 (defect-contract-scope) WITHOUT repair implementation authority: repair_authority is restricted to none / pending-owner-approval, and every defect carries a pre-declared preliminary-scope disposition.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "document_type": {
+            "const": "contract-member"
+          }
+        },
+        "required": [
+          "document_type"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/root_member"
+          },
+          {
+            "$ref": "#/$defs/delta_member"
+          }
+        ]
+      },
+      "else": {
+        "$ref": "#/$defs/legacy"
+      }
+    }
+  ],
+  "$defs": {
+    "sha256Hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "rfc3339Utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "sectionId": {
+      "type": "string",
+      "pattern": "^s[0-9]+(-[0-9]+)*-[a-z0-9][a-z0-9-]*$"
+    },
+    "sectionEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_id",
+        "title",
+        "body"
+      ],
+      "properties": {
+        "section_id": {
+          "$ref": "#/$defs/sectionId"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string"
+        },
+        "subsections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sectionEntry"
+          }
+        }
+      }
+    },
+    "legacy": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://common.lsa.dev/schemas/fix-decisions/defect-contract/v1.0",
+      "title": "Fix-Decision Defect Contract",
+      "description": "Envelope plus defect specialization. Drives Gate 1 (defect-contract-scope) WITHOUT repair implementation authority: repair_authority is restricted to none / pending-owner-approval, and every defect carries a pre-declared preliminary-scope disposition.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "schema_version",
+        "document_type",
+        "contract_id",
+        "ticket",
+        "cycle_key",
+        "contract_version",
+        "contract_slug",
+        "issued_by",
+        "issued_at",
+        "invocation_origin",
+        "source_path",
+        "parent_contracts",
+        "evidence_refs",
+        "intent",
+        "contract_status",
+        "gate_kind",
+        "gate_mode",
+        "required_approval_vocabulary",
+        "repair_authority",
+        "revision_policy",
+        "decision",
+        "summary",
+        "pm_view",
+        "terminal_outcome",
+        "pm_anchor_map",
+        "scope",
+        "defects",
+        "flow",
+        "risks",
+        "cost_timeline",
+        "detail_refs",
+        "sections",
+        "uat_route",
+        "vendor_policy",
+        "accepted_user_outcome",
+        "out_of_scope_boundaries",
+        "probe_constraints",
+        "conviction_state",
+        "fix_settings_path",
+        "fix_settings_sha256"
+      ],
+      "properties": {
+        "schema": {
+          "const": "jswarm.fix-decisions.defect-contract/v1"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "document_type": {
+          "const": "defect-contract"
+        },
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ticket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "issued_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issued_at": {
+          "$ref": "#/$defs/rfc3339Utc"
+        },
+        "invocation_origin": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "conversion"
+          ],
+          "properties": {
+            "conversion": {
+              "enum": [
+                "native",
+                "legacy-migration"
+              ],
+              "description": "legacy-migration exempts the document from PM anchoring minimums (converted historical contracts never had PM anchor tables)."
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "parent_contracts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "relation"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256Hex"
+              },
+              "relation": {
+                "enum": [
+                  "supersedes",
+                  "prior-diagnosis",
+                  "parent-defect-contract",
+                  "evidence"
+                ]
+              }
+            }
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ref"
+            ],
+            "properties": {
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "locator": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "intent": {
+          "const": "scope-authorizing"
+        },
+        "contract_status": {
+          "enum": [
+            "draft",
+            "issued-awaiting-owner-approval",
+            "approved",
+            "denied",
+            "superseded",
+            "informational"
+          ]
+        },
+        "gate_kind": {
+          "const": "defect-contract-scope"
+        },
+        "gate_mode": {
+          "enum": [
+            "owner-authorized",
+            "auto"
+          ]
+        },
+        "required_approval_vocabulary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repair_authority": {
+          "enum": [
+            "none",
+            "pending-owner-approval"
+          ],
+          "description": "A defect contract can never grant repair implementation authority; repair authority is granted only by the owner gate on the first repair-authorizing fix contract."
+        },
+        "revision_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "approval_behavior",
+            "digest_discipline",
+            "within_scope_revisions",
+            "scope_widening_rule"
+          ],
+          "properties": {
+            "approval_behavior": {
+              "enum": [
+                "owner-stop-for-this-exact-path-and-reported-sha256"
+              ]
+            },
+            "digest_discipline": {
+              "enum": [
+                "every-revision-new-digest",
+                "immutable-single-issuance"
+              ],
+              "description": "Machine vocabulary derived from the exemplar headers. every-revision-new-digest: every revision receives a new path-or-version and sha256; every downstream packet and receipt must cite the current exact digest. immutable-single-issuance: the file is sealed once and never edited; any change is a new contract. Verbatim era prose belongs in revision_policy.description."
+            },
+            "within_scope_revisions": {
+              "enum": [
+                "auto-included-without-owner-stop",
+                "owner-stop-per-revision"
+              ]
+            },
+            "scope_widening_rule": {
+              "enum": [
+                "returns-to-owner-before-issuance"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "description": "Free-form human prose preserving the original contract's wording."
+            }
+          }
+        },
+        "decision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "pm_view": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "anchor",
+              "quote"
+            ],
+            "properties": {
+              "anchor": {
+                "type": "string",
+                "minLength": 1
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "terminal_outcome": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "statement"
+          ],
+          "properties": {
+            "statement": {
+              "type": "string",
+              "minLength": 1
+            },
+            "bullets": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "pm_anchor_map": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "technical_sections",
+              "controlling_sentence",
+              "how_it_serves"
+            ],
+            "properties": {
+              "technical_sections": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "controlling_sentence": {
+                "type": "string",
+                "minLength": 1
+              },
+              "how_it_serves": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "in_scope",
+            "out_of_scope"
+          ],
+          "properties": {
+            "in_scope": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "item"
+                ],
+                "properties": {
+                  "item": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "out_of_scope": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "item",
+                  "reason"
+                ],
+                "properties": {
+                  "item": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "defects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "conviction",
+              "preliminary_scope_analysis"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "conviction": {
+                "type": "string",
+                "minLength": 1
+              },
+              "authorization": {
+                "type": "string"
+              },
+              "fixed_means": {
+                "type": "string"
+              },
+              "preliminary_scope_analysis": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "disposition"
+                ],
+                "properties": {
+                  "disposition": {
+                    "enum": [
+                      "in-scope",
+                      "covered-by-ticket",
+                      "recommend-new-ticket"
+                    ]
+                  },
+                  "covered_by_ticket_key": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "probe_constraints": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "flow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "representation"
+          ],
+          "properties": {
+            "representation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "body": {
+              "type": "string"
+            }
+          }
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "priority",
+              "risk",
+              "guardrail"
+            ],
+            "properties": {
+              "priority": {
+                "type": "string",
+                "minLength": 1
+              },
+              "risk": {
+                "type": "string",
+                "minLength": 1
+              },
+              "impact": {
+                "type": "string"
+              },
+              "guardrail": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "cost_timeline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "detail_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ref"
+            ],
+            "properties": {
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "locator": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "section_id",
+              "title",
+              "body"
+            ],
+            "properties": {
+              "section_id": {
+                "$ref": "#/$defs/sectionId"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "body": {
+                "type": "string"
+              },
+              "subsections": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/sectionEntry"
+                }
+              }
+            }
+          }
+        },
+        "fix_settings_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fix_settings_sha256": {
+          "$ref": "#/$defs/sha256Hex"
+        },
+        "uat_route": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vendor_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accepted_user_outcome": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "statement"
+          ],
+          "properties": {
+            "statement": {
+              "type": "string",
+              "minLength": 1
+            },
+            "bullets": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "out_of_scope_boundaries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "boundary",
+              "reason"
+            ],
+            "properties": {
+              "boundary": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "probe_constraints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "constraint"
+            ],
+            "properties": {
+              "constraint": {
+                "type": "string",
+                "minLength": 1
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "conviction_state": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "summary"
+          ],
+          "properties": {
+            "summary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidence_refs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "not": {
+              "required": [
+                "provenance"
+              ],
+              "properties": {
+                "provenance": {
+                  "required": [
+                    "conversion"
+                  ],
+                  "properties": {
+                    "conversion": {
+                      "const": "legacy-migration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "description": "Native contracts must be PM-anchored (pm_anchoring_precheck); legacy migrations are exempt.",
+            "properties": {
+              "pm_view": {
+                "minItems": 1
+              },
+              "pm_anchor_map": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ],
+      "$defs": {
+        "sha256Hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rfc3339Utc": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+        },
+        "sectionId": {
+          "type": "string",
+          "pattern": "^s[0-9]+(-[0-9]+)*-[a-z0-9][a-z0-9-]*$"
+        },
+        "sectionEntry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "section_id",
+            "title",
+            "body"
+          ],
+          "properties": {
+            "section_id": {
+              "$ref": "#/$defs/sectionId"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "body": {
+              "type": "string"
+            },
+            "subsections": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/sectionEntry"
+              }
+            }
+          }
+        }
+      }
+    },
+    "root_member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "schema_version",
+        "document_type",
+        "member_kind",
+        "contract_id",
+        "contract_version",
+        "ticket",
+        "cycle_key",
+        "body",
+        "effective_sha256"
+      ],
+      "properties": {
+        "schema": {
+          "const": "jswarm.fix-decisions.defect-contract/v1"
+        },
+        "schema_version": {
+          "const": "1.1"
+        },
+        "document_type": {
+          "const": "contract-member"
+        },
+        "member_kind": {
+          "enum": [
+            "root",
+            "delta"
+          ]
+        },
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ticket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "https://common.lsa.dev/schemas/fix-decisions/defect-contract/v1.0",
+          "title": "Fix-Decision Defect Contract",
+          "description": "Envelope plus defect specialization. Drives Gate 1 (defect-contract-scope) WITHOUT repair implementation authority: repair_authority is restricted to none / pending-owner-approval, and every defect carries a pre-declared preliminary-scope disposition.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "schema_version",
+            "document_type",
+            "contract_id",
+            "ticket",
+            "cycle_key",
+            "contract_version",
+            "contract_slug",
+            "issued_by",
+            "issued_at",
+            "invocation_origin",
+            "source_path",
+            "parent_contracts",
+            "evidence_refs",
+            "intent",
+            "contract_status",
+            "gate_kind",
+            "gate_mode",
+            "required_approval_vocabulary",
+            "repair_authority",
+            "revision_policy",
+            "decision",
+            "summary",
+            "pm_view",
+            "terminal_outcome",
+            "pm_anchor_map",
+            "scope",
+            "defects",
+            "flow",
+            "risks",
+            "cost_timeline",
+            "detail_refs",
+            "sections",
+            "uat_route",
+            "vendor_policy",
+            "accepted_user_outcome",
+            "out_of_scope_boundaries",
+            "probe_constraints",
+            "conviction_state",
+            "fix_settings_path",
+            "fix_settings_sha256",
+            "business_header"
+          ],
+          "properties": {
+            "schema": {
+              "const": "jswarm.fix-decisions.defect-contract/v1"
+            },
+            "schema_version": {
+              "const": "1.0"
+            },
+            "document_type": {
+              "const": "defect-contract"
+            },
+            "contract_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "ticket": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cycle_key": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contract_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contract_slug": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            },
+            "issued_by": {
+              "type": "string",
+              "minLength": 1
+            },
+            "issued_at": {
+              "$ref": "#/$defs/rfc3339Utc"
+            },
+            "invocation_origin": {
+              "type": "string",
+              "minLength": 1
+            },
+            "source_path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "conversion"
+              ],
+              "properties": {
+                "conversion": {
+                  "enum": [
+                    "native",
+                    "legacy-migration"
+                  ],
+                  "description": "legacy-migration exempts the document from PM anchoring minimums (converted historical contracts never had PM anchor tables)."
+                },
+                "note": {
+                  "type": "string"
+                }
+              }
+            },
+            "parent_contracts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "path",
+                  "relation"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sha256": {
+                    "$ref": "#/$defs/sha256Hex"
+                  },
+                  "relation": {
+                    "enum": [
+                      "supersedes",
+                      "prior-diagnosis",
+                      "parent-defect-contract",
+                      "evidence"
+                    ]
+                  }
+                }
+              }
+            },
+            "evidence_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "ref"
+                ],
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "locator": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "intent": {
+              "const": "scope-authorizing"
+            },
+            "contract_status": {
+              "enum": [
+                "draft",
+                "issued-awaiting-owner-approval",
+                "approved",
+                "denied",
+                "superseded",
+                "informational"
+              ]
+            },
+            "gate_kind": {
+              "const": "defect-contract-scope"
+            },
+            "gate_mode": {
+              "enum": [
+                "owner-authorized",
+                "auto"
+              ]
+            },
+            "required_approval_vocabulary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "repair_authority": {
+              "enum": [
+                "none",
+                "pending-owner-approval"
+              ],
+              "description": "A defect contract can never grant repair implementation authority; repair authority is granted only by the owner gate on the first repair-authorizing fix contract."
+            },
+            "revision_policy": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "approval_behavior",
+                "digest_discipline",
+                "within_scope_revisions",
+                "scope_widening_rule"
+              ],
+              "properties": {
+                "approval_behavior": {
+                  "enum": [
+                    "owner-stop-for-this-exact-path-and-reported-sha256"
+                  ]
+                },
+                "digest_discipline": {
+                  "enum": [
+                    "every-revision-new-digest",
+                    "immutable-single-issuance"
+                  ],
+                  "description": "Machine vocabulary derived from the exemplar headers. every-revision-new-digest: every revision receives a new path-or-version and sha256; every downstream packet and receipt must cite the current exact digest. immutable-single-issuance: the file is sealed once and never edited; any change is a new contract. Verbatim era prose belongs in revision_policy.description."
+                },
+                "within_scope_revisions": {
+                  "enum": [
+                    "auto-included-without-owner-stop",
+                    "owner-stop-per-revision"
+                  ]
+                },
+                "scope_widening_rule": {
+                  "enum": [
+                    "returns-to-owner-before-issuance"
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Free-form human prose preserving the original contract's wording."
+                }
+              }
+            },
+            "decision": {
+              "type": "string",
+              "minLength": 1
+            },
+            "summary": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "pm_view": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "anchor",
+                  "quote"
+                ],
+                "properties": {
+                  "anchor": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "quote": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "terminal_outcome": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "statement"
+              ],
+              "properties": {
+                "statement": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "bullets": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "pm_anchor_map": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "technical_sections",
+                  "controlling_sentence",
+                  "how_it_serves"
+                ],
+                "properties": {
+                  "technical_sections": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "controlling_sentence": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "how_it_serves": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "scope": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "in_scope",
+                "out_of_scope"
+              ],
+              "properties": {
+                "in_scope": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "item"
+                    ],
+                    "properties": {
+                      "item": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "reason": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "out_of_scope": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "item",
+                      "reason"
+                    ],
+                    "properties": {
+                      "item": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "defects": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "key",
+                  "conviction",
+                  "preliminary_scope_analysis"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "conviction": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "authorization": {
+                    "type": "string"
+                  },
+                  "fixed_means": {
+                    "type": "string"
+                  },
+                  "preliminary_scope_analysis": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "disposition"
+                    ],
+                    "properties": {
+                      "disposition": {
+                        "enum": [
+                          "in-scope",
+                          "covered-by-ticket",
+                          "recommend-new-ticket"
+                        ]
+                      },
+                      "covered_by_ticket_key": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    },
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "disposition": {
+                              "const": "covered-by-ticket"
+                            }
+                          },
+                          "required": [
+                            "disposition"
+                          ]
+                        },
+                        "then": {
+                          "required": [
+                            "covered_by_ticket_key"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "probe_constraints": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "flow": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "representation"
+              ],
+              "properties": {
+                "representation": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "body": {
+                  "type": "string"
+                }
+              }
+            },
+            "risks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "priority",
+                  "risk",
+                  "guardrail"
+                ],
+                "properties": {
+                  "priority": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "risk": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "impact": {
+                    "type": "string"
+                  },
+                  "guardrail": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "cost_timeline": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "detail_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "ref"
+                ],
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "locator": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "sections": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "section_id",
+                  "title",
+                  "body"
+                ],
+                "properties": {
+                  "section_id": {
+                    "$ref": "#/$defs/sectionId"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "body": {
+                    "type": "string"
+                  },
+                  "subsections": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/sectionEntry"
+                    }
+                  }
+                }
+              }
+            },
+            "fix_settings_path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fix_settings_sha256": {
+              "$ref": "#/$defs/sha256Hex"
+            },
+            "uat_route": {
+              "type": "string",
+              "minLength": 1
+            },
+            "vendor_policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "accepted_user_outcome": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "statement"
+              ],
+              "properties": {
+                "statement": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "bullets": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "out_of_scope_boundaries": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "boundary",
+                  "reason"
+                ],
+                "properties": {
+                  "boundary": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "probe_constraints": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "constraint"
+                ],
+                "properties": {
+                  "constraint": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "conviction_state": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "summary"
+              ],
+              "properties": {
+                "summary": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "business_header": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "blocks",
+                "ticket_refs",
+                "nfr_refs",
+                "fixed_means",
+                "disposition_now",
+                "cycle"
+              ],
+              "properties": {
+                "blocks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "id",
+                      "text"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "text": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                },
+                "ticket_refs": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "ticket",
+                    "ac_ids",
+                    "objective"
+                  ],
+                  "properties": {
+                    "ticket": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "ac_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 1
+                    },
+                    "objective": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                "nfr_refs": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "ids"
+                      ],
+                      "properties": {
+                        "ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "minItems": 1
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "none_reason"
+                      ],
+                      "properties": {
+                        "none_reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "fixed_means": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "disposition_now": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "cycle": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "cycle_id",
+                    "mode",
+                    "shape",
+                    "parent_ref"
+                  ],
+                  "properties": {
+                    "cycle_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "mode": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "shape": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "parent_ref": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "required": [
+                    "provenance"
+                  ],
+                  "properties": {
+                    "provenance": {
+                      "required": [
+                        "conversion"
+                      ],
+                      "properties": {
+                        "conversion": {
+                          "const": "legacy-migration"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "description": "Native contracts must be PM-anchored (pm_anchoring_precheck); legacy migrations are exempt.",
+                "properties": {
+                  "pm_view": {
+                    "minItems": 1
+                  },
+                  "pm_anchor_map": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          ],
+          "$defs": {
+            "sha256Hex": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "rfc3339Utc": {
+              "type": "string",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+            },
+            "sectionId": {
+              "type": "string",
+              "pattern": "^s[0-9]+(-[0-9]+)*-[a-z0-9][a-z0-9-]*$"
+            },
+            "sectionEntry": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "section_id",
+                "title",
+                "body"
+              ],
+              "properties": {
+                "section_id": {
+                  "$ref": "#/$defs/sectionId"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "body": {
+                  "type": "string"
+                },
+                "subsections": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/sectionEntry"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "effective_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "parent_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_effective_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "member_kind": {
+                "const": "root"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "parent_ref"
+                  ]
+                },
+                {
+                  "required": [
+                    "parent_effective_sha256"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "delta_member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "schema_version",
+        "document_type",
+        "member_kind",
+        "contract_id",
+        "contract_version",
+        "ticket",
+        "cycle_key",
+        "body",
+        "effective_sha256"
+      ],
+      "properties": {
+        "schema": {
+          "const": "jswarm.fix-decisions.defect-contract/v1"
+        },
+        "schema_version": {
+          "const": "1.1"
+        },
+        "document_type": {
+          "const": "contract-member"
+        },
+        "member_kind": {
+          "enum": [
+            "root",
+            "delta"
+          ]
+        },
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ticket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cycle_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "contract_id",
+            "contract_version",
+            "business_header_patch",
+            "changes",
+            "change_summary"
+          ],
+          "properties": {
+            "schema": {
+              "const": "jswarm.fix-decisions.contract-delta/v1"
+            },
+            "contract_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contract_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "business_header_patch": {
+              "type": "object"
+            },
+            "changes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "op",
+                  "path",
+                  "value"
+                ],
+                "properties": {
+                  "op": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  },
+                  "value": {}
+                }
+              }
+            },
+            "change_summary": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "effective_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "parent_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_effective_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "member_kind": {
+                "const": "delta"
+              }
+            },
+            "required": [
+              "member_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "parent_ref",
+              "parent_effective_sha256"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "jswarm.fix-decisions.defect-contract/v1"
+    },
+    "schema_version": {},
+    "document_type": {},
+    "contract_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ticket": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cycle_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "issued_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issued_at": {
+      "$ref": "#/$defs/rfc3339Utc"
+    },
+    "invocation_origin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "conversion"
+      ],
+      "properties": {
+        "conversion": {
+          "enum": [
+            "native",
+            "legacy-migration"
+          ],
+          "description": "legacy-migration exempts the document from PM anchoring minimums (converted historical contracts never had PM anchor tables)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "parent_contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "relation"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "$ref": "#/$defs/sha256Hex"
+          },
+          "relation": {
+            "enum": [
+              "supersedes",
+              "prior-diagnosis",
+              "parent-defect-contract",
+              "evidence"
+            ]
+          }
+        }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ref"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "locator": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "intent": {
+      "const": "scope-authorizing"
+    },
+    "contract_status": {
+      "enum": [
+        "draft",
+        "issued-awaiting-owner-approval",
+        "approved",
+        "denied",
+        "superseded",
+        "informational"
+      ]
+    },
+    "gate_kind": {
+      "const": "defect-contract-scope"
+    },
+    "gate_mode": {
+      "enum": [
+        "owner-authorized",
+        "auto"
+      ]
+    },
+    "required_approval_vocabulary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repair_authority": {
+      "enum": [
+        "none",
+        "pending-owner-approval"
+      ],
+      "description": "A defect contract can never grant repair implementation authority; repair authority is granted only by the owner gate on the first repair-authorizing fix contract."
+    },
+    "revision_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approval_behavior",
+        "digest_discipline",
+        "within_scope_revisions",
+        "scope_widening_rule"
+      ],
+      "properties": {
+        "approval_behavior": {
+          "enum": [
+            "owner-stop-for-this-exact-path-and-reported-sha256"
+          ]
+        },
+        "digest_discipline": {
+          "enum": [
+            "every-revision-new-digest",
+            "immutable-single-issuance"
+          ],
+          "description": "Machine vocabulary derived from the exemplar headers. every-revision-new-digest: every revision receives a new path-or-version and sha256; every downstream packet and receipt must cite the current exact digest. immutable-single-issuance: the file is sealed once and never edited; any change is a new contract. Verbatim era prose belongs in revision_policy.description."
+        },
+        "within_scope_revisions": {
+          "enum": [
+            "auto-included-without-owner-stop",
+            "owner-stop-per-revision"
+          ]
+        },
+        "scope_widening_rule": {
+          "enum": [
+            "returns-to-owner-before-issuance"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "Free-form human prose preserving the original contract's wording."
+        }
+      }
+    },
+    "decision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "pm_view": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "anchor",
+          "quote"
+        ],
+        "properties": {
+          "anchor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "terminal_outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statement"
+      ],
+      "properties": {
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bullets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pm_anchor_map": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "technical_sections",
+          "controlling_sentence",
+          "how_it_serves"
+        ],
+        "properties": {
+          "technical_sections": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "controlling_sentence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "how_it_serves": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "in_scope",
+        "out_of_scope"
+      ],
+      "properties": {
+        "in_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item"
+            ],
+            "properties": {
+              "item": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "out_of_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "item",
+              "reason"
+            ],
+            "properties": {
+              "item": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "defects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "conviction",
+          "preliminary_scope_analysis"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "conviction": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authorization": {
+            "type": "string"
+          },
+          "fixed_means": {
+            "type": "string"
+          },
+          "preliminary_scope_analysis": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "disposition"
+            ],
+            "properties": {
+              "disposition": {
+                "enum": [
+                  "in-scope",
+                  "covered-by-ticket",
+                  "recommend-new-ticket"
+                ]
+              },
+              "covered_by_ticket_key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "disposition": {
+                      "const": "covered-by-ticket"
+                    }
+                  },
+                  "required": [
+                    "disposition"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "covered_by_ticket_key"
+                  ]
+                }
+              }
+            ]
+          },
+          "probe_constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "representation"
+      ],
+      "properties": {
+        "representation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "string"
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "priority",
+          "risk",
+          "guardrail"
+        ],
+        "properties": {
+          "priority": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risk": {
+            "type": "string",
+            "minLength": 1
+          },
+          "impact": {
+            "type": "string"
+          },
+          "guardrail": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "cost_timeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "detail_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ref"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "locator": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "section_id",
+          "title",
+          "body"
+        ],
+        "properties": {
+          "section_id": {
+            "$ref": "#/$defs/sectionId"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "body": {
+            "type": "string"
+          },
+          "subsections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/sectionEntry"
+            }
+          }
+        }
+      }
+    },
+    "fix_settings_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fix_settings_sha256": {
+      "$ref": "#/$defs/sha256Hex"
+    },
+    "uat_route": {
+      "type": "string",
+      "minLength": 1
+    },
+    "vendor_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "accepted_user_outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statement"
+      ],
+      "properties": {
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bullets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "out_of_scope_boundaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "boundary",
+          "reason"
+        ],
+        "properties": {
+          "boundary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "probe_constraints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "constraint"
+        ],
+        "properties": {
+          "constraint": {
+            "type": "string",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "conviction_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}

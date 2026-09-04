@@ -1,0 +1,41 @@
+---
+// COM-389 — Q&A thread list for one anchor (section-anchored inline or a
+// free-floating group). Semantic list markup, readable on mobile.
+import type { QaThread } from "../lib/load-data";
+
+interface Props {
+  threads: QaThread[];
+  headingLevel?: number;
+}
+const { threads, headingLevel = 4 } = Astro.props;
+const Heading = `h${Math.min(headingLevel, 6)}` as "h4";
+---
+{
+  threads.length === 0 ? null : (
+    <section class="mt-4 space-y-4" aria-label="Question and answer threads">
+      {threads.map((thread) => (
+        <article
+          class="rounded border border-jw-line bg-jw-surface-muted p-4"
+          aria-label={`Q&A thread ${thread.thread_id} (${thread.status})`}
+        >
+          <Heading class="text-sm font-semibold text-jw-fg">
+            Q&amp;A · {thread.thread_id}
+            <span class="ml-2 rounded-full bg-jw-info-soft px-2 py-0.5 text-xs font-medium text-jw-info">
+              {thread.status}
+            </span>
+          </Heading>
+          <ol class="mt-3 space-y-3 list-none p-0">
+            {thread.messages.map((m) => (
+              <li class="rounded bg-jw-surface p-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-jw-muted">
+                  {m.author_role} · {m.created_at_utc}
+                </p>
+                <p class="mt-1 text-sm">{m.body}</p>
+              </li>
+            ))}
+          </ol>
+        </article>
+      ))}
+    </section>
+  )
+}

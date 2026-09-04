@@ -1,0 +1,15 @@
+{
+  "schema": "jswarm.fix-forward-intelligence-activation/v1",
+  "state": "active",
+  "reason": "owner-authorized current corrected producer and /fix Packet gate; retained readiness and owner authorization identities are required",
+  "producer_readiness": {
+    "path": ".jswarm/plans/COM-393/COM-393.evidence.phase2-producer-readiness.20260831.v2.md",
+    "sha256": "bbebc83936ccc8407552e5f60e9d488227ce59614007fdb512e5ef52b8faa7a0",
+    "verdict": "PRODUCER_READY"
+  },
+  "gate_a": {
+    "path": ".jswarm/plans/COM-393/COM-393.evidence.owner-activation-authorization.20260831.md",
+    "sha256": "6653e2d1aa10e4623dddc0d9cf04236e7005fb6d912e65c33d32fd8b2228eaa5",
+    "verdict": "APPROVED_FOR_IMPLEMENTATION"
+  }
+}

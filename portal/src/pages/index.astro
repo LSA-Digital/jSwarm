@@ -1,0 +1,180 @@
+---
+import Base from "../layouts/Base.astro";
+import QaThreads from "../components/QaThreads.astro";
+import FixUatLifecycle from "../components/home/FixUatLifecycle.astro";
+import UatSummaryArea from "../components/home/UatSummaryArea.astro";
+import { loadReviewData } from "../lib/load-data";
+
+const data = loadReviewData();
+
+const reviewTimestamp = (contract: (typeof data.contracts)[number]) =>
+  contract.view_model.identity.published_at_utc || contract.view_model.identity.issued_at || "1970-01-01T00:00:00Z";
+const reviewDate = (contract: (typeof data.contracts)[number]) => reviewTimestamp(contract).slice(0, 10);
+const sortedContracts = [...data.contracts].sort((a, b) => reviewTimestamp(b).localeCompare(reviewTimestamp(a)));
+const dateGroups = new Map<string, typeof data.contracts>();
+for (const contract of sortedContracts) {
+  const key = reviewDate(contract);
+  const list = dateGroups.get(key) ?? [];
+  list.push(contract);
+  dateGroups.set(key, list);
+}
+const displayDate = (isoDate: string) =>
+  new Date(`${isoDate}T00:00:00Z`).toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+const displayTimestamp = (value: string) =>
+  value
+    ? new Date(value).toLocaleString("en-US", { timeZone: "UTC", dateStyle: "medium", timeStyle: "short" }) + " UTC"
+    : "Not recorded";
+const freeFloating = data.qa_threads.filter(
+  (thread) => !(thread.anchor && typeof thread.anchor.section_id === "string"),
+);
+---
+<Base title="FIX and UAT Decision Review">
+  <main id="main" class="px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+    <header class="page-masthead">
+      <div>
+        <p class="page-kicker">Decision assurance</p>
+        <h1>FIX decisions and UAT feedback, in one accountable loop.</h1>
+      </div>
+      <p class="page-intro">
+        Review exact FIX authority, then inspect the canonical TEST UAT evidence that returns findings to the next decision.
+      </p>
+    </header>
+
+    <FixUatLifecycle />
+
+    <div class="peer-grid" aria-label="FIX decision reviews and TEST UAT feedback">
+      <section
+        data-fix-decision-review-area
+        aria-labelledby="fix-decision-review-title"
+        class="peer-area peer-area-fix"
+      >
+        <header class="peer-header">
+          <div>
+            <p class="peer-index">01 · Build-time authority</p>
+            <h2 id="fix-decision-review-title">FIX DECISION REVIEW</h2>
+          </div>
+          <span class="peer-source">{data.contracts.length} review{data.contracts.length === 1 ? "" : "s"}</span>
+        </header>
+        <p class="peer-description">Available reviews include the decision, publication status, and immutable receipt needed before approving FIX authority.</p>
+
+        {data.contracts.length === 0 ? (
+          <div class="empty-state">No FIX decision reviews are currently published.</div>
+        ) : (
+          <div class="fix-date-list">
+            {[...dateGroups.entries()].map(([date, contracts]) => (
+              <section class="fix-date-group" aria-labelledby={`review-date-${date}`}>
+                <header class="date-heading">
+                  <h3 id={`review-date-${date}`}>{displayDate(date)}</h3>
+                  <span>{contracts.length}</span>
+                </header>
+                <div class="fix-card-list">
+                  {contracts.map((contract) => {
+                    const href = `/review/${contract.slug}/`;
+                    return (
+                      <article
+                        data-fix-summary-card
+                        data-order="newest-first"
+                        data-detail-href={href}
+                        class="fix-summary-card"
+                      >
+                        <a href={href} class="fix-card-link">
+                          <span class="fix-card-topline">
+                            <span>{contract.view_model.identity.ticket} · {contract.view_model.identity.cycle_key}</span>
+                            <span class="fix-status">{contract.view_model.identity.contract_status}</span>
+                          </span>
+                          <strong>{contract.view_model.identity.contract_slug || contract.slug}</strong>
+                          <span class="fix-document">{contract.document_type} · {contract.view_model.identity.contract_version}</span>
+                          <span class="fix-decision">{contract.view_model.decision}</span>
+                          <span class="fix-action">Open decision review <span aria-hidden="true">→</span></span>
+                        </a>
+                        <dl class="receipt-grid">
+                          <div>
+                            <dt>{contract.view_model.identity.published_at_utc ? "Published for review" : "Issued"}</dt>
+                            <dd><time datetime={reviewTimestamp(contract)}>{displayTimestamp(reviewTimestamp(contract))}</time></dd>
+                          </div>
+                          <div>
+                            <dt>Gate</dt>
+                            <dd>{contract.view_model.identity.gate_kind}</dd>
+                          </div>
+                          <div class="receipt-wide">
+                            <dt>Canonical path</dt>
+                            <dd>{contract.view_model.identity.canonical_path}</dd>
+                          </div>
+                          <div class="receipt-wide">
+                            <dt>SHA-256</dt>
+                            <dd>{contract.view_model.identity.sha256}</dd>
+                          </div>
+                        </dl>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <UatSummaryArea />
+      <noscript>
+        <p class="noscript-uat">Live UAT summaries require JavaScript. <a href="/uat/">Open active UAT rounds</a>.</p>
+      </noscript>
+    </div>
+
+    <section class="qa-area" aria-labelledby="free-floating-qa">
+      <div class="qa-heading">
+        <div>
+          <p>Decision context</p>
+          <h2 id="free-floating-qa">Cycle-level Q&amp;A</h2>
+        </div>
+        <span>Unanchored discussion</span>
+      </div>
+      <QaThreads threads={freeFloating} headingLevel={3} />
+    </section>
+  </main>
+</Base>
+
+<style is:inline>
+  .page-masthead{display:grid;gap:1.5rem;align-items:end;border-bottom:1px solid #dadce0;padding:1rem 0 1.5rem}
+  .page-kicker{margin:0;color:#1a4fa0;font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+  .page-masthead h1{max-width:48rem;margin:.4rem 0 0;font-size:clamp(1.8rem,5vw,3.35rem);line-height:1.02;letter-spacing:-.045em}
+  .page-intro{max-width:32rem;margin:0;color:#5f6368;font-size:clamp(.9rem,1.5vw,1rem);line-height:1.55}
+  .peer-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;margin-top:1rem}
+  .peer-area{display:flex;min-width:0;flex-direction:column;border:1px solid #dadce0;background:#fff;padding:clamp(1rem,2.5vw,1.5rem);box-shadow:0 8px 24px rgba(32,33,36,.05)}
+  .peer-area-fix{border-top:4px solid #1a4fa0}
+  .peer-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;border-bottom:1px solid #dadce0;padding-bottom:1rem}
+  .peer-index{margin:0;color:#1a4fa0;font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+  .peer-header h2{margin:.35rem 0 0;font-size:clamp(1.05rem,2vw,1.3rem);line-height:1.15;letter-spacing:.035em}
+  .peer-source{flex:none;border:1px solid #dadce0;background:#f1f3f5;padding:.28rem .48rem;color:#5f6368;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+  .peer-description{min-height:3.4rem;margin:1rem 0;color:#5f6368;font-size:.86rem;line-height:1.5}
+  .empty-state{border:1px dashed #dadce0;background:#fafbfc;padding:1rem;color:#5f6368;font-size:.85rem}
+  .fix-date-list{display:grid;gap:1.25rem}
+  .fix-date-group{min-width:0}
+  .date-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.65rem}
+  .date-heading h3{margin:0;color:#5f6368;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .date-heading span{display:grid;min-width:1.5rem;height:1.5rem;place-items:center;background:#e3ebf7;color:#1a4fa0;font-size:.7rem;font-weight:800}
+  .fix-card-list{display:grid;gap:.75rem}
+  .fix-summary-card{min-width:0;border:1px solid #dadce0;background:#fff}
+  .fix-card-link{display:flex;min-height:44px;min-width:0;flex-direction:column;padding:1rem;color:#202124;text-decoration:none;transition:box-shadow .15s ease,transform .15s ease}
+  .fix-card-link:hover{box-shadow:inset 4px 0 #1a4fa0;transform:translateY(-1px)}
+  .fix-card-link:focus-visible{outline:3px solid #1a4fa0;outline-offset:3px}
+  .fix-card-topline{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem;color:#5f6368;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .fix-status{max-width:100%;overflow-wrap:anywhere;background:#e3ebf7;padding:.18rem .4rem;color:#3a5a8a;font-size:.62rem}
+  .fix-card-link strong{overflow-wrap:anywhere;margin-top:.7rem;font-size:1rem;line-height:1.3}
+  .fix-document{margin-top:.15rem;color:#5f6368;font-family:SF Mono,Menlo,Consolas,monospace;font-size:.68rem}
+  .fix-decision{display:-webkit-box;overflow:hidden;margin-top:.75rem;color:#202124;font-size:.8rem;line-height:1.5;-webkit-box-orient:vertical;-webkit-line-clamp:3}
+  .fix-action{margin-top:.9rem;color:#1a4fa0;font-size:.78rem;font-weight:800}
+  .receipt-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:.55rem;margin:0;border-top:1px solid #dadce0;background:#fafbfc;padding:.8rem 1rem}
+  .receipt-grid div{min-width:0}.receipt-grid dt{color:#5f6368;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.receipt-grid dd{overflow-wrap:anywhere;margin:.18rem 0 0;font-size:.7rem;line-height:1.4}.receipt-wide dd{font-family:SF Mono,Menlo,Consolas,monospace;font-size:.62rem}
+  .qa-area{margin-top:1rem;border:1px solid #dadce0;background:#fff;padding:clamp(1rem,2.5vw,1.5rem)}
+  .qa-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;border-bottom:1px solid #dadce0;padding-bottom:.8rem}.qa-heading p{margin:0;color:#5f6368;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.qa-heading h2{margin:.25rem 0 0;font-size:1.15rem}.qa-heading>span{color:#5f6368;font-size:.72rem}
+  @media (min-width:720px){.page-masthead{grid-template-columns:minmax(0,1.5fr) minmax(16rem,.7fr)}.receipt-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.receipt-wide{grid-column:1/-1}}
+  @media (min-width:1024px){.peer-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.peer-area{height:100%}}
+  @media (max-width:320px){.page-masthead h1{font-size:1.65rem}.peer-area{padding:.85rem}.peer-header{display:block}.peer-source{display:inline-block;margin-top:.65rem}.fix-card-link,.receipt-grid{padding:.8rem}}
+  @media (prefers-reduced-motion:reduce){.fix-card-link{transition:none}.fix-card-link:hover{transform:none}}
+</style>

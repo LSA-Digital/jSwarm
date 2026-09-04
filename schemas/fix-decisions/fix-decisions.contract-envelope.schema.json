@@ -1,0 +1,384 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://common.lsa.dev/schemas/fix-decisions/contract-envelope/v1.0",
+  "title": "Fix-Decision Contract Envelope",
+  "description": "Shared envelope for defect contracts and fix contracts. The canonical source file must NOT carry its own SHA-256; publication manifests compute and record the digest over exact JSON bytes. Review-hardened 2026-08-27: gate_kind, contract_status, and parent relation are closed enums; revision_policy is typed per SC-14; PM anchoring is required for native contracts (legacy-migration conversion exempt).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schema_version",
+    "document_type",
+    "contract_id",
+    "ticket",
+    "cycle_key",
+    "contract_version",
+    "contract_slug",
+    "issued_by",
+    "issued_at",
+    "invocation_origin",
+    "source_path",
+    "parent_contracts",
+    "evidence_refs",
+    "intent",
+    "contract_status",
+    "gate_kind",
+    "gate_mode",
+    "required_approval_vocabulary",
+    "repair_authority",
+    "revision_policy",
+    "decision",
+    "summary",
+    "pm_view",
+    "terminal_outcome",
+    "pm_anchor_map",
+    "scope",
+    "defects",
+    "flow",
+    "risks",
+    "cost_timeline",
+    "detail_refs",
+    "sections",
+    "uat_route",
+    "vendor_policy"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "pattern": "^jswarm\\.fix-decisions\\.(contract|defect-contract|fix-contract)/v[0-9]+$"
+    },
+    "schema_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+    "document_type": { "enum": ["defect-contract", "fix-contract"] },
+    "contract_id": { "type": "string", "minLength": 1 },
+    "ticket": { "type": "string", "minLength": 1 },
+    "cycle_key": { "type": "string", "minLength": 1 },
+    "contract_version": { "type": "string", "minLength": 1 },
+    "contract_slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "issued_by": { "type": "string", "minLength": 1 },
+    "issued_at": { "$ref": "#/$defs/rfc3339Utc" },
+    "invocation_origin": { "type": "string", "minLength": 1 },
+    "source_path": { "type": "string", "minLength": 1 },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["conversion"],
+      "properties": {
+        "conversion": {
+          "enum": ["native", "legacy-migration"],
+          "description": "legacy-migration exempts the document from PM anchoring minimums (converted historical contracts never had PM anchor tables)."
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "parent_contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "relation"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "$ref": "#/$defs/sha256Hex" },
+          "relation": {
+            "enum": ["supersedes", "prior-diagnosis", "parent-defect-contract", "evidence"]
+          }
+        }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1 },
+          "locator": { "type": "string" },
+          "description": { "type": "string", "description": "v1.1: verbatim evidence description from the source ('— structured table grid survives parsing; …')." }
+        }
+      }
+    },
+    "intent": { "enum": ["scope-authorizing", "repair-authorizing"] },
+    "contract_status": {
+      "enum": [
+        "draft",
+        "issued-awaiting-owner-approval",
+        "approved",
+        "denied",
+        "superseded",
+        "informational"
+      ]
+    },
+    "gate_kind": {
+      "enum": ["defect-contract-scope", "fix-contract-digest"],
+      "description": "SC-14: exactly two gates. A within-scope revision is NOT a third gate: it is first_repair_authorizing=false with an informational publication_kind on the manifest."
+    },
+    "gate_mode": { "enum": ["owner-authorized", "auto"] },
+    "required_approval_vocabulary": { "type": "string", "minLength": 1 },
+    "repair_authority": { "type": "string", "minLength": 1 },
+    "revision_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approval_behavior",
+        "digest_discipline",
+        "within_scope_revisions",
+        "scope_widening_rule"
+      ],
+      "properties": {
+        "approval_behavior": {
+          "enum": ["owner-stop-for-this-exact-path-and-reported-sha256"]
+        },
+        "digest_discipline": {
+          "enum": ["every-revision-new-digest", "immutable-single-issuance"],
+          "description": "Machine vocabulary derived from the exemplar headers. every-revision-new-digest: every revision receives a new path-or-version and sha256; every downstream packet and receipt must cite the current exact digest. immutable-single-issuance: the file is sealed once and never edited; any change is a new contract. Verbatim era prose belongs in revision_policy.description."
+        },
+        "within_scope_revisions": {
+          "enum": ["auto-included-without-owner-stop", "owner-stop-per-revision"]
+        },
+        "scope_widening_rule": {
+          "enum": ["returns-to-owner-before-issuance"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Free-form human prose preserving the original contract's wording."
+        }
+      }
+    },
+    "decision": { "type": "string", "minLength": 1 },
+    "summary": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "pm_view": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["anchor", "quote"],
+        "properties": {
+          "anchor": { "type": "string", "minLength": 1 },
+          "quote": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "terminal_outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement"],
+      "properties": {
+        "statement": { "type": "string", "minLength": 1 },
+        "incompleteness_guardrails": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "bullets": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "pm_anchor_map": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["technical_sections", "controlling_sentence", "how_it_serves"],
+        "properties": {
+          "technical_sections": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "controlling_sentence": { "type": "string", "minLength": 1 },
+          "how_it_serves": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["in_scope", "out_of_scope"],
+      "properties": {
+        "in_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["item"],
+            "properties": {
+              "item": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string" }
+            }
+          }
+        },
+        "out_of_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["item", "reason"],
+            "properties": {
+              "item": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "defects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "conviction"],
+        "properties": {
+          "key": { "type": "string", "minLength": 1 },
+          "conviction": { "type": "string", "minLength": 1 },
+          "authorization": { "type": "string" },
+          "fixed_means": { "type": "string" },
+          "preliminary_scope_analysis": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["disposition"],
+            "properties": {
+              "disposition": {
+                "enum": ["in-scope", "covered-by-ticket", "recommend-new-ticket"]
+              },
+              "covered_by_ticket_key": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Required when disposition is covered-by-ticket: the ticket/defect key under which the work is already covered."
+              },
+              "note": { "type": "string" }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": { "disposition": { "const": "covered-by-ticket" } },
+                  "required": ["disposition"]
+                },
+                "then": { "required": ["covered_by_ticket_key"] }
+              }
+            ]
+          },
+          "probe_constraints": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["representation"],
+      "properties": {
+        "representation": { "type": "string", "minLength": 1 },
+        "body": { "type": "string" }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["priority", "risk", "guardrail"],
+        "properties": {
+          "priority": { "type": "string", "minLength": 1 },
+          "risk": { "type": "string", "minLength": 1 },
+          "impact": { "type": "string" },
+          "guardrail": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "cost_timeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "paragraphs": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "detail_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ref"],
+        "properties": {
+          "ref": { "type": "string", "minLength": 1 },
+          "locator": { "type": "string" },
+          "label": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section_id", "title", "body"],
+        "properties": {
+          "section_id": { "$ref": "#/$defs/sectionId" },
+          "title": { "type": "string", "minLength": 1 },
+          "body": { "type": "string" },
+          "subsections": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/sectionEntry" }
+          }
+        }
+      }
+    },
+    "fix_settings_path": { "type": "string", "minLength": 1 },
+    "fix_settings_sha256": { "$ref": "#/$defs/sha256Hex" },
+    "uat_route": { "type": "string", "minLength": 1 },
+    "vendor_policy": { "type": "string", "minLength": 1 }
+  },
+  "allOf": [
+    {
+      "if": {
+        "not": {
+          "required": ["provenance"],
+          "properties": {
+            "provenance": {
+              "required": ["conversion"],
+              "properties": { "conversion": { "const": "legacy-migration" } }
+            }
+          }
+        }
+      },
+      "then": {
+        "description": "Native contracts must be PM-anchored (pm_anchoring_precheck); legacy migrations are exempt.",
+        "properties": {
+          "pm_view": { "minItems": 1 },
+          "pm_anchor_map": { "minItems": 1 }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256Hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "rfc3339Utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "sectionId": {
+      "type": "string",
+      "pattern": "^s[0-9]+(-[0-9]+)*-[a-z0-9][a-z0-9-]*$"
+    },
+    "sectionEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section_id", "title", "body"],
+      "properties": {
+        "section_id": { "$ref": "#/$defs/sectionId" },
+        "title": { "type": "string", "minLength": 1 },
+        "body": { "type": "string" },
+        "subsections": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sectionEntry" }
+        }
+      }
+    }
+  }
+}

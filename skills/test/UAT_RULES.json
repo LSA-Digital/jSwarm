@@ -1,0 +1,539 @@
+{
+  "schema_version": 1,
+  "ruleset_id": "uat-master",
+  "rules": [
+    {
+      "id": "UAT-G0",
+      "status": "active",
+      "imperative": "Before a ready signal, owner invitation, or QA dispatch, require a typed certification source proving that the running target serves the exact content/build and applicable fixture/config under test. Docker requires its existing jInfra recreate/currency evidence; an explicitly supported local process requires fresh listener lineage, served-byte binding, and targeted smoke. Replay is required only when UAT-D4 selected replay; otherwise record current-script replay N/A.",
+      "point_of_use": [
+        "before-ready-signal",
+        "before-owner-invite",
+        "before-qa-dispatch"
+      ],
+      "stop_condition": "Stop on missing, malformed, cross-source, forged, stale, or source-mismatched certification; on missing applicable runtime lineage, content/build/fixture/config identity, served-byte binding, or targeted smoke; or when the UAT-D4 replay/current-script disposition is absent.",
+      "required_evidence": [
+        "typed-certification-source-and-receipt",
+        "content-build-and-applicable-fixture-config-identity",
+        "running-container-sentinel-or-local-process-lineage",
+        "runtime-start-after-applicable-build-and-fixture",
+        "served-runtime-binding",
+        "targeted-smoke-result",
+        "workflow-replay-result-or-current-script-na"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "STALE-STACK-LINEAGE",
+          "date": "2026-07-08",
+          "note": "Incidents on 2026-07-05 and 2026-07-08."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.preflight",
+        "option.3",
+        "option.4"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-G1",
+      "status": "active",
+      "imperative": "When a processed owner-feedback receipt, an owner or ticket boss ruling receipt, or an orchestrator verification receipt confirms an accepted behavior outcome absent from or contradictory to current GWT, update canonical uat-scenarios/GWT in that same work unit before fix, test or implementation dispatch, round refresh, re-seal, preparation, or any owner-ready claim; record a successor clause, then run the applicable UAT-R9 drift sweep before re-deriving steps and acceptance wording.",
+      "point_of_use": [
+        "new-owner-input",
+        "confirmation-time-gwt-sync",
+        "before-fix-or-test-dispatch",
+        "before-round-refresh"
+      ],
+      "stop_condition": "Stop when a confirmed behavior outcome lacks its confirmation receipt, current-GWT comparison, or same-work-unit GWT disposition; when changed GWT lacks its successor clause or required UAT-R9 propagation evidence; or when the update is deferred to preparation, close, or a later batch.",
+      "required_evidence": [
+        "commit-or-diff",
+        "quoted-amended-gwt-clause",
+        "derived-step-reference",
+        "confirmation-receipt-and-gwt-disposition",
+        "successor-clause-or-current-clause-citation"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "OWNER-SYNC-2026-07-12",
+          "date": "2026-07-12",
+          "note": "Directive originated 2026-06-12 and was restated four times on 2026-07-12."
+        },
+        {
+          "key": "COM-386-CONFIRMATION-TIME-GWT-SYNC-2026-08-25",
+          "date": "2026-08-25",
+          "note": "Owner requirement: collected feedback or otherwise confirmed behavior updates canonical GWT immediately to prevent downstream drift."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.owner-sync",
+        "option.2",
+        "option.4",
+        "feedback.confirmation-time-gwt-sync",
+        "lifecycle.confirmation-propagation-chain"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-R1",
+      "status": "active",
+      "imperative": "Keep the round header timestamp, time zone, UTC equivalent, and deploy-status statement truthful on every patch.",
+      "point_of_use": [
+        "round-create",
+        "round-patch",
+        "deploy-state-change"
+      ],
+      "stop_condition": "Stop when the host-clock timestamp or runtime deploy truth cannot be established.",
+      "required_evidence": [
+        "host-clock-timestamp",
+        "deploy-status-proof"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "FRESHNESS-108",
+          "date": "2026-07-08",
+          "note": "Round stayed stale after fix #108."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "round.header",
+        "option.4"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-R2",
+      "status": "active",
+      "imperative": "Source every journey row from named scenario and step assets, cite sources above each table and within Journey citations, and do not add a Sources column.",
+      "point_of_use": [
+        "round-compose",
+        "round-patch"
+      ],
+      "stop_condition": "Stop when required source content is absent or a row would have to be invented.",
+      "required_evidence": [
+        "data-sources-links",
+        "scenario-and-step-citations"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "SOURCES-JOURNEY-WALK",
+          "date": "2026-07-11",
+          "note": "Sources-column removal and Journey/Walk contract."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "round.journeys",
+        "option.4"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-R3",
+      "status": "active",
+      "imperative": "Treat missing or wrong intent content as drift: update the owner-owned scenarios first, then derived steps and downstream round content.",
+      "point_of_use": [
+        "missing-source-content",
+        "critic-finding",
+        "round-compose"
+      ],
+      "stop_condition": "Stop downstream composition or dispatch until the upstream intent asset is corrected.",
+      "required_evidence": [
+        "updated-scenario",
+        "updated-derived-steps",
+        "downstream-citation"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "OWNER-SYNC-DRIFT",
+          "date": "2026-07-12",
+          "note": "Owner expectation sync and GWT tightening lineage."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.owner-sync",
+        "option.2",
+        "option.4"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-R4",
+      "status": "active",
+      "imperative": "Maintain separate HOT and COLD journey tables, move rows with readiness changes, and name every Set only by its creation timestamp with time zone.",
+      "point_of_use": [
+        "round-create",
+        "round-patch",
+        "readiness-change"
+      ],
+      "stop_condition": "Stop when a row temperature is ambiguous or a Set uses semantic naming.",
+      "required_evidence": [
+        "hot-and-cold-tables",
+        "timestamp-only-set-name",
+        "same-patch-row-move"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "HOT-COLD-TIMESTAMP-SETS",
+          "date": "2026-07-09",
+          "note": "Two-table split and timestamp-only Sets."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "round.journeys",
+        "round.keys-and-sets"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-R5",
+      "status": "active",
+      "imperative": "Patch the current round in the same work unit whenever readiness, deployment, defect, or intentional behavior changes.",
+      "point_of_use": [
+        "readiness-change",
+        "fix-commit",
+        "deploy",
+        "intentional-ui-change"
+      ],
+      "stop_condition": "Stop the work unit before handoff when the round does not reflect current truth.",
+      "required_evidence": [
+        "same-work-unit-round-diff",
+        "current-deploy-status"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "FRESHNESS-108",
+          "date": "2026-07-08",
+          "note": "Continuous freshness receipt #108."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "round.refresh",
+        "option.4"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-R6",
+      "status": "active",
+      "imperative": "Keep Definitions and Keys & Sets complete, define jargon once, create pill keys for every referenced defect and commit, and use clickable absolute session links where the owner must open a session.",
+      "point_of_use": [
+        "first-reference",
+        "round-create",
+        "round-patch"
+      ],
+      "stop_condition": "Stop when a referenced term, defect, commit, set, or owner-openable session lacks its required lookup entry or link.",
+      "required_evidence": [
+        "definitions-section",
+        "keys-and-sets-section",
+        "clickable-session-links"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "ASSET-LOOKUP-CONTRACT",
+          "date": "2026-07-08",
+          "note": "Definitions, pill keys, and owner-openable session links are mandatory lookup assets."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "round.definitions",
+        "round.keys-and-sets",
+        "option.4"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-R7",
+      "status": "active",
+      "imperative": "Represent every OPEN ledger bug in HOT with readiness and Who, keep known behavior in COLD, and refresh the bug ledger, round, and changed QA steps together after each fix or deploy cycle.",
+      "point_of_use": [
+        "round-refresh",
+        "fix-cycle",
+        "deploy-cycle",
+        "phase-gate"
+      ],
+      "stop_condition": "Stop when an OPEN bug is absent from HOT, a QA leg lacks executable steps, or the two ledgers disagree.",
+      "required_evidence": [
+        "open-ledger-to-hot-map",
+        "who-assignment",
+        "current-step-script",
+        "both-ledgers-diff"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "OPEN-LEDGER-COMPLETE",
+          "date": "2026-07-09",
+          "note": "Repeatable bug-clearing and both-ledgers contract."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.ledger-coverage",
+        "round.journeys",
+        "tracking-artifact"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-R8",
+      "status": "active",
+      "imperative": "Cite relevant NFR IDs on every specific scenario, defect row, or defect-narrative bullet; every reliability-class defect, including durability, recoverability, honest/visible failure, audit traceability, and data integrity, names the NFRs it threatens.",
+      "point_of_use": [
+        "scenario-row-authoring",
+        "defect-row-authoring",
+        "defect-narrative-authoring",
+        "round-refresh"
+      ],
+      "stop_condition": "Stop when a reliability-class row or defect-narrative bullet lacks a threatened NFR, including for data-integrity failures, or a cited NFR is not relevant to its PASS criteria.",
+      "required_evidence": [
+        "round-row-closes-cell",
+        "defect-narrative-nfr-citation",
+        "ticket-nfr-slice-or-matrix"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "HAS-520-19-NFR-520-5-2026-07-12",
+          "date": "2026-07-12",
+          "note": "HAS-520 #19 omitted NFR-520-5 audit traceability."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.nfr-citation",
+        "round.journeys"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-R9",
+      "status": "active",
+      "imperative": "Paste the relevant scenario ID and GWT clauses verbatim into every test-writing dispatch, and require each satisfying test to name its clause and drive the clause's production or user-visible boundary. At gwt-change-drift-sweep, bind the authoritative ruling receipt, superseded and successor clauses, and search seeds derived from removed/replaced copy, codes, status names, affected public identifiers/API names, or scenario/requirement IDs; reconcile only to the cited ruling, never to observed behavior alone.",
+      "point_of_use": [
+        "before-test-authoring-dispatch",
+        "gwt-change-drift-sweep",
+        "critic-regate",
+        "test-return-review"
+      ],
+      "stop_condition": "Stop when bound GWT is absent, paraphrased, contradictory, lacks observable FAIL conditions, or the proposed acceptance test bypasses the named boundary; for gwt-change-drift-sweep, also stop when the ruling receipt, superseded/successor clause pair, search seeds/results, or per-module disposition is missing, or when any expectation is aligned to observed behavior without the cited ruling.",
+      "required_evidence": [
+        "filled-gwt-dispatch-block",
+        "clause-to-test-map",
+        "red-green-boundary-proof",
+        "ruling-cited-unit-integration-drift-sweep-report-when-triggered"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "HAS-520-FIX19-REVISE-2X-2026-07-12",
+          "date": "2026-07-12",
+          "note": "HAS-520 fix19 required two jCritic REVISE rounds after helper-direct and forged-fixture false greens."
+        },
+        {
+          "key": "HAS-617-GWT-DRIFT-SWEEP-2026-08-25",
+          "date": "2026-08-25",
+          "note": "Eleven stale unit/integration expectations in two modules survived behavior rulings until an unrelated lane forced clause-by-clause attribution; localized precursor commit 78b110d7f."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.test-dispatch",
+        "accepted-gwt-dispatch-template",
+        "checklist.owner-sync.gwt-change-drift-sweep"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-T1",
+      "status": "active",
+      "imperative": "Create the ticket-owned current round only by instantiating the controlled template at the canonical ticket-plan path; replace wholesale only at issuance, including when cutting the bundle round, patch in place mid-round when readiness, deploy, or defect truth changes, and treat the round file as canonical over the short chat-format summary.",
+      "point_of_use": [
+        "round-create",
+        "round-issue",
+        "bundle-round-cut",
+        "mid-round-update",
+        "chat-summary-compose"
+      ],
+      "stop_condition": "Stop when the target path, template provenance, replacement-versus-patch mode, or round-file-over-chat precedence is wrong.",
+      "required_evidence": [
+        "canonical-ticket-path",
+        "template-provenance",
+        "materialization-mode",
+        "round-file-link-in-chat-summary"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "TICKET-OWNED-ROUND",
+          "date": "2026-07-09",
+          "note": "Ticket-prefixed plan-folder ownership."
+        },
+        {
+          "key": "COM-249-SLICE-C-F06-F07",
+          "date": "2026-07-12",
+          "note": "F-06 round-file precedence over chat format and F-07 provenance lineage."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "asset-map.round",
+        "option.4",
+        "round.delivery-precedence"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-D1",
+      "status": "active",
+      "imperative": "Select QA transport with the canonical health-probed ladder and dispatch jQATester only with all 13 handoff fields filled or explicitly marked not applicable.",
+      "point_of_use": [
+        "before-qa-dispatch",
+        "blocked-qa-retry"
+      ],
+      "stop_condition": "Stop when transport health is unprobed, the handoff is malformed, or required run-specific facts are missing.",
+      "required_evidence": [
+        "transport-decision-json",
+        "completed-13-field-handoff",
+        "scenario-gwt-step-binding"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "QA15-QA21",
+          "date": "2026-07-10",
+          "note": "QA15 2026-07-08; QA16/QA17 2026-07-09; QA21 2026-07-10."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.qa-dispatch",
+        "option.3",
+        "qa-handoff-template"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-D2",
+      "status": "active",
+      "imperative": "For combinatorial fixes, enumerate the full permutation matrix in deterministic tests on captured production-shape data, add capture-replay/projection fixtures that pin write-path to read-path behavior, and reserve jQATester for a handful of journey-shape spot checks.",
+      "point_of_use": [
+        "verification-design",
+        "before-qa-dispatch"
+      ],
+      "stop_condition": "Stop when QA is asked to mechanically enumerate a matrix larger than about 10 permutations, deterministic tests rely on synthetic symmetric fixtures, or capture-replay/projection coverage is absent.",
+      "required_evidence": [
+        "deterministic-permutation-tests",
+        "captured-production-shape-fixture",
+        "capture-replay-projection-fixture",
+        "bounded-journey-spot-checks"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "COVERAGE-ILLUSION-2026-07-12",
+          "date": "2026-07-12",
+          "note": "Fake test anchors x2, telemetry extras-only test, and forged connectivity_repair fixture."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.layered-verification",
+        "option.2",
+        "option.3"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-D3",
+      "status": "active",
+      "imperative": "Before any Layer-2 semantic judgment dispatch, bind a scenario-specific, verbatim `judgment_rubric` to the exact scenario ID; never dispatch semantic judgment against a defect narrative or paraphrased expectation.",
+      "point_of_use": [
+        "before-semantic-judgment-dispatch",
+        "layer-2-dispatch",
+        "blocked-semantic-retry"
+      ],
+      "stop_condition": "BLOCKED: missing scenario judgment contract when the dispatch lacks a scenario-bound, verbatim judgment_rubric.",
+      "required_evidence": [
+        "scenario-bound-judgment-rubric",
+        "verbatim-canonical-gwt-binding",
+        "probe-set-composition-record"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "COM-307-SEMANTIC-DISPATCH-RUBRIC-GAP",
+          "date": "2026-07-26",
+          "note": "Phase 2 governance gap: Layer-2 semantic judgment dispatch lacked its own scenario-bound rubric contract."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.semantic-dispatch",
+        "semantic-judgment-dispatch-template"
+      ],
+      "supersedes": []
+    },
+    {
+      "id": "UAT-D4",
+      "status": "active",
+      "imperative": "Before selecting a UAT verification instrument, determine the behavior lock. YES permits deterministic replay; NO/UNKNOWN selects a current-script jQATester walk first.",
+      "point_of_use": [
+        "pre-merge",
+        "post-owner-acceptance",
+        "round close"
+      ],
+      "stop_condition": "Stop when behavior lock is NO or UNKNOWN and the current-script jQATester walk has not been selected and evidenced, or when the decision or current-script evidence is absent.",
+      "required_evidence": [
+        "behavior-lock-decision",
+        "current-script-jqatester-walk-or-yes-lock",
+        "selected-instrument-record"
+      ],
+      "receipt_pointers": [
+        {
+          "key": "COM-376-UAT-D4-BEHAVIOR-LOCK",
+          "date": "2026-08-20",
+          "note": "Behavior lock selects a current-script jQATester walk before deterministic replay when lock is NO or UNKNOWN."
+        }
+      ],
+      "applies_to": [
+        "*"
+      ],
+      "process_refs": [
+        "checklist.instrument-selection",
+        "option.3"
+      ],
+      "supersedes": []
+    }
+  ]
+}

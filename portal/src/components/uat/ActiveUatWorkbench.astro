@@ -1,0 +1,1751 @@
+---
+// COM-391 Phase 4 — runtime-only Active UAT owner workbench.
+// Canonical round content is rendered into a structurally separate, control-free
+// region. Only feedback entries are mutable, and no client state is authority.
+---
+<section class="mt-8 min-w-0" aria-labelledby="active-uat-heading">
+  <header class="border-b-2 border-jw-fg pb-5">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div class="min-w-0">
+        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-jw-muted">Active review ledger</p>
+        <h1 id="active-uat-heading" class="mt-1 text-2xl font-bold sm:text-3xl">UAT feedback queue</h1>
+        <p class="mt-2 max-w-3xl text-sm text-jw-muted">Scan rounds ready for attention, open one, then record feedback journey by journey.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <div data-uat-list-message class="rounded-full border border-jw-line bg-jw-surface-muted px-3 py-1.5 text-sm font-semibold text-jw-muted">Loading active rounds…</div>
+        <button type="button" data-uat-refresh-list class="min-h-11 rounded border border-jw-blue bg-jw-surface px-4 py-2 text-sm font-bold text-jw-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue">Refresh queue</button>
+      </div>
+    </div>
+  </header>
+
+  <p data-uat-live role="status" aria-live="polite" class="sr-only">Loading registered active UAT rounds.</p>
+
+  <section data-uat-date-bands class="mt-6 min-w-0" aria-labelledby="round-list-heading">
+    <h2 id="round-list-heading" class="sr-only">Rounds ready for attention</h2>
+    <ul data-uat-round-list class="m-0 list-none space-y-6 p-0" aria-label="Active UAT rounds grouped by feedback date"></ul>
+    <div data-uat-registration-warnings class="mt-4 hidden rounded border border-jw-med bg-jw-med-soft p-3 text-sm" role="status"></div>
+  </section>
+
+  <section data-uat-selection-empty class="mt-8 rounded border border-dashed border-jw-line bg-jw-surface p-6 text-center">
+    <h2 class="text-lg font-semibold">Choose a round from the queue</h2>
+    <p class="mt-2 text-sm text-jw-muted">Round details stay compact until you ask for them. This page never creates or edits registrations.</p>
+  </section>
+
+  <section data-uat-round-loading class="mt-8 hidden rounded border border-jw-line bg-jw-surface p-6" aria-label="Loading selected round">
+    <p class="text-sm text-jw-muted">Loading the canonical round and feedback projection…</p>
+  </section>
+
+  <div data-uat-alert data-uat-autosave-alert tabindex="-1" role="alert" class="mt-6 hidden rounded border-2 border-jw-high bg-jw-high-soft p-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-high">
+    <h2 data-uat-alert-title class="text-base font-bold"></h2>
+    <p data-uat-alert-message class="mt-1 text-sm"></p>
+    <div data-uat-alert-actions class="mt-3 flex flex-wrap gap-2"></div>
+  </div>
+
+  <div data-uat-workbench class="mt-8 hidden min-w-0 space-y-6">
+    <header class="rounded border border-jw-line bg-jw-surface p-4 shadow-sm sm:p-5">
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-jw-muted">Selected round</p>
+          <h2 data-uat-round-title class="mt-1 break-words text-xl font-bold"></h2>
+          <a data-uat-app-url-link class="mt-2 inline-block break-all text-sm font-semibold text-jw-blue underline decoration-2 underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue"></a>
+        </div>
+        <div class="flex flex-wrap gap-2 text-xs font-bold">
+          <span data-uat-package-chip class="rounded-full border border-jw-info bg-jw-info-soft px-3 py-1"><span class="sr-only">Package state: </span><span data-uat-package-state></span></span>
+          <span data-uat-processing-chip class="rounded-full border border-jw-line bg-jw-surface-muted px-3 py-1"><span class="sr-only">Feedback state: </span><span data-uat-processing-state></span></span>
+          <span data-uat-journey-count class="rounded-full border border-jw-line bg-jw-surface px-3 py-1"></span>
+        </div>
+      </div>
+    </header>
+
+    <section data-uat-round-summary class="min-w-0 rounded border-2 border-jw-info bg-jw-info-soft p-4 sm:p-5" aria-labelledby="canonical-round-heading">
+      <div data-uat-current-round class="min-w-0">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.14em] text-jw-info">Canonical · immutable</p>
+            <h2 id="canonical-round-heading" class="mt-1 text-lg font-bold">Read-only canonical current round</h2>
+          </div>
+          <span class="rounded-full border border-jw-info bg-jw-surface px-3 py-1 text-xs font-bold text-jw-info">READ ONLY</span>
+        </div>
+        <p data-uat-round-digest class="mt-3 max-w-4xl text-sm leading-6 text-jw-fg"></p>
+        <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+          <div><dt class="font-medium text-jw-muted">Package state</dt><dd data-uat-package-state-summary class="mt-0.5 font-semibold"></dd></div>
+          <div><dt class="font-medium text-jw-muted">Feedback state</dt><dd data-uat-processing-state-summary class="mt-0.5 font-semibold"></dd></div>
+          <div><dt class="font-medium text-jw-muted">Journeys</dt><dd data-uat-journey-count-summary class="mt-0.5 font-semibold"></dd></div>
+        </dl>
+      </div>
+
+      <div class="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-stretch">
+        <article data-uat-identity-details class="min-w-0 flex-1 rounded border border-jw-info/40 bg-jw-surface p-3">
+          <p class="text-xs font-bold uppercase tracking-[0.12em] text-jw-muted">Canonical identity</p>
+          <dl class="mt-2 grid min-w-0 gap-2 text-sm sm:grid-cols-3">
+            <div class="min-w-0"><dt class="text-xs text-jw-muted">Artifact</dt><dd data-uat-current-path class="mt-0.5 truncate font-mono text-xs"></dd></div>
+            <div class="min-w-0"><dt class="text-xs text-jw-muted">Round</dt><dd data-uat-current-sha class="mt-0.5 font-mono text-xs"></dd></div>
+            <div class="min-w-0"><dt class="text-xs text-jw-muted">Projection</dt><dd data-uat-projection-digest class="mt-0.5 font-mono text-xs"></dd></div>
+          </dl>
+        </article>
+        <button type="button" data-uat-source-details data-uat-open-source class="min-h-11 shrink-0 rounded border border-jw-blue bg-jw-surface px-4 py-3 text-sm font-bold text-jw-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue">Exact source</button>
+      </div>
+    </section>
+
+    <dialog data-uat-source-dialog aria-labelledby="canonical-source-dialog-heading" class="m-auto max-h-[calc(100vh-2rem)] w-[min(64rem,calc(100%-2rem))] max-w-full rounded border border-jw-line bg-jw-surface p-0 text-jw-fg shadow-2xl backdrop:bg-jw-fg/60">
+      <div class="flex items-center justify-between gap-4 border-b border-jw-line px-4 py-3 sm:px-5">
+        <div class="min-w-0">
+          <p class="text-xs font-bold uppercase tracking-[0.12em] text-jw-muted">Read-only canonical artifact</p>
+          <h2 id="canonical-source-dialog-heading" class="mt-1 text-lg font-bold">Exact source</h2>
+        </div>
+        <button type="button" data-uat-close-source autofocus class="min-h-11 rounded border border-jw-line px-4 py-2 text-sm font-bold text-jw-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-jw-blue">Close</button>
+      </div>
+      <pre class="max-h-[calc(100vh-8rem)] max-w-full overflow-x-auto overflow-y-auto p-4 font-mono text-xs leading-5 whitespace-pre-wrap [overflow-wrap:anywhere] sm:p-5"><code data-uat-current-round-source></code></pre>
+    </dialog>
+
+    <section data-uat-feedback-region data-uat-journey-plan-details class="min-w-0 rounded border-2 border-jw-fg bg-jw-surface p-4 sm:p-5" aria-labelledby="feedback-heading">
+      <div class="flex flex-wrap items-start justify-between gap-3 border-b border-jw-line pb-4">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.14em] text-jw-muted">Journey plan · feedback to record</p>
+          <h2 id="feedback-heading" class="mt-1 text-lg font-bold">Work through the numbered steps</h2>
+          <p class="mt-1 text-sm text-jw-muted">Feedback is stored automatically when you leave text fields or change controls. Submit only when the complete feedback is ready for the ticket agent.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" data-uat-practice-reset class="hidden min-h-11 rounded border border-jw-med bg-jw-med-soft px-4 py-2 text-sm font-bold text-jw-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-med">Reset practice round</button>
+          <span data-uat-step-counts class="rounded-full border border-jw-line bg-jw-surface-muted px-3 py-1 text-xs font-bold text-jw-muted"></span>
+          <span data-uat-dirty-indicator class="rounded-full border border-jw-line bg-jw-surface-muted px-3 py-1 text-xs font-bold">No unsaved changes</span>
+        </div>
+      </div>
+
+      <div data-uat-practice-banner class="mt-4 hidden rounded border-2 border-jw-med bg-jw-med-soft p-4" role="status">
+        <h3 class="font-bold">Safe practice round</h3>
+        <p class="mt-1 text-sm">This synthetic round exercises the real feedback workflow, but submitting it never sends feedback to a ticket agent. Reset discards the practice artifacts and rematerializes a clean round.</p>
+      </div>
+
+      <div data-uat-processed class="mt-4 hidden rounded border border-jw-info bg-jw-info-soft p-4">
+        <h3 class="font-bold">Feedback processed</h3>
+        <p class="mt-1 text-sm"><code>/test uat feedback</code> has processed this canonical feedback artifact. Results are displayed read-only; Save is unavailable.</p>
+        <div data-uat-processed-entries class="mt-4 grid gap-4 md:grid-cols-2"></div>
+      </div>
+
+      <form data-uat-feedback-form class="mt-4" novalidate>
+        <p data-uat-draft-restored class="mb-4 hidden rounded border border-jw-info bg-jw-info-soft p-3 text-sm font-semibold text-jw-info" role="status"></p>
+        <p data-uat-autosave-live class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+        <div data-uat-validation-summary tabindex="-1" role="alert" class="hidden rounded border-2 border-jw-high bg-jw-high-soft p-4">
+          <h3 class="font-bold">Complete the highlighted feedback</h3>
+          <ul data-uat-validation-list class="mt-2 list-disc space-y-1 pl-5 text-sm"></ul>
+        </div>
+        <div data-uat-feedback-fieldsets class="min-w-0 max-w-full space-y-8"></div>
+        <div class="sticky bottom-0 z-10 mt-6 -mx-4 border-t-2 border-jw-fg bg-jw-surface/95 px-4 py-4 shadow-[0_-10px_24px_rgba(32,33,36,0.08)] backdrop-blur-sm sm:-mx-5 sm:px-5">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p data-uat-save-state role="status" aria-live="polite" class="text-sm font-semibold text-jw-muted">Submit when the complete feedback is ready.</p>
+            <button type="submit" data-uat-save disabled class="min-h-11 rounded bg-jw-blue px-5 py-2.5 text-sm font-bold text-jw-on-accent disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue">Submit feedback</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </div>
+</section>
+
+<script>
+  import {
+    UatApiError,
+    allowedDispositions,
+    buildFeedbackCommand,
+    cloneEntries,
+    createFeedbackController,
+    deriveFeedbackUi,
+    describeFailure,
+    fetchRoundDetail,
+    fetchRoundList,
+    groupUatSummariesByGeneratedDate,
+    clearLocalDraft,
+    persistLocalDraft,
+    restoreLocalDraft,
+    resolveEffectiveAppLink,
+    resolveLinkedScenarioBlocks,
+    resolveStepKnownItems,
+    resetPracticeRound,
+    saveFeedback,
+    buildRoundStatusCommand,
+    updateRoundStatus,
+    ROUND_STATUS_OPTIONS,
+    severitiesFromResultContract,
+    submitFeedback,
+    transitionFeedbackController,
+    walkStopCommandValue,
+    type ActiveRoundView,
+    type FeedbackControllerState,
+    type FeedbackEntries,
+    type FeedbackEntry,
+    type FeedbackUpdateCommand,
+    type Journey,
+    type WalkStop,
+    type RoundStatus,
+    type RoundSummary,
+  } from "../../lib/uat-rounds";
+  import {
+    createFieldSaveState,
+    transitionFieldSave,
+    type FieldSaveEvent,
+    type FieldSaveState,
+  } from "../../lib/uat-field-save-indicator";
+
+  const query = <T extends Element>(selector: string) => {
+    const node = document.querySelector<T>(selector);
+    if (!node) throw new Error(`Active UAT shell is missing ${selector}`);
+    return node;
+  };
+  const list = query<HTMLUListElement>("[data-uat-round-list]");
+  const listMessage = query<HTMLElement>("[data-uat-list-message]");
+  const warnings = query<HTMLElement>("[data-uat-registration-warnings]");
+  const empty = query<HTMLElement>("[data-uat-selection-empty]");
+  const loading = query<HTMLElement>("[data-uat-round-loading]");
+  const workbench = query<HTMLElement>("[data-uat-workbench]");
+  const alertPanel = query<HTMLElement>("[data-uat-alert]");
+  const alertTitle = query<HTMLElement>("[data-uat-alert-title]");
+  const alertMessage = query<HTMLElement>("[data-uat-alert-message]");
+  const alertActions = query<HTMLElement>("[data-uat-alert-actions]");
+  const form = query<HTMLFormElement>("[data-uat-feedback-form]");
+  const fieldsets = query<HTMLElement>("[data-uat-feedback-fieldsets]");
+  const processed = query<HTMLElement>("[data-uat-processed]");
+  const processedEntries = query<HTMLElement>("[data-uat-processed-entries]");
+  const saveButton = query<HTMLButtonElement>("[data-uat-save]");
+  const practiceBanner = query<HTMLElement>("[data-uat-practice-banner]");
+  const practiceReset = query<HTMLButtonElement>("[data-uat-practice-reset]");
+  const saveState = query<HTMLElement>("[data-uat-save-state]");
+  const live = query<HTMLElement>("[data-uat-live]");
+  const autosaveLive = query<HTMLElement>("[data-uat-autosave-live]");
+  const draftRestoredNotice = query<HTMLElement>("[data-uat-draft-restored]");
+  const dirtyIndicator = query<HTMLElement>("[data-uat-dirty-indicator]");
+  const validationSummary = query<HTMLElement>("[data-uat-validation-summary]");
+  const validationList = query<HTMLElement>("[data-uat-validation-list]");
+  const stepCounts = query<HTMLElement>("[data-uat-step-counts]");
+  const sourceDialog = query<HTMLDialogElement>("[data-uat-source-dialog]");
+  const sourceText = query<HTMLElement>("[data-uat-current-round-source]");
+  const appUrlLink = query<HTMLAnchorElement>("[data-uat-app-url-link]");
+
+  let view: ActiveRoundView | null = null;
+  let controller: FeedbackControllerState | null = null;
+  let selectedRound = "";
+  let stopUndoDraft: ReturnType<typeof cloneEntries> | null = null;
+  type AutosaveSnapshot = {
+    draft: FeedbackEntries;
+    walkStop: WalkStop | null | undefined;
+    revisions: Map<string, number>;
+    values: Map<string, string>;
+    command?: FeedbackUpdateCommand;
+  };
+
+  let committedDraft: FeedbackEntries | null = null;
+  let committedWalkStop: WalkStop | null | undefined;
+  let pendingAutosave: AutosaveSnapshot | null = null;
+  let exactRetrySnapshot: AutosaveSnapshot | null = null;
+  let exactRetryReady = false;
+  let autosaveRunning = false;
+  let autosaveWaiters: Array<() => void> = [];
+  let draftPersistenceFailed = false;
+  let savingSince = 0;
+  let aggregateSlowTimer: ReturnType<typeof setTimeout> | null = null;
+  let lastSubmittedDigest: string | null = null;
+  const fieldSaveStates = new Map<string, FieldSaveState>();
+  const fieldTimers = new Map<string, { saving?: ReturnType<typeof setTimeout>; hold?: ReturnType<typeof setTimeout>; fade?: ReturnType<typeof setTimeout> }>();
+
+  const setText = (selector: string, value: string) => { query<HTMLElement>(selector).textContent = value; };
+  const make = <K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = "") => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  };
+  const button = (label: string, action: () => void, dataAttribute?: string) => {
+    const node = make("button", "min-h-11 rounded border border-jw-line bg-jw-surface px-4 py-2 text-sm font-bold text-jw-blue underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue", label);
+    node.type = "button";
+    if (dataAttribute) node.setAttribute(dataAttribute, "");
+    node.addEventListener("click", action);
+    return node;
+  };
+  const announce = (message: string) => { live.textContent = message; };
+  const uiState = () => {
+    if (!controller || !view) return null;
+    return deriveFeedbackUi(controller, view.current_round.journeys.flatMap((journey) => journey.steps.map((step) => step.step_id)));
+  };
+  const dirty = () => uiState()?.dirty ?? false;
+
+  // A/C 6: unsent edits outlive a refresh or a browser restart, but they stay a
+  // local draft bound to the round and baseline they were written against.
+  function draftStorage() {
+    try {
+      const storage = globalThis.localStorage;
+      return storage ? storage : null;
+    } catch {
+      return null; // private mode or blocked storage: drafts degrade, the round still works
+    }
+  }
+
+  function rememberDraft() {
+    if (!controller || !dirty()) {
+      draftPersistenceFailed = false;
+      return true;
+    }
+    const storage = draftStorage();
+    if (!storage) {
+      draftPersistenceFailed = true;
+      return false;
+    }
+    draftPersistenceFailed = persistLocalDraft(storage, controller, new Date().toISOString()) === null;
+    return !draftPersistenceFailed;
+  }
+
+  function recoverDraft() {
+    const storage = draftStorage();
+    if (!storage || !controller) return "none" as const;
+    const outcome = restoreLocalDraft(storage, controller);
+    if (outcome.status === "restored") controller = outcome.state;
+    return outcome.status;
+  }
+
+  function updateDraftRestoreNotice(status: ReturnType<typeof recoverDraft>) {
+    draftRestoredNotice.classList.add("hidden");
+    draftRestoredNotice.textContent = "";
+    if (status === "restored") {
+      draftRestoredNotice.textContent = "Unsaved draft restored";
+      draftRestoredNotice.classList.remove("hidden");
+    } else if (status === "stale-baseline") {
+      draftRestoredNotice.textContent = "Saved local draft could not be restored because newer feedback is available.";
+      draftRestoredNotice.classList.remove("hidden");
+    }
+  }
+
+  function hasUnpersistableUnloadRisk() {
+    return draftPersistenceFailed
+      || autosaveRunning
+      || pendingAutosave !== null
+      || exactRetrySnapshot !== null
+      || [...fieldSaveStates.values()].some((state) => state.phase === "queued" || state.phase === "saving" || state.phase === "failed");
+  }
+
+  function aggregateAutosaveState() {
+    const states = [...fieldSaveStates.values()];
+    if (states.some((state) => state.phase === "failed")) return "failed" as const;
+    if (states.some((state) => state.phase === "queued" || state.phase === "saving") || autosaveRunning) {
+      return savingSince && Date.now() - savingSince >= 5_000 ? "still-saving" as const : "saving" as const;
+    }
+    if (dirty() || states.some((state) => state.phase === "editing")) return "editing" as const;
+    return "idle" as const;
+  }
+
+  function updateSaveAvailability(message?: string) {
+    const ui = uiState();
+    if (!ui || !controller) return;
+    saveButton.disabled = controller.saving || !view?.capabilities.feedback_update;
+    saveButton.textContent = controller.saving ? "Submitting feedback…" : "Submit feedback";
+    const aggregate = aggregateAutosaveState();
+    const aggregateCopy = {
+      failed: "Some changes aren’t saved",
+      "still-saving": "Still saving…",
+      saving: "Saving changes…",
+      editing: "Unsaved changes",
+      idle: "No unsaved changes",
+    }[aggregate];
+    dirtyIndicator.textContent = aggregateCopy;
+    dirtyIndicator.className = aggregate === "failed"
+      ? "rounded-full border border-jw-high bg-jw-high-soft px-3 py-1 text-xs font-bold text-jw-high"
+      : aggregate === "still-saving"
+        ? "rounded-full border border-jw-info bg-jw-info-soft px-3 py-1 text-xs font-bold text-jw-info"
+        : aggregate === "editing"
+          ? "rounded-full border border-jw-med bg-jw-med-soft px-3 py-1 text-xs font-bold text-jw-med"
+          : "rounded-full border border-jw-line bg-jw-surface-muted px-3 py-1 text-xs font-bold text-jw-muted";
+    if ((aggregate === "saving" || aggregate === "still-saving") && !aggregateSlowTimer) {
+      aggregateSlowTimer = setTimeout(() => { aggregateSlowTimer = null; updateSaveAvailability(); }, 5_000);
+    } else if (aggregate !== "saving" && aggregate !== "still-saving" && aggregateSlowTimer) {
+      clearTimeout(aggregateSlowTimer); aggregateSlowTimer = null;
+    }
+    if (message) saveState.textContent = message;
+    else if (controller.saving) saveState.textContent = "Submitting feedback…";
+    else if (lastSubmittedDigest === view?.feedback.sha256) saveState.textContent = view?.fixture ? "Practice feedback receipt recorded; no ticket agent was notified." : "Feedback submitted to the ticket agent.";
+    else if (!ui.validation.valid) saveState.textContent = "Complete the highlighted feedback before submitting.";
+    else saveState.textContent = "Submit when the complete feedback is ready.";
+  }
+
+  function hideAlert() {
+    alertPanel.classList.add("hidden");
+    alertActions.replaceChildren();
+  }
+
+  async function copyDraft() {
+    const text = JSON.stringify({ round_review_id: selectedRound, step_entries: controller?.draft ?? {}, walk_stop: controller?.walkStop ?? null }, null, 2);
+    try {
+      await navigator.clipboard.writeText(text);
+      announce("Complete local feedback draft copied to the clipboard.");
+      saveState.textContent = "Draft copied";
+    } catch {
+      const area = make("textarea", "mt-3 min-h-44 w-full rounded border border-jw-line p-3 font-mono text-xs");
+      area.value = text;
+      area.setAttribute("aria-label", "Complete local feedback draft to copy");
+      alertActions.append(area);
+      area.focus();
+      area.select();
+      announce("Clipboard access was unavailable. The complete draft is selected for manual copy.");
+    }
+  }
+
+  function showFailure(code: string, focus = true) {
+    const failure = describeFailure(code);
+    alertTitle.textContent = failure.title;
+    alertMessage.textContent = failure.message;
+    alertPanel.dataset.uatState = failure.state;
+    if (failure.state === "stale-feedback" || failure.state === "stale-round") alertPanel.setAttribute("data-uat-stale", "");
+    else alertPanel.removeAttribute("data-uat-stale");
+    alertActions.replaceChildren();
+    if (["stale-feedback", "stale-round", "processed"].includes(failure.state)) {
+      if (dirty()) alertActions.append(button("Copy my draft", () => void copyDraft(), "data-uat-copy-draft"));
+      alertActions.append(button("Reload latest", () => void reloadLatest(), "data-uat-reload-latest"));
+      if (failure.state === "processed") setFieldControlsDisabled(true);
+    }
+    if (failure.state === "offline" || failure.state === "write-error") {
+      alertActions.append(button("Retry autosave", () => void retryAutosave(), "data-uat-retry-autosave"));
+      if (dirty()) alertActions.append(button("Copy my draft", () => void copyDraft(), "data-uat-copy-draft"));
+    }
+    if (failure.state === "commit-uncertain") {
+      alertActions.append(button("Retry exact autosave", () => void retryExactAutosave(), "data-uat-retry-exact-autosave"));
+      alertActions.append(button("Copy my draft", () => void copyDraft(), "data-uat-copy-draft"));
+    }
+    alertPanel.classList.remove("hidden");
+    updateSaveAvailability();
+    if (focus) {
+      const target = uiState()?.focusTarget;
+      if (target === "validation-summary") {
+        validationList.replaceChildren(make("li", "", failure.message));
+        validationSummary.classList.remove("hidden");
+        validationSummary.focus();
+      } else alertPanel.focus();
+    }
+  }
+
+  function setSelectOptions(control: HTMLSelectElement, values: readonly string[], selected: string, unavailableLabel?: string) {
+    if (!values.length && unavailableLabel) {
+      const option = make("option", "", unavailableLabel);
+      option.value = "";
+      option.selected = true;
+      control.replaceChildren(option);
+      control.dataset.uatUnavailable = "true";
+      control.disabled = true;
+      return;
+    }
+    const options = values[0] === "" ? values : ["", ...values];
+    control.replaceChildren(...options.map((value) => {
+      const option = make("option", "", value || "Choose…");
+      option.value = value;
+      option.selected = value === selected;
+      return option;
+    }));
+    delete control.dataset.uatUnavailable;
+    control.disabled = false;
+  }
+
+  function selectControl(values: readonly string[], selected: string, unavailableLabel?: string) {
+    const control = document.createElement("select");
+    setSelectOptions(control, values, selected, unavailableLabel);
+    return control;
+  }
+
+  function assessmentTone(assessment: string) {
+    if (assessment === "PASS" || assessment === "ALIGNED") return {
+      card: "border-jw-status-pass bg-jw-status-pass-soft",
+      badge: "border-jw-status-pass bg-jw-status-pass-soft text-jw-status-pass",
+      label: "PASS",
+      state: "pass",
+    };
+    if (assessment === "FAIL" || assessment === "OBSERVED_FAILURE") return {
+      card: "border-jw-status-fail bg-jw-status-fail-soft",
+      badge: "border-jw-status-fail bg-jw-status-fail-soft text-jw-status-fail",
+      label: "FAIL",
+      state: "fail",
+    };
+    if (assessment === "BLOCKED" || assessment === "NOT_OBSERVED") return {
+      card: "border-jw-status-caution bg-jw-status-caution-soft",
+      badge: "border-jw-status-caution bg-jw-status-caution-soft text-jw-status-caution",
+      label: assessment === "BLOCKED" ? "BLOCKED" : "NOT OBSERVED",
+      state: assessment === "BLOCKED" ? "blocked" : "not-observed",
+    };
+    if (assessment === "NOT_APPLICABLE") return {
+      card: "border-jw-status-na bg-jw-status-na-soft",
+      badge: "border-jw-status-na bg-jw-status-na-soft text-jw-status-na",
+      label: "N/A",
+      state: "not-applicable",
+    };
+    return {
+      card: "border-jw-line bg-jw-surface-muted",
+      badge: "border-jw-line bg-jw-surface text-jw-muted",
+      label: "NOT ASSESSED",
+      state: "not-assessed",
+    };
+  }
+
+  function updateJourneyFeedbackSummary(journeyId: string) {
+    const ui = uiState();
+    const journey = view?.current_round.journeys.find((item) => item.journey_id === journeyId);
+    const summary = fieldsets.querySelector<HTMLElement>(`[data-uat-journey="${CSS.escape(journeyId)}"] [data-uat-journey-feedback-summary]`);
+    if (!ui || !journey || !summary) return;
+    const states = journey.steps.map((step) => ui.cardStates[step.step_id]);
+    const green = states.filter((state) => state === "green").length;
+    const yellow = states.filter((state) => state === "yellow").length;
+    const gray = states.filter((state) => state === "gray").length;
+    summary.textContent = `${green} complete · ${yellow} in progress · ${gray} untouched`;
+  }
+
+  function updateStepCounts() {
+    const ui = uiState();
+    if (!ui) return;
+    const states = Object.values(ui.cardStates);
+    const green = states.filter((state) => state === "green").length;
+    const yellow = states.filter((state) => state === "yellow").length;
+    const gray = states.filter((state) => state === "gray").length;
+    stepCounts.textContent = `${states.length} steps · ${green} complete · ${yellow} in progress · ${gray} untouched`;
+  }
+
+  function updateStepCard(stepId: string) {
+    const ui = uiState();
+    const entry = controller?.draft[stepId];
+    const card = fieldsets.querySelector<HTMLElement>(`[data-uat-step-card="${CSS.escape(stepId)}"]`);
+    if (!ui || !entry || !card) return;
+    const tone = assessmentTone(entry.assessment);
+    card.dataset.uatStepState = tone.state;
+    card.setAttribute("data-uat-card-assessment", entry.assessment || "UNSET");
+    card.className = `min-w-0 max-w-full overflow-hidden rounded border-2 ${tone.card}`;
+    const badge = card.querySelector<HTMLElement>("[data-uat-step-state]");
+    if (badge) {
+      badge.textContent = tone.label;
+      badge.className = `rounded-full border px-2.5 py-1 text-xs font-bold ${tone.badge}`;
+    }
+    const filled = [entry.assessment, entry.finding_severity, entry.finding_disposition, entry.observed, entry.comment].filter(Boolean).length;
+    const count = card.querySelector<HTMLElement>("[data-uat-step-field-count]");
+    if (count) count.textContent = `${filled}/5 feedback fields`;
+    updateStepCounts();
+  }
+
+  function applyInlineStepValidation(stepId: string) {
+    if (!controller || !view) return;
+    const errors = deriveFeedbackUi(controller, view.current_round.journeys.flatMap((journey) => journey.steps.map((step) => step.step_id))).validation.errors;
+    fieldsets.querySelectorAll<HTMLElement>(`[data-uat-step-card="${CSS.escape(stepId)}"] [data-uat-field-error]`).forEach((error) => {
+      const control = error.previousElementSibling as HTMLElement | null;
+      if (control) clearFieldError(control);
+    });
+    for (const [key, message] of Object.entries(errors)) {
+      if (!key.startsWith(`${stepId}-`)) continue;
+      const error = fieldsets.querySelector<HTMLElement>(`[data-uat-field-error="${CSS.escape(key)}"]`);
+      const control = error?.previousElementSibling as HTMLElement | null;
+      if (!control || !error) continue;
+      control.setAttribute("aria-invalid", "true");
+      control.setAttribute("aria-describedby", error.id);
+      error.textContent = message;
+      error.classList.remove("hidden");
+    }
+  }
+
+  const feedbackFieldLabels: Record<keyof FeedbackEntry, string> = {
+    complete: "Step complete",
+    assessment: "Assessment",
+    finding_severity: "Finding severity",
+    finding_disposition: "Finding disposition",
+    observed: "What you observed",
+    comment: "Additional comment",
+  };
+  const walkStopSaveKey = "walk-stop";
+
+  function savedFieldKey(stepId: string, field: keyof FeedbackEntry) {
+    return `${stepId}:${field}`;
+  }
+
+  function fieldValue(entry: FeedbackEntry, field: keyof FeedbackEntry) {
+    return field === "complete" ? String(entry.complete) : entry[field];
+  }
+
+  function parseFieldKey(key: string): [string, keyof FeedbackEntry] | null {
+    const split = key.lastIndexOf(":");
+    return split < 0 ? null : [key.slice(0, split), key.slice(split + 1) as keyof FeedbackEntry];
+  }
+
+  function cancelFieldTimers(key: string) {
+    const timers = fieldTimers.get(key);
+    if (!timers) return;
+    if (timers.saving) clearTimeout(timers.saving);
+    if (timers.hold) clearTimeout(timers.hold);
+    if (timers.fade) clearTimeout(timers.fade);
+    fieldTimers.delete(key);
+  }
+
+  function describedBy(control: HTMLElement, id: string, add: boolean) {
+    const ids = new Set((control.getAttribute("aria-describedby") ?? "").split(/\s+/).filter(Boolean));
+    if (add) ids.add(id); else ids.delete(id);
+    if (ids.size) control.setAttribute("aria-describedby", [...ids].join(" "));
+    else control.removeAttribute("aria-describedby");
+  }
+
+  function renderFieldSaveState(key: string) {
+    const state = fieldSaveStates.get(key);
+    const shell = fieldsets.querySelector<HTMLElement>(`[data-uat-field-shell="${CSS.escape(key)}"]`);
+    const visual = fieldsets.querySelector<HTMLElement>(`[data-uat-field-save-visual="${CSS.escape(key)}"]`);
+    const help = fieldsets.querySelector<HTMLElement>(`[data-uat-field-save-help="${CSS.escape(key)}"]`);
+    if (!state || !visual) return;
+    visual.dataset.state = state.phase;
+    visual.textContent = state.visualText;
+    visual.classList.remove("text-jw-muted", "text-jw-low", "text-jw-high");
+    if (state.phase === "saving") visual.classList.add("text-jw-muted");
+    if (state.phase === "saved" || state.phase === "fading") visual.classList.add("text-jw-low");
+    if (state.phase === "failed") visual.classList.add("text-jw-high");
+    if (shell) {
+      if (state.phase === "queued" || state.phase === "saving") shell.setAttribute("aria-busy", "true");
+      else shell.removeAttribute("aria-busy");
+    }
+    if (help) {
+      const storageAvailable = Boolean(draftStorage());
+      help.textContent = state.phase === "failed"
+        ? storageAvailable
+          ? "This change wasn’t saved. Your work is still in this browser."
+          : "This change wasn’t saved. Your work is still on this page. Do not close or refresh it."
+        : "";
+      help.classList.toggle("text-jw-high", state.phase === "failed");
+      const control = shell?.querySelector<HTMLElement>("input, select, textarea");
+      if (control) describedBy(control, help.id, state.phase === "failed");
+    }
+  }
+
+  function applyFieldEvent(key: string, event: FieldSaveEvent) {
+    const state = fieldSaveStates.get(key);
+    if (!state) return null;
+    if (event.type === "input") cancelFieldTimers(key);
+    const next = transitionFieldSave(state, event);
+    fieldSaveStates.set(key, next);
+    renderFieldSaveState(key);
+    updateSaveAvailability();
+    return next;
+  }
+
+  function fieldSaveVisual(key: string) {
+    const visual = make("span", "min-h-5 w-[4.75rem] justify-self-end text-right text-xs font-semibold");
+    visual.setAttribute("data-uat-field-save-visual", key);
+    visual.setAttribute("data-state", fieldSaveStates.get(key)?.phase ?? "idle");
+    visual.setAttribute("aria-hidden", "true");
+    queueMicrotask(() => renderFieldSaveState(key));
+    return visual;
+  }
+
+  function fieldSaveHelp(key: string, id: string) {
+    const help = make("p", "mt-1 text-sm font-semibold");
+    help.id = id;
+    help.setAttribute("data-uat-field-save-help", key);
+    return help;
+  }
+
+  function startSaveTimers(key: string, revision: number) {
+    cancelFieldTimers(key);
+    const timers: { saving?: ReturnType<typeof setTimeout>; hold?: ReturnType<typeof setTimeout>; fade?: ReturnType<typeof setTimeout> } = {};
+    timers.saving = setTimeout(() => applyFieldEvent(key, { type: "saving-delay-expired", revision }), 300);
+    fieldTimers.set(key, timers);
+  }
+
+  function startSuccessTimers(key: string, revision: number) {
+    cancelFieldTimers(key);
+    const timers: { hold?: ReturnType<typeof setTimeout>; fade?: ReturnType<typeof setTimeout> } = {};
+    timers.hold = setTimeout(() => {
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const next = applyFieldEvent(key, { type: "success-hold-expired", revision, reducedMotion });
+      if (next?.phase === "fading") timers.fade = setTimeout(() => applyFieldEvent(key, { type: "fade-expired", revision }), 200);
+    }, 2_500);
+    fieldTimers.set(key, timers);
+  }
+
+  function initializeFieldSaveStates(baseline: FeedbackEntries, editing: FeedbackEntries, baselineStop: WalkStop | null, editingStop: WalkStop | null) {
+    fieldSaveStates.clear();
+    for (const [stepId, entry] of Object.entries(baseline)) {
+      for (const field of Object.keys(feedbackFieldLabels) as (keyof FeedbackEntry)[]) {
+        const key = savedFieldKey(stepId, field);
+        let state = createFieldSaveState(fieldValue(entry, field));
+        const editingValue = fieldValue(editing[stepId], field);
+        if (editingValue !== state.editingValue) state = transitionFieldSave(state, { type: "input", value: editingValue });
+        fieldSaveStates.set(key, state);
+      }
+    }
+    let stopState = createFieldSaveState(JSON.stringify(baselineStop));
+    const editingStopValue = JSON.stringify(editingStop);
+    if (editingStopValue !== stopState.editingValue) stopState = transitionFieldSave(stopState, { type: "input", value: editingStopValue });
+    fieldSaveStates.set(walkStopSaveKey, stopState);
+  }
+
+  function snapshotCurrentCommits(command?: FeedbackUpdateCommand): AutosaveSnapshot | null {
+    if (!committedDraft) return null;
+    const revisions = new Map<string, number>();
+    const values = new Map<string, string>();
+    for (const [key, state] of fieldSaveStates) {
+      if (state.committedRevision > state.confirmedRevision) {
+        revisions.set(key, state.committedRevision);
+        values.set(key, state.committedValue);
+      }
+    }
+    if (!revisions.size && !command) return null;
+    return { draft: cloneEntries(committedDraft), walkStop: committedWalkStop, revisions, values, command };
+  }
+
+  function enqueueAutosave() {
+    const snapshot = snapshotCurrentCommits();
+    if (!snapshot) return;
+    pendingAutosave = snapshot;
+    void runAutosaveQueue();
+  }
+
+  function resumeRestoredDraftAutosave() {
+    if (!view || !controller || view.feedback.processing_state !== "UNPROCESSED" || !view.capabilities.feedback_update) return;
+    committedDraft = cloneEntries(controller.draft);
+    committedWalkStop = controller.walkStop;
+    let changed = false;
+    for (const [key, state] of fieldSaveStates) {
+      if (state.editingValue === state.confirmedValue) continue;
+      const before = state.committedRevision;
+      const next = applyFieldEvent(key, { type: "commit" });
+      if (next && next.committedRevision !== before) changed = true;
+    }
+    if (changed) enqueueAutosave();
+  }
+
+  function resolveAutosaveWaiters() {
+    if (autosaveRunning || pendingAutosave || (exactRetrySnapshot && !exactRetryReady)) return;
+    const waiters = autosaveWaiters; autosaveWaiters = [];
+    for (const resolve of waiters) resolve();
+  }
+
+  function waitForAutosave() {
+    if (!autosaveRunning && !pendingAutosave && !exactRetrySnapshot) return Promise.resolve();
+    return new Promise<void>((resolve) => autosaveWaiters.push(resolve));
+  }
+
+  function announceSaved(labels: string[]) {
+    if (!labels.length) return;
+    autosaveLive.textContent = labels.length === 1
+      ? `${labels[0]} saved.`
+      : labels.length === 2 ? `${labels[0]} and ${labels[1]} saved.` : `${labels.length} changes saved.`;
+  }
+
+  function syncUntrackedConfirmedFields(nextView: ActiveRoundView, tracked: Set<string>) {
+    for (const [stepId, entry] of Object.entries(nextView.feedback.step_entries)) {
+      for (const field of Object.keys(feedbackFieldLabels) as (keyof FeedbackEntry)[]) {
+        const key = savedFieldKey(stepId, field);
+        if (tracked.has(key)) continue;
+        const current = controller?.draft[stepId];
+        if (current && fieldValue(current, field) === fieldValue(entry, field)) {
+          cancelFieldTimers(key);
+          fieldSaveStates.set(key, createFieldSaveState(fieldValue(entry, field)));
+          renderFieldSaveState(key);
+        }
+      }
+    }
+  }
+
+  async function runAutosaveQueue() {
+    if (autosaveRunning || (exactRetrySnapshot && !exactRetryReady)) return;
+    autosaveRunning = true;
+    savingSince ||= Date.now();
+    updateSaveAvailability();
+    try {
+      while (true) {
+        let snapshot: AutosaveSnapshot | null = null;
+        if (exactRetrySnapshot && exactRetryReady) {
+          snapshot = exactRetrySnapshot;
+          exactRetryReady = false;
+        } else if (!exactRetrySnapshot && pendingAutosave) {
+          snapshot = pendingAutosave;
+          pendingAutosave = null;
+        }
+        if (!snapshot || !view || !controller) break;
+        for (const [key, revision] of snapshot.revisions) {
+          applyFieldEvent(key, { type: "request-started", revision });
+          startSaveTimers(key, revision);
+        }
+        const command = snapshot.command ?? buildFeedbackCommand(snapshot.draft, view.feedback.sha256, view.current_round.sha256, snapshot.walkStop);
+        try {
+          const response = await saveFeedback(selectedRound, command);
+          const currentEditing = cloneEntries(controller.draft);
+          const currentWalkStop = controller.walkStop;
+          const currentCommitted = committedDraft ? cloneEntries(committedDraft) : cloneEntries(currentEditing);
+          const currentCommittedStop = committedWalkStop;
+          view = response.view;
+          syncRoundCardStatus(response.view);
+          controller = createFeedbackController(response.view);
+          if (JSON.stringify(currentWalkStop) !== JSON.stringify(controller.walkStop)) {
+            controller = transitionFeedbackController(controller, { type: "walk-stop-changed", walkStop: currentWalkStop, draft: currentEditing });
+          }
+          controller = transitionFeedbackController(controller, { type: "draft-changed", draft: currentEditing });
+          committedDraft = currentCommitted;
+          committedWalkStop = currentCommittedStop;
+          const savedLabels: string[] = [];
+          for (const [key, revision] of snapshot.revisions) {
+            cancelFieldTimers(key);
+            const next = applyFieldEvent(key, { type: "request-succeeded", revision, value: snapshot.values.get(key) ?? "" });
+            if (next?.phase === "saved") {
+              startSuccessTimers(key, revision);
+              const parsed = parseFieldKey(key);
+              savedLabels.push(key === walkStopSaveKey ? "Stopped walk" : parsed ? feedbackFieldLabels[parsed[1]] : "Change");
+            }
+          }
+          syncUntrackedConfirmedFields(response.view, new Set(snapshot.revisions.keys()));
+          if (exactRetrySnapshot === snapshot) exactRetrySnapshot = null;
+          hideAlert();
+          if (lastSubmittedDigest !== response.view.feedback.sha256) lastSubmittedDigest = null;
+          rememberDraft();
+          if (!dirty()) {
+            const storage = draftStorage();
+            if (storage) clearLocalDraft(storage, selectedRound);
+            draftPersistenceFailed = false;
+          }
+          updateStepCounts();
+          updateSaveAvailability();
+          announceSaved(savedLabels);
+        } catch (error) {
+          const code = error instanceof UatApiError ? error.code : "offline";
+          for (const [key, state] of fieldSaveStates) {
+            if (state.committedRevision <= state.confirmedRevision) continue;
+            cancelFieldTimers(key);
+            applyFieldEvent(key, { type: "request-failed", revision: state.committedRevision });
+          }
+          controller = transitionFeedbackController(controller, { type: "save-failed", code, command });
+          if (code === "feedback_commit_uncertain") {
+            exactRetrySnapshot = { ...snapshot, command };
+            exactRetryReady = false;
+          }
+          pendingAutosave = null;
+          showFailure(code, false);
+          break;
+        }
+      }
+    } finally {
+      autosaveRunning = false;
+      if (!pendingAutosave && !exactRetrySnapshot) savingSince = 0;
+      updateSaveAvailability();
+      resolveAutosaveWaiters();
+    }
+  }
+
+  function retryAutosave() {
+    for (const [key, state] of fieldSaveStates) if (state.phase === "failed") applyFieldEvent(key, { type: "retry" });
+    pendingAutosave = snapshotCurrentCommits();
+    hideAlert();
+    void runAutosaveQueue();
+  }
+
+  function retryExactAutosave() {
+    if (!exactRetrySnapshot) return;
+    for (const [key, revision] of exactRetrySnapshot.revisions) applyFieldEvent(key, { type: "request-started", revision });
+    exactRetryReady = true;
+    hideAlert();
+    void runAutosaveQueue();
+  }
+
+  function commitControlChange(stepId: string, field: keyof FeedbackEntry, control: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, autosave: boolean) {
+    if (!controller || !view) return;
+    // This is the pre-edit state for this one user gesture. It must not be read
+    // after a prior listener has had a chance to update controller.draft.
+    const previousEntry = { ...controller.draft[stepId] };
+    const nextDraft = cloneEntries(controller.draft);
+    const entry = nextDraft[stepId];
+    const autosaveFields: (keyof FeedbackEntry)[] = [field];
+    if (field === "complete" && control instanceof HTMLInputElement) {
+      entry.complete = control.checked;
+    } else if (field !== "complete") entry[field] = control.value;
+    if (field === "assessment") {
+      const severityValues = severitiesFromResultContract(view.feedback_result_contract, entry.assessment);
+      if (!severityValues.includes(entry.finding_severity)) entry.finding_severity = "";
+      const severity = fieldsets.querySelector<HTMLSelectElement>(`[data-uat-severity][name="${CSS.escape(`${stepId}-finding_severity`)}"]`);
+      if (severity) setSelectOptions(severity, severityValues, entry.finding_severity, "Choose assessment first");
+      if (entry.finding_severity !== previousEntry.finding_severity) autosaveFields.push("finding_severity");
+    }
+    if (field === "assessment" || field === "finding_severity") {
+      const values = allowedDispositions(entry.assessment, entry.finding_severity, view.feedback_result_contract);
+      if (!values.includes(entry.finding_disposition)) entry.finding_disposition = values[0] ?? "";
+      const disposition = fieldsets.querySelector<HTMLSelectElement>(`[data-uat-disposition][name="${CSS.escape(`${stepId}-finding_disposition`)}"]`);
+      const unavailableLabel = entry.assessment && entry.finding_severity
+        ? "No disposition available"
+        : "Choose assessment and severity first";
+      if (disposition) setSelectOptions(disposition, values, entry.finding_disposition, unavailableLabel);
+      if (entry.finding_disposition !== previousEntry.finding_disposition) autosaveFields.push("finding_disposition");
+    }
+    controller = transitionFeedbackController(controller, { type: "draft-changed", draft: nextDraft });
+    for (const changedField of autosaveFields) {
+      const key = savedFieldKey(stepId, changedField);
+      applyFieldEvent(key, { type: "input", value: fieldValue(nextDraft[stepId], changedField) });
+    }
+    clearFieldError(control);
+    updateStepCard(stepId);
+    refreshStopRegion(stepId);
+    const journeyId = control.closest<HTMLElement>("[data-uat-journey]")?.dataset.uatJourney;
+    if (journeyId) updateJourneyFeedbackSummary(journeyId);
+    applyInlineStepValidation(stepId);
+    rememberDraft();
+    updateSaveAvailability();
+    if (autosave) {
+      committedDraft ??= cloneEntries(controller.baseline);
+      let changed = false;
+      for (const changedField of autosaveFields) {
+        const key = savedFieldKey(stepId, changedField);
+        const before = fieldSaveStates.get(key)?.committedRevision;
+        const next = applyFieldEvent(key, { type: "commit" });
+        if (next && next.committedRevision !== before) {
+          committedDraft[stepId][changedField] = changedField === "complete" ? nextDraft[stepId].complete as never : nextDraft[stepId][changedField] as never;
+          changed = true;
+        }
+      }
+      if (changed) enqueueAutosave();
+    }
+  }
+
+  function labelledControl(stepId: string, field: keyof FeedbackEntry, labelText: string, control: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
+    const key = savedFieldKey(stepId, field);
+    const wrapper = make("div", "min-w-0 max-w-full");
+    wrapper.setAttribute("data-uat-field-shell", key);
+    const id = `uat-${stepId.replace(/[^a-zA-Z0-9_-]/g, "-")}-${field}`;
+    const heading = make("div", "grid min-w-0 grid-cols-[minmax(0,1fr)_4.75rem] items-start gap-x-2");
+    const label = make("label", "min-w-0 break-words text-sm font-bold", labelText);
+    label.htmlFor = id;
+    heading.append(label, fieldSaveVisual(key));
+    control.id = id;
+    control.name = `${stepId}-${field}`;
+    control.className = "mt-1 min-h-11 w-full max-w-full rounded border border-jw-line bg-jw-surface px-3 py-2 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-jw-blue";
+    const stableSelectors: Record<keyof FeedbackEntry, string> = {
+      complete: "data-uat-complete",
+      assessment: "data-uat-assessment",
+      finding_severity: "data-uat-severity",
+      finding_disposition: "data-uat-disposition",
+      observed: "data-uat-observed",
+      comment: "data-uat-comment",
+    };
+    control.setAttribute(stableSelectors[field], "");
+    // Selects commit only on change. Browsers emit input before change for a
+    // select; wiring both would let the first pass mutate the cascade before
+    // the committing pass determines which dependent fields to save.
+    if (!(control instanceof HTMLSelectElement)) {
+      control.addEventListener("input", () => commitControlChange(stepId, field, control, false));
+    }
+    const eventName = control instanceof HTMLSelectElement ? "change" : "blur";
+    control.addEventListener(eventName, () => commitControlChange(stepId, field, control, true));
+    const help = fieldSaveHelp(key, `${id}-save-help`);
+    const error = make("p", "mt-1 hidden text-sm font-semibold text-jw-high");
+    error.id = `${id}-error`;
+    error.dataset.uatFieldError = `${stepId}-${field}`;
+    wrapper.append(heading, control, help, error);
+    return wrapper;
+  }
+
+  function completeControl(stepId: string, checked: boolean) {
+    const key = savedFieldKey(stepId, "complete");
+    const wrapper = make("div", "rounded border border-jw-line bg-jw-surface p-3");
+    wrapper.setAttribute("data-uat-field-shell", key);
+    const row = make("div", "grid min-w-0 grid-cols-[minmax(0,1fr)_4.75rem] items-start gap-x-2");
+    const choice = make("div", "flex min-w-0 items-center gap-3");
+    const control = document.createElement("input");
+    control.type = "checkbox";
+    control.checked = checked;
+    control.id = `uat-${stepId.replace(/[^a-zA-Z0-9_-]/g, "-")}-complete`;
+    control.name = `${stepId}-complete`;
+    control.className = "h-5 w-5 shrink-0 accent-jw-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue";
+    control.setAttribute("data-uat-complete", "");
+    const label = make("label", "min-w-0 break-words text-sm font-bold", "Mark this step complete");
+    label.htmlFor = control.id;
+    choice.append(control, label);
+    row.append(choice, fieldSaveVisual(key));
+    const help = fieldSaveHelp(key, `${control.id}-save-help`);
+    const error = make("p", "mt-1 hidden text-sm font-semibold text-jw-high");
+    error.id = `${control.id}-error`;
+    error.dataset.uatFieldError = `${stepId}-complete`;
+    control.addEventListener("change", () => {
+      commitControlChange(stepId, "complete", control, true);
+      if (control.checked) control.closest<HTMLDetailsElement>("details[data-uat-step-caret]")?.removeAttribute("open");
+    });
+    wrapper.append(row, help, error);
+    return wrapper;
+  }
+
+  function renderScenarioSquare(linkedScenario: ReturnType<typeof resolveLinkedScenarioBlocks>[number]) {
+    const scenario = linkedScenario;
+    const details = make("details", "min-w-0 rounded border border-jw-line bg-jw-surface");
+    details.setAttribute("data-uat-scenario-square", scenario.scenario_id);
+    const summary = make("summary", "flex aspect-square w-32 cursor-pointer list-none flex-col justify-between p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue");
+    summary.append(
+      make("span", "text-[0.65rem] font-bold uppercase tracking-[0.14em] text-jw-muted", "Linked scenario"),
+      make("span", "max-w-full break-words text-sm font-bold text-jw-fg", linkedScenario.title),
+      make("span", "max-w-full break-words font-mono text-[0.65rem] font-semibold text-jw-blue", linkedScenario.scenario_id),
+    );
+    const body = make("div", "border-t border-jw-line p-3");
+    for (const block of linkedScenario.gwt) {
+      const clause = make("article", "border-t border-jw-line pt-3 first:border-t-0 first:pt-0");
+      clause.append(make("p", "max-w-full break-all font-mono text-[0.65rem] text-jw-muted", `GWT ${block.gwt_ref.slice(0, 12)}…`));
+      const dl = make("dl", "mt-3 space-y-3 text-sm");
+      for (const [label, values] of [["Given", block.given], ["When", block.when], ["Then", block.then]] as const) {
+        const row = make("div");
+        const items = make("ol", "mt-1 list-decimal space-y-1 pl-5");
+        items.setAttribute("data-uat-gwt-clause-list", label.toLowerCase());
+        for (const value of values) items.append(make("li", "max-w-full break-words", value));
+        row.append(make("dt", "text-xs font-bold uppercase tracking-wide text-jw-muted", label), items);
+        dl.append(row);
+      }
+      clause.append(dl);
+      body.append(clause);
+    }
+    details.append(summary, body);
+    return details;
+  }
+
+  function canonicalSteps() {
+    return view?.current_round.journeys.flatMap((journey) => journey.steps.map((step) => ({ journey, step }))) ?? [];
+  }
+
+  function stepDisplayName(stepId: string) {
+    const match = canonicalSteps().find(({ step }) => step.step_id === stepId);
+    return match ? `${match.journey.title} · Step ${match.step.ordinal} · ${match.step.name}` : stepId;
+  }
+
+  function emptyFeedbackEntry(entry: FeedbackEntry) {
+    return !entry.complete && !entry.assessment && !entry.finding_severity
+      && !entry.finding_disposition && !entry.observed.trim() && !entry.comment.trim();
+  }
+
+  function stoppedWalkEligible(stepId: string, entry: FeedbackEntry) {
+    if (!controller || controller.walkStop) return false;
+    const hasUnreached = Object.entries(controller.draft).some(([id, candidate]) => id !== stepId && emptyFeedbackEntry(candidate));
+    return hasUnreached && entry.complete && entry.assessment === "FAIL"
+      && entry.finding_severity === "MAJOR" && entry.finding_disposition === "OPEN" && Boolean(entry.observed.trim());
+  }
+
+  function renderWalkStopStatus() {
+    const shell = make("div", "mb-4 grid min-w-0 grid-cols-[minmax(0,1fr)_4.75rem] items-start gap-x-2");
+    shell.setAttribute("data-uat-field-shell", walkStopSaveKey);
+    const label = make("p", "min-w-0 break-words text-sm font-bold", controller?.walkStop ? "Stopped walk" : "Walk status");
+    shell.append(label, fieldSaveVisual(walkStopSaveKey));
+    const help = fieldSaveHelp(walkStopSaveKey, "uat-walk-stop-save-help");
+    help.classList.add("col-span-2");
+    shell.append(help);
+    return shell;
+  }
+
+  function rerenderFeedbackFields() {
+    if (!view || !controller) return;
+    fieldsets.replaceChildren(renderWalkStopStatus(), ...view.current_round.journeys.map(renderJourneySection));
+    setFieldControlsDisabled(false);
+    updateStepCounts();
+    rememberDraft();
+    updateSaveAvailability();
+  }
+
+  function commitWalkStopChange(nextDraft: FeedbackEntries, nextStop: WalkStop | null) {
+    if (!controller) return;
+    const previousDraft = controller.draft;
+    controller = transitionFeedbackController(controller, { type: "walk-stop-changed", walkStop: nextStop, draft: nextDraft });
+    committedDraft = cloneEntries(nextDraft);
+    committedWalkStop = nextStop;
+    const changedKeys: string[] = [];
+    for (const [stepId, entry] of Object.entries(nextDraft)) {
+      for (const field of Object.keys(feedbackFieldLabels) as (keyof FeedbackEntry)[]) {
+        if (fieldValue(entry, field) === fieldValue(previousDraft[stepId], field)) continue;
+        const key = savedFieldKey(stepId, field);
+        applyFieldEvent(key, { type: "input", value: fieldValue(entry, field) });
+        const before = fieldSaveStates.get(key)?.committedRevision;
+        const committed = applyFieldEvent(key, { type: "commit" });
+        if (committed && committed.committedRevision !== before) changedKeys.push(key);
+      }
+    }
+    applyFieldEvent(walkStopSaveKey, { type: "input", value: JSON.stringify(nextStop) });
+    const before = fieldSaveStates.get(walkStopSaveKey)?.committedRevision;
+    const next = applyFieldEvent(walkStopSaveKey, { type: "commit" });
+    if (next && next.committedRevision !== before) changedKeys.push(walkStopSaveKey);
+    rerenderFeedbackFields();
+    if (changedKeys.length) enqueueAutosave();
+  }
+
+  function removeWalkStop() {
+    if (!controller) return;
+    const restored = stopUndoDraft ? cloneEntries(stopUndoDraft) : cloneEntries(controller.draft);
+    stopUndoDraft = null;
+    commitWalkStopChange(restored, null);
+    announce("Stopped-walk declaration removed. Saving the updated feedback snapshot.");
+  }
+
+  function confirmWalkStop(haltingStepId: string, note: string) {
+    if (!controller || !note.trim()) return;
+    const unreached = Object.entries(controller.draft).filter(([id, entry]) => id !== haltingStepId && emptyFeedbackEntry(entry)).map(([id]) => id);
+    if (!unreached.length) return;
+    stopUndoDraft = cloneEntries(controller.draft);
+    const nextDraft = cloneEntries(controller.draft);
+    const stoppedText = `Walk stopped at ${haltingStepId}; this step was not reached.`;
+    for (const id of unreached) {
+      nextDraft[id] = {
+        complete: false,
+        assessment: "NOT_OBSERVED",
+        finding_severity: "NONE",
+        finding_disposition: "OPEN",
+        observed: stoppedText,
+        comment: "",
+      };
+    }
+    const stop: WalkStop = {
+      state: "STOPPED",
+      halting_step_id: haltingStepId,
+      unreached_step_ids: unreached,
+      trigger: "OBSERVED_FAILURE",
+      recorded_by: "OWNER",
+      note: note.trim(),
+    };
+    commitWalkStopChange(nextDraft, stop);
+    announce(`Walk marked stopped at ${stepDisplayName(haltingStepId)}. The complete snapshot is saving automatically.`);
+  }
+
+  function stopConfirmation(stepId: string) {
+    if (!controller) return make("div");
+    const unreached = Object.entries(controller.draft).filter(([id, entry]) => id !== stepId && emptyFeedbackEntry(entry)).map(([id]) => id);
+    const panel = make("section", "mt-4 min-w-0 max-w-full rounded border-2 border-jw-high bg-jw-high-soft p-4");
+    panel.setAttribute("data-uat-stop-confirmation", "");
+    panel.setAttribute("aria-label", "Confirm stopped walk");
+    panel.append(
+      make("p", "text-xs font-bold uppercase tracking-[0.12em] text-jw-high", "Consequential action"),
+      make("h5", "mt-1 text-base font-bold", "Record this failure as the point where the walk stopped?"),
+      make("p", "mt-2 text-sm", "This will record only the listed empty cards as not reached — never passed, skipped, or not applicable. Cards with content stay exactly as you entered them; Cancel leaves everything unchanged."),
+    );
+    const list = make("ul", "mt-3 min-w-0 list-disc space-y-1 pl-5 text-sm");
+    list.setAttribute("data-uat-stop-unreached-list", "");
+    for (const id of unreached) list.append(make("li", "max-w-full break-words", stepDisplayName(id)));
+    panel.append(list);
+    const label = make("label", "mt-4 block text-sm font-bold", "Why did the walk stop?");
+    const note = document.createElement("textarea");
+    note.rows = 3; note.maxLength = 20_000;
+    note.className = "mt-1 min-h-11 w-full max-w-full rounded border border-jw-line bg-jw-surface px-3 py-2 text-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-jw-blue";
+    note.setAttribute("data-uat-stop-note", "");
+    label.htmlFor = `uat-stop-note-${stepId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+    note.id = label.htmlFor;
+    const actions = make("div", "mt-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center");
+    const confirm = button("Confirm stopped walk", () => confirmWalkStop(stepId, note.value), "data-uat-stop-confirm");
+    confirm.className = "min-h-11 rounded bg-jw-high px-4 py-2 text-sm font-bold text-jw-on-accent disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-high";
+    confirm.disabled = true;
+    note.addEventListener("input", () => { confirm.disabled = !note.value.trim(); });
+    const cancel = button("Cancel", () => refreshStopRegion(stepId), "data-uat-stop-cancel");
+    actions.append(confirm, cancel);
+    panel.append(label, note, actions);
+    queueMicrotask(() => note.focus());
+    return panel;
+  }
+
+  function renderStopRegion(stepId: string, entry: FeedbackEntry) {
+    const region = make("div", "min-w-0 max-w-full");
+    region.setAttribute("data-uat-stop-region", stepId);
+    const stop = controller?.walkStop;
+    if (stop?.halting_step_id === stepId) {
+      const panel = make("section", "mt-4 min-w-0 max-w-full rounded border-2 border-jw-high bg-jw-high-soft p-4");
+      panel.append(make("p", "text-xs font-bold uppercase tracking-[0.12em] text-jw-high", "Walk marked stopped"), make("p", "mt-1 max-w-full break-words text-sm", stop.note));
+      const list = make("ul", "mt-3 list-disc space-y-1 pl-5 text-sm");
+      list.setAttribute("data-uat-stop-unreached-list", "");
+      for (const id of stop.unreached_step_ids) list.append(make("li", "max-w-full break-words", stepDisplayName(id)));
+      const undo = button(stopUndoDraft ? "Undo stopped walk" : "Remove stopped walk", removeWalkStop, "data-uat-stop-undo");
+      undo.classList.add("mt-4");
+      panel.append(list, undo);
+      region.append(panel);
+    } else if (stoppedWalkEligible(stepId, entry)) {
+      const action = button("Stop walk at this observed failure", () => region.replaceChildren(stopConfirmation(stepId)), "data-uat-stop-action");
+      action.className = "mt-4 min-h-11 w-full max-w-full rounded border-2 border-jw-high bg-jw-surface px-4 py-3 text-left text-sm font-bold text-jw-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-high sm:w-auto";
+      region.append(action);
+    }
+    return region;
+  }
+
+  function refreshStopRegion(stepId: string) {
+    const current = fieldsets.querySelector<HTMLElement>(`[data-uat-stop-region="${CSS.escape(stepId)}"]`);
+    const entry = controller?.draft[stepId];
+    if (current && entry) current.replaceWith(renderStopRegion(stepId, entry));
+  }
+
+  function renderStepCard(journey: Journey, step: Journey["steps"][number], entry: FeedbackEntry) {
+    if (!view) throw new Error("active UAT round view is required before rendering feedback controls");
+    const card = make("article", "min-w-0 max-w-full overflow-hidden rounded border-2 border-jw-line bg-jw-surface-muted");
+    card.setAttribute("data-uat-step-card", step.step_id);
+    const visible = make("div", "p-4");
+    const top = make("div", "flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between");
+    const title = make("div", "min-w-0");
+    const heading = make("h4", "max-w-full break-words text-base font-bold", `Step ${step.ordinal} · ${step.name}`);
+    heading.setAttribute("data-uat-step-heading", "");
+    title.append(heading);
+    const state = make("span");
+    state.setAttribute("data-uat-step-state", "");
+    top.append(title, state);
+    const action = step.instruction;
+    const instruction = make("div", "mt-4");
+    instruction.append(make("p", "text-xs font-bold uppercase tracking-[0.12em] text-jw-muted", "Instruction"), make("p", "min-w-0 [overflow-wrap:anywhere]", String(action)));
+    const outcome = make("div", "mt-3 rounded border-l-4 border-jw-blue bg-jw-info-soft px-3 py-2");
+    outcome.append(make("p", "text-xs font-bold uppercase tracking-[0.12em] text-jw-info", "Expected outcome"), make("p", "mt-1 max-w-full break-words text-sm", step.expected_outcome));
+    const effectiveLink = resolveEffectiveAppLink(step, journey, view.current_round.app_url);
+    const linkRegion = make("div", "mt-4 rounded border border-jw-line bg-jw-surface px-3 py-2 text-sm");
+    linkRegion.setAttribute("data-uat-app-link-scope", effectiveLink.source);
+    const provenance = effectiveLink.source === "step" ? "Step link" : effectiveLink.source === "journey" ? "Journey link" : "Application base";
+    const appLink = make("a", "font-bold text-jw-blue underline decoration-2 underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue", effectiveLink.label ?? "Open application");
+    appLink.setAttribute("data-uat-app-link", "");
+    appLink.setAttribute("href", effectiveLink.href);
+    appLink.setAttribute("target", "_blank");
+    appLink.setAttribute("rel", "noopener noreferrer");
+    appLink.setAttribute("referrerpolicy", "no-referrer");
+    linkRegion.append(make("span", "mr-2 text-xs font-bold uppercase tracking-[0.1em] text-jw-muted", provenance), appLink);
+    const scenarios = make("div", "mt-4 flex min-w-0 flex-wrap gap-3");
+    scenarios.setAttribute("aria-label", `${step.scenario_links.length} linked scenario${step.scenario_links.length === 1 ? "" : "s"}`);
+    for (const linkedScenario of resolveLinkedScenarioBlocks(journey, step)) scenarios.append(renderScenarioSquare(linkedScenario));
+    visible.append(top, instruction, outcome, linkRegion);
+    const knownItems = renderStepKnownItems(journey, step);
+    if (knownItems) visible.append(knownItems);
+    visible.append(scenarios);
+
+    const feedback = make("details", "border-t border-jw-line bg-jw-surface");
+    feedback.setAttribute("data-uat-step-caret", "");
+    feedback.setAttribute("data-uat-journey-feedback-summary", "");
+    const summary = make("summary", "flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-bold text-jw-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-jw-blue");
+    const fieldCount = make("span", "text-xs font-semibold text-jw-muted");
+    fieldCount.setAttribute("data-uat-step-field-count", "");
+    summary.append(make("span", "", "Record feedback"), fieldCount);
+    const fields = make("fieldset", "border-t border-jw-line p-4");
+    fields.append(make("legend", "sr-only", `Feedback for Step ${step.ordinal}: ${step.name}`));
+    fields.append(completeControl(step.step_id, entry.complete));
+    const grid = make("div", "mt-4 grid min-w-0 max-w-full gap-4 md:grid-cols-2");
+    grid.append(
+      labelledControl(step.step_id, "assessment", "Assessment", selectControl(view.feedback_result_contract.canonical_assessments, entry.assessment)),
+      labelledControl(step.step_id, "finding_severity", "Finding severity", selectControl(
+        severitiesFromResultContract(view.feedback_result_contract, entry.assessment),
+        entry.finding_severity,
+        "Choose assessment first",
+      )),
+      labelledControl(step.step_id, "finding_disposition", "Finding disposition", selectControl(
+        allowedDispositions(entry.assessment, entry.finding_severity, view.feedback_result_contract),
+        entry.finding_disposition,
+        entry.assessment && entry.finding_severity ? "No disposition available" : "Choose assessment and severity first",
+      )),
+    );
+    const observed = document.createElement("textarea");
+    observed.rows = 4; observed.maxLength = 20_000; observed.value = entry.observed;
+    grid.append(labelledControl(step.step_id, "observed", "What you observed", observed));
+    fields.append(grid);
+    const comment = document.createElement("textarea");
+    comment.rows = 3; comment.maxLength = 20_000; comment.value = entry.comment;
+    const commentWrap = labelledControl(step.step_id, "comment", "Additional comment", comment);
+    commentWrap.classList.add("mt-4");
+    fields.append(commentWrap, renderStopRegion(step.step_id, entry));
+    feedback.append(summary, fields);
+    card.append(visible, feedback);
+    queueMicrotask(() => updateStepCard(step.step_id));
+    return card;
+  }
+
+  function renderStepKnownItems(journey: Journey, step: Journey["steps"][number]) {
+    const knownItems = resolveStepKnownItems(journey, step);
+    if (!knownItems.length) return null;
+    const region = make("aside", "mt-4 min-w-0 max-w-full rounded border-2 border-jw-med bg-jw-med-soft p-4 text-jw-fg");
+    region.setAttribute("data-uat-known-items", "");
+    region.setAttribute("role", "note");
+    const headingId = `uat-known-items-${step.step_id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+    region.setAttribute("aria-labelledby", headingId);
+    const heading = make("h5", "text-sm font-bold", knownItems.length === 1 ? "Known before you score this step" : `${knownItems.length} things to know before you score this step`);
+    heading.id = headingId;
+    const context = make("p", "mt-1 text-sm text-jw-muted", "These disclosed limitations apply to this step. Do not score them as new defects.");
+    const list = make("ul", "mt-3 grid min-w-0 max-w-full gap-3");
+    for (const known of knownItems) {
+      const item = make("li", "min-w-0 border-l-4 border-jw-med pl-3 text-sm leading-6 [overflow-wrap:anywhere]", known.text);
+      item.setAttribute("data-uat-known-item-source", known.source_ref);
+      list.append(item);
+    }
+    region.append(heading, context, list);
+    return region;
+  }
+
+  function renderJourneySection(journey: Journey) {
+    const section = make("section", "min-w-0 max-w-full border-t-2 border-jw-fg pt-5 first:border-t-0 first:pt-0");
+    section.setAttribute("data-uat-journey", journey.journey_id);
+    section.setAttribute("data-uat-journey-details", "");
+    const header = make("div", "flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between");
+    const identity = make("div", "min-w-0");
+    identity.append(make("p", "text-xs font-bold uppercase tracking-[0.14em] text-jw-muted", "Journey"));
+    const heading = make("h3", "mt-1 max-w-full break-words text-xl font-bold", journey.title);
+    heading.setAttribute("data-uat-journey-heading", "");
+    identity.append(heading);
+    const summary = make("p", "text-sm font-semibold text-jw-muted");
+    summary.setAttribute("data-uat-journey-feedback-summary", "");
+    header.append(identity, summary);
+    const grid = make("div", "mt-4 grid min-w-0 max-w-full gap-4 md:grid-cols-2");
+    if (controller) grid.append(...journey.steps.map((step) => renderStepCard(journey, step, controller!.draft[step.step_id])));
+    section.append(header, grid);
+    queueMicrotask(() => updateJourneyFeedbackSummary(journey.journey_id));
+    return section;
+  }
+
+  function clearFieldError(control: HTMLElement) {
+    control.removeAttribute("aria-invalid");
+    const error = control.parentElement?.querySelector<HTMLElement>("[data-uat-field-error]");
+    if (error) {
+      error.classList.add("hidden");
+      describedBy(control, error.id, false);
+    }
+  }
+
+  function showValidation(errors: Record<string, string>) {
+    validationList.replaceChildren();
+    let firstControl: HTMLElement | null = null;
+    for (const [key, message] of Object.entries(errors)) {
+      const item = make("li");
+      const error = document.querySelector<HTMLElement>(`[data-uat-field-error="${CSS.escape(key)}"]`);
+      const control = error?.previousElementSibling as HTMLElement | null;
+      if (control && error) {
+        (control.closest("details") as HTMLDetailsElement | null)?.setAttribute("open", "");
+        control.setAttribute("aria-invalid", "true");
+        control.setAttribute("aria-describedby", error.id);
+        error.textContent = message;
+        error.classList.remove("hidden");
+        const link = make("a", "font-semibold text-jw-high underline", message);
+        link.href = `#${control.id}`;
+        item.append(link);
+        firstControl ??= control;
+      } else item.textContent = message;
+      validationList.append(item);
+    }
+    validationSummary.classList.remove("hidden");
+    validationSummary.focus();
+    firstControl?.scrollIntoView({ block: "center" });
+  }
+
+  function setFieldControlsDisabled(disabled: boolean) {
+    form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea").forEach((control) => {
+      control.disabled = disabled || control.dataset.uatUnavailable === "true";
+    });
+  }
+
+  function renderProcessedEntries() {
+    processedEntries.replaceChildren();
+    if (!view) return;
+    for (const journey of view.current_round.journeys) {
+      for (const step of journey.steps) {
+        const entry = view.feedback.step_entries[step.step_id];
+        const article = make("article", "rounded border border-jw-line bg-jw-surface p-3");
+        article.append(make("p", "text-xs font-bold uppercase tracking-wide text-jw-muted", journey.title), make("h4", "mt-1 font-bold", `Step ${step.ordinal} · ${step.name}`));
+        const dl = make("dl", "mt-3 grid gap-2 text-sm sm:grid-cols-2");
+        for (const [label, value] of [["Complete", entry.complete ? "Yes" : "No"], ["Assessment", entry.assessment || "—"], ["Severity", entry.finding_severity || "—"], ["Disposition", entry.finding_disposition || "—"], ["Observed", entry.observed || "—"], ["Comment", entry.comment || "—"]]) {
+          const row = make("div", label === "Observed" || label === "Comment" ? "sm:col-span-2" : "");
+          row.append(make("dt", "font-medium text-jw-muted", label), make("dd", "mt-0.5 whitespace-pre-wrap break-words", value));
+          dl.append(row);
+        }
+        article.append(dl);
+        processedEntries.append(article);
+      }
+    }
+  }
+
+  function renderView(nextView: ActiveRoundView, nextController = createFeedbackController(nextView)) {
+    for (const key of fieldTimers.keys()) cancelFieldTimers(key);
+    pendingAutosave = null;
+    exactRetrySnapshot = null;
+    exactRetryReady = false;
+    autosaveRunning = false;
+    draftPersistenceFailed = false;
+    savingSince = 0;
+    view = nextView;
+    controller = nextController;
+    selectedRound = nextView.round_review_id;
+    stopUndoDraft = null;
+    // Restore before the fields are built so a recovered draft renders as typed.
+    const restoreStatus = recoverDraft();
+    committedDraft = cloneEntries(nextView.feedback.step_entries);
+    committedWalkStop = nextView.feedback.walk_stop;
+    initializeFieldSaveStates(nextView.feedback.step_entries, controller!.draft, nextView.feedback.walk_stop, controller!.walkStop);
+    rememberDraft();
+    if (restoreStatus === "restored") resumeRestoredDraftAutosave();
+    updateDraftRestoreNotice(restoreStatus);
+    hideAlert();
+    empty.classList.add("hidden");
+    loading.classList.add("hidden");
+    workbench.classList.remove("hidden");
+    const journeyCount = nextView.current_round.journeys.length;
+    const stepCount = nextView.current_round.journeys.reduce((total, journey) => total + journey.steps.length, 0);
+    practiceBanner.classList.toggle("hidden", !nextView.fixture);
+    practiceReset.classList.toggle("hidden", !nextView.fixture?.resettable);
+    setText("[data-uat-round-title]", `${nextView.ticket} / ${nextView.round_review_id}`);
+    appUrlLink.hidden = !nextView.current_round.app_url;
+    appUrlLink.href = nextView.current_round.app_url;
+    appUrlLink.textContent = nextView.current_round.app_url;
+    appUrlLink.target = "_blank";
+    appUrlLink.rel = "noopener noreferrer";
+    appUrlLink.referrerPolicy = "no-referrer";
+    setText("[data-uat-package-state]", nextView.current_round.package_state);
+    setText("[data-uat-processing-state]", nextView.feedback.processing_state);
+    setText("[data-uat-package-state-summary]", nextView.current_round.package_state);
+    setText("[data-uat-processing-state-summary]", nextView.feedback.processing_state);
+    setText("[data-uat-journey-count]", `${journeyCount} journey${journeyCount === 1 ? "" : "s"} · ${stepCount} step${stepCount === 1 ? "" : "s"}`);
+    setText("[data-uat-journey-count-summary]", `${journeyCount} / ${stepCount} steps`);
+    setText("[data-uat-round-digest]", `${nextView.ticket} has ${journeyCount} human-guided journey${journeyCount === 1 ? "" : "s"} and ${stepCount} independently savable step${stepCount === 1 ? "" : "s"}. The package is ${nextView.current_round.package_state.toLowerCase()} and feedback is ${nextView.feedback.processing_state.toLowerCase().replaceAll("_", " ")}.`);
+    setText("[data-uat-projection-digest]", `${nextView.projection_sha256.slice(0, 12)}…`);
+    setText("[data-uat-current-path]", nextView.current_round.path.split("/").at(-1) ?? nextView.current_round.path);
+    setText("[data-uat-current-sha]", `${nextView.current_round.sha256.slice(0, 12)}…`);
+    sourceText.textContent = nextView.current_round.source;
+    const isProcessed = nextView.feedback.processing_state !== "UNPROCESSED" || !nextView.capabilities.feedback_update;
+    processed.classList.toggle("hidden", !isProcessed);
+    form.classList.toggle("hidden", isProcessed);
+    if (isProcessed) renderProcessedEntries();
+    else {
+      fieldsets.replaceChildren(renderWalkStopStatus(), ...nextView.current_round.journeys.map(renderJourneySection));
+      setFieldControlsDisabled(false);
+      updateStepCounts();
+      updateSaveAvailability();
+    }
+    history.replaceState({}, "", `/uat/?round=${encodeURIComponent(selectedRound)}`);
+    list.querySelectorAll<HTMLElement>("[data-uat-round-card]").forEach((card) => {
+      const isCurrent = card.dataset.uatRoundId === selectedRound;
+      card.toggleAttribute("aria-current", isCurrent);
+      const top = card.querySelector<HTMLElement>("[data-uat-round-card-top]");
+      const existingAction = card.querySelector<HTMLElement>("[data-uat-round-card-action]");
+      if (isCurrent) {
+        const count = card.querySelector<HTMLElement>("[data-uat-round-journey-count]");
+        if (count) count.textContent = `${journeyCount} journey${journeyCount === 1 ? "" : "s"} · ${stepCount} step${stepCount === 1 ? "" : "s"}`;
+        if (!existingAction && top) {
+          const action = make("span", "shrink-0 rounded-full bg-jw-blue px-3 py-1.5 text-xs font-extrabold tracking-[0.08em] text-jw-on-accent", "NOW REVIEWING");
+          action.setAttribute("data-uat-round-card-action", "");
+          top.append(action);
+        }
+      } else {
+        existingAction?.remove();
+      }
+    });
+    announce(nextView.fixture
+      ? `Safe practice round ${selectedRound} loaded. Ticket-agent notification is disabled.`
+      : `Active UAT round ${selectedRound} loaded. Canonical current round is read only.`);
+  }
+
+  practiceReset.addEventListener("click", async () => {
+    if (!view?.fixture || !selectedRound || controller?.saving) return;
+    if (!window.confirm("Reset this safe practice round and discard all practice feedback?")) return;
+    practiceReset.disabled = true;
+    try {
+      renderView(await resetPracticeRound(selectedRound));
+      announce("Safe practice round reset to clean canonical artifacts.");
+    } catch (error) {
+      showFailure(error instanceof UatApiError ? error.code : "offline");
+    } finally {
+      practiceReset.disabled = false;
+    }
+  });
+
+  async function selectRound(roundId: string) {
+    if (dirty() && roundId !== selectedRound && !window.confirm("You have unsaved feedback. Leave this round and discard the local draft?")) return;
+    selectedRound = roundId;
+    empty.classList.add("hidden");
+    workbench.classList.add("hidden");
+    hideAlert();
+    loading.classList.remove("hidden");
+    announce(`Loading active UAT round ${roundId}.`);
+    try {
+      renderView(await fetchRoundDetail(roundId));
+    } catch (error) {
+      loading.classList.add("hidden");
+      const code = error instanceof UatApiError ? error.code : "source_invalid";
+      showFailure(code);
+    }
+  }
+
+  async function reloadLatest() {
+    if (dirty() && !window.confirm("Reload latest will replace your complete local draft. Copy the draft first if you need to keep it. Continue?")) return;
+    await selectRound(selectedRound);
+  }
+
+  function commitActiveControl() {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLInputElement || active instanceof HTMLSelectElement || active instanceof HTMLTextAreaElement)) return;
+    if (!form.contains(active)) return;
+    const name = active.name;
+    const split = name.lastIndexOf("-");
+    if (split < 0) return;
+    const field = name.slice(split + 1) as keyof FeedbackEntry;
+    const stepId = name.slice(0, split);
+    if (field in feedbackFieldLabels) commitControlChange(stepId, field, active, true);
+  }
+
+  async function submitDraft() {
+    if (!view || !controller || controller.saving) return;
+    commitActiveControl();
+    if (controller.uncertainCommand || controller.lastFailure === "stale_feedback" || controller.lastFailure === "stale_round") {
+      showFailure(controller.lastFailure ?? "feedback_commit_uncertain");
+      return;
+    }
+    await waitForAutosave();
+    if (!view || !controller || controller.saving) return;
+    const ui = uiState();
+    if (!ui) return;
+    if (controller.uncertainCommand || controller.lastFailure === "stale_feedback" || controller.lastFailure === "stale_round") {
+      showFailure(controller.lastFailure ?? "feedback_commit_uncertain");
+      return;
+    }
+    if (!ui.validation.valid) {
+      showValidation(ui.validation.errors);
+      updateSaveAvailability("Feedback needs the required fields before it can be submitted");
+      return;
+    }
+    validationSummary.classList.add("hidden");
+    hideAlert();
+    const command = buildFeedbackCommand(controller.draft, view.feedback.sha256, view.current_round.sha256, walkStopCommandValue(controller));
+    controller = transitionFeedbackController(controller, { type: "save-started", command });
+    setFieldControlsDisabled(true);
+    updateSaveAvailability();
+    announce(view.fixture ? "Recording a practice-only receipt. Do not close this page." : "Submitting stored feedback to the ticket agent. Do not close this page.");
+    try {
+      const response = await submitFeedback(selectedRound, command);
+      controller = transitionFeedbackController(controller, { type: "save-succeeded", status: response.status, view: response.view });
+      const storage = draftStorage();
+      if (storage) clearLocalDraft(storage, selectedRound);
+      lastSubmittedDigest = response.notification === "pending" ? null : response.view.feedback.sha256;
+      renderView(response.view, controller);
+      const message = response.notification === "pending"
+        ? "Feedback is stored, but notification is pending. Submit again to notify the ticket agent."
+        : response.notification === "practice_submitted" || response.notification === "practice_already_submitted"
+          ? "Practice feedback stored with a fixture-only receipt; no ticket agent was notified."
+          : "Feedback stored and submitted to the ticket agent";
+      saveState.textContent = message;
+      announce(message);
+    } catch (error) {
+      const code = error instanceof UatApiError ? error.code : "offline";
+      controller = transitionFeedbackController(controller, { type: "save-failed", code, command });
+      const failedUi = uiState();
+      setFieldControlsDisabled(failedUi?.controlsDisabled ?? false);
+      showFailure(code);
+    }
+  }
+
+  function dateBandLabel(date: string) {
+    if (date === "undated") return "Date unavailable";
+    const today = new Date().toISOString().slice(0, 10);
+    if (date === today) return "Today";
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
+  }
+
+  function generatedTimeLabel(timestamp?: string) {
+    if (!timestamp) return "Generated time unavailable";
+    return `Generated ${new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(timestamp))}`;
+  }
+
+  function statusChip(label: string, value: string, tone = "border-jw-line bg-jw-surface-muted text-jw-muted") {
+    const chip = make("span", `rounded-full border px-2.5 py-1 text-xs font-bold ${tone}`);
+    chip.append(make("span", "sr-only", `${label}: `), document.createTextNode(value.replaceAll("_", " ")));
+    return chip;
+  }
+
+  function statusLabel(status: RoundStatus) {
+    return ROUND_STATUS_OPTIONS.find(([value]) => value === status)?.[1] ?? status.replaceAll("_", " ");
+  }
+
+  function syncRoundCardStatus(nextView: ActiveRoundView) {
+    const card = list.querySelector<HTMLElement>(`[data-uat-round-card][data-uat-round-id="${CSS.escape(nextView.round_review_id)}"]`);
+    const control = card?.querySelector<HTMLSelectElement>("[data-uat-round-status]");
+    if (control) {
+      control.value = nextView.round_status;
+      control.disabled = nextView.feedback.processing_state !== "UNPROCESSED";
+      control.setAttribute("aria-label", `Round status for ${nextView.round_review_id}: ${statusLabel(nextView.round_status)}`);
+    }
+  }
+
+  async function changeRoundStatus(round: RoundSummary, control: HTMLSelectElement, message: HTMLElement) {
+    const requested = control.value as RoundStatus;
+    const previous = round.round_status;
+    message.classList.add("hidden");
+    message.textContent = "";
+    control.disabled = true;
+
+    if (round.round_review_id === selectedRound) {
+      await waitForAutosave();
+      if (dirty() || exactRetrySnapshot || pendingAutosave) {
+        control.value = view?.round_status ?? previous;
+        message.textContent = "Status not saved. Finish saving the open feedback first.";
+        message.className = "mt-2 text-xs font-semibold text-jw-high";
+        announce(message.textContent);
+        control.disabled = false;
+        return;
+      }
+    }
+
+    const currentView = view?.round_review_id === round.round_review_id ? view : null;
+    const expectedFeedback = currentView?.feedback.sha256 ?? round.feedback_sha256;
+    const expectedCurrent = currentView?.current_round.sha256 ?? round.current_round_sha256;
+    try {
+      const response = await updateRoundStatus(
+        round.round_review_id,
+        buildRoundStatusCommand(requested, expectedFeedback, expectedCurrent),
+      );
+      round.round_status = response.view.round_status;
+      round.feedback_sha256 = response.view.feedback.sha256;
+      round.current_round_sha256 = response.view.current_round.sha256;
+      round.processing_state = response.view.feedback.processing_state;
+      round.writable = response.view.capabilities.feedback_update;
+      control.value = response.view.round_status;
+      if (round.round_review_id === selectedRound) {
+        view = response.view;
+        controller = createFeedbackController(response.view);
+        committedDraft = cloneEntries(response.view.feedback.step_entries);
+        committedWalkStop = response.view.feedback.walk_stop;
+        setText("[data-uat-projection-digest]", `${response.view.projection_sha256.slice(0, 12)}…`);
+      }
+      message.textContent = `${statusLabel(response.view.round_status)} saved.`;
+      message.className = "mt-2 text-xs font-semibold text-jw-low";
+      syncRoundCardStatus(response.view);
+      hideAlert();
+      announce(`Round ${round.round_review_id} status changed to ${statusLabel(response.view.round_status)}.`);
+    } catch (error) {
+      const code = error instanceof UatApiError ? error.code : "offline";
+      control.value = previous;
+      message.textContent = code === "stale_feedback" || code === "stale_round"
+        ? "Status not saved because this round changed. Refresh the queue and try again."
+        : code === "feedback_processed"
+          ? "Status not saved because this round has already been processed. Reload the latest round."
+          : "Status not saved. Check the connection and try again.";
+      message.className = "mt-2 text-xs font-semibold text-jw-high";
+      if (round.round_review_id === selectedRound) showFailure(code);
+      else announce(message.textContent);
+    } finally {
+      control.disabled = round.processing_state !== "UNPROCESSED";
+    }
+  }
+
+  function renderRoundCard(round: Awaited<ReturnType<typeof fetchRoundList>>["rounds"][number]) {
+    const item = make("li", "min-w-0");
+    const card = make("article", "group min-h-11 w-full min-w-0 rounded border border-jw-line bg-jw-queue p-4 text-left shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-jw-blue hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue");
+    card.tabIndex = 0;
+    card.setAttribute("data-uat-round-card", "");
+    card.dataset.uatRoundId = round.round_review_id;
+    if (round.round_review_id === selectedRound) card.setAttribute("aria-current", "true");
+
+    const top = make("div", "flex min-w-0 items-start justify-between gap-3");
+    top.setAttribute("data-uat-round-card-top", "");
+    const open = make("button", "min-w-0 flex-1 rounded text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue");
+    open.type = "button";
+    open.setAttribute("data-uat-round-open", "");
+    open.setAttribute("data-uat-round-card", "");
+    open.setAttribute("aria-label", `Open ${round.round_review_id}`);
+    open.append(
+      make("span", "block text-xs font-bold uppercase tracking-[0.12em] text-jw-muted", round.ticket),
+      make("span", "mt-1 block max-w-full break-words text-base font-bold text-jw-fg", round.round_review_id),
+    );
+    open.addEventListener("click", () => void selectRound(round.round_review_id));
+    top.append(open);
+    if (round.round_review_id === selectedRound) {
+      const action = make("span", "shrink-0 rounded-full bg-jw-blue px-3 py-1.5 text-xs font-extrabold tracking-[0.08em] text-jw-on-accent", "NOW REVIEWING");
+      action.setAttribute("data-uat-round-card-action", "");
+      top.append(action);
+    }
+
+    const controls = make("div", "mt-4 flex flex-wrap items-start gap-3");
+    const statusField = make("div", "min-w-[10rem] flex-1");
+    const statusId = `uat-round-status-${round.round_review_id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+    const label = make("label", "block text-xs font-bold uppercase tracking-[0.1em] text-jw-muted", "Round status");
+    label.htmlFor = statusId;
+    const status = make("select", "mt-1 min-h-11 w-full rounded border border-jw-line bg-jw-surface px-3 py-2 text-sm font-bold text-jw-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jw-blue");
+    status.id = statusId;
+    status.setAttribute("data-uat-round-status", "");
+    status.setAttribute("aria-label", `Round status for ${round.round_review_id}: ${statusLabel(round.round_status)}`);
+    status.replaceChildren(...ROUND_STATUS_OPTIONS.map(([value, text]) => {
+      const option = make("option", "", text);
+      option.value = value;
+      option.selected = value === round.round_status;
+      return option;
+    }));
+    status.disabled = round.processing_state !== "UNPROCESSED";
+    const statusMessage = make("p", "mt-2 hidden text-xs font-semibold");
+    statusMessage.setAttribute("data-uat-round-status-message", "");
+    statusMessage.setAttribute("role", "status");
+    status.addEventListener("change", () => void changeRoundStatus(round, status, statusMessage));
+    statusField.append(label, status, statusMessage);
+    controls.append(
+      statusField,
+      statusChip("Editing", round.writable ? "Editable" : "Read only", round.writable ? "mt-5 border-jw-low bg-jw-low-soft text-jw-low" : "mt-5 border-jw-line bg-jw-surface-muted text-jw-muted"),
+      ...(round.practice_fixture ? [statusChip("Round", "Safe practice", "mt-5 border-jw-med bg-jw-med-soft text-jw-fg")] : []),
+    );
+    const meta = make("div", "mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-jw-line pt-3 text-xs font-semibold text-jw-muted");
+    meta.append(make("span", "", generatedTimeLabel(round.feedback_generated_at)));
+    const selectedJourneyCount = round.round_review_id === selectedRound && view ? view.current_round.journeys.length : null;
+    const selectedStepCount = round.round_review_id === selectedRound && view ? view.current_round.journeys.reduce((total, journey) => total + journey.steps.length, 0) : null;
+    const count = make("span", "", selectedJourneyCount === null || selectedStepCount === null ? "Journey count on open" : `${selectedJourneyCount} journey${selectedJourneyCount === 1 ? "" : "s"} · ${selectedStepCount} step${selectedStepCount === 1 ? "" : "s"}`);
+    count.setAttribute("data-uat-round-journey-count", "");
+    meta.append(count);
+    card.append(top, controls, meta);
+    item.append(card);
+    return item;
+  }
+
+  async function loadList() {
+    listMessage.textContent = "Loading active rounds…";
+    list.replaceChildren();
+    warnings.classList.add("hidden");
+    try {
+      const response = await fetchRoundList();
+      listMessage.textContent = response.rounds.length ? `${response.rounds.length} ready for attention` : "Queue clear";
+      for (const band of groupUatSummariesByGeneratedDate(response.rounds)) {
+        const bandItem = make("li", "grid min-w-0 gap-3 sm:grid-cols-[8rem_minmax(0,1fr)]");
+        bandItem.setAttribute("data-uat-date-band", band.date);
+        const rail = make("div", "rounded bg-jw-blue px-4 py-3 text-jw-on-accent sm:min-h-full");
+        rail.append(
+          make("p", "text-[0.65rem] font-bold uppercase tracking-[0.18em] text-jw-on-accent/75", "Feedback date"),
+          make("h3", "mt-1 text-base font-bold leading-tight", dateBandLabel(band.date)),
+          make("p", "mt-1 text-xs font-semibold text-jw-on-accent/80", `${band.rounds.length} round${band.rounds.length === 1 ? "" : "s"}`),
+        );
+        const grid = make("ul", "grid min-w-0 list-none gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3");
+        grid.setAttribute("data-uat-round-grid", "");
+        grid.append(...band.rounds.map(renderRoundCard));
+        bandItem.append(rail, grid);
+        list.append(bandItem);
+      }
+      if (response.warnings.length) {
+        warnings.replaceChildren(make("h3", "font-bold", "Some registrations were skipped"));
+        const warningList = make("ul", "mt-2 list-disc space-y-1 pl-5");
+        response.warnings.forEach((warning) => warningList.append(make("li", "", warning)));
+        warnings.append(warningList);
+        warnings.classList.remove("hidden");
+      }
+      const requested = new URLSearchParams(location.search).get("round");
+      if (requested && requested !== selectedRound) await selectRound(requested);
+      announce(response.rounds.length ? `${response.rounds.length} active UAT rounds loaded.` : "No active UAT rounds are registered.");
+    } catch (error) {
+      listMessage.textContent = "Queue unavailable";
+      showFailure(error instanceof UatApiError ? error.code : "offline", false);
+    }
+  }
+
+  query<HTMLButtonElement>("[data-uat-open-source]").addEventListener("click", () => {
+    if (!sourceDialog.open) sourceDialog.showModal();
+  });
+  query<HTMLButtonElement>("[data-uat-close-source]").addEventListener("click", () => sourceDialog.close());
+  form.addEventListener("submit", (event) => { event.preventDefault(); void submitDraft(); });
+  query<HTMLButtonElement>("[data-uat-refresh-list]").addEventListener("click", () => void loadList());
+  window.addEventListener("beforeunload", (event) => {
+    if (!hasUnpersistableUnloadRisk()) return;
+    event.preventDefault();
+  });
+
+  void loadList();
+</script>
+
+<style>
+  :global([data-uat-field-save-visual]) {
+    visibility: hidden;
+    opacity: 0;
+    min-height: 1.25rem;
+  }
+  :global([data-uat-field-save-visual][data-state="saving"]),
+  :global([data-uat-field-save-visual][data-state="saved"]),
+  :global([data-uat-field-save-visual][data-state="failed"]) {
+    visibility: visible;
+    opacity: 1;
+  }
+  :global([data-uat-field-save-visual][data-state="fading"]) {
+    visibility: visible;
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+  }
+  :global([data-uat-round-card][aria-current]) {
+    border-color: rgb(var(--jw-blue)) !important;
+    background: rgb(var(--jw-queue-selected));
+    box-shadow: inset 0.3rem 0 0 rgb(var(--jw-blue)), 0 0 0 1px rgb(var(--jw-blue));
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] > summary [aria-hidden="true"] { transform: rotate(45deg); }
+  details > summary [aria-hidden="true"] { transition: transform 160ms ease; }
+  @media (max-width: 320px) {
+    :global([data-uat-round-card]) { padding: 0.75rem; }
+    :global([data-uat-round-card]) > span:first-child { flex-direction: column; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+</style>

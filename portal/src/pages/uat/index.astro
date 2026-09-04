@@ -1,0 +1,14 @@
+---
+// COM-391 Phase 4 — static Astro shell. All active-round authority is fetched
+// from runtime service APIs after load; no build-time UAT data is imported.
+import Base from "../../layouts/Base.astro";
+import ActiveUatWorkbench from "../../components/uat/ActiveUatWorkbench.astro";
+---
+<Base title="Active UAT rounds — Decision Review">
+  <main id="main" class="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <nav aria-label="Breadcrumb" class="text-sm">
+      <a href="/" class="inline-flex min-h-11 items-center text-jw-blue underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-jw-blue">← Decision Review</a>
+    </nav>
+    <ActiveUatWorkbench />
+  </main>
+</Base>

@@ -1,0 +1,54 @@
+{
+  "schema": "jswarm.test-uat.operation-inventory/v1",
+  "deployed_root_convention": "install_target_relpath is relative to deployed_root (normally ~/.claude); deployed_entrypoint is descriptive and relative to skills/test.",
+  "operations": [
+    {
+      "operation": "uat.round.issue",
+      "controlling_ac": ["A/C 7", "A/C 17"],
+      "deployed_entrypoint": "uat/round-registration.md",
+      "component_path": "skills/test/uat/round-registration.md",
+      "install_target_relpath": "skills/test/uat/round-registration.md",
+      "tool_payload": {"module": "jswarm.uat_practical_cutover", "operation": "practical-cutover"}
+    },
+    {
+      "operation": "uat.round.reseal",
+      "controlling_ac": ["A/C 17", "A/C 20"],
+      "deployed_entrypoint": "uat/round-registration.md",
+      "component_path": "skills/test/uat/round-registration.md",
+      "install_target_relpath": "skills/test/uat/round-registration.md",
+      "tool_payload": {"module": "jswarm.uat_practical_cutover", "operation": "practical-cutover"}
+    },
+    {
+      "operation": "uat.monitor.arm",
+      "controlling_ac": ["A/C 8", "A/C 17", "A/C 18"],
+      "deployed_entrypoint": "uat/notification-operation.md",
+      "component_path": "skills/test/uat/notification-operation.md",
+      "install_target_relpath": "skills/test/uat/notification-operation.md",
+      "required_command_fields": ["notify_command", "notify_once_command"]
+    },
+    {
+      "operation": "uat.feedback.wake",
+      "controlling_ac": ["A/C 8", "A/C 17"],
+      "deployed_entrypoint": "uat/notification-operation.md",
+      "component_path": "skills/test/uat/notification-operation.md",
+      "install_target_relpath": "skills/test/uat/notification-operation.md",
+      "tool_payload": {"monitor": "registration[\"notify_command\"]", "discovery": "registration[\"notify_once_command\"]"}
+    },
+    {
+      "operation": "uat.feedback.process",
+      "controlling_ac": ["A/C 17", "A/C 18"],
+      "deployed_entrypoint": "uat/feedback.md",
+      "component_path": "skills/test/uat/feedback.md",
+      "install_target_relpath": "skills/test/uat/feedback.md",
+      "required_command_fields": ["consumer_command", "consumer_once_command", "consumer_notify_command", "consumer_notify_once_command"]
+    },
+    {
+      "operation": "uat.round.close",
+      "controlling_ac": ["A/C 17", "A/C 20"],
+      "deployed_entrypoint": "uat/notification-operation.md",
+      "component_path": "skills/test/uat/notification-operation.md",
+      "install_target_relpath": "skills/test/uat/notification-operation.md",
+      "tool_payload": {"operation": "TaskStop", "condition": "durable acknowledgement or terminal round state"}
+    }
+  ]
+}

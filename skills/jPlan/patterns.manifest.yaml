@@ -1,0 +1,314 @@
+manifest_version: 1
+assembly_engine:
+  command: jswarm/new_work_templates/assemble.py
+  sole_executable_path: true
+  dependencies:
+    - PyYAML
+    - jswarm/patterns/recommend.py:PRESET_KEYS
+    - jswarm/precompact_reconcile/lifecycle_audit.py
+  output_receipts:
+    plan_birth: .jswarm/plans/<TICKET>/<TICKET>.assembly-receipts.ndjson
+    regeneration: jswarm/new_work_templates/regen-receipts.ndjson
+  generated_file_marker: YAML-frontmatter comment containing GENERATED
+patterns:
+  briefing: {version: 1, file: pattern.briefing.md}
+  planning-scaffold: {version: 1, file: pattern.planning-scaffold.md}
+  uat-chain: {version: 1, file: pattern.uat-chain.md}
+  nfr-chain: {version: 1, file: pattern.nfr-chain.md}
+  security-baseline: {version: 1, file: pattern.security-baseline.md}
+  outcome-metrics: {version: 1, file: pattern.outcome-metrics.md}
+  ux-section: {version: 1, file: pattern.ux-section.md}
+  catalog-pattern-selection: {version: 1, file: pattern.catalog-pattern-selection.md}
+  feature-governance: {version: 1, file: pattern.feature-governance.md}
+  pe2e-contributions: {version: 1, file: pattern.pe2e-contributions.md}
+  dashboard-render-tier: {version: 1, file: pattern.dashboard-render-tier.md}
+  dashboard-projections: {version: 1, file: pattern.dashboard-projections.md}
+  plan-governance: {version: 1, file: pattern.plan-governance.md}
+  uat-round-tracking: {version: 1, file: pattern.uat-round-tracking.md}
+  rapid-vibe-ui: {version: 1, file: pattern.rapid-vibe-ui.md}
+  preissued-rulings: {version: 1, file: pattern.preissued-rulings.md}
+injection_order:
+  - briefing
+  - catalog-pattern-selection
+  - pe2e-contributions
+  - ux-section
+  - uat-chain
+  - uat-round-tracking
+  - rapid-vibe-ui
+  - preissued-rulings
+  - nfr-chain
+  - security-baseline
+  - outcome-metrics
+  - dashboard-render-tier
+  - dashboard-projections
+  - feature-governance
+  - plan-governance
+  - planning-scaffold
+bundles:
+  LITE:
+    - briefing
+  QUICK:
+    - catalog-pattern-selection
+    - nfr-chain
+    - security-baseline
+    - outcome-metrics
+    - planning-scaffold
+  FULL:
+    - catalog-pattern-selection
+    - pe2e-contributions
+    - ux-section
+    - uat-chain
+    - nfr-chain
+    - security-baseline
+    - outcome-metrics
+    - dashboard-render-tier
+    - dashboard-projections
+    - plan-governance
+    - planning-scaffold
+  FEATURE:
+    - catalog-pattern-selection
+    - uat-chain
+    - nfr-chain
+    - security-baseline
+    - outcome-metrics
+    - feature-governance
+    - dashboard-render-tier
+    - planning-scaffold
+ceremony_preset_to_bundle:
+  l1.story.low-essential: QUICK
+  l1.story.medium-standard: FULL
+  l1.story.high-assurance: FULL
+  --lite mode: LITE
+  issue type Feature: FEATURE
+  legacy/no-selection:Quick: QUICK
+  legacy/no-selection:Standard: FULL
+  legacy/no-selection:Deep: FULL
+singleton_header_ownership:
+  "**Last Updated:**": template.CORE.md
+  "**Jira Ticket:**": template.CORE.md
+  "**Parent:**": template.CORE.md
+  "**Technical Design Spec:**": template.CORE.md
+  "**Status:**": template.CORE.md
+  "**Planning mode:**": pattern.briefing.md
+  "**Deeper planning:**": pattern.briefing.md
+  "**Recommended agent team:**": template.CORE.md
+  "**Ceremony tier:**": template.CORE.md
+  "**Effective pattern:**": template.CORE.md
+  "**Catalog Pattern selection:**": pattern.catalog-pattern-selection.md
+  "**Testing strategy:**": template.CORE.md
+  "**UAT state policy:**": template.CORE.md
+  "**Test data strategy:**": template.CORE.md
+  "**Automated UAT:**": pattern.uat-chain.md
+  "**E2E policy:**": pattern.uat-chain.md
+  "**UAT round tracking:**": pattern.uat-round-tracking.md
+  "## Bug Master Ledger": pattern.uat-round-tracking.md
+  "**Rapid vibe UI:**": pattern.rapid-vibe-ui.md
+  "**Living contracts:**": pattern.rapid-vibe-ui.md
+  "## Rapid Vibe UI Delivery Contract": pattern.rapid-vibe-ui.md
+  "## Pre-issued Execution Rulings": pattern.preissued-rulings.md
+  "**NFR catalog:**": pattern.nfr-chain.md
+  "**Automated NFR:**": pattern.nfr-chain.md
+  "**Per-Phase NFR Gate:**": pattern.nfr-chain.md
+  "**Integration Defects:**": pattern.feature-governance.md
+  "**PE2E Defects:**": pattern.feature-governance.md
+  "**Dashboard render tier:**": pattern.dashboard-render-tier.md
+  "**Dashboard projection:**": pattern.dashboard-projections.md
+  "## A/C-to-Test Traceability Matrix": pattern.planning-scaffold.md
+  "## Required Reading": pattern.plan-governance.md
+  "## Agent Assignment Summary": pattern.plan-governance.md
+  "## End-to-End Demo Path": pattern.plan-governance.md
+  "## Risk / Rollback": "pattern.plan-governance.md (FULL wording) / pattern.feature-governance.md (FEATURE wording) — same heading text, template-specific bodies, bundle-scoped so never co-selected"
+  "## Screenshot Evidence": pattern.plan-governance.md
+  "## Smoke Test Impact Assessment": pattern.plan-governance.md
+  "## Error Handling Strategy": pattern.plan-governance.md
+  "## Observability Requirements": pattern.plan-governance.md
+  "## TEST_CATALOG.md Review": pattern.plan-governance.md
+  "## E2E Tests Enabled by This Ticket": pattern.plan-governance.md
+  "## Critical Files": pattern.plan-governance.md
+  "## Critical Reminders": pattern.planning-scaffold.md
+  "## Definition of Done-ness (UAT/NFR Status Ladder)": pattern.uat-chain.md
+  "## Feature Context": pattern.feature-governance.md
+  "## Agent & Delegation Recommendations": pattern.feature-governance.md
+  "## Summary": pattern.feature-governance.md
+  "## UAT Scenario Alignment": pattern.feature-governance.md
+  "## Implementation Order": pattern.feature-governance.md
+  "## Scope Boundary": pattern.feature-governance.md
+  "## Open Questions": pattern.feature-governance.md
+  "## Known Technical Debt to Address": pattern.feature-governance.md
+  "## Implementation Notes": pattern.feature-governance.md
+header_contribution_contract:
+  required_ownership: every-exact-"**Key:**"-plan-header-line
+  validation: compare each contributing pattern's Header lines section with singleton_header_ownership
+  duplicate_owner: fail-loud
+collision_rules:
+  duplicate_singleton_header: fail-loud
+  duplicate_contributed_section: fail-loud
+  canonical_matrix_header: byte-exact-required
+  unresolved_placeholder: fail-loud
+  unmapped_ceremony_preset: fail-loud
+version_bump_rules:
+  template_version: integer
+  baseline_fixture_version: 2
+  composition_change_reaching_template: bump_that_template
+  core_change: bump_all_templates
+  pattern_change: bump_only_templates_whose_bundle_contains_pattern
+  no_op_regeneration:
+    versions: unchanged
+    bytes: unchanged
+provenance:
+  assembled_plan:
+    created_from_template: CORE@<integer>
+    assembled_patterns: ["<id>@<integer>"]
+  generated_template:
+    preserve_template_id: true
+    preserve_template_version: true
+content_ownership:
+  core-frontmatter-title-overview-scope-acceptance: template.CORE.md
+  lite-briefing-shape: pattern.briefing.md
+  planning-phases-tasks-testing-completion-retro: pattern.planning-scaffold.md
+  ac-to-test-traceability: pattern.planning-scaffold.md
+  uat-matrix-automated-uat-plan-and-results: pattern.uat-chain.md
+  nfr-matrix-validation-and-sidecar-rules: pattern.nfr-chain.md
+  ac-14-nfr-weighting: pattern.nfr-chain.md
+  security-compliance-baseline: pattern.security-baseline.md
+  outcome-metrics: pattern.outcome-metrics.md
+  user-experience: pattern.ux-section.md
+  catalog-pattern-selection: pattern.catalog-pattern-selection.md
+  feature-pe2e-contracts-governance-and-defect-trackers: pattern.feature-governance.md
+  story-feature-pe2e-contributions: pattern.pe2e-contributions.md
+  dashboard-delivery-render-tier: pattern.dashboard-render-tier.md
+  feature-child-dashboard-projections: pattern.dashboard-projections.md
+  required-reading-and-agent-assignment: pattern.plan-governance.md
+  full-risk-rollback-and-screenshot-evidence: pattern.plan-governance.md
+  smoke-test-impact-assessment: pattern.plan-governance.md
+  error-handling-and-observability-requirements: pattern.plan-governance.md
+  test-catalog-review-and-e2e-tests-enabled: pattern.plan-governance.md
+  critical-files: pattern.plan-governance.md
+  critical-reminders: pattern.planning-scaffold.md
+  definition-of-doneness-uat-nfr-status-ladder: pattern.uat-chain.md
+  bug-master-ledger-and-uat-round-tracking: pattern.uat-round-tracking.md
+  rapid-vibe-ui-living-contracts-and-close-reconciliation: pattern.rapid-vibe-ui.md
+  conditional-preissued-execution-rulings-and-escalation-budget: pattern.preissued-rulings.md
+  feature-context-and-delegation-recommendations: pattern.feature-governance.md
+  feature-summary: pattern.feature-governance.md
+  uat-scenario-alignment-feature: pattern.feature-governance.md
+  implementation-order-and-story-dependencies: pattern.feature-governance.md
+  scope-boundary-and-feature-risk-rollback: pattern.feature-governance.md
+  open-questions-and-known-technical-debt: pattern.feature-governance.md
+  implementation-notes-feature: pattern.feature-governance.md
+core_fields:
+  - status
+  - plan_status
+  - phase
+  - ac_complete
+  - template_id
+  - template_version
+  - components
+  - features
+  - title
+  - last_updated
+  - jira_ticket
+  - parent
+  - technical_design_spec
+  - recommended_agent_team
+  - ceremony_tier
+  - effective_pattern
+  - catalog_pattern_selection
+  - testing_strategy
+  - uat_state_policy
+  - test_data_strategy
+  - automated_uat
+  - e2e_policy
+  - nfr_catalog
+  - automated_nfr
+  - per_phase_nfr_gate
+  - status_line
+  - overview
+  - scope
+  - acceptance_criteria
+core_field_classification:
+  invariant:
+    - status
+    - plan_status
+    - phase
+    - ac_complete
+    - components
+    - features
+    - title
+    - last_updated
+    - jira_ticket
+    - status_line
+    - overview
+    - scope
+    - acceptance_criteria
+  parameter:
+    template_id:
+      LITE: PLAN_TEMPLATE_QUICK
+      QUICK: PLAN_TEMPLATE_QUICK
+      FULL: PLAN_TEMPLATE
+      FEATURE: PLAN_FEATURE_TEMPLATE
+    template_version:
+      LITE: 1
+      QUICK: 1
+      FULL: 1
+      FEATURE: 1
+    parent:
+      LITE: N/A
+      QUICK: optional
+      FULL: optional
+      FEATURE: required
+    technical_design_spec:
+      LITE: omitted
+      QUICK: optional
+      FULL: required
+      FEATURE: required
+    recommended_agent_team:
+      LITE: omitted
+      QUICK: required
+      FULL: required
+      FEATURE: required
+    ceremony_tier:
+      LITE: N/A
+      QUICK: selected
+      FULL: selected
+      FEATURE: N/A
+    effective_pattern:
+      LITE: N/A
+      QUICK: selected
+      FULL: selected
+      FEATURE: issue-type-Feature
+    testing_strategy:
+      LITE: omitted
+      QUICK: required
+      FULL: required
+      FEATURE: required
+    uat_state_policy:
+      LITE: omitted
+      QUICK: conditional
+      FULL: conditional
+      FEATURE: conditional
+    test_data_strategy:
+      LITE: omitted
+      QUICK: conditional
+      FULL: conditional
+      FEATURE: conditional
+  bundle-owned:
+    - catalog_pattern_selection
+    - automated_uat
+    - e2e_policy
+    - nfr_catalog
+    - automated_nfr
+    - per_phase_nfr_gate
+addons:
+  uat-round-tracking:
+    registered: true
+    allowed_bundles: [QUICK, FULL, FEATURE]
+    reason: Slice C (T5.2) registered this @1 as a --with-only addon; see patterns.uat-round-tracking above.
+  rapid-vibe-ui:
+    registered: true
+    allowed_bundles: [QUICK]
+    reason: Owner-approved opt-in for rapid existing-UI refinement; use QUICK plus living browser contracts and close reconciliation.
+  preissued-rulings:
+    registered: true
+    allowed_bundles: [QUICK, FULL, FEATURE]
+    reason: Conditional QUICK/FULL/FEATURE weak-orchestrator armor; select only when evidenced T1-T5 failure classes match and emit only matching rulings plus the escalation capstone.

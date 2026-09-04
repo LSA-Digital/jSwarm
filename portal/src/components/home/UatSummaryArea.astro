@@ -1,0 +1,147 @@
+<section
+  data-test-uat-feedback-area
+  aria-labelledby="test-uat-feedback-title"
+  class="peer-area peer-area-uat"
+>
+  <header class="peer-header">
+    <div>
+      <p class="peer-index">02 · Runtime feedback</p>
+      <h2 id="test-uat-feedback-title">TEST UAT FEEDBACK</h2>
+    </div>
+    <span class="peer-source">Live service</span>
+  </header>
+  <p class="peer-description">Open a canonical UAT round, record journey outcomes, and return findings to the next FIX decision.</p>
+
+  <div data-uat-summary-status class="uat-status" role="status" aria-live="polite">
+    <span class="uat-status-mark" aria-hidden="true"></span>
+    <span>Loading active UAT feedback rounds…</span>
+  </div>
+  <div data-uat-summary-warnings class="uat-warning" role="alert" hidden></div>
+  <div data-uat-summary-list class="uat-card-list" aria-label="UAT feedback rounds ordered newest first"></div>
+
+  <footer class="peer-footer">
+    <a href="/uat/" class="peer-footer-link">Open UAT workbench <span aria-hidden="true">→</span></a>
+  </footer>
+</section>
+
+<script>
+  import { fetchRoundList, sortUatSummariesNewestFirst } from "../../lib/uat-rounds";
+
+  const area = document.querySelector<HTMLElement>("[data-test-uat-feedback-area]");
+  const status = area?.querySelector<HTMLElement>("[data-uat-summary-status]");
+  const warnings = area?.querySelector<HTMLElement>("[data-uat-summary-warnings]");
+  const list = area?.querySelector<HTMLElement>("[data-uat-summary-list]");
+
+  const formatTimestamp = (value: string) => new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value)) + " UTC";
+
+  const statusCopy = (processingState: string, writable: boolean) => {
+    if (processingState !== "UNPROCESSED") return "Processed · read-only";
+    return writable ? "Ready for feedback" : "Read-only";
+  };
+
+  const renderRound = (round: Awaited<ReturnType<typeof fetchRoundList>>["rounds"][number]) => {
+    if (!round.feedback_generated_at) throw new TypeError("feedback_generated_at is required for a UAT summary card");
+    const href = `/uat/?round=${encodeURIComponent(round.round_review_id)}`;
+    const article = document.createElement("article");
+    article.className = "uat-summary-card";
+    article.setAttribute("data-uat-summary-card", "");
+    article.setAttribute("data-order", "newest-first");
+    article.setAttribute("data-round-id", round.round_review_id);
+    article.setAttribute("data-feedback-generated-at", round.feedback_generated_at);
+    article.setAttribute("data-detail-href", href);
+
+    const link = document.createElement("a");
+    link.className = "uat-card-link";
+    link.href = href;
+
+    const top = document.createElement("span");
+    top.className = "uat-card-topline";
+    const ticket = document.createElement("span");
+    ticket.className = "uat-ticket";
+    ticket.textContent = round.ticket;
+    const state = document.createElement("span");
+    state.className = `uat-state ${round.processing_state === "UNPROCESSED" ? "uat-state-open" : "uat-state-closed"}`;
+    state.textContent = statusCopy(round.processing_state, round.writable);
+    top.append(ticket, state);
+
+    const title = document.createElement("strong");
+    title.className = "uat-round-title";
+    title.textContent = round.round_review_id;
+
+    const meta = document.createElement("span");
+    meta.className = "uat-card-meta";
+    const time = document.createElement("time");
+    time.dateTime = round.feedback_generated_at;
+    time.textContent = formatTimestamp(round.feedback_generated_at);
+    const packageState = document.createElement("span");
+    packageState.textContent = round.package_state;
+    meta.append(time, packageState);
+
+    const action = document.createElement("span");
+    action.className = "uat-card-action";
+    action.innerHTML = "Review feedback <span aria-hidden=\"true\">→</span>";
+    link.append(top, title, meta, action);
+    article.append(link);
+    return article;
+  };
+
+  const showStatus = (message: string, tone: "loading" | "empty" | "offline") => {
+    if (!status) return;
+    status.dataset.state = tone;
+    const copy = status.querySelector("span:last-child");
+    if (copy) copy.textContent = message;
+    status.hidden = false;
+  };
+
+  if (area && status && warnings && list) {
+    fetchRoundList().then((result) => {
+      if (result.warnings.length) {
+        warnings.textContent = `Some registrations were skipped: ${result.warnings.join(" · ")}`;
+        warnings.hidden = false;
+      }
+      const rounds = sortUatSummariesNewestFirst(result.rounds);
+      if (!rounds.length) {
+        showStatus("No active UAT feedback rounds are registered.", "empty");
+        return;
+      }
+      const cards = rounds.map(renderRound);
+      list.replaceChildren(...cards);
+      status.hidden = true;
+    }).catch(() => {
+      showStatus("Active UAT feedback is offline. The FIX reviews remain available.", "offline");
+    });
+  }
+</script>
+
+<style is:inline>
+  .peer-area{display:flex;min-width:0;flex-direction:column;border:1px solid #dadce0;background:#fff;padding:clamp(1rem,2.5vw,1.5rem);box-shadow:0 8px 24px rgba(32,33,36,.05)}
+  .peer-area-uat{border-top:4px solid #0f6b3a}
+  .peer-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;border-bottom:1px solid #dadce0;padding-bottom:1rem}
+  .peer-index{margin:0;color:#0f6b3a;font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+  .peer-header h2{margin:.35rem 0 0;font-size:clamp(1.05rem,2vw,1.3rem);line-height:1.15;letter-spacing:.035em}
+  .peer-source{flex:none;border:1px solid #dadce0;background:#f1f3f5;padding:.28rem .48rem;color:#5f6368;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+  .peer-description{min-height:3.4rem;margin:1rem 0;color:#5f6368;font-size:.86rem;line-height:1.5}
+  .uat-status{display:flex;min-height:5.25rem;align-items:center;gap:.7rem;border:1px dashed #dadce0;background:#fafbfc;padding:1rem;color:#5f6368;font-size:.85rem}
+  .uat-status-mark{width:.65rem;height:.65rem;flex:none;border:2px solid #1a4fa0;border-radius:999px}
+  .uat-status[data-state="loading"] .uat-status-mark{animation:uat-pulse 1.4s ease-in-out infinite}
+  .uat-status[data-state="offline"]{border-color:#b3261e;background:#fde7e7;color:#7a1f1a}.uat-status[data-state="offline"] .uat-status-mark{border-color:#b3261e}
+  .uat-warning{margin-bottom:.75rem;border-left:4px solid #a15c00;background:#fdecc8;padding:.75rem;font-size:.78rem;color:#202124}
+  .uat-card-list{display:grid;gap:.75rem}
+  .uat-summary-card{min-width:0;border:1px solid #dadce0;background:#fff}
+  .uat-card-link{display:flex;min-height:44px;min-width:0;flex-direction:column;padding:1rem;color:#202124;text-decoration:none;transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease}
+  .uat-card-link:hover{box-shadow:inset 4px 0 #0f6b3a,0 6px 18px rgba(32,33,36,.08);transform:translateY(-1px)}
+  .uat-card-link:focus-visible{outline:3px solid #1a4fa0;outline-offset:3px}
+  .uat-card-topline,.uat-card-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem}
+  .uat-ticket{color:#5f6368;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+  .uat-state{padding:.18rem .4rem;font-size:.66rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}.uat-state-open{background:#e3f3e8;color:#0f6b3a}.uat-state-closed{background:#f1f3f5;color:#5f6368}
+  .uat-round-title{overflow-wrap:anywhere;margin-top:.7rem;font-size:.98rem;line-height:1.35}
+  .uat-card-meta{margin-top:.7rem;color:#5f6368;font-size:.73rem}.uat-card-meta span:last-child{font-family:SF Mono,Menlo,Consolas,monospace;font-size:.68rem}
+  .uat-card-action{margin-top:.9rem;color:#0f6b3a;font-size:.78rem;font-weight:800}
+  .peer-footer{margin-top:auto;padding-top:1rem}.peer-footer-link{display:inline-flex;min-height:44px;align-items:center;color:#1a4fa0;font-size:.82rem;font-weight:800;text-underline-offset:3px}.peer-footer-link:focus-visible{outline:3px solid #1a4fa0;outline-offset:3px}
+  @keyframes uat-pulse{50%{opacity:.25;transform:scale(.72)}}
+  @media (prefers-reduced-motion:reduce){.uat-status-mark{animation:none!important}.uat-card-link{transition:none}.uat-card-link:hover{transform:none}}
+</style>

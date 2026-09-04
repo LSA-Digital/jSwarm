@@ -1,0 +1,117 @@
+---
+import Base from "../../layouts/Base.astro";
+import { loadReviewData } from "../../lib/load-data";
+
+const data = loadReviewData();
+const publicationTimestamp = (contract: (typeof data.contracts)[number]) =>
+  contract.view_model.identity.published_at_utc ||
+  contract.view_model.identity.issued_at ||
+  "1970-01-01T00:00:00Z";
+const publicationDate = (contract: (typeof data.contracts)[number]) =>
+  publicationTimestamp(contract).slice(0, 10);
+const sortedContracts = [...data.contracts].sort((a, b) =>
+  publicationTimestamp(b).localeCompare(publicationTimestamp(a)),
+);
+const dateGroups = new Map<string, typeof data.contracts>();
+for (const contract of sortedContracts) {
+  const date = publicationDate(contract);
+  const group = dateGroups.get(date) ?? [];
+  group.push(contract);
+  dateGroups.set(date, group);
+}
+const displayDate = (isoDate: string) =>
+  new Date(`${isoDate}T00:00:00Z`).toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+const displayTimestamp = (value: string) =>
+  new Date(value).toLocaleString("en-US", {
+    timeZone: "UTC",
+    dateStyle: "medium",
+    timeStyle: "short",
+  }) + " UTC";
+---
+<Base title="FIX publications — Decision Review">
+  <main id="main" class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <nav aria-label="Breadcrumb" class="text-sm">
+      <a href="/" class="inline-flex min-h-11 items-center text-jw-blue underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-jw-blue">← Decision Review</a>
+    </nav>
+
+    <header class="mt-4 border-b border-jw-line pb-5">
+      <p class="text-xs font-bold uppercase tracking-widest text-jw-blue">Build-time authority</p>
+      <div class="mt-2 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-bold sm:text-3xl">FIX publications</h1>
+          <p class="mt-2 max-w-2xl text-sm leading-6 text-jw-muted">
+            Review published FIX decision and defect contracts, grouped by publication date and ordered newest first.
+          </p>
+        </div>
+        <p class="rounded border border-jw-line bg-jw-surface-muted px-3 py-2 text-xs font-semibold text-jw-muted">
+          {data.contracts.length} publication{data.contracts.length === 1 ? "" : "s"}
+        </p>
+      </div>
+    </header>
+
+    {data.contracts.length === 0 ? (
+      <p class="mt-6 rounded border border-dashed border-jw-line bg-jw-surface p-4 text-sm text-jw-muted">
+        No FIX publications are currently available.
+      </p>
+    ) : (
+      <div class="mt-6 space-y-8" data-fix-index>
+        {[...dateGroups.entries()].map(([date, contracts]) => (
+          <section aria-labelledby={`fix-publication-date-${date}`}>
+            <div class="flex items-center justify-between gap-4 border-b border-jw-line pb-2">
+              <h2 id={`fix-publication-date-${date}`} class="text-sm font-semibold uppercase tracking-wide text-jw-muted">
+                {displayDate(date)}
+              </h2>
+              <span class="text-xs font-semibold text-jw-muted">{contracts.length}</span>
+            </div>
+            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+              {contracts.map((contract) => {
+                const identity = contract.view_model.identity;
+                const href = `/review/${contract.slug}/`;
+                const timestamp = publicationTimestamp(contract);
+                return (
+                  <article data-fix-index-card class="min-w-0 rounded border border-jw-line bg-jw-surface p-4">
+                    <div class="flex flex-wrap items-start justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-jw-muted">
+                      <span>{identity.ticket} · {identity.cycle_key}</span>
+                      <span>{identity.contract_status}</span>
+                    </div>
+                    <h3 class="mt-3 break-words text-base font-semibold">
+                      <a href={href} class="text-jw-blue underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-jw-blue">
+                        {identity.contract_slug || contract.slug}
+                      </a>
+                    </h3>
+                    <p class="mt-1 break-words font-mono text-xs text-jw-muted">
+                      {contract.document_type} · {identity.contract_version}
+                    </p>
+                    <p class="mt-3 text-sm leading-6">{contract.view_model.decision}</p>
+                    <dl class="mt-4 grid gap-3 border-t border-jw-line pt-3 text-xs sm:grid-cols-2">
+                      <div>
+                        <dt class="font-semibold uppercase tracking-wide text-jw-muted">
+                          {identity.published_at_utc ? "Published" : "Issued"}
+                        </dt>
+                        <dd class="mt-1"><time datetime={timestamp}>{displayTimestamp(timestamp)}</time></dd>
+                      </div>
+                      <div>
+                        <dt class="font-semibold uppercase tracking-wide text-jw-muted">Gate</dt>
+                        <dd class="mt-1 break-words">{identity.gate_kind}</dd>
+                      </div>
+                    </dl>
+                    <p class="mt-4">
+                      <a href={href} class="inline-flex min-h-11 items-center font-semibold text-jw-blue underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-jw-blue">
+                        Open decision review <span aria-hidden="true">→</span>
+                      </a>
+                    </p>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+      </div>
+    )}
+  </main>
+</Base>

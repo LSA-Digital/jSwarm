@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.lsars.decision-review</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__JSWARM_COMMON__/.venv/bin/python</string>
+        <string>-m</string>
+        <string>jswarm.portal.server</string>
+        <string>--config</string>
+        <string>__HOME__/.jswarm/decision-review/config.json</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__JSWARM_COMMON__</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>__HOME__</string>
+    </dict>
+
+    <!-- Owner activation is MANUAL: the plist is committed but must be linked
+         into ~/Library/LaunchAgents and bootstrapped by the owner (see
+         README.decision-review.md). -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>__JSWARM_COMMON__/log/decision-review.launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>__JSWARM_COMMON__/log/decision-review.launchd.error.log</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

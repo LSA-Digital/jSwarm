@@ -1,0 +1,13 @@
+{
+  "approved_roots": ["__JSWARM_COMMON__"],
+  "publications_dir": "__JSWARM_COMMON__/.jswarm/decision-review/publications",
+  "threads_dir": "__JSWARM_COMMON__/.jswarm/decision-review/threads",
+  "dist_dir": "__JSWARM_COMMON__/jswarm/portal/dist",
+  "origin_allowlist": [
+    "http://localhost:__PORT_UI__",
+    "http://127.0.0.1:__PORT_UI__"
+  ],
+  "port": __PORT_BACKEND__,
+  "bind_host": "127.0.0.1",
+  "service_store_root": "__HOME__/.jswarm/decision-review"
+}

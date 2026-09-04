@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "patterns": [
+    {
+      "id": "default",
+      "version": 1,
+      "status": "active",
+      "source": "controlled-config",
+      "template": "UAT_CURRENT_ROUND_TEMPLATE.md",
+      "rule_set": "uat-master",
+      "rule_ids": [
+        "UAT-G0",
+        "UAT-G1",
+        "UAT-R1",
+        "UAT-R2",
+        "UAT-R3",
+        "UAT-R4",
+        "UAT-R5",
+        "UAT-R6",
+        "UAT-R7",
+        "UAT-R8",
+        "UAT-R9",
+        "UAT-T1",
+        "UAT-D1",
+        "UAT-D2",
+        "UAT-D3",
+        "UAT-D4"
+      ],
+      "materialization": {
+        "output_name": "<TICKET>.UAT-CURRENT-ROUND.md",
+        "mode": "wholesale-replace-on-create; patch-in-place-mid-round",
+        "compatibility_baseline": "UAT_CURRENT_ROUND_TEMPLATE.md@pre-COM-266"
+      }
+    }
+  ]
+}

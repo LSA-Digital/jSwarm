@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://common.lsa.dev/schemas/fix-decisions/qa-thread/v1.0",
+  "title": "Fix-Decision Q&A Thread",
+  "description": "Generic question-and-answer thread (owner expansion 2026-08-27): any question, any anchor, free-floating allowed. Q&A is a first-class object, not a receipt kind; receipts are decisions only. Threads are mutable-with-history: messages append and status transitions (unlike immutable receipts).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schema_version",
+    "thread_id",
+    "ticket",
+    "created_at_utc",
+    "status",
+    "asked_by",
+    "messages"
+  ],
+  "properties": {
+    "schema": { "const": "jswarm.fix-decisions.qa-thread/v1" },
+    "schema_version": { "const": "1.0" },
+    "thread_id": { "type": "string", "minLength": 1 },
+    "ticket": { "type": "string", "minLength": 1 },
+    "cycle_key": { "type": "string", "minLength": 1 },
+    "created_at_utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "anchor": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": true,
+      "description": "Optional and open. MAY carry section_id, contract_path, contract_sha256, contract_slug, subject, or any other key the asker needs. A thread with no anchor at all is valid (free-floating question)."
+    },
+    "status": { "enum": ["open", "answered", "closed"] },
+    "asked_by": { "type": "string", "minLength": 1 },
+    "answered_by": { "type": "string", "minLength": 1 },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["message_id", "author_role", "created_at_utc", "body"],
+        "properties": {
+          "message_id": { "type": "string", "minLength": 1 },
+          "author_role": { "enum": ["owner", "orchestrator", "architect", "agent", "other"] },
+          "created_at_utc": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+          },
+          "body": { "type": "string", "minLength": 1, "maxLength": 20000 },
+          "in_reply_to": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "x_extension": { "type": "object" }
+  }
+}
