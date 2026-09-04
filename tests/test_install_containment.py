@@ -27,7 +27,7 @@ subprocess environment on every run, so a regression that stops scoping
 would have looked untouched by coincidence.
 
 Skips (not silently passes) when a real `claude` CLI a stub cannot stand in
-for is not available on `PATH`, or does not actually run.
+for is not available on `PATH`, or does not actually work as one.
 """
 from __future__ import annotations
 
@@ -36,6 +36,7 @@ import os
 import shutil
 import stat
 import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -46,6 +47,33 @@ REAL_HOME = Path.home()  # captured once, at import time, before any test touche
 
 
 def _real_claude_or_skip() -> str:
+    """Resolve a `claude` on `PATH` that can actually perform the real MCP
+    registration this module tests, or skip with a precise reason.
+
+    `shutil.which` finding something named `claude`, and that something
+    printing a version string, is not proof it can register an MCP server --
+    it is exactly the false-positive shape that was fixed in
+    `ClaudeCodeHost.is_present()` (a bare `~/.claude` directory used to be
+    enough to report the host "present" even with no working binary behind
+    it). Here the equivalent trap is a `claude` on `PATH` that is a
+    wrapper/shim: some dev tooling (an account-switcher shell function, an
+    IDE-injected forwarding script, etc.) answers `--version` by forwarding
+    to a real Claude Code install, then fails `mcp add` once `PATH` is
+    scoped down the way this module's tests scope it for containment (see
+    `_decoy_env` below) -- because the wrapper itself needs more of the
+    caller's PATH than a scoped subprocess provides. That failure mode is
+    silent at the `--version` check (exit 0, a real-looking version string)
+    and only surfaces deep inside a test as "registration did not happen",
+    which looks like a containment bug rather than a broken local CLI.
+
+    So the guard actually runs `claude mcp add` / `mcp remove` -- the exact
+    subcommands the installer and these tests depend on -- against a
+    disposable scratch `HOME`, under the same scoped `PATH` (`claude`'s own
+    directory plus this repo's base tool PATH, no more) that `_decoy_env`
+    gives the real tests. Only a `claude` that can round-trip that for real
+    is treated as usable; anything else skips with the concrete exit code
+    and stderr so the reason is legible instead of guessed at.
+    """
     claude = shutil.which("claude")
     if not claude:
         pytest.skip("no `claude` CLI on PATH -- this test proves containment against the "
@@ -53,9 +81,40 @@ def _real_claude_or_skip() -> str:
     try:
         probe = subprocess.run([claude, "--version"], capture_output=True, text=True, timeout=10)
     except (OSError, subprocess.TimeoutExpired) as exc:
-        pytest.skip(f"`claude` on PATH did not run ({exc}); cannot exercise real MCP registration")
+        pytest.skip(f"`claude` on PATH ({claude}) did not run ({exc}); cannot exercise real MCP registration")
     if probe.returncode != 0:
-        pytest.skip(f"`claude --version` failed (exit {probe.returncode}); cannot exercise real MCP registration")
+        pytest.skip(
+            f"`claude --version` ({claude}) failed (exit {probe.returncode}); "
+            "cannot exercise real MCP registration"
+        )
+
+    claude_dir = str(Path(claude).parent)
+    probe_name = "jswarm-containment-guard-probe"
+    with tempfile.TemporaryDirectory(prefix="jswarm-claude-guard-home-") as probe_home:
+        probe_env = {"HOME": probe_home, "PATH": f"{claude_dir}:{BASE_PATH}"}
+        try:
+            add = subprocess.run(
+                [claude, "mcp", "add", "--scope", "user", probe_name, "/usr/bin/true"],
+                capture_output=True, text=True, timeout=20, env=probe_env,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            pytest.skip(
+                f"`claude` on PATH ({claude}) answers --version but `mcp add` did not run under "
+                f"this test's scoped PATH ({exc}); likely a wrapper/shim, not the real CLI -- "
+                "cannot exercise real MCP registration"
+            )
+        if add.returncode != 0:
+            detail = (add.stderr or add.stdout or "").strip()[:300]
+            pytest.skip(
+                f"`claude` on PATH ({claude}) answers --version but `mcp add` failed under this "
+                f"test's scoped PATH (exit {add.returncode}: {detail}) -- likely a wrapper/shim "
+                "that needs more of the caller's PATH than the real test provides, not the real "
+                "CLI; cannot exercise real MCP registration"
+            )
+        subprocess.run(
+            [claude, "mcp", "remove", "--scope", "user", probe_name],
+            capture_output=True, text=True, timeout=20, env=probe_env,
+        )
     return claude
 
 
