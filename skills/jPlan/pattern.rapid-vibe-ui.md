@@ -43,4 +43,4 @@ Reconcile at every `/jPrecompact` and immediately before `/jClose`: derive the p
 
 This pattern optimizes for minimum ceremony and maximum owner-feedback cycles; it is not permission to skip planning for genuine feature work. The living contracts file replaces upfront defect A/C and the duplicate executable UAT document, but not per-item browser acceptance, measured evidence, the final combined walkthrough, or close-gate reconciliation.
 
-Provenance: owner-directed pattern from field evidence, 2026-07-26.
+Provenance: pattern derived from field evidence.

@@ -221,15 +221,12 @@ inputs are corrected. Never bypass it with a manual config edit.
 ## Verify the live watcher, not just the registration
 
 A watcher that is dead, or armed on the wrong path, is indistinguishable from an
-empty queue. Three incidents in one week traced to this distinction. In one,
-an agent had the right round paths and key derivation but no watcher process for
-the live round; it was watching the two previous rounds. Another alarm used a
-method that could not detect the watcher that did exist. Both checks also
-resolved state roots from the canonical plans path, although a worktree-based
-ticket roots its events inside the worktree.
-
-The lane contributed this procedure from field use (observed in field
-use, 2026-09-01).
+empty queue from the outside: a watcher can be watching stale round paths or
+key derivation instead of the live round, or a health check can itself be
+blind to a watcher that does exist. Both failure modes also hide behind
+resolving state roots from the canonical plans path when a worktree-based
+ticket actually roots its events inside the worktree. Verify the live
+watcher directly; do not infer it from registration alone.
 
 ### Enumerate mechanisms by path
 

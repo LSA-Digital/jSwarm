@@ -64,4 +64,4 @@ Rules:
 
 Use the UAT chain only after unit/integration proof. State whether execution is live-show-headed, headless automation, or diagnostic CDP; include driver, preflight, data, contracts, monitoring, durable report, and regression-promotion decision. Passing live-show flows are promoted or explicitly deferred.
 
-Provenance: `PLAN_TEMPLATE.md` / `PLAN_FEATURE_TEMPLATE.md` §§ Definition of Done-ness (UAT/NFR Status Ladder), UAT-Scenario Traceability Matrix, Automated UAT Plan, Automated UAT Results. Definition of Done-ness restored 2026-07-10 (Slice B gate-4 round-1 MAJOR-1 remediation, byte-identical between the two source templates); see `.jswarm/plans/TICKET-XXX/TICKET-XXX.dedrift-ledger.md`.
+Provenance: `PLAN_TEMPLATE.md` / `PLAN_FEATURE_TEMPLATE.md` §§ Definition of Done-ness (UAT/NFR Status Ladder), UAT-Scenario Traceability Matrix, Automated UAT Plan, Automated UAT Results. Definition of Done-ness was restored (byte-identical between the two source templates); see `.jswarm/plans/TICKET-XXX/TICKET-XXX.dedrift-ledger.md`.
