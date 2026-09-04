@@ -63,6 +63,60 @@ def _cmd_check(args: argparse.Namespace) -> int:
 
 
 # ------------------------------------------------------------------- install
+# colgrep-search and code-overview both lean on the colgrep_search /
+# colgrep_list_dev_indices MCP tools that only exist once ColGREP is actually
+# installed and registered (see _install_colgrep). Installing them without that
+# would leave a silently non-functional command sitting in the user's command
+# surface -- unacceptable, per the same standard --with-colgrep is held to.
+# Excluded rather than installed with a "not available" banner: colgrep-search is
+# `user-invocable: false`, designed to be copied verbatim into other skills'
+# subagent-dispatch prompts, so a banner at its own top would not stop that
+# reliance.
+_COLGREP_DEPENDENT_SKILLS = {"colgrep-search", "code-overview"}
+
+
+def _expected_skill_names(source: Path, *, with_colgrep: bool) -> list[str]:
+    """The top-level skill names `_install_skills` deploys (or would deploy)
+    for a given `with_colgrep` setting -- real skills plus non-colliding
+    `_shims/` aliases -- without touching the destination filesystem.
+
+    Shared by `_install_skills` (to decide what to copy) and `_cmd_verify`
+    (to decide what must actually be present on disk): computing this list
+    in two places let them drift apart, which is exactly how `verify`
+    reported "all artefacts present" while the colgrep-gated skills were
+    silently missing -- it never knew colgrep-search/code-overview were
+    supposed to exist, so it never looked for them.
+    """
+    skills_source = source / "skills"
+    if not skills_source.is_dir():
+        return []
+
+    excluded = set() if with_colgrep else _COLGREP_DEPENDENT_SKILLS
+    real_skill_dirs = sorted(
+        p for p in skills_source.iterdir()
+        if p.is_dir() and p.name != "_shims" and p.name not in excluded
+    )
+    real_names_lower = {p.name.lower() for p in real_skill_dirs}
+    names = [p.name for p in real_skill_dirs]
+
+    # _shims/ is a source-tree grouping directory only. Each child is a
+    # deprecation-alias skill that must land at its own discoverable
+    # top-level name (dest_root/<alias>), exactly like a real skill -- not
+    # nested under a literal "_shims" directory, which nothing that
+    # discovers skills by top-level name would ever find. A shim whose name
+    # only differs from a real skill's by case is never actually deployed
+    # under its own name (see the case-collision note in `_install_skills`),
+    # so it must not be listed as expected either -- that path IS the real
+    # skill's directory.
+    shims_source = skills_source / "_shims"
+    if shims_source.is_dir():
+        for shim_dir in sorted(p for p in shims_source.iterdir() if p.is_dir()):
+            if shim_dir.name.lower() not in real_names_lower:
+                names.append(shim_dir.name)
+
+    return names
+
+
 def _install_skills(ctx, home: Path, source: Path, timestamp: str, *, with_colgrep: bool = False) -> None:
     from jswarm.host import current as current_host
     from jswarm.installer import backup as backup_mod
@@ -75,25 +129,16 @@ def _install_skills(ctx, home: Path, source: Path, timestamp: str, *, with_colgr
         print(f"  skills: {skills_source} not found, skipping")
         return
 
-    # colgrep-search and code-overview both lean on the colgrep_search /
-    # colgrep_list_dev_indices MCP tools that only exist once ColGREP is actually
-    # installed and registered (see _install_colgrep). Installing them without that
-    # would leave a silently non-functional command sitting in the user's command
-    # surface -- unacceptable, per the same standard --with-colgrep is held to.
-    # Excluded rather than installed with a "not available" banner: colgrep-search is
-    # `user-invocable: false`, designed to be copied verbatim into other skills'
-    # subagent-dispatch prompts, so a banner at its own top would not stop that
-    # reliance.
-    _COLGREP_DEPENDENT_SKILLS = {"colgrep-search", "code-overview"}
     excluded = set() if with_colgrep else _COLGREP_DEPENDENT_SKILLS
-    real_skill_dirs = sorted(
-        p for p in skills_source.iterdir()
-        if p.is_dir() and p.name != "_shims" and p.name not in excluded
-    )
     for name in sorted(excluded):
         if (skills_source / name).is_dir():
             print(f"  skills: {name} skipped (requires --with-colgrep)")
-    real_names_lower = {p.name.lower() for p in real_skill_dirs}
+
+    expected = _expected_skill_names(source, with_colgrep=with_colgrep)
+    real_names = {
+        p.name for p in skills_source.iterdir()
+        if p.is_dir() and p.name != "_shims" and p.name not in excluded
+    }
 
     # Real skills first, shims second: a rename that only changed case (e.g.
     # jsetup -> jSetup) leaves the deprecated shim's name identical to the
@@ -105,8 +150,11 @@ def _install_skills(ctx, home: Path, source: Path, timestamp: str, *, with_colgr
     # so identity is never in doubt; the shim loop below then skips any shim
     # whose name collides case-insensitively with a real skill instead of
     # clobbering it.
-    for skill_dir in real_skill_dirs:
-        dest = dest_root / skill_dir.name
+    for name in expected:
+        if name not in real_names:
+            continue  # a shim; handled below
+        skill_dir = skills_source / name
+        dest = dest_root / name
         if dest.exists():
             backup_mod.backup_path(ctx, home, dest, timestamp)
         ctx.copy_tree(skill_dir, dest)
@@ -114,23 +162,22 @@ def _install_skills(ctx, home: Path, source: Path, timestamp: str, *, with_colgr
     shims_source = skills_source / "_shims"
     if not shims_source.is_dir():
         return
-    # _shims/ is a source-tree grouping directory only. Each child is a
-    # deprecation-alias skill that must land at its own discoverable
-    # top-level name (dest_root/<alias>), exactly like a real skill -- not
-    # nested under a literal "_shims" directory, which nothing that
-    # discovers skills by top-level name would ever find.
-    for shim_dir in sorted(p for p in shims_source.iterdir() if p.is_dir()):
-        if shim_dir.name.lower() in real_names_lower:
-            print(
-                f"  skills: shim '{shim_dir.name}' skipped -- its name is a case-only "
-                f"variant of a real skill already installed at {dest_root / shim_dir.name}, "
-                "the same path on a case-insensitive filesystem"
-            )
+    for name in expected:
+        if name in real_names:
             continue
-        shim_dest = dest_root / shim_dir.name
+        shim_dir = shims_source / name
+        shim_dest = dest_root / name
         if shim_dest.exists():
             backup_mod.backup_path(ctx, home, shim_dest, timestamp)
         ctx.copy_tree(shim_dir, shim_dest)
+    skipped_shims = {p.name for p in shims_source.iterdir() if p.is_dir()} - set(expected)
+    for shim_name in sorted(skipped_shims):
+        dest_root_shim = dest_root / shim_name
+        print(
+            f"  skills: shim '{shim_name}' skipped -- its name is a case-only "
+            f"variant of a real skill already installed at {dest_root_shim}, "
+            "the same path on a case-insensitive filesystem"
+        )
 
 
 def _install_portal_config(ctx, home: Path, source: Path, timestamp: str) -> None:
@@ -205,8 +252,24 @@ def _install_colgrep(ctx, source: Path) -> bool:
     result = ctx.run(argv)
     if result is not None and result.returncode != 0:
         detail = (result.stderr or result.stdout or "").strip()[:400]
-        print(f"  colgrep: MCP registration failed (exit {result.returncode}): {detail}")
-        return False
+        # `claude mcp add` exits non-zero both for a real registration failure
+        # and for "this name is already registered" -- the latter is not a
+        # failure at all, it is the idempotency signal that ColGREP is
+        # already correctly set up (a second `install --with-colgrep`, a
+        # prior partial install that got this far, or a leftover
+        # registration from outside this installer entirely). Treating it as
+        # a failure was the actual bug: it set `colgrep_ready = False`, which
+        # is exactly the flag `_cmd_install`'s `skills_need_run` checks
+        # before (re)deploying colgrep-search/code-overview, so the
+        # documented `install --with-colgrep` resume path silently skipped
+        # both skills with no error, and also never recorded "colgrep" as a
+        # completed step -- which is also why `uninstall` had nothing to undo
+        # (see `_cmd_uninstall`'s `colgrep_registered` check).
+        if "already exists" in detail.lower():
+            print(f"  colgrep: MCP server already registered ({detail})")
+        else:
+            print(f"  colgrep: MCP registration failed (exit {result.returncode}): {detail}")
+            return False
 
     print("  colgrep: ready -- colgrep_search and colgrep_list_dev_indices are registered")
     return True
@@ -324,16 +387,44 @@ def _cmd_verify(args: argparse.Namespace) -> int:
     from jswarm.host import current as current_host
 
     host = current_host()
+    source = jswarm_paths.jswarm_home()
+    dest_root = host.skills_dir()
+
+    # A lock file recording "skills" (and, once ColGREP is enabled,
+    # "skills_colgrep") as completed steps is a record of what the installer
+    # *attempted*, not proof of what actually survived on disk -- the old
+    # "skills dir is a directory" check below is satisfied as long as *any*
+    # skill is still there, so it kept reporting "all artefacts present"
+    # even when `_install_colgrep` mis-reported an already-registered MCP
+    # server as a failure and silently left colgrep-search and code-overview
+    # undeployed (see `_install_colgrep`). This recomputes the exact set of
+    # skill names that lock state says should be deployed -- via the same
+    # `_expected_skill_names` helper `_install_skills` uses to decide what to
+    # copy -- and checks each one is actually present, so the two can never
+    # silently drift apart again.
+    with_colgrep = "skills_colgrep" in lock.steps_completed
+    expected_skills = _expected_skill_names(source, with_colgrep=with_colgrep)
+    missing_skills = [name for name in expected_skills if not (dest_root / name / "SKILL.md").is_file()]
+
     rows = [
-        ("skills dir", host.skills_dir().is_dir(), str(host.skills_dir())),
+        ("skills dir", dest_root.is_dir(), str(dest_root)),
         ("portal config", (home / ".jswarm" / "decision-review" / "config.json").is_file(), str(home / ".jswarm" / "decision-review" / "config.json")),
         ("venv python", jswarm_paths.python().is_file(), str(jswarm_paths.python())),
     ]
-    width = max(len(r[0]) for r in rows)
+    width = max(len(r[0]) for r in rows + [("skills deployed", None, None)])
     ok = True
     for name, present, detail in rows:
         print(f"{name.ljust(width)}  {'ok     ' if present else 'MISSING'}  {detail}")
         ok = ok and present
+
+    skills_ok = not missing_skills
+    skills_detail = (
+        f"{len(expected_skills)}/{len(expected_skills)} present"
+        if skills_ok
+        else f"{len(expected_skills) - len(missing_skills)}/{len(expected_skills)} present; missing: {', '.join(missing_skills)}"
+    )
+    print(f"{'skills deployed'.ljust(width)}  {'ok     ' if skills_ok else 'MISSING'}  {skills_detail}")
+    ok = ok and skills_ok
 
     print()
     if not ok:
