@@ -6,7 +6,7 @@ from typing import Final
 
 CONTROLLED_RESOLVER: Final = (
     Path(__file__).resolve().parents[1]
-    / "skills/fix/scripts/fix_localization.py"
+    / "skills/jFix/scripts/fix_localization.py"
 )
 
 if __name__ == "__main__":
