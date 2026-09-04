@@ -5,10 +5,10 @@ phase: "2.planning"
 ac_complete: "0/0"
 template_id: PLAN_TEMPLATE
 template_version: 1
-# COM-138 — phase: + ac_complete: are DERIVED (like status:) and hook-maintained.
+# phase: + ac_complete: are DERIVED (like status:) and hook-maintained.
 #   phase:       "<N>.<heading>" from plan_status (impl) or the stage label; do NOT hand-edit.
 #   ac_complete: "<done>/<total>" counted from the ## Acceptance Criteria section.
-# COM-114 — logical components this ticket contributes to + marketable features it advances.
+# logical components this ticket contributes to + marketable features it advances.
 #   components: list of logical-component ids (docs/_JarviSWARM/components/{id}.component.yaml);
 #               use [] (explicit, never omit) if the ticket touches no durable component.
 #   features:   list of marketable-feature ids (F-MKT/MTH/TOOL/INF-N) the ticket advances; [] allowed.
@@ -22,11 +22,11 @@ features: []
 #   - /jClose flips to DONE post-merge (Step 3.10, after /jMerge returns green)
 # Canonical: ${JSWARM_HOME:-$HOME/dev/jswarm}/docs/merge/state-machine.md
 #
-# plan_status (COM-84): canonical lifecycle; status: above is DERIVED from it.
+# plan_status: canonical lifecycle; status: above is DERIVED from it.
 #   /jPlan --lite -> 0.planning.lite_init ; /jPlan -> 2.planning.detailed
 #   /jGo -> 3.implementation.phase_N.<descr> ; Plan Completion -> 5.closed.ready_for_merge
 #   /jClose -> 4.closed.all_ac_met then 6.closed.merged ; terminal.wont_do / terminal.deferred
-# Canonical: docs/agent-system/plan-status-state-machine.md and docs/plans/COM-84.specs.md
+# Canonical: docs/agent-system/plan-status-state-machine.md and docs/plans/TICKET-XXX.specs.md
 ---
 
 # TICKET-XXX: Feature Title

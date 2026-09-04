@@ -23,7 +23,7 @@ Before `/uat-round` consumes a scenario's semantic verdict into the round file, 
 5. **Transcript reference per probe.** Require a transcript reference for every probe — canonical GWT and each paraphrase — not only the aggregate row.
 6. **Continuation evidence for every offer.** Require continuation evidence for every action offer: cite the typed continuation each offer was consumed by.
 7. **Rubric in Definitions.** Carry the scenario's judgment_rubric verbatim into the round file's Definitions section (pass_exemplars, fail_exemplars, tolerance_notes, grounding_requirements, forbidden_behaviors) — never invent rubric text outside it.
-8. **Product NFRs as context only.** Product NFRs are citable as acceptance context only — for example the mutation-consent and backed-affordance items owned by HAS-568.
-9. **Ownership boundary.** This gate never registers, proposes, promotes, or catalogs product NFRs; that workflow belongs to HAS-568 alone — COM-307 cites, it does not manage.
+8. **Product NFRs as context only.** Product NFRs are citable as acceptance context only — for example the mutation-consent and backed-affordance items owned by the product-NFR catalog.
+9. **Ownership boundary.** This gate never registers, proposes, promotes, or catalogs product NFRs; that workflow belongs to the product-NFR catalog alone — this gate cites it, and does not manage it.
 
 A verdict failing any check above stops at `/uat-round` PREP; do not materialize a round file around an unauditable or contradictory semantic verdict.

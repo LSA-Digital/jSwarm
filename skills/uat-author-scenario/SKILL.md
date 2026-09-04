@@ -14,9 +14,9 @@ level: 2
 
 # uat-author-scenario — mid-ticket guided scenario authoring + runbook + test scaffolding
 
-Option 3 of the `/jUAT` menu (COM-194). It lets a developer, **while another ticket is mid-`/jGo`**, add UAT coverage for newly-discovered behavior without leaving the flow: author a brand-new scenario (or update an existing one), generate that scenario's executable `.uat-test.md` runbook, and scaffold the unit/integration test stubs it implies — then continue with `/jGo` to author the real assertions.
+Option 3 of the `/jUAT` menu. It lets a developer, **while another ticket is mid-`/jGo`**, add UAT coverage for newly-discovered behavior without leaving the flow: author a brand-new scenario (or update an existing one), generate that scenario's executable `.uat-test.md` runbook, and scaffold the unit/integration test stubs it implies — then continue with `/jGo` to author the real assertions.
 
-This skill is a **thin orchestration** over the existing COM-122 UAT-scenario engine. It does not reimplement validation, rendering, or the preview gate — it drives the engine scripts. Two hard rules:
+This skill is a **thin orchestration** over the existing UAT-scenario engine. It does not reimplement validation, rendering, or the preview gate — it drives the engine scripts. Two hard rules:
 
 1. **Preview before apply, always.** Never write the canonical scenarios JSON, the runbook, or any test stub before a PREVIEW has been produced and the developer has approved it. Every write is receipt-gated by the underlying tool.
 2. **Fail loud, write nothing on doubt.** If the active ticket is unresolved, closed/terminal, missing a plan, or its sources disagree; if input is schema-invalid; if a link is dangling; or if a receipt is stale — stop with a clear error and write nothing. There is no silent fallback substitution (never quietly pick a different ticket, scenarios path, or scenario id).
@@ -39,7 +39,7 @@ This skill is a **thin orchestration** over the existing COM-122 UAT-scenario en
 
 ## Workflow (8 steps — keep the developer informed at each)
 
-1. **Resolve + validate the active ticket.** Gather the candidate ticket from the COM-174 per-session `active-ticket.json` binding, the git branch (`git branch --show-current`), and the session title, then validate with the resolver:
+1. **Resolve + validate the active ticket.** Gather the candidate ticket from the per-session `active-ticket.json` binding, the git branch (`git branch --show-current`), and the session title, then validate with the resolver:
 
    ```bash
    .venv/bin/python jswarm/uat-scenarios/resolve_active_ticket.py \

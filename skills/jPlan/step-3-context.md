@@ -92,9 +92,9 @@ For each scenario in the extracted UAT file, answer:
 Record results in `TICKET-XXX.uat-scenarios.md` under a `## UAT Pre-flight` section. Any scenario that fails checks 1–4 **MUST be re-scoped** before the executable UAT doc is written — do not carry known-infeasible scenarios into `TICKET-XXX.uat-test.md`.
 
 
-## Bounded overview first — only when the project adopted the COM-122 scenarios engine (COM-128 WS3)
+## Bounded overview first — only when the project adopted the scenarios engine (WS3)
 
-Before the architecture-first ColGREP trawl, check whether this project has adopted the COM-122 UAT-scenario engine. The **adoption signal** is deterministic: the project manages `code-overview.md` (a `managed_commands.code-overview.md` entry with a `code-overview-scenario-source` anchor / a resolvable canonical scenarios JSON). Verify with:
+Before the architecture-first ColGREP trawl, check whether this project has adopted the UAT-scenario engine. The **adoption signal** is deterministic: the project manages `code-overview.md` (a `managed_commands.code-overview.md` entry with a `code-overview-scenario-source` anchor / a resolvable canonical scenarios JSON). Verify with:
 
 ```
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/devops_command_injection.py \
@@ -104,6 +104,6 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
 Adoption requires **both** `mode: managed` **and** `code-overview-scenario-source` present in the emitted `anchors` list. A project can manage `code-overview.md` for `code-overview-required-reading` / `code-overview-smoke-config` alone, with **no** canonical scenarios JSON — that is **not** adoption. Anything short of both ⇒ not adopted.
 
 - **If adopted →** run `/code-overview <scenario-grouping>` **first** as the bounded, UX-aligned overview pass (scenario-grouping framing, ≤12 / hard-20 tool budget, ≥3× speedup benchmark vs an unbounded trawl). Then let ColGREP enrich the already-bounded pathway with the Step 3A/C-keyword searches in this module.
-- **If NOT adopted →** skip `/code-overview` entirely and use the architecture-first ColGREP search in this module. **Never advise `/code-overview` where no canonical scenarios JSON exists** — it depends on the COM-122 engine and would mislead on a non-adopting project.
+- **If NOT adopted →** skip `/code-overview` entirely and use the architecture-first ColGREP search in this module. **Never advise `/code-overview` where no canonical scenarios JSON exists** — it depends on the engine and would mislead on a non-adopting project.
 
 hai-sim-engine is the live first adopter (manifest wires `code-overview.md` → `docs/architecture/architecture.uat-scenarios.json`).

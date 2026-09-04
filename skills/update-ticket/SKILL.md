@@ -5,7 +5,7 @@ description: Reliable single entry point for lifecycle plan-maintenance (migrate
 
 # Update Ticket
 
-## Safety contract (COM-219 — destructive skill, agent-invocable)
+## Safety contract (destructive skill, agent-invocable)
 
 - **Default is read-only / no-write.** Invoked with no args (or `--help`/`status`), this skill only inspects and reports; it performs NO write, apply, push, delete, remote, or trim.
 - **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation — or run an approved preview/dry-run first and act only on that approved plan.
@@ -16,7 +16,7 @@ description: Reliable single entry point for lifecycle plan-maintenance (migrate
 
 A reliable single entry point for lifecycle plan-maintenance. The deterministic sections are a
 thin **facade** over `jswarm/update_ticket/cli.py` (run via `.venv/bin/python`), which itself
-orchestrates the existing COM-167 engine CLIs as subprocesses — no logic is reimplemented. This
+orchestrates the existing engine CLIs as subprocesses — no logic is reimplemented. This
 skill owns the ONE piece that cannot be a CLI: the interactive **promotion-review gate**.
 
 Every deterministic refresh section is **fail-open** (exit 0; a missing/malformed plan is
@@ -138,4 +138,4 @@ that cannot obtain a real approval must stop, not guess.
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-06-23 | COM-201 (Phase 4, /jGo) | Initial `update-ticket` skill: preset→section resolution, the interactive promotion-review gate (fail-safe Hold), the frozen ticket-local promotion-decision JSON contract, deterministic `apply-promotions` + refresh/count, and non-interactive exit-2 safety. Facade over `jswarm/update_ticket/cli.py`; `.venv/bin/python` only. |
+| 2026-06-23 | Phase 4, /jGo | Initial `update-ticket` skill: preset→section resolution, the interactive promotion-review gate (fail-safe Hold), the frozen ticket-local promotion-decision JSON contract, deterministic `apply-promotions` + refresh/count, and non-interactive exit-2 safety. Facade over `jswarm/update_ticket/cli.py`; `.venv/bin/python` only. |

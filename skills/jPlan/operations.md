@@ -9,7 +9,7 @@ Run main-sync portion of [`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/merge/preflight
 
 Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with the user stating Lite intent (**"lite"** / **"briefing only"** / **"ticket + context only"**) or explicit rapid existing-UI intent (**"rapid-vibe-ui"**).
 
-> **Point-of-impact reminders (COM-133 — migrated from auto-memory):**
+> **Point-of-impact reminders (migrated from auto-memory):**
 > - **Work item → plan (Step 2A):** after creating ANY work item — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
 
 | # | Output | Required When | Tool/Method | DONE? |
@@ -39,7 +39,7 @@ Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with
 
 **If Lite mode applies, use Lite questions above instead.**
 
-**Defaults pre-fill from project parameters (COM-128 WS4).** If the localization pass (preamble step 6) resolved a `parameters:` block for this project, present its values as the **pre-selected defaults** for Q5–Q9 below (depth, execution team, review tier, arch tier, automated-UAT, E2E policy, test-data strategy) — e.g. "Planning depth? [default: standard]". The developer overrides any answer freely. When no `parameters:` block resolved, use the global defaults shown on each question.
+**Defaults pre-fill from project parameters (WS4).** If the localization pass (preamble step 6) resolved a `parameters:` block for this project, present its values as the **pre-selected defaults** for Q5–Q9 below (depth, execution team, review tier, arch tier, automated-UAT, E2E policy, test-data strategy) — e.g. "Planning depth? [default: standard]". The developer overrides any answer freely. When no `parameters:` block resolved, use the global defaults shown on each question.
 
 **Q6 is rubric-governed, not pre-fill-governed.** The resolved `default_review_tier` / `default_arch_tier` are only a *lean starting point*. The agent-team rubric (Q6 below) still runs and still governs any escalation from a named trigger. A project may NOT pre-default review to `critic-xhigh` or arch to `architect-master` — those tiers are trigger-gated, and the renderer rejects them fail-loud, so a resolved default can only ever be a lean tier the rubric escalates *from*.
 
@@ -110,7 +110,7 @@ Legacy-safe: plans with no ceremony selection / no-selection recorded remain val
    - **no** (default) → frontmatter `rollup_comments: off` (or omit). No rollup comment is ever posted.
    - Independent of the existing `/jClose` tracker comment (Step 3).
 
-<!-- HAS-340: per-project worktree policy lives below this anchor. Projects opt in
+<!-- Per-project worktree policy lives below this anchor. Projects opt in
      via .claude/project-command-injections.yaml + a snippet at
      .claude/command-injections/new-work-worktree-policy.md. -->
 <!-- inject:project-worktree-policy -->
@@ -168,7 +168,7 @@ There is no tracker `create` verb at the boundary in v0.1.0 (only `resolve`/`com
 
 `resolve` returning `null` (issue not found, or `is-configured` was already false) is not a hard stop for an otherwise-valid slug flow; it only matters for a tracker-key argument, and the hard stop above already covers "no tracker at all". A tracker-key argument that a *configured* tracker cannot resolve is reported to the user as a normal not-found condition, not this skill inventing a substitute id.
 
-> **Point-of-impact reminder (COM-133):** after establishing ANY work item — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
+> **Point-of-impact reminder:** after establishing ANY work item — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
 
 ### Step 2B — Session rename
 
@@ -185,7 +185,7 @@ Title format: `TICKET-{NUMBER}-{DESCRIPTION}` — UPPERCASE, hyphens, ~40 chars 
 
 #### UAT scenario JSON READ integration
 <!-- uat-scenarios:read-integration -->
-When a project has adopted the COM-122 UAT-scenario engine (canonical scenarios JSON + generated `.md`), resolve scenario data from the **JSON** via `jswarm/uat-scenarios/query_uat_scenarios.py` (`--list-groupings` / `--get-scenario <id>` / `--list-scenarios [--grouping <id>]`); treat the generated `.md` as **derived/read-only** (edit JSON, regenerate). The scenarios JSON path is project-supplied (see the engine README / project localization). Projects that have NOT adopted the engine continue using the markdown UAT inventory.
+When a project has adopted the UAT-scenario engine (canonical scenarios JSON + generated `.md`), resolve scenario data from the **JSON** via `jswarm/uat-scenarios/query_uat_scenarios.py` (`--list-groupings` / `--get-scenario <id>` / `--list-scenarios [--grouping <id>]`); treat the generated `.md` as **derived/read-only** (edit JSON, regenerate). The scenarios JSON path is project-supplied (see the engine README / project localization). Projects that have NOT adopted the engine continue using the markdown UAT inventory.
 
 ## Tool Failure Reports
 
@@ -267,7 +267,7 @@ State file: `.jswarm/plans/TICKET-XXX/TICKET-XXX.new-work-state.md` (≤200 line
 
 **Skip protocol for:** Lite mode, Quick (depth 1) <15 min, simple single-ticket with no jOracle/research, user actively driving each step.
 
-## ColGREP Index Lifecycle Check (COM-204 — no-badgering)
+## ColGREP Index Lifecycle Check (no-badgering)
 
 During **plan setup (before dispatching implementation)**, run the read-only ColGREP lifecycle check. It silently lets the certain-only evictor handle stale/orphan indices and surfaces ONE consolidated question only for genuinely ambiguous candidates — and only once per unchanged set (receipt-backed; no badgering). ColGREP is optional; an uninstalled or erroring check must never block planning:
 

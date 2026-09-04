@@ -1,8 +1,8 @@
-// COM-119 — Tailwind v3 config (Context7-verified: /websites/v3_tailwindcss + /withastro/docs).
-// Theme tokens ported from COM-82 `scripts/security/project_dashboard.py` for
+// Tailwind v3 config (Context7-verified: /websites/v3_tailwindcss + /withastro/docs).
+// Theme tokens ported from `scripts/security/project_dashboard.py` for
 // visual continuity across the migrated dashboards.
 //
-// COM-127 T3.5 — professional styling pass: added semantic staleness/severity
+// T3.5 — professional styling pass: added semantic staleness/severity
 // scale (jw-high / jw-med / jw-low + soft bg tints) consumed by StalenessBadge
 // and the Risk/Maintenance matrix rank-coloring map. Deterministic / static.
 /** @type {import('tailwindcss').Config} */

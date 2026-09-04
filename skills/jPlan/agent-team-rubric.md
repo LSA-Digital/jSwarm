@@ -1,7 +1,7 @@
 
 # Agent-Team Rubric — review-tier and architecture-tier escalation
 
-**Owner ticket:** COM-128 · **Last Updated:** 2026-08-30 (fix-cycle architect-effort rule added; prior 2026-07-27)
+**Last Updated:** 2026-08-30 (fix-cycle architect-effort rule added; prior 2026-07-27)
 
 ## Fix-cycle architect effort (owner rubric update 2026-08-30)
 
@@ -42,7 +42,7 @@ This is the **single source of truth** for deciding **whether independent review
 3. **Errors would not be observable through runtime telemetry** — a defect here would not surface in tests, logs, exit codes, or UAT. A repair whose previous "green" turned out to be false is in this class by construction.
 4. **A ticket acceptance criterion requires an independent review.** This binds regardless of risk, and it is the only non-risk activation.
 
-### COM-393 two-stage composition
+### two-stage composition
 
 A ticketed qualifying broad `/jFix` may make both the pre-implementation contract
 challenge and the post-implementation code review acceptance criteria. They
@@ -101,7 +101,7 @@ If none hold → `review:critic` · `escalation-trigger:none`.
 
 ## Consumer contract (how `/jGo` and `/jFix` read this)
 
-**Replace-immediately with a dual-format parser during transition (COM-128 TQ3).** `/jPlan` writes only the new `Recommended agent team` line going forward. Consumers accept BOTH formats while in-flight plans drain:
+**Replace-immediately with a dual-format parser during transition (TQ3).** `/jPlan` writes only the new `Recommended agent team` line going forward. Consumers accept BOTH formats while in-flight plans drain:
 
 1. If the plan header has **`Recommended agent team`** → parse `Pattern` + `review` + `arch` + `escalation-trigger`.
 2. Else if it has the legacy **`Execution team pattern`** line → parse `Pattern` + critic tier; default `arch:none`, `escalation-trigger:none`.
@@ -138,4 +138,4 @@ The `outcome / warranted` field is load-bearing: it lets a quarterly calibration
 | Touches a published API schema other services consume | critic-xhigh | none |
 | New service boundary / runway enabler | critic-xhigh | architect |
 | Runway strategy across many downstream features + user-approved | critic-xhigh | architect-master (gated) |
-| Live-global command/hook/policy edit (e.g. COM-128 itself) | critic-xhigh | none |
+| Live-global command/hook/policy edit (e.g. this rubric itself) | critic-xhigh | none |
