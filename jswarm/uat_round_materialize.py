@@ -20,7 +20,7 @@ from typing import Any, Callable, Literal, NoReturn, cast
 
 RULE_ID = re.compile(r"^UAT-(?:G\d+|R\d+|T\d+|D\d+)$")
 TICKET_ID = re.compile(r"^[A-Z][A-Z0-9]+-\d+$")
-CONTROLLED_SKILL_ROOT = Path(__file__).resolve().parents[1] / "skills/test"
+CONTROLLED_SKILL_ROOT = Path(__file__).resolve().parents[1] / "skills/jTest"
 ALLOWED_RULE_STATUSES = {"active", "inactive"}
 ALLOWED_PATTERN_STATUSES = {"active", "inactive"}
 ALLOWED_PATTERN_SOURCES = {"controlled-config", "ticket-local"}
