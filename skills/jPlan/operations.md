@@ -10,7 +10,7 @@ Run main-sync portion of [`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/merge/preflight
 Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with the user stating Lite intent (**"lite"** / **"briefing only"** / **"ticket + context only"**) or explicit rapid existing-UI intent (**"rapid-vibe-ui"**).
 
 > **Point-of-impact reminders (migrated from auto-memory):**
-> - **Work item → plan (Step 2A):** after creating ANY work item — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
+> - **Work item → plan (Step 2A):** after creating ANY work item (even a side-task filed mid-work), create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
 
 | # | Output | Required When | Tool/Method | DONE? |
 |---|---|---|---|---|
@@ -21,7 +21,7 @@ Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with
 | 5 | **Ticket-local UAT scenario extract written** | When `Automated UAT: yes` and ticket changes user-visible behavior (never in Lite) | Write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md` from `UAT_SCENARIO_EXTRACT_TEMPLATE.md` | ? |
 | 6 | **Executable UAT doc written** | When `Automated UAT: yes` and ticket changes user-visible behavior (never in Lite) | Write `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-test.md` from `UAT_TEST_TEMPLATE.md` | ? |
 
-**Lite** (`--lite` / "briefing only"): Outputs **1, 2, 4** only. Plan file is a **briefing** — problem/opportunity, rich context, user-provided examples, scope, acceptance criteria. **Do not** "solve" the work in that document.
+**Lite** (`--lite` / "briefing only"): Outputs **1, 2, 4** only. Plan file is a **briefing**: problem/opportunity, rich context, user-provided examples, scope, acceptance criteria. **Do not** "solve" the work in that document.
 
 **Quick (depth 1):** Outputs 1, 2, 4 required. No spec.
 **Standard (depth 2):** Outputs 1, 2, 3, 4 required. jOracle review recommended.
@@ -33,15 +33,15 @@ Invoke as **`/jPlan`**, **`/jPlan --lite`**, **`/jPlan rapid-vibe-ui`**, or with
 
 **Procedural detail owners:** `step-3-context.md`, `step-4-spec.md`, and `step-5-assemble-plan.md`. This module owns the user-facing full-mode flow (questions + dispatch + summary); those owner files contain the executable procedural detail.
 
-> **Advisory — Background Tasks & Hang Prevention:** Run delegated tasks/agents as background (`run_in_background=true`) with task IDs. Don't poll every turn. Use completion notifications. For long-running work, use externally monitorable execution: explicit timeouts, redirected log files, heartbeats/progress, process status.
+> **Advisory: Background Tasks & Hang Prevention:** Run delegated tasks/agents as background (`run_in_background=true`) with task IDs. Don't poll every turn. Use completion notifications. For long-running work, use externally monitorable execution: explicit timeouts, redirected log files, heartbeats/progress, process status.
 
 ## Step 1: Full-mode questions and ceremony selection
 
 **If Lite mode applies, use Lite questions above instead.**
 
-**Defaults pre-fill from project parameters (WS4).** If the localization pass (preamble step 6) resolved a `parameters:` block for this project, present its values as the **pre-selected defaults** for Q5–Q9 below (depth, execution team, review tier, arch tier, automated-UAT, E2E policy, test-data strategy) — e.g. "Planning depth? [default: standard]". The developer overrides any answer freely. When no `parameters:` block resolved, use the global defaults shown on each question.
+**Defaults pre-fill from project parameters (WS4).** If the localization pass (preamble step 6) resolved a `parameters:` block for this project, present its values as the **pre-selected defaults** for Q5–Q9 below (depth, execution team, review tier, arch tier, automated-UAT, E2E policy, test-data strategy), e.g. "Planning depth? [default: standard]". The developer overrides any answer freely. When no `parameters:` block resolved, use the global defaults shown on each question.
 
-**Q6 is rubric-governed, not pre-fill-governed.** The resolved `default_review_tier` / `default_arch_tier` are only a *lean starting point*. The agent-team rubric (Q6 below) still runs and still governs any escalation from a named trigger. A project may NOT pre-default review to `critic-xhigh` or arch to `architect-master` — those tiers are trigger-gated, and the renderer rejects them fail-loud, so a resolved default can only ever be a lean tier the rubric escalates *from*.
+**Q6 is rubric-governed, not pre-fill-governed.** The resolved `default_review_tier` / `default_arch_tier` are only a *lean starting point*. The agent-team rubric (Q6 below) still runs and still governs any escalation from a named trigger. A project may NOT pre-default review to `critic-xhigh` or arch to `architect-master`: those tiers are trigger-gated, and the renderer rejects them fail-loud, so a resolved default can only ever be a lean tier the rubric escalates *from*.
 
 Ask these together in a single message:
 
@@ -65,7 +65,7 @@ After Q1–Q4, invoke the `jPlan.ceremony-selector` skill when the rapid-vibe-ui
 
 Picking a tier compiles Q5–Q9 plus worktree, NFR, precompact cadence, and orchestrator-context settings from the chosen preset. The compiled levers are the answers: Q5–Q9 are not re-asked as independent questions unless the compiler leaves a required detail unresolved after the preset compile.
 
-Persist the validated decision state returned by the `jPlan.ceremony-selector` skill's `apply` boundary to the plan: `selected_ceremony_tier`, `engine_recommended_tier` (the deterministic Medium-default baseline), `jarvi_recommended_tier` (Jarvi's authored situational recommendation), `situational_rationale`, `selector_signals`, `hard_high_triggers`, `owner_approved_high` when High is selected, and, when a downgrade below a fired High bar is accepted, `downgrade_rationale`. Do not persist a prose-only recording — persist the JSON the `apply` boundary emits. Medium is the default pick. High requires explicit owner approval (`--owner-approved-high`).
+Persist the validated decision state returned by the `jPlan.ceremony-selector` skill's `apply` boundary to the plan: `selected_ceremony_tier`, `engine_recommended_tier` (the deterministic Medium-default baseline), `jarvi_recommended_tier` (Jarvi's authored situational recommendation), `situational_rationale`, `selector_signals`, `hard_high_triggers`, `owner_approved_high` when High is selected, and, when a downgrade below a fired High bar is accepted, `downgrade_rationale`. Do not persist a prose-only recording; persist the JSON the `apply` boundary emits. Medium is the default pick. High requires explicit owner approval (`--owner-approved-high`).
 
 Scope-drift re-evaluation: when scope or A/C changes mid-conversation, have the `jPlan.ceremony-selector` skill re-eval the selector inputs through the runner. If `reprompt` is true because the recommended tier shifted or a hard-High trigger newly fired, re-present the updated cards and include the one-line `why_changed` explanation. If `reprompt` is false, do not nag the user; keep the prior tier because it still fits.
 
@@ -76,7 +76,7 @@ Jarvi callout behavior: Jarvi callout leads explanation turns, including the rec
 Legacy-safe: plans with no ceremony selection / no-selection recorded remain valid and may continue through the existing Q5–Q9 fields.
 
 5. Planning depth? `[1=Quick / 2=Standard / 3=Deep]`
-6. **Ticket execution agent team + review/architecture tiers** (for `/jGo` and `/jFix`). Reply with Pattern `1` or `2`. The review tier and architecture tier are decided by **rubric, not by gut feel** — this is what stops overuse of `jCritic` at xhigh effort / `jArchitect` at xhigh effort.
+6. **Ticket execution agent team + review/architecture tiers** (for `/jGo` and `/jFix`). Reply with Pattern `1` or `2`. The review tier and architecture tier are decided by **rubric, not by gut feel**: this is what stops overuse of `jCritic` at xhigh effort / `jArchitect` at xhigh effort.
 
    **STOP. Before answering Q6, read `docs/jplan/agent-team-rubric.md` in full and apply its rubric to determine the review tier and the architecture tier.** Use the `agent-team-advisor` skill with `lifecycle_stage: plan` to select dynamic topology and staffing: read the agent-team catalog index first and use its fallback on failure; never block.
    - **Step 5 writes the inherited plan-header line** (consumed verbatim by `/jGo` and `/jFix`):
@@ -86,26 +86,26 @@ Legacy-safe: plans with no ceremony selection / no-selection recorded remain val
    - **Keep the frozen-header capture and record** any override/pin and escalation above the default (`jCritic` at xhigh effort / `jArchitect` / `jArchitect` at xhigh effort) in the plan; log the escalation to `docs/jplan/agent-escalation-log.md` with its trigger + `outcome / warranted`.
 
 7. **Automated UAT needed?** `[yes / no]`
-   - **yes** — only when ticket has UI/E2E/user-journey impact. After implementation + lower-level tests pass, `jQATester` executes `TICKET-XXX.uat-test.md` against the running app in the declared mode. Standard live-show driver: Playwright MCP headed/foreground or headed Playwright. Headless automation never claimed as developer-watched Live Show UAT. Chrome DevTools MCP only for documented Chrome/CDP diagnostic exception. Catches bugs unit tests miss: event propagation, CSS rendering, data flow, stale caches, confusing user journeys.
-   - **no** — required for backend-only/database-only/migration-only/infrastructure-only/internal-refactor/tooling-only tickets with no UI/E2E impact. Prove with unit, integration, migration/schema, API/contract, smoke, or targeted CLI tests.
-   - Default `yes` only when UI/E2E/user-journey impact is clear. Otherwise default `no` with `Automated UAT: no — no UI/E2E impact`.
+   - **yes**: only when ticket has UI/E2E/user-journey impact. After implementation + lower-level tests pass, `jQATester` executes `TICKET-XXX.uat-test.md` against the running app in the declared mode. Standard live-show driver: Playwright MCP headed/foreground or headed Playwright. Headless automation never claimed as developer-watched Live Show UAT. Chrome DevTools MCP only for documented Chrome/CDP diagnostic exception. Catches bugs unit tests miss: event propagation, CSS rendering, data flow, stale caches, confusing user journeys.
+   - **no**: required for backend-only/database-only/migration-only/infrastructure-only/internal-refactor/tooling-only tickets with no UI/E2E impact. Prove with unit, integration, migration/schema, API/contract, smoke, or targeted CLI tests.
+   - Default `yes` only when UI/E2E/user-journey impact is clear. Otherwise default `no` with `Automated UAT: no (no UI/E2E impact)`.
    - When **yes**: plan includes UAT phase/gate; UAT doc declares execution mode, browser driver, visible-browser expectation, overlay/callout mode, runtime monitor command/task (or N/A reason), report path, evidence path before `/jGo` delegates.
    - **UAT document chain:** official high-level UAT inventory → `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-scenarios.md` (extracted working slice) → `.jswarm/plans/TICKET-XXX/TICKET-XXX.uat-test.md` (derived from extracted).
    - **UAT templates:** `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/templates/UAT_SCENARIO_EXTRACT_TEMPLATE.md`, `UAT_TEST_TEMPLATE.md`, `UAT_REPORT_TEMPLATE.md`, `UAT_TEST_EXAMPLE.md`.
 
 8. **E2E test policy?** `[per-ticket / deferred (Recommended)]`
-   - **per-ticket** — stable live-show flows promoted to durable headless Playwright regression artifacts near the **end of the ticket**, not as per-phase gate.
-   - **deferred** (default) — regression-mode E2E moves to feature-level verification after related tickets complete. Unit + integration + live-show UAT provide per-ticket coverage.
+   - **per-ticket**: stable live-show flows promoted to durable headless Playwright regression artifacts near the **end of the ticket**, not as per-phase gate.
+   - **deferred** (default): regression-mode E2E moves to feature-level verification after related tickets complete. Unit + integration + live-show UAT provide per-ticket coverage.
    - Default: **deferred**.
 
 9. **Test data strategy?** `[managed cluster / inline fresh setup / exploratory-ad-hoc / N/A]`
-   - **managed cluster** — named cluster with manifest, seed/preflight/reset commands, invariants. Required for regression-mode E2E/PE2E unless test creates equivalent deterministic state itself.
-   - **inline fresh setup** — UAT/regression test creates all state in setup steps.
-   - **exploratory-ad-hoc** — Live Show UAT only. Cannot be promoted to regression until converted to deterministic setup or managed cluster.
-   - **N/A** — No stateful UAT/regression data needed.
+   - **managed cluster**: named cluster with manifest, seed/preflight/reset commands, invariants. Required for regression-mode E2E/PE2E unless test creates equivalent deterministic state itself.
+   - **inline fresh setup**: UAT/regression test creates all state in setup steps.
+   - **exploratory-ad-hoc**: Live Show UAT only. Cannot be promoted to regression until converted to deterministic setup or managed cluster.
+   - **N/A**: no stateful UAT/regression data needed.
 
 10. **Enable PM/PO Jira rollup comments for this ticket?** `[no (default) / yes]`
-   - **Default: No.** Rollup comments are OFF unless the developer opts in here — this is the single opt-in moment (asked once at `/jPlan`). Record the answer as the plan-frontmatter flag `rollup_comments: on|off`.
+   - **Default: No.** Rollup comments are OFF unless the developer opts in here; this is the single opt-in moment (asked once at `/jPlan`). Record the answer as the plan-frontmatter flag `rollup_comments: on|off`.
    - **yes** → frontmatter `rollup_comments: on`. **Not implemented in this distribution:** the PO-altitude rendering this flag was designed to opt into is not available here; `/jClose` Step 3 always posts its own plain tracker comment (retro link, plan link, next step) regardless of this flag.
    - **no** (default) → frontmatter `rollup_comments: off` (or omit). No rollup comment is ever posted.
    - Independent of the existing `/jClose` tracker comment (Step 3).
@@ -123,8 +123,8 @@ Legacy-safe: plans with no ceremony selection / no-selection recorded remain val
 
 `/jPlan <work-item>` accepts either identity form (`jswarm.workitem.identity.parse`):
 
-- a tracker key, `^[A-Z][A-Z0-9]+-\d+$` (e.g. `PS-14`) — only meaningful when a tracker is configured;
-- a slug, `^[a-z0-9][a-z0-9-]*$` (e.g. `add-csv-export`) — always available.
+- a tracker key, `^[A-Z][A-Z0-9]+-\d+$` (e.g. `PS-14`), only meaningful when a tracker is configured;
+- a slug, `^[a-z0-9][a-z0-9-]*$` (e.g. `add-csv-export`), always available.
 
 An argument that parses as neither is a usage error; show both accepted shapes.
 
@@ -144,7 +144,7 @@ re-run `/jPlan` with a slug instead (e.g. `/jPlan add-csv-export`) to plan this
 work locally with no tracker.
 ```
 
-Do not invent a placeholder key and do not silently fall back to a slug — ask the user to choose.
+Do not invent a placeholder key and do not silently fall back to a slug; ask the user to choose.
 
 **Otherwise, write local state before touching the tracker:**
 
@@ -164,15 +164,15 @@ Record the work item's identity, kind, and plan-file path in `.jswarm/work/<ID>/
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli resolve <ID> --repo "$PROJECT_ROOT"
 ```
 
-There is no tracker `create` verb at the boundary in v0.1.0 (only `resolve`/`comment`/`transition`) — when the user wants a brand-new tracked issue rather than an existing key or a local slug, create it directly with the connected tracker's own tool (for Jira: the connected Atlassian MCP's create-issue tool) using the project key from `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/devops_command_injection.py jira-key --project-root <PROJECT_ROOT>`, then treat the returned key as `<ID>` for the rest of this step. With a slug argument, or with no tracker configured at all, there is nothing to create upstream — local state is the whole of it.
+There is no tracker `create` verb at the boundary in v0.1.0 (only `resolve`/`comment`/`transition`); when the user wants a brand-new tracked issue rather than an existing key or a local slug, create it directly with the connected tracker's own tool (for Jira: the connected Atlassian MCP's create-issue tool) using the project key from `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/devops_command_injection.py jira-key --project-root <PROJECT_ROOT>`, then treat the returned key as `<ID>` for the rest of this step. With a slug argument, or with no tracker configured at all, there is nothing to create upstream; local state is the whole of it.
 
 `resolve` returning `null` (issue not found, or `is-configured` was already false) is not a hard stop for an otherwise-valid slug flow; it only matters for a tracker-key argument, and the hard stop above already covers "no tracker at all". A tracker-key argument that a *configured* tracker cannot resolve is reported to the user as a normal not-found condition, not this skill inventing a substitute id.
 
-> **Point-of-impact reminder:** after establishing ANY work item — even a side-task filed mid-work — create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
+> **Point-of-impact reminder:** after establishing ANY work item (even a side-task filed mid-work), create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
 
 ### Step 2B: Session rename
 
-Title format: `TICKET-{NUMBER}-{DESCRIPTION}` — UPPERCASE, hyphens, ~40 chars max.
+Title format: `TICKET-{NUMBER}-{DESCRIPTION}` (UPPERCASE, hyphens, ~40 chars max).
 
 | Runtime | Agent-automated? | How |
 |---|---|---|
@@ -180,7 +180,7 @@ Title format: `TICKET-{NUMBER}-{DESCRIPTION}` — UPPERCASE, hyphens, ~40 chars 
 | **OpenCode** | Yes (via server API) | Set `OPENCODE_SERVER_URL`, then `PATCH /session/:id` with `{"title": "..."}`. |
 | **Any** | User fallback | User runs `/rename TICKET-XXX-DESCRIPTION` in TUI. |
 
-> **Feature-orchestrator carve-out — SKIP 2B.** When you are the **Feature orchestrator** running `/jPlan` serially for child Stories under a Feature you own, skip this rename entirely: do **not** write `.jswarm/state/pending-session-rename` and do **not** claim a rename. `/jGo` runs in a separate chat, so per-Story renames are pointless churn that pollute the orchestrator session title — whose correct identity is the FEATURE, not the latest child Story. **Detection:** parent is a Feature AND you are running multiple consecutive `/jPlan` cycles in one chat. In the Step 6 summary, mark the Session row `n/a (Feature orchestrator)`. Applies in Lite too. If you already wrote a rename intent before realizing, don't revert — just stop renaming for subsequent cycles.
+> **Feature-orchestrator carve-out: SKIP 2B.** When you are the **Feature orchestrator** running `/jPlan` serially for child Stories under a Feature you own, skip this rename entirely: do **not** write `.jswarm/state/pending-session-rename` and do **not** claim a rename. `/jGo` runs in a separate chat, so per-Story renames are pointless churn that pollute the orchestrator session title, whose correct identity is the FEATURE, not the latest child Story. **Detection:** parent is a Feature AND you are running multiple consecutive `/jPlan` cycles in one chat. In the Step 6 summary, mark the Session row `n/a (Feature orchestrator)`. Applies in Lite too. If you already wrote a rename intent before realizing, don't revert; just stop renaming for subsequent cycles.
 
 
 #### UAT scenario JSON READ integration
@@ -207,7 +207,7 @@ All Playwright screenshot evidence goes in **LOCAL PLAN FILE** using rendered ma
 
 ## Step 6: Sync the tracker and show summary
 
-**Full-plan mode — tracker comment (skipped cleanly when no tracker is configured):**
+**Full-plan mode: tracker comment (skipped cleanly when no tracker is configured):**
 
 ```bash
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.tracker.cli comment <ID> --repo "$PROJECT_ROOT" --text "$(cat <<'EOF'
@@ -223,7 +223,7 @@ EOF
 )"
 ```
 
-Print the result's `message` once. `skipped: true` (no tracker configured) and `ok: false` (tracker reachable but the call failed) are both non-blocking here — local state was already written in Step 2A; continue to the summary either way.
+Print the result's `message` once. `skipped: true` (no tracker configured) and `ok: false` (tracker reachable but the call failed) are both non-blocking here: local state was already written in Step 2A; continue to the summary either way.
 
 **Full-plan mode summary:**
 ```markdown
@@ -239,9 +239,9 @@ Print the result's `message` once. `skipped: true` (no tracker configured) and `
 | **jOracle Review** | Complete / Skipped / N/A |
 | **Execution team** | Pattern 1 / Pattern 2 + review tier |
 | **UAT verification** | jQATester enabled / N/A |
-| **Tracker sync** | commented / skipped (no tracker) / failed — see message above |
+| **Tracker sync** | commented / skipped (no tracker) / failed (see message above) |
 
-**Move the tracked issue to "In Progress"?** [yes/no/N/A — no tracker] — on yes, `python -m jswarm.tracker.cli transition <ID> --repo "$PROJECT_ROOT" --state "In Progress"`.
+**Move the tracked issue to "In Progress"?** [yes/no/N/A (no tracker)]; on yes, `python -m jswarm.tracker.cli transition <ID> --repo "$PROJECT_ROOT" --state "In Progress"`.
 
 **Next:** run `/jGo` in this project's agent session to execute the plan with TDD.
 ```
@@ -269,7 +269,7 @@ State file: `.jswarm/plans/TICKET-XXX/TICKET-XXX.new-work-state.md` (≤200 line
 
 ## ColGREP Index Lifecycle Check (no-badgering)
 
-During **plan setup (before dispatching implementation)**, run the read-only ColGREP lifecycle check. It silently lets the certain-only evictor handle stale/orphan indices and surfaces ONE consolidated question only for genuinely ambiguous candidates — and only once per unchanged set (receipt-backed; no badgering). ColGREP is optional; an uninstalled or erroring check must never block planning:
+During **plan setup (before dispatching implementation)**, run the read-only ColGREP lifecycle check. It silently lets the certain-only evictor handle stale/orphan indices and surfaces ONE consolidated question only for genuinely ambiguous candidates, and only once per unchanged set (receipt-backed; no badgering). ColGREP is optional; an uninstalled or erroring check must never block planning:
 
 ```bash
 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/colgrep_index_lifecycle.py \
@@ -277,6 +277,6 @@ ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswar
 ```
 
 - `question` null or `suppressed: true`, or the command itself failed to run → proceed silently; no action needed.
-- `question` present → surface its `prompt` + each `candidate` (with its `reasons`) using the actions **keep-protect / delete-now / defer / inspect-details**. Advisory only — never block planning, and never auto-`--apply` cleanup from a lifecycle command (deletion stays operator-gated; dry-run is the default).
+- `question` present → surface its `prompt` + each `candidate` (with its `reasons`) using the actions **keep-protect / delete-now / defer / inspect-details**. Advisory only: never block planning, and never auto-`--apply` cleanup from a lifecycle command (deletion stays operator-gated; dry-run is the default).
 
 ---
