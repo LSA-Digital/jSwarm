@@ -1,6 +1,3 @@
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/jPlan/step-4-spec.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # Step 4 — Create technical design spec (Standard + Deep only)
 

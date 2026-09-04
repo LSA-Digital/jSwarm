@@ -2,12 +2,6 @@
 name: jPrecompact
 description: Symlink to the global /jPrecompact command that runs the 4-surface checkpoint protocol before context compaction and persists durable retro lessons.
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/jPrecompact/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy.
-     COM-358 T2: /jPrecompact has been renamed to /jPrecompact. The old skills/jPrecompact/SKILL.md
-     survives as a thin compatibility alias that delegates here; it carries its own distinct catalog
-     identity. The sibling /precompact-update skill and the PreCompact hook event are NOT renamed. -->
 
 # /jPrecompact — Execute Pre-Compaction Protocol
 

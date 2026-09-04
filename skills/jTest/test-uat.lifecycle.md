@@ -1,4 +1,3 @@
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/test-uat.lifecycle.md -->
 
 # Developer guide: the Level 1 UAT cycle
 

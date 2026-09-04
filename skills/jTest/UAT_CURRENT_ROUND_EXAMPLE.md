@@ -1,7 +1,3 @@
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/UAT_CURRENT_ROUND_EXAMPLE.md
-     WORKED EXAMPLE of UAT_CURRENT_ROUND_TEMPLATE.md — snapshot of the hai-sim-engine HAS-508 round (2026-07-08).
-     Read alongside the template when instantiating a round; project paths/ids here are illustrative.
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 # UAT — CURRENT ROUND (single always-current file; wholesale-replaced at issuance, PATCHED mid-round)
 
 **Round:** 2026-07-08 · re-observation of the four owner-reported defect fixes (#102/#103/#104/#106) + carry-forward

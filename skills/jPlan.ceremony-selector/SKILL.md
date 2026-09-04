@@ -2,9 +2,6 @@
 name: jPlan.ceremony-selector
 description: Run the JSWARM ceremony selector to render scope, recommend a planning tier, and persist the selected ceremony state.
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/jPlan.ceremony-selector/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # Ceremony Selector
 

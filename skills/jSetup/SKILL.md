@@ -2,9 +2,6 @@
 name: jSetup
 description: Guided day-0 front door for a fresh JSWARM (JarviSWARM) clone.
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/jsetup/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # /jSetup
 

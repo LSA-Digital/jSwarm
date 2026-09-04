@@ -1,6 +1,3 @@
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/uat/round-registration.md
-     Deploys as a symlink via COM-176 install; edit this master only.
-     Manage via /devops-maint dotclaude (mode 37). -->
 
 # Put a prepared UAT round in front of the owner
 

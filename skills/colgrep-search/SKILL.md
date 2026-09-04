@@ -3,9 +3,6 @@ name: colgrep-search
 description: Guide agents to use ColGREP MCP for semantic code and ARIS content search before exact-match fallbacks.
 user-invocable: false
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/colgrep-search/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # ColGREP Semantic Search
 

@@ -2,10 +2,6 @@
 name: ctx-optional-hook-config
 description: Optional default-off hook configuration for main-session ctx threshold warnings.
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/ctx/OPTIONAL_HOOK_CONFIG.md
-     Master source of truth. Deploys to ~/.claude as a symlink ONLY via /devops-maint dotclaude (mode 37);
-     that one-time symlink deploy is out of scope for COM-239 (this master is not yet deployed).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # Optional ctx Threshold Hook Configuration
 

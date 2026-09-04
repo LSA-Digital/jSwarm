@@ -2,9 +2,6 @@
 name: update-plan
 description: Normalize JSWARM plan frontmatter, propose or apply explicit content hygiene moves, and refresh HUD-visible plan state.
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/update-plan/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # Update Plan
 

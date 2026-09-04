@@ -2,9 +2,6 @@
 name: precompact-update
 description: Symlink to the global /precompact-update command that authors global, project-local, or ticket-local precompact include rules from natural-language instructions.
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/precompact-update/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # /precompact-update — Scope-Aware Precompact Include Authoring
 

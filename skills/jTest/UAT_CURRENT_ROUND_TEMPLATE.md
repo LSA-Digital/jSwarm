@@ -1,6 +1,3 @@
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/UAT_CURRENT_ROUND_TEMPLATE.md
-     Template asset for <ticket plan folder>/<TICKET>.UAT-CURRENT-ROUND.md. Instantiate via /jTest Option 4; never free-compose a round file.
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 # UAT — CURRENT ROUND (single always-current file; wholesale-replaced at issuance, PATCHED mid-round)
 
 **Round:** <YYYY-MM-DD> · <one-line round purpose>

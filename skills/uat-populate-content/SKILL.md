@@ -10,9 +10,6 @@ triggers:
 argument-hint: "[--scenarios <scenarios.json>] [--source <file|UAT.ID>] [--profile pm-summary|engineering|both]"
 level: 2
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/uat-populate-content/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 
 # uat-populate-content — preview-gated scenario content authoring

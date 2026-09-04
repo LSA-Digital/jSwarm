@@ -2,9 +2,6 @@
 name: "code-overview"
 description: "Symlink to the global /code-overview slash command: builds a bounded, data-driven code overview for one UAT scenario grouping instead of brute-force reading the whole repo."
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/code-overview/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # /code-overview — Scenario-Guided Code Overview
 

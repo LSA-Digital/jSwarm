@@ -1,7 +1,7 @@
-"""COM-241 AC-5 RED tests for the ColGREP status-report generator.
+"""WORK-241 AC-5 RED tests for the ColGREP status-report generator.
 
 These tests freeze the read-only status-first contract from
-``.jswarm/plans/COM-241/COM-241.specs.status-report.md``. They are expected to
+``.jswarm/plans/WORK-241/WORK-241.specs.status-report.md``. They are expected to
 fail in RED while ``jswarm.colgrep_status_report`` contains only importable API
 stubs, and turn GREEN only when the next implementation phase builds the real
 report logic.
@@ -110,9 +110,9 @@ def _row_by_index(report: dict[str, Any], index_name: str) -> dict[str, Any]:
 def test_report_leads_with_active_rebuild_answer_and_active_jobs_before_recommendations():
     active_job = {
         "pid": 111,
-        "repo": "/Users/idengrenme/dev/common",
+        "repo": "/Users/testuser/dev/common",
         "elapsed_s": 3_720,
-        "log": "/Users/idengrenme/dev/colgrep-idx/log/common-base-rebuild-COM241.log",
+        "log": "/Users/testuser/dev/colgrep-idx/log/common-base-rebuild-COM241.log",
     }
     report = build_report(
         _fake_probes(scan_active_rebuilds=lambda: [active_job]),
@@ -139,9 +139,9 @@ def test_all_indices_table_carries_health_lastupdated_size_eta_estfinal_per_row(
             scan_active_rebuilds=lambda: [
                 {
                     "pid": 222,
-                    "repo": "/Users/idengrenme/dev/common",
+                    "repo": "/Users/testuser/dev/common",
                     "elapsed_s": 600,
-                    "log": "/Users/idengrenme/dev/colgrep-idx/log/common-base-rebuild-COM241.log",
+                    "log": "/Users/testuser/dev/colgrep-idx/log/common-base-rebuild-COM241.log",
                 }
             ]
         ),
@@ -440,13 +440,13 @@ def test_parse_rebuild_target_handles_memguard_wrapper():
     assert (
         _parse_rebuild_target(
             "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python /x/colgrep_mem_guard.py --cap-gb 32 -- "
-            "colgrep init -y --force-cpu /Users/idengrenme/dev/hai-sim-engine"
+            "colgrep init -y --force-cpu /Users/testuser/dev/hai-sim-engine"
         )["repo"]
-        == "/Users/idengrenme/dev/hai-sim-engine"
+        == "/Users/testuser/dev/hai-sim-engine"
     )
     assert (
-        _parse_rebuild_target("colgrep init -y --force-cpu /Users/idengrenme/dev/foo")["repo"]
-        == "/Users/idengrenme/dev/foo"
+        _parse_rebuild_target("colgrep init -y --force-cpu /Users/testuser/dev/foo")["repo"]
+        == "/Users/testuser/dev/foo"
     )
 
 
@@ -459,28 +459,28 @@ def test_parse_rebuild_target_ignores_flags_after_repo():
     """R1: a flag AFTER the repo (with its own value) must not steal the repo slot."""
     assert (
         _parse_rebuild_target(
-            "colgrep init -y --force-cpu /Users/idengrenme/dev/foo --index common"
+            "colgrep init -y --force-cpu /Users/testuser/dev/foo --index common"
         )["repo"]
-        == "/Users/idengrenme/dev/foo"
+        == "/Users/testuser/dev/foo"
     )
     assert (
         _parse_rebuild_target(
-            "/x/colgrep_mem_guard.sh --cap-gb 32 -- colgrep init /Users/idengrenme/dev/foo --flag value"
+            "/x/colgrep_mem_guard.sh --cap-gb 32 -- colgrep init /Users/testuser/dev/foo --flag value"
         )["repo"]
-        == "/Users/idengrenme/dev/foo"
+        == "/Users/testuser/dev/foo"
     )
     # Existing passing shapes must remain green: bare and mem-guard-wrapped
     # `--force-cpu <repo>` still resolve to the repo, not the interpreter.
     assert (
-        _parse_rebuild_target("colgrep init -y --force-cpu /Users/idengrenme/dev/foo")["repo"]
-        == "/Users/idengrenme/dev/foo"
+        _parse_rebuild_target("colgrep init -y --force-cpu /Users/testuser/dev/foo")["repo"]
+        == "/Users/testuser/dev/foo"
     )
     assert (
         _parse_rebuild_target(
             "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python /x/colgrep_mem_guard.py --cap-gb 32 -- "
-            "colgrep init -y --force-cpu /Users/idengrenme/dev/hai-sim-engine"
+            "colgrep init -y --force-cpu /Users/testuser/dev/hai-sim-engine"
         )["repo"]
-        == "/Users/idengrenme/dev/hai-sim-engine"
+        == "/Users/testuser/dev/hai-sim-engine"
     )
 
 
@@ -574,24 +574,24 @@ def test_missing_base_conditional_restart_and_final_verify():
 
 
 # -----------------------------------------------------------------------------
-# COM-241 AC-6 remediation: Bug 2 (rebuild-scan blind to overlay build-overlay
+# WORK-241 AC-6 remediation: Bug 2 (rebuild-scan blind to overlay build-overlay
 # encodes) + Fix 3 (action_sequence must emit REAL runnable commands).
 # -----------------------------------------------------------------------------
 
 
 def test_scan_ps_lines_for_rebuilds_matches_overlay_build_and_refresh_if_stale():
-    """HAS-520 gap: a live `colgrep_worktree.py build-overlay` (or
+    """TASK-520 gap: a live `colgrep_worktree.py build-overlay` (or
     `refresh-if-stale`) encode must be visible to the rebuild scan — previously the
     regex only matched native `colgrep init` / mem-guard processes and the status
     report falsely reported "Rebuild running: NO" during a live overlay build."""
     ps_stdout = (
         "  PID ELAPSED COMMAND\n"
         "  4242    05:10 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python "
-        "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/colgrep-worktree build-overlay COM-241 "
-        "--worktree /Users/idengrenme/dev/hai-sim-engine\n"
+        "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/colgrep-worktree build-overlay WORK-241 "
+        "--worktree /Users/testuser/dev/hai-sim-engine\n"
         "  4343    02:00 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python "
         "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/colgrep_worktree.py refresh-if-stale "
-        "/Users/idengrenme/dev/hai-sim-engine\n"
+        "/Users/testuser/dev/hai-sim-engine\n"
         "  9999    00:05 -bash\n"
     )
 
@@ -599,13 +599,13 @@ def test_scan_ps_lines_for_rebuilds_matches_overlay_build_and_refresh_if_stale()
 
     assert len(jobs) == 2
     repos = {job["repo"] for job in jobs}
-    assert "/Users/idengrenme/dev/hai-sim-engine" in repos
+    assert "/Users/testuser/dev/hai-sim-engine" in repos
     pids = {job["pid"] for job in jobs}
     assert pids == {4242, 4343}
 
     report = build_report(_fake_probes(scan_active_rebuilds=lambda: jobs), now=FIXED_NOW)
     assert report["active_rebuild"]["running"] is True
-    assert any(job["repo"] == "/Users/idengrenme/dev/hai-sim-engine" for job in report["active_rebuild"]["jobs"])
+    assert any(job["repo"] == "/Users/testuser/dev/hai-sim-engine" for job in report["active_rebuild"]["jobs"])
     markdown = render_markdown(report)
     assert "Rebuild running: YES" in markdown
 
@@ -616,7 +616,7 @@ def test_scan_ps_lines_for_rebuilds_ignores_unrelated_processes():
 
 
 def test_scan_ps_lines_for_rebuilds_matches_dotted_module_invocation():
-    """Fix 4/5 (COM-241 AC-6 jCritic pass): a live overlay-build/refresh-if-stale
+    """Fix 4/5 (WORK-241 AC-6 jCritic pass): a live overlay-build/refresh-if-stale
     encode launched via `python -m jswarm.colgrep_worktree ... build-overlay`
     (the dotted-module invocation shape, distinct from the direct-script or shim
     forms already covered) must still be visible to the rebuild scan — a live
@@ -625,7 +625,7 @@ def test_scan_ps_lines_for_rebuilds_matches_dotted_module_invocation():
     ps_stdout = (
         "  PID ELAPSED COMMAND\n"
         "  5151    03:00 ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python -m jswarm.colgrep_worktree "
-        "build-overlay COM-241 --worktree /Users/idengrenme/dev/hai-sim-engine\n"
+        "build-overlay WORK-241 --worktree /Users/testuser/dev/hai-sim-engine\n"
         "  9999    00:05 -bash\n"
     )
 
@@ -633,7 +633,7 @@ def test_scan_ps_lines_for_rebuilds_matches_dotted_module_invocation():
 
     assert len(jobs) == 1
     assert jobs[0]["pid"] == 5151
-    assert jobs[0]["repo"] == "/Users/idengrenme/dev/hai-sim-engine"
+    assert jobs[0]["repo"] == "/Users/testuser/dev/hai-sim-engine"
 
     report = build_report(_fake_probes(scan_active_rebuilds=lambda: jobs), now=FIXED_NOW)
     assert report["active_rebuild"]["running"] is True
@@ -647,7 +647,7 @@ def test_stale_active_ops_tokens_are_non_gating_evidence(tmp_path):
     token = active_ops / "op-84905-1783561720-9e787990.json"
     token.write_text(
         '{"kind":"overlay-build","pid":84905,"started_at":"2026-07-08T12:00:00Z",'
-        '"details":{"worktree":"/Users/idengrenme/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-520"}}\n',
+        '"details":{"worktree":"/Users/testuser/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-520"}}\n',
         encoding="utf-8",
     )
 
@@ -693,7 +693,7 @@ def test_live_active_ops_tokens_still_supplement_active_jobs(tmp_path):
 
 
 def test_quiesced_reload_uses_real_wrapper_not_noop_lib():
-    """COM-241 AC-6 Bug 1 fix, surfaced through the action_sequence: the quiesced-
+    """WORK-241 AC-6 Bug 1 fix, surfaced through the action_sequence: the quiesced-
     reload command must reference the real executable wrapper
     (next-plaid/bin/nextplaid-quiesce-restart), never the raw library file
     (next-plaid/lib/nextplaid-quiesce.sh), which is a no-op when run directly."""
@@ -753,7 +753,7 @@ def test_no_action_step_recommends_generation_reaper_for_orphan_cleanup():
 
 
 def test_orphan_generations_get_guarded_lifecycle_cleanup_action_not_generation_reaper():
-    """Fix 3 (COM-241 AC-6 jCritic finding #3): the orphan action must be a REAL,
+    """Fix 3 (WORK-241 AC-6 jCritic finding #3): the orphan action must be a REAL,
     runnable, guarded command — `colgrep_orphan_cleanup.py plan`/`apply --family
     <family>`, never `generation_reaper reap` (wrong tool) and never the old
     `colgrep_index_lifecycle.py cleanup` pairing (a bare unload with no paired
@@ -836,7 +836,7 @@ def test_orphan_cleanup_multiple_families_is_blocked_not_guessed():
 
 
 def test_no_action_step_ever_emits_raw_launchctl_or_noop_quiesce_lib():
-    """Fix 2/6 (COM-241 AC-6 jCritic pass): EVERY mutating action_sequence step
+    """Fix 2/6 (WORK-241 AC-6 jCritic pass): EVERY mutating action_sequence step
     must route through a guarded, agent-runnable wrapper — never raw `launchctl
     load`/`launchctl unload` prose (no paired stop-without-restart either) and
     never the raw no-op `next-plaid/lib/nextplaid-quiesce.sh` library file.
@@ -887,7 +887,7 @@ def _infra_row(report: dict[str, Any], needle: str) -> dict[str, Any]:
 
 
 def test_supervisor_loaded_no_live_pid_recommends_restart_not_steady_state():
-    """COM-241 AC-6 jCritic delta finding (residual of finding #6, reopened at
+    """WORK-241 AC-6 jCritic delta finding (residual of finding #6, reopened at
     the report layer): overlay-fleet-supervisor is LONG-RUNNING — `loaded`
     alone is not "up" for it. A `{"loaded": True, "pid": None}` supervisor is
     crash-looping and must recommend a restart, never render as a healthy
@@ -979,7 +979,7 @@ def test_long_running_launchd_set_matches_launchd_control_module():
 
 
 # -----------------------------------------------------------------------------
-# COM-241 Phase B RED: status must converge with fleet-plan worktree blockers.
+# WORK-241 Phase B RED: status must converge with fleet-plan worktree blockers.
 # -----------------------------------------------------------------------------
 
 
@@ -1047,7 +1047,7 @@ def test_fleet_plan_supervisor_blocked_worktree_appends_restart_after_infra_befo
                 launchd_state=lambda: _launchd_state(supervisor=True, watcher=False, health_check=True),
             ),
             _fleet_plan_snapshot(
-                path="/Users/idengrenme/dev/hai-sim-engine-wt-has-520",
+                path="/Users/testuser/dev/hai-sim-engine-wt-has-520",
                 action="fleet-supervisor-not-running",
                 next_action="start-fleet-supervisor",
                 actual_blocker="overlay-fleet-supervisor-not-running",
@@ -1090,7 +1090,7 @@ def test_fleet_plan_operator_gated_blockers_emit_advisory_not_supervisor_restart
                     launchd_state=lambda: _launchd_state(supervisor=True, watcher=True, health_check=True),
                 ),
                 _fleet_plan_snapshot(
-                    path=f"/Users/idengrenme/dev/hai-sim-engine-wt-{actual_blocker}",
+                    path=f"/Users/testuser/dev/hai-sim-engine-wt-{actual_blocker}",
                     action="blocked",
                     next_action=next_action,
                     actual_blocker=actual_blocker,
@@ -1117,7 +1117,7 @@ def test_fleet_plan_config_unresolved_blocker_emits_advisory_not_supervisor_rest
                 launchd_state=lambda: _launchd_state(supervisor=True, watcher=True, health_check=True),
             ),
             _fleet_plan_snapshot(
-                path="/Users/idengrenme/dev/hai-sim-engine-wt-lane-config-unresolved",
+                path="/Users/testuser/dev/hai-sim-engine-wt-lane-config-unresolved",
                 action="full-index-config-unresolved",
                 next_action="resolve-daemon-config",
                 actual_blocker="lane-config-unresolved",
@@ -1156,7 +1156,7 @@ def test_fleet_plan_probe_raises_fail_open_and_omits_worktree_actions():
 
 
 # -----------------------------------------------------------------------------
-# COM-289 BR-15 — registry-integrity linter parity between `health` and `report`.
+# WORK-289 BR-15 — registry-integrity linter parity between `health` and `report`.
 #
 # BR-05 shipped `_registry_integrity_findings()` as an unconditional `health` row
 # (colgrep_worktree.py `dependency_health`). The `report` surface (this module)
@@ -1184,12 +1184,12 @@ def test_probes_registry_integrity_findings_is_optional_default_none():
 def test_report_surfaces_registry_integrity_findings_row_when_violations_exist():
     finding = {
         "class": "api-index-equals-base",
-        "ticket": "HAS-583",
+        "ticket": "TASK-583",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/idengrenme/dev/hai-sim-engine-wt-has-583",
+        "worktree_path": "/Users/testuser/dev/hai-sim-engine-wt-has-583",
         "api_index_name": "hai-sim-engine",
         "base_index": "hai-sim-engine",
-        "detail": "registry entry for ticket 'HAS-583' has api_index_name == base_index",
+        "detail": "registry entry for ticket 'TASK-583' has api_index_name == base_index",
     }
     report = build_report(
         _with_registry_integrity_findings(_fake_probes(), [finding]),
@@ -1199,7 +1199,7 @@ def test_report_surfaces_registry_integrity_findings_row_when_violations_exist()
     row = next(r for r in report["infrastructure"] if r.get("component") == "registry integrity lint")
     assert "1 finding" in row["state"]
     assert "api-index-equals-base" in row["detail"]
-    assert "HAS-583" in row["detail"]
+    assert "TASK-583" in row["detail"]
 
 
 def test_report_registry_integrity_row_is_clean_when_no_violations():
@@ -1237,11 +1237,11 @@ def test_report_registry_integrity_probe_raises_fail_open_not_silently_clean():
 
 
 # -----------------------------------------------------------------------------
-# COM-289 BR-17 — api-index-equals-base precision, report-surface parity with
+# WORK-289 BR-17 — api-index-equals-base precision, report-surface parity with
 # health. `_registry_integrity_findings()` (colgrep_worktree.py) now enriches the
 # api-index-equals-base shape with whether a dedicated overlay index demonstrably
 # exists (source-confirmed: reconcile_registry_manifest_at_fleet_tick,
-# colgrep_overlay_fleet_supervisor.py, COM-244 P0-9, always pairs
+# colgrep_overlay_fleet_supervisor.py, WORK-244 P0-9, always pairs
 # api_index_name=base_index with physical_colgrep_dir="" for a genuinely
 # base-authoritative row). When no dedicated index exists the finding's `class`
 # becomes "api-index-equals-base-informational" -- `report` must not render that
@@ -1250,13 +1250,13 @@ def test_report_registry_integrity_probe_raises_fail_open_not_silently_clean():
 def test_report_registry_integrity_row_is_informational_not_warn_when_no_dedicated_index_exists():
     finding = {
         "class": "api-index-equals-base-informational",
-        "ticket": "HAS-583",
+        "ticket": "TASK-583",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/idengrenme/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-583",
+        "worktree_path": "/Users/testuser/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-583",
         "api_index_name": "hai-sim-engine",
         "base_index": "hai-sim-engine",
         "dedicated_index_exists": False,
-        "detail": "registry entry for ticket 'HAS-583' has api_index_name == base_index but no dedicated index exists (likely honest base-authoritative encoding)",
+        "detail": "registry entry for ticket 'TASK-583' has api_index_name == base_index but no dedicated index exists (likely honest base-authoritative encoding)",
     }
     report = build_report(
         _with_registry_integrity_findings(_fake_probes(), [finding]),
@@ -1267,7 +1267,7 @@ def test_report_registry_integrity_row_is_informational_not_warn_when_no_dedicat
     assert "⚠️" not in row["state"], (
         f"an informational-only (no dedicated index) finding must not WARN: {row}"
     )
-    assert "HAS-583" in row["detail"], (
+    assert "TASK-583" in row["detail"], (
         f"the informational finding must still be named, never silently dropped: {row}"
     )
 
@@ -1275,23 +1275,23 @@ def test_report_registry_integrity_row_is_informational_not_warn_when_no_dedicat
 def test_report_registry_integrity_row_still_warns_when_hard_and_informational_findings_coexist():
     hard_finding = {
         "class": "api-index-equals-base",
-        "ticket": "HAS-582",
+        "ticket": "TASK-582",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/idengrenme/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-582",
+        "worktree_path": "/Users/testuser/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-582",
         "api_index_name": "hai-sim-engine",
         "base_index": "hai-sim-engine",
         "dedicated_index_exists": True,
-        "detail": "registry entry for ticket 'HAS-582' has api_index_name == base_index",
+        "detail": "registry entry for ticket 'TASK-582' has api_index_name == base_index",
     }
     informational_finding = {
         "class": "api-index-equals-base-informational",
-        "ticket": "HAS-583",
+        "ticket": "TASK-583",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/idengrenme/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-583",
+        "worktree_path": "/Users/testuser/dev/hai-sim-engine/.claude/worktrees/hai-sim-engine-wt-has-583",
         "api_index_name": "hai-sim-engine",
         "base_index": "hai-sim-engine",
         "dedicated_index_exists": False,
-        "detail": "registry entry for ticket 'HAS-583' has api_index_name == base_index but no dedicated index exists",
+        "detail": "registry entry for ticket 'TASK-583' has api_index_name == base_index but no dedicated index exists",
     }
     report = build_report(
         _with_registry_integrity_findings(_fake_probes(), [hard_finding, informational_finding]),
@@ -1300,14 +1300,14 @@ def test_report_registry_integrity_row_still_warns_when_hard_and_informational_f
 
     row = next(r for r in report["infrastructure"] if r.get("component") == "registry integrity lint")
     assert "⚠️" in row["state"], f"the coexisting hard finding must still WARN: {row}"
-    assert "HAS-582" in row["detail"], "the hard finding must still be named"
-    assert "HAS-583" in row["detail"], (
+    assert "TASK-582" in row["detail"], "the hard finding must still be named"
+    assert "TASK-583" in row["detail"], (
         "the coexisting informational finding must still be surfaced, not dropped"
     )
 
 
 # -----------------------------------------------------------------------------
-# COM-289 BR-08 — status-plane disagreement parity between `health` and `report`.
+# WORK-289 BR-08 — status-plane disagreement parity between `health` and `report`.
 #
 # Field failure (2026Jul23 retro §WRONG-8): `report` said `orphans:0`/"no active
 # rebuild" while `resolve` showed "overlay-rebuilding" and the pid file pointed at
@@ -1336,13 +1336,13 @@ def test_probes_status_plane_disagreements_is_optional_default_none():
 def test_report_surfaces_status_plane_disagreement_row_when_planes_disagree():
     finding = {
         "class": "queue-active-watcher-dead",
-        "ticket": "HAS-999",
+        "ticket": "TASK-999",
         "project": "hai-sim-engine",
-        "worktree_path": "/Users/idengrenme/dev/hai-sim-engine-wt-has-999",
+        "worktree_path": "/Users/testuser/dev/hai-sim-engine-wt-has-999",
         "queue_state": "running",
         "watcher_state": "watcher-dead",
         "worker_pid": 999999999,
-        "detail": "refresh-queue for ticket 'HAS-999' claims an active rebuild (state='running') but watcher-liveness says 'watcher-dead'",
+        "detail": "refresh-queue for ticket 'TASK-999' claims an active rebuild (state='running') but watcher-liveness says 'watcher-dead'",
     }
     report = build_report(
         _with_status_plane_disagreements(_fake_probes(), [finding]),
@@ -1351,7 +1351,7 @@ def test_report_surfaces_status_plane_disagreement_row_when_planes_disagree():
 
     row = next(r for r in report["infrastructure"] if r.get("component") == "status-plane disagreement")
     assert "DISAGREEMENT" in row["state"]
-    assert "HAS-999" in row["state"]
+    assert "TASK-999" in row["state"]
     assert "running" in row["detail"]
     assert "watcher-dead" in row["detail"]
 

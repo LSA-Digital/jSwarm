@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Catalog-driven controlled-config deploy engine for COM-146.
+"""Catalog-driven controlled-config deploy engine.
 
 The engine is deliberately root-parameterized: callers must provide the
 controlled master, common target, home target, and catalog roots.  No command
@@ -58,7 +58,7 @@ PLAN_KEYS = (
     "rollback_hint",
 )
 VALID_TYPES = {"symlink", "managed-copy", "merge-template"}
-LIVE_APPLY_REFUSAL = "live apply is COM-148"
+LIVE_APPLY_REFUSAL = "live apply is refused"
 
 # AC-12 live backup/preview/rollback constants.
 BACKUP_ROOT_ENV = "COM146_CONTROLLED_CONFIG_BACKUP_ROOT"
@@ -392,7 +392,7 @@ def _plan_merge_template(*, target_relpath: str, context: str, source: Path, tar
             target=target,
             action="merge-template",
             status="error",
-            detail="merge-template non-JSON not supported in COM-146",
+            detail="merge-template non-JSON not supported",
             rollback_hint=rollback,
         )
 
@@ -561,7 +561,7 @@ def build_plan(
         if "scope" in install:
             plan.append(
                 _error_entry(
-                    f"artifact {target_relpath}: install.scope is legacy and unsupported in COM-176 one-home catalog; use install.context",
+                    f"artifact {target_relpath}: install.scope is legacy and unsupported in the one-home catalog; use install.context",
                     target_relpath=target_relpath,
                 )
             )
@@ -569,7 +569,7 @@ def build_plan(
         if "target_contexts" in install:
             plan.append(
                 _error_entry(
-                    f"artifact {target_relpath}: install.target_contexts is legacy and unsupported in COM-176 one-home catalog; use install.context",
+                    f"artifact {target_relpath}: install.target_contexts is legacy and unsupported in the one-home catalog; use install.context",
                     target_relpath=target_relpath,
                 )
             )
@@ -1533,7 +1533,7 @@ def _load_ledger(path: Path) -> tuple[dict[str, Any], str | None]:
         if schema_version == 1:
             return (
                 {},
-                "ledger schema_version 1 uses legacy target_relpath::scope keys; run COM-176 "
+                "ledger schema_version 1 uses legacy target_relpath::scope keys; run "
                 "ledger reset/re-apply or migrate_ledger_one_home.py",
             )
         return {}, f"ledger at {path} has unsupported schema_version {schema_version!r}"
@@ -2515,8 +2515,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "verify":
         # Plan-based verify: consistent with apply by construction. Fail on any unreconciled
         # (non-noop) entry, using the same context->target + type semantics as build_plan. This
-        # does NOT delegate to the AC-5 verify_dotclaude_topology (that models the full
-        # post-inversion topology — common symlink universal — a COM-148 concern).
+        # does NOT delegate to verify_dotclaude_topology (that models the full
+        # post-inversion topology, common symlink universal, as a separate concern).
         plan = build_plan(
             master_root=args.master_root,
             common_root=args.common_root,

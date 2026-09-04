@@ -1,5 +1,5 @@
-# CONFIG-CONTROLLED — edit the master under jswarm/host/deploy/ (COM-176).
-"""COM-176 shared layer loader for the controlled-config one-home model.
+# CONFIG-CONTROLLED — edit the master under jswarm/host/deploy/.
+"""Shared layer loader for the controlled-config one-home model.
 
 Parses ``docs/_CONTROLLED_CONFIG/dotclaude/_layers.yaml`` once and shares the
 result across deploy, verify, adopt, and migration. Each *context* maps to
@@ -13,8 +13,6 @@ precedence registry: runtime precedence (enterprise > user > repo) is Claude
 Code's own cascade, never a deploy-engine concern. Any precedence / rank /
 masking / multi-target field in ``_layers.yaml`` is rejected on purpose to keep
 the rejected multi-target model from reappearing.
-
-Spec: COM-176.implementation-spec.md §2 (_layers.yaml) and §4 (this loader).
 """
 from __future__ import annotations
 
@@ -145,7 +143,7 @@ def _require_no_forbidden(node: Any, *, where: str) -> None:
         for key in node:
             if key in FORBIDDEN_FIELDS:
                 raise LayersError(
-                    f"{where}: forbidden field {key!r} — COM-176 is one-home/one-target; "
+                    f"{where}: forbidden field {key!r}: the layer model is one-home/one-target; "
                     f"precedence/masking/multi-target metadata is rejected by design"
                 )
 

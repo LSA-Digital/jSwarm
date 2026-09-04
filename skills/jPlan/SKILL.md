@@ -2,9 +2,6 @@
 name: jPlan
 description: Initialize a work item (tracker key or local slug), technical design spec, and plan file (full or --lite/briefing mode).
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/jPlan/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # /jPlan — router
 

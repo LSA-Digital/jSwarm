@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""COM-146 AC-13 runtime-honor smoke runner.
+"""Runtime-honor smoke runner.
 
 Filesystem topology is not enough: a surface is live-ready only when the Claude
 runtime demonstrably honors the deployed form. This runner deploys unique-nonce
@@ -129,22 +129,22 @@ def _surface_prompt(surface: str, nonce: str) -> str:
     if surface == "skill":
         return (
             f"A skill named com146-symlink-probe-{nonce} may be available. If it is "
-            "available, use it to answer the COM-146 skill symlink probe. If it is not "
+            "available, use it to answer the skill symlink probe. If it is not "
             "available, answer exactly NO_SKILL."
         )
     if surface == "rule":
         return (
-            f"COM146 rule probe {nonce}: if a COM-146 rule sentinel token is in effect "
+            f"COM146 rule probe {nonce}: if a rule sentinel token is in effect "
             "for this session, output that token verbatim. Otherwise output exactly NO_RULE."
         )
     if surface == "hook":
         return (
-            f"COM146 hook probe {nonce}: if a COM-146 sentinel token was injected into "
+            f"COM146 hook probe {nonce}: if a sentinel token was injected into "
             "your context by a hook, output that token verbatim. Otherwise output exactly NO_HOOK."
         )
     if surface == "settings":
         return (
-            f"COM146 settings probe {nonce}: if a COM-146 sentinel token was injected into "
+            f"COM146 settings probe {nonce}: if a sentinel token was injected into "
             "your context by a hook, output that token verbatim. Otherwise output exactly NO_SETTINGS."
         )
     raise ValueError(f"unsupported surface {surface!r}; expected one of {SUPPORTED_SURFACES}")
@@ -521,8 +521,8 @@ def _write_skill_probe_master(plan: ProbePlan) -> None:
     skill_dir = plan.master_probe_source
     skill_dir.mkdir(parents=True, exist_ok=True)
     (skill_dir / "SKILL.md").write_text(
-        "# COM-146 symlink probe skill\n\n"
-        "If the user asks for the COM-146 skill symlink probe, answer exactly:\n"
+        "# com146 symlink probe skill\n\n"
+        "If the user asks for the skill symlink probe, answer exactly:\n"
         f"{plan.private_sentinel}\n",
         encoding="utf-8",
     )
@@ -538,30 +538,30 @@ def _write_probe_master(plan: ProbePlan) -> None:
         # The sentinel deliberately lives in the SNIPPET, not the command body — only a
         # successful renderer splice through the anchor can surface it (spec §3:372).
         body = (
-            f"# COM-146 command-injection probe {plan.nonce}\n\n"
+            f"# com146 command-injection probe {plan.nonce}\n\n"
             f"<!-- inject:com146-probe-{plan.nonce} -->\n"
         )
     elif plan.surface == "command":
         body = (
-            f"# COM-146 {plan.surface} probe {plan.nonce}\n\n"
+            f"# com146 {plan.surface} probe {plan.nonce}\n\n"
             f"When this command runs, output exactly this token and nothing else:\n"
             f"{plan.private_sentinel}\n"
         )
     elif plan.surface == "rule":
         body = (
             "---\nalwaysApply: true\n---\n\n"
-            f"# COM-146 rule probe {plan.nonce}\n\n"
-            "When asked for the COM-146 rule probe token, output exactly:\n"
+            f"# com146 rule probe {plan.nonce}\n\n"
+            "When asked for the rule probe token, output exactly:\n"
             f"{plan.private_sentinel}\n"
         )
     elif plan.surface == "hook":
         body = (
             "#!/usr/bin/env python3\n"
-            f'"""COM-146 hook probe {plan.nonce} (UserPromptSubmit)."""\n'
+            f'"""com146 hook probe {plan.nonce} (UserPromptSubmit)."""\n'
             "import json, sys\n"
             f"SENTINEL = {plan.private_sentinel!r}\n"
             "payload = {\"hookSpecificOutput\": {\"hookEventName\": \"UserPromptSubmit\","
-            " \"additionalContext\": \"COM-146 hook sentinel: \" + SENTINEL}}\n"
+            " \"additionalContext\": \"com146 hook sentinel: \" + SENTINEL}}\n"
             "print(json.dumps(payload))\n"
             "sys.exit(0)\n"
         )
@@ -719,7 +719,7 @@ def _stage_injection_probe_root(plan: ProbePlan) -> Path:
     snippet_master = root / "snippet-masters" / f"com146-probe-snippet-{plan.nonce}.md"
     snippet_master.parent.mkdir(parents=True, exist_ok=True)
     snippet_master.write_text(
-        f"COM-146 injected snippet {plan.nonce}\n\n{plan.private_sentinel}\n", encoding="utf-8"
+        f"com146 injected snippet {plan.nonce}\n\n{plan.private_sentinel}\n", encoding="utf-8"
     )
     injections_dir = root / ".claude" / "command-injections"
     injections_dir.mkdir(parents=True, exist_ok=True)

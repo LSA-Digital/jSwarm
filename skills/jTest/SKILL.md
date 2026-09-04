@@ -2,9 +2,6 @@
 name: "jTest"
 description: "Symlink to the global /jTest command: single procedural entrypoint for testing strategy, UAT (scripts, execution, owner invitations), E2E, regression (creation, capture-replay, maintenance), backend-only proof, and diagnosis."
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # /jTest - Testing Procedure Entry Point
 

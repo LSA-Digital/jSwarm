@@ -1,4 +1,3 @@
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/uat/verification.md -->
 
 # UAT verification overview
 

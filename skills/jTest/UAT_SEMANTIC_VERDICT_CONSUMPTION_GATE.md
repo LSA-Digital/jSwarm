@@ -1,7 +1,5 @@
 # Chatbot Testing Protocol — UAT Semantic Verdict Consumption Gate
 
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/UAT_SEMANTIC_VERDICT_CONSUMPTION_GATE.md -->
-
 > **Name:** this protocol is the **"chatbot testing protocol"** (owner-named 2026-08-02). The filename stays stable for existing references; prose references should use the new name.
 
 ## Applicability (binding rule, owner-ruled 2026-08-02)

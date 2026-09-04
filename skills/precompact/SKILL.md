@@ -2,17 +2,6 @@
 name: precompact
 description: "[DEPRECATED — use /jPrecompact] Compatibility alias for the renamed precompact command; delegates to /jPrecompact."
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/precompact/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy.
-     COMPATIBILITY ALIAS (COM-358 T2): /precompact has been renamed to /jPrecompact. This thin alias
-     delegates to /jPrecompact; the full checkpoint protocol + all surface/gate content now live under
-     skills/jPrecompact/. This alias is the ONE surviving skills/precompact/ artifact — it carries its
-     own distinct catalog identity and is EXCLUDED from any old-folder retire set, so /precompact keeps
-     resolving through the deprecation window. Alias retirement is owned by a separate ticket
-     (ceiling no earlier than 2026-11-10).
-     NOT affected by this rename: the `PreCompact` hook event, precompact-auto.py, precompact-runner.py,
-     jswarm/precompact_reconcile, .jswarm/state/precompact/, and the sibling /precompact-update skill. -->
 
 # /precompact → renamed to /jPrecompact (compatibility alias)
 

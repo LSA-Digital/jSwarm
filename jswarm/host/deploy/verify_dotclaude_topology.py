@@ -318,7 +318,7 @@ def desired_merge_template_payload(
 ) -> tuple[dict[str, Any], list[str]]:
     """Return the additive merge-template end-state and its missing entries.
 
-    General JSON keys keep COM-146's top-level additive semantics.  Settings
+    General JSON keys keep the top-level additive semantics.  Settings
     ``hooks`` is the one structured exception: when both sides are hook maps,
     required command registrations merge by event, matcher, and ``type`` plus
     ``command`` identity without replacing existing command payloads.
@@ -529,7 +529,7 @@ def verify_topology(
 ) -> list[str]:
     """Return topology failures for cataloged controlled-config install artifacts.
 
-    COM-176 one-home: each artifact has exactly ONE home context and ONE deploy
+    One-home: each artifact has exactly ONE home context and ONE deploy
     target. The verifier proves the single deployed target resolves to
     ``dotclaude/<context>/<target_relpath>`` — it does NOT check separate common
     and home legs by scope. An empty list means the topology conforms.
@@ -563,7 +563,7 @@ def verify_topology(
         # produce a clean verify with silently-skipped legs.
         if "scope" in install:
             failures.append(
-                f"{_artifact_label(target_relpath)}: legacy install.scope unsupported in COM-176 one-home; use install.context"
+                f"{_artifact_label(target_relpath)}: legacy install.scope unsupported in the one-home model; use install.context"
             )
             continue
         if "target_contexts" in install:
@@ -589,7 +589,7 @@ def verify_topology(
         role = f"context {context}"
 
         if install_type == "merge-template":
-            # COM-160 merge-template: a real merged JSON file (never a whole-file symlink).
+            # merge-template: a real merged JSON file (never a whole-file symlink).
             if Path(target_relpath).suffix != ".json":
                 failures.append(
                     f"{_artifact_label(target_relpath)}: merge-template non-JSON not supported; expected a .json target_relpath, actual {target_relpath!r}"
@@ -632,7 +632,7 @@ def verify_topology(
             )
         else:
             failures.append(
-                f"{_artifact_label(target_relpath)}: COM-176 expects install.type symlink, actual {install_type!r}"
+                f"{_artifact_label(target_relpath)}: one-home expects install.type symlink, actual {install_type!r}"
             )
 
     return failures

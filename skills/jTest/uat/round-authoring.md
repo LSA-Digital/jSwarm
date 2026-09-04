@@ -1,6 +1,3 @@
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/uat/round-authoring.md
-     Deploys as a symlink via COM-176 install; edit this master only.
-     Manage via /devops-maint dotclaude (mode 37). -->
 
 # Authoring a UAT round the owner can actually work
 

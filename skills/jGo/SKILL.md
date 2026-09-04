@@ -2,9 +2,6 @@
 name: jGo
 description: Symlink to the global /jGo command that executes a plan through progressive-disclosure lifecycle seams and flips plan status ACTIVE->READY_FOR_MERGE at completion.
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/jGo/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # /jGo — Execute a Plan
 

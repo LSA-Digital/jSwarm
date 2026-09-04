@@ -1,6 +1,3 @@
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/uat/notification-operation.md
-     Deploys as a symlink via COM-176 install; edit this master only.
-     Manage via /devops-maint dotclaude (mode 37). -->
 
 # Website feedback notification operation
 

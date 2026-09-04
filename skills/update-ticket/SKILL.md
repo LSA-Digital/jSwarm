@@ -2,9 +2,6 @@
 name: update-ticket
 description: Reliable single entry point for lifecycle plan-maintenance (migrate, rebuild matrix rows, reconcile status, count, audit) plus the interactive promotion-review gate, as a thin facade over jswarm/update_ticket/cli.py.
 ---
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/update-ticket/SKILL.md
-     Deploys as a symlink to this master: editing here edits the live source of truth (no deploy step).
-     Manage via /devops-maint dotclaude (mode 37); do not hand-edit a deployed copy. -->
 
 # Update Ticket
 

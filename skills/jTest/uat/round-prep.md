@@ -1,4 +1,3 @@
-<!-- CONFIG-CONTROLLED (COM-176 controlled-config) — master: skills/test/uat/round-prep.md -->
 
 # UAT round preparation
 
