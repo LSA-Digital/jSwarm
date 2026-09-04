@@ -26,7 +26,7 @@ PHASE_ONE_MANAGED_COMMANDS = frozenset({JPLAN_COMMAND_KEY, "implement.md", "test
 # Superset of the auto-bootstrap set. Two members are opt-in PER PROJECT and deliberately NOT
 # auto-scaffolded (they stay out of PHASE_ONE_MANAGED_COMMANDS):
 #   - close-ticket.md  — component-governance gate (only common wires it).
-#   - code-overview.md — UAT-scenario engine adopters (already wired for hai-sim-engine).
+#   - code-overview.md — UAT-scenario engine adopters (already wired for an adopting project).
 #     Real global command named code-overview.md, in this host's commands directory
 #     (`jswarm.host.claude_code.ClaudeCodeHost.commands_dir`), with three inject anchors;
 #     added to the allowlist by WS4 so an adopter manifest validates and its
@@ -94,50 +94,31 @@ class InspectSkillResult:
     warnings: tuple[str, ...] = ()
 
 
-PROJECT_IDENTITIES: dict[str, dict[str, str]] = {
-    "common": {
-        "ticket_prefix": "COM",
-        "jira_key": "COM",
-        "colgrep_index": "common",
-        "project_name": "common",
-    },
-    "hai-sim-engine": {
-        "ticket_prefix": "HAS",
-        "jira_key": "HAS",
-        "colgrep_index": "hai-sim-engine",
-        "project_name": "hai-sim-engine",
-    },
-    "epms": {
-        "ticket_prefix": "EPMS",
-        "jira_key": "LSARS",
-        "colgrep_index": "epms",
-        "project_name": "epms",
-    },
-    "haisim": {
-        "ticket_prefix": "HAISIM",
-        "jira_key": "HAISIM",
-        "colgrep_index": "haisim",
-        "project_name": "haisim",
-    },
-    "lsars-hra": {
-        "ticket_prefix": "LSARS",
-        "jira_key": "LSARS",
-        "colgrep_index": "lsars-hra",
-        "project_name": "lsars-hra",
-    },
-    "lsars-datalab": {
-        "ticket_prefix": "LSARS",
-        "jira_key": "LSARS",
-        "colgrep_index": "lsars-datalab",
-        "project_name": "lsars-datalab",
-    },
-    "lsars-pi": {
-        "ticket_prefix": "LSARS",
-        "jira_key": "LSARS",
-        "colgrep_index": "lsars-pi",
-        "project_name": "lsars-pi",
-    },
-}
+def _config_tracker_key_prefix(project_root: "Path | None") -> "str | None":
+    """Read a project's own ``.jswarm/config.yaml`` ``tracker.key_prefix``, if set.
+
+    Mirrors ``jswarm.plan_status.config._tracker_key_prefix``: there is no
+    built-in table mapping real project names to ticket-key prefixes. A
+    project's prefix is either recorded in its own committed
+    ``.jswarm/config.yaml`` (once it has adopted a tracker) or not resolved
+    at all; there is nothing left to guess from.
+    """
+    if project_root is None:
+        return None
+    try:
+        import yaml  # local import: keep this module importable without PyYAML
+    except Exception:  # pragma: no cover - yaml is a hard dep in this repo
+        return None
+    config_path = Path(project_root) / ".jswarm" / "config.yaml"
+    if not config_path.is_file():
+        return None
+    try:
+        data = yaml.safe_load(config_path.read_text()) or {}
+    except Exception:
+        return None
+    tracker_cfg = data.get("tracker") if isinstance(data, dict) else None
+    prefix = tracker_cfg.get("key_prefix") if isinstance(tracker_cfg, dict) else None
+    return str(prefix) if prefix else None
 
 
 def normalize_text(text: str) -> str:
@@ -147,15 +128,22 @@ def normalize_text(text: str) -> str:
     return f"{normalized}\n" if normalized else ""
 
 
-def project_identity(project_name: str) -> dict[str, str]:
-    normalized = project_name.strip()
-    if normalized in PROJECT_IDENTITIES:
-        return dict(PROJECT_IDENTITIES[normalized])
+def project_identity(project_name: str, project_root: "Path | None" = None) -> dict[str, str]:
+    """Derive a project's ticket-prefix / jira-key / colgrep-index identity.
 
+    There is no built-in table of real projects. When ``project_root`` is
+    given and that project has adopted a tracker, its own
+    ``.jswarm/config.yaml`` ``tracker.key_prefix`` is the real, authoritative
+    prefix and wins. Otherwise the identity is derived mechanically from the
+    project name itself (upper-cased, hyphens to underscores) -- a reasonable
+    guess, not a claim about any real tracker project.
+    """
+    normalized = project_name.strip()
     fallback_key = normalized.upper().replace("-", "_")
+    key = _config_tracker_key_prefix(project_root) or fallback_key
     return {
-        "ticket_prefix": fallback_key,
-        "jira_key": fallback_key,
+        "ticket_prefix": key,
+        "jira_key": key,
         "colgrep_index": normalized,
         "project_name": normalized,
     }
@@ -168,32 +156,34 @@ def resolve_jira_project_key(project_root: Path) -> str | None:
     """Resolve the Jira project key for ``project_root``.
 
     Order: ``managed_commands.jPlan.md.parameters.jira_project_key`` in the
-    project manifest (fail-open reader) -> the built-in ``PROJECT_IDENTITIES``
-    table by directory name -> ``None`` (caller must ask the user).
+    project manifest (fail-open reader) -> that project's own
+    ``.jswarm/config.yaml`` ``tracker.key_prefix`` -> ``None`` (caller must
+    ask the user).
     """
     project_root = Path(project_root)
     params = command_parameters_for_project(project_root, JPLAN_COMMAND_KEY)
     key = params.get(JIRA_KEY_PARAMETER) if isinstance(params, dict) else None
     if isinstance(key, str) and key.strip():
         return key.strip().upper()
-    name = project_root.name.strip()
-    if name in PROJECT_IDENTITIES:
-        return PROJECT_IDENTITIES[name]["jira_key"]
-    return None
+    configured = _config_tracker_key_prefix(project_root)
+    return configured.upper() if configured else None
 
 
 def project_command_substitutions(
-    source_project_name: str, target_project_name: str
+    source_project_name: str,
+    target_project_name: str,
+    *,
+    source_root: "Path | None" = None,
+    target_root: "Path | None" = None,
 ) -> dict[str, str]:
-    source = project_identity(source_project_name)
-    target = project_identity(target_project_name)
+    source = project_identity(source_project_name, source_root)
+    target = project_identity(target_project_name, target_root)
 
     substitutions = {
         f'"project_key": "{source["jira_key"]}"': f'"project_key": "{target["jira_key"]}"',
         f"{source['ticket_prefix']}-XXX": f"{target['ticket_prefix']}-XXX",
         f"{source['ticket_prefix']}-{{NUMBER}}": f"{target['ticket_prefix']}-{{NUMBER}}",
         f'"index": "{source["colgrep_index"]}"': f'"index": "{target["colgrep_index"]}"',
-        '"project_key": "COM"': f'"project_key": "{target["jira_key"]}"',
         "TICKET-XXX": f"{target['ticket_prefix']}-XXX",
         "TICKET-{NUMBER}": f"{target['ticket_prefix']}-{{NUMBER}}",
         '"index": "<project>"': f'"index": "{target["colgrep_index"]}"',
@@ -1086,7 +1076,10 @@ def audit_project_check(
         status = "ok"
         source_project_name = common_root.name
         target_project_name = project_root.name
-        substitutions = project_command_substitutions(source_project_name, target_project_name)
+        substitutions = project_command_substitutions(
+            source_project_name, target_project_name,
+            source_root=common_root, target_root=project_root,
+        )
 
         for command_name, config in (manifest.get("managed_commands") or {}).items():
             if not isinstance(config, dict) or str(config.get("state", "")) != "managed":
@@ -1357,7 +1350,8 @@ def main(argv: list[str] | None = None) -> int:
             substitutions = _parse_substitutions(args.substitute)
             if args.source_project_name and args.target_project_name:
                 auto_substitutions = project_command_substitutions(
-                    args.source_project_name, args.target_project_name
+                    args.source_project_name, args.target_project_name,
+                    target_root=Path(args.project_root),
                 )
                 auto_substitutions.update(substitutions)
                 substitutions = auto_substitutions
