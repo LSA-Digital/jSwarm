@@ -127,27 +127,27 @@ flowchart LR
 
 ## Observability Requirements
 
-> **MANDATORY SECTION** — Transparent, debuggable systems prevent hours wasted on "hung" processes and silent failures. These requirements apply to both application code AND test code.
+> **MANDATORY SECTION**: transparent, debuggable systems prevent hours wasted on "hung" processes and silent failures. These requirements apply to both application code AND test code.
 
 ### Application Code
 
-- [ ] **Structured logging** — All key operations log entry, exit, and duration. Use structured format (JSON or key=value) with correlation IDs where applicable.
-- [ ] **Error context** — Every error log includes: operation name, input summary (not secrets), error type, and suggested next step.
-- [ ] **Progress indicators** — Long-running operations (>5s) emit periodic progress logs (e.g., "Processing batch 3/10, 450 records").
-- [ ] **Timeout messages** — Every timeout includes: what was being waited for, how long it waited, and what the configured limit is.
+- [ ] **Structured logging**: All key operations log entry, exit, and duration. Use structured format (JSON or key=value) with correlation IDs where applicable.
+- [ ] **Error context**: Every error log includes: operation name, input summary (not secrets), error type, and suggested next step.
+- [ ] **Progress indicators**: Long-running operations (>5s) emit periodic progress logs (e.g., "Processing batch 3/10, 450 records").
+- [ ] **Timeout messages**: Every timeout includes what was being waited for, how long it waited, and what the configured limit is.
 
 ### Test Code
 
-- [ ] **Test progress output** — Every test logs its name and key steps as it runs. No silent tests that appear "hung" when they're actually working.
-- [ ] **Assertion messages** — Every assertion includes a human-readable message explaining what was expected vs what was found.
-- [ ] **Timeout assertions** — Tests that wait for async operations MUST have explicit timeouts with descriptive failure messages (not just "timeout exceeded").
-- [ ] **Screenshot context** — Playwright screenshots include: test name, step number, and timestamp in the filename.
+- [ ] **Test progress output**: Every test logs its name and key steps as it runs. No silent tests that appear "hung" when they're actually working.
+- [ ] **Assertion messages**: Every assertion includes a human-readable message explaining what was expected vs what was found.
+- [ ] **Timeout assertions**: Tests that wait for async operations MUST have explicit timeouts with descriptive failure messages (not just "timeout exceeded").
+- [ ] **Screenshot context**: Playwright screenshots include test name, step number, and timestamp in the filename.
 
 ### Hang Prevention
 
-- [ ] **No unbounded waits** — Every `await`, `sleep`, poll loop, or external call has a timeout. Document the timeout value and rationale.
-- [ ] **Heartbeat logging** — Processes that run >30s log a heartbeat every 10-15s showing they're still alive and what they're doing.
-- [ ] **Fail loudly** — If a process is stuck, it must eventually timeout and report WHY it's stuck, not just silently hang.
+- [ ] **No unbounded waits**: Every `await`, `sleep`, poll loop, or external call has a timeout. Document the timeout value and rationale.
+- [ ] **Heartbeat logging**: Processes that run >30s log a heartbeat every 10-15s showing they're still alive and what they're doing.
+- [ ] **Fail loudly**: If a process is stuck, it must eventually timeout and report WHY it's stuck, not just silently hang.
 
 ---
 
@@ -170,7 +170,7 @@ If the project uses a generated catalog, do not hand-edit rendered inventory row
 
 ## E2E Tests Enabled by This Ticket
 
-> **MANDATORY SECTION (if project uses TEST_CATALOG.md or architecture test-scenario inventories)** — Search for E2E tests and scenario contracts that list this ticket (or its parent Feature) as a **prerequisite**.
+> **MANDATORY SECTION (if project uses TEST_CATALOG.md or architecture test-scenario inventories)**: search for E2E tests and scenario contracts that list this ticket (or its parent Feature) as a **prerequisite**.
 >
 > The plan header's **`E2E policy`** controls **when** this work runs:
 > - **`per-ticket`** → create / upgrade / run the relevant E2E tests near **plan completion**
@@ -208,20 +208,20 @@ If the project uses a generated catalog, do not hand-edit rendered inventory row
 
 | Test   | Spec File              | All Prerequisites Met?                              | Timing                       | Action               | Status |
 | ------ | ----------------------- | ------------------------------------------------------ | ------------------------------ | --------------------- | ------ |
-| E2E-XX | `e2e_XX_name.spec.ts`  | [Yes — runnable] / [No — TICKET-YY still pending]   | [per-ticket now / deferred]  | 🆕 New / ✏️ Upgrade | 🔴     |
+| E2E-XX | `e2e_XX_name.spec.ts`  | [Yes, runnable] / [No, TICKET-YY still pending]   | [per-ticket now / deferred]  | 🆕 New / ✏️ Upgrade | 🔴     |
 
 ### E2E QA Standards (NON-NEGOTIABLE)
 
 When **`E2E policy: per-ticket`**, agents MUST follow this workflow:
 
-1. **Read the full test definition** from `tests/TEST_CATALOG.md` — do NOT invent steps or assertions
+1. **Read the full test definition** from `tests/TEST_CATALOG.md`; do NOT invent steps or assertions
 2. **Create/update the spec file** using the stable live-show `uat-test.md` flow plus scenario contracts/catalog entries
 3. **Run the test** against the production-like build (NOT dev server where possible), usually headless for regression mode
 4. **Capture ALL listed screenshots** at the exact points specified in the catalog
 5. **Use `look_at` only for asynchronous screenshot review** when the developer did not watch the live-show run or when visual evidence needs independent review
 6. **Document results** in this plan file's Screenshot Evidence section with look_at verification notes
 7. **Update TEST_CATALOG.md** status from ⬜ to 🟢 when the test passes. If the catalog is generated, update source metadata and re-render instead of hand-editing generated rows.
-8. **Populate `Relevant UAT`** for Regression E2E/PE2E rows with the source live-show scenario ID, `uat-test.md` anchor, or `N/A — [reason]`
+8. **Populate `Relevant UAT`** for Regression E2E/PE2E rows with the source live-show scenario ID, `uat-test.md` anchor, or `N/A ([reason])`
 
 If **`E2E policy: deferred`**, do **not** silently skip this section. Record the deferred tests and explicitly note where/when they will run.
 
@@ -241,4 +241,4 @@ If **`E2E policy: deferred`**, do **not** silently skip this section. Record the
 
 FULL-bundle governance/ops content with no other topical owner: required reading, agent assignment + tag legend + named-agent routing rule, the end-to-end demo path, FULL's risk/rollback wording (FEATURE's distinct wording is owned by `pattern.feature-governance.md`; the two are never co-selected into the same bundle, so the shared `## Risk / Rollback` heading text does not collide), screenshot evidence, smoke-test impact assessment, the mandatory error-handling and observability sections, TEST_CATALOG.md review, E2E-enablement discovery + QA standards, and the critical-files table.
 
-Provenance: `PLAN_TEMPLATE.md` §§ Required Reading, Agent Assignment Summary, End-to-End Demo Path, Risk/Rollback, Screenshot Evidence, Smoke Test Impact Assessment, Error Handling Strategy, Observability Requirements, TEST_CATALOG.md Review, E2E Tests Enabled by This Ticket, Critical Files. Restored 2026-07-10 (Slice B gate-4 round-1 MAJOR-1 remediation) — new pattern; see `.jswarm/plans/TICKET-XXX/TICKET-XXX.dedrift-ledger.md` for the restoration ledger rows.
+Provenance: `PLAN_TEMPLATE.md` §§ Required Reading, Agent Assignment Summary, End-to-End Demo Path, Risk/Rollback, Screenshot Evidence, Smoke Test Impact Assessment, Error Handling Strategy, Observability Requirements, TEST_CATALOG.md Review, E2E Tests Enabled by This Ticket, Critical Files. Restored 2026-07-10 (Slice B gate-4 round-1 MAJOR-1 remediation), new pattern; see `.jswarm/plans/TICKET-XXX/TICKET-XXX.dedrift-ledger.md` for the restoration ledger rows.
