@@ -11,10 +11,9 @@ secret-assignment patterns), plus bare email addresses, ``sk-``-prefixed keys,
 and JWT-shaped tokens -- ordinary, generic regexes with no coupling to the
 enterprise substrate, restored here from the same family jswarm/leakgate.yaml
 already declares for commits (this module is the equivalent check at install
-time: jswarm/installer/preflight/__init__.py and jswarm/installer/installer/
-services/leak_gate.py both gate on it). This is a local pattern set, not a
-governance-backed one: it detects what is listed above and nothing the
-upstream substrate additionally covers beyond that.
+time: jswarm/installer/preflight/__init__.py gates on it). This is a local
+pattern set, not a governance-backed one: it detects what is listed above and
+nothing the upstream substrate additionally covers beyond that.
 """
 from __future__ import annotations
 

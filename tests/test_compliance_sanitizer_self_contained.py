@@ -12,8 +12,7 @@ Fix round 2: an empty `_SECRET_PATTERNS` tuple silently dropped three
 upstream detectors (bare email/PII, sk-prefixed keys, JWT-shaped tokens)
 that have no local equivalent -- restored as ordinary, uncoupled regexes
 (no import of substrate), since `sanitize`/`contains_sensitive` are a real
-runtime gate (`jswarm/installer/preflight/__init__.py` raises on failure;
-`jswarm/installer/installer/services/leak_gate.py` also gates on it).
+runtime gate (`jswarm/installer/preflight/__init__.py` raises on failure).
 """
 
 from __future__ import annotations

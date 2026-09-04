@@ -110,7 +110,7 @@ files:
   target: jswarm/colgrep_index_policy.py
   sha256: 2c6f652977096bc952274134ac3e6f2b65023e058c524a59fee75bda907b5da9
 - source: scripts/colgrep_launchd_control.py
-  target: jswarm/colgrep_launchd_control.py
+  target: jswarm/platform/colgrep_launchd_control.py
   sha256: 367b1ea57bcd28a65c21246abb7e5776eda015cdef398b1bfeeb628ce2bf171a
 - source: scripts/colgrep_lifecycle_check.py
   target: jswarm/colgrep_lifecycle_check.py
@@ -157,48 +157,6 @@ files:
 - source: scripts/jarviswarm/day0.py
   target: jswarm/installer/day0.py
   sha256: 41a6d61f600d7e9fee3fa5fbbb1b0d4791cc217aa90772c50c5ee629726a500c
-- source: scripts/jarviswarm/installer/services/__init__.py
-  target: jswarm/installer/installer/services/__init__.py
-  sha256: 7b4c96464bff0fcf8d4b3b71b2b38e9c0bc4bae02dc3866aa7452e3dd9a46a1a
-- source: scripts/jarviswarm/installer/services/detect.py
-  target: jswarm/installer/installer/services/detect.py
-  sha256: a29ea284c44bd140ce93ed8c6cada8abc558cd5b01c4aab108a2b7cdaa3a625c
-- source: scripts/jarviswarm/installer/services/instructions.py
-  target: jswarm/installer/installer/services/instructions.py
-  sha256: 44c7b011955ff58a4986c84f714d2e4313b9dfd50e8a89067e36aa952ec48052
-- source: scripts/jarviswarm/installer/services/leak_gate.py
-  target: jswarm/installer/installer/services/leak_gate.py
-  sha256: d1b17da5d76db857f5e7c539848f00061bb4882d514b216a0e5e11a35aa10245
-- source: scripts/jarviswarm/installer/services/platforms/__init__.py
-  target: jswarm/installer/installer/services/platforms/__init__.py
-  sha256: c06d24f4fcf03a277ff506b41618f4af6120d1563151d0455708a8550d5df21d
-- source: scripts/jarviswarm/installer/services/platforms/common.py
-  target: jswarm/installer/installer/services/platforms/common.py
-  sha256: a261b60b499ada96e0b04886f65bf54e0f6cfab59744b1a0ff6c43ad6fa7619c
-- source: scripts/jarviswarm/installer/services/platforms/linux_openrc.py
-  target: jswarm/installer/installer/services/platforms/linux_openrc.py
-  sha256: 861a03b9d6d1897dd80ae62e8a71d4b3773c57fb9ea5b2281cc0809964e3c052
-- source: scripts/jarviswarm/installer/services/platforms/linux_systemd.py
-  target: jswarm/installer/installer/services/platforms/linux_systemd.py
-  sha256: 5d58008f227338904438e81383418425a34d1ef620bf95ce72812de2da793704
-- source: scripts/jarviswarm/installer/services/platforms/linux_sysvinit.py
-  target: jswarm/installer/installer/services/platforms/linux_sysvinit.py
-  sha256: b568d2015c1d4e8544f59f80d40401981af19f380c97d5ace9093efcff13bc59
-- source: scripts/jarviswarm/installer/services/platforms/macos_launchd.py
-  target: jswarm/installer/installer/services/platforms/macos_launchd.py
-  sha256: 9e327d4d81479889f71e793a4e3e3f8cf762303141b84ca2e10bb9cea1d60ea1
-- source: scripts/jarviswarm/installer/services/platforms/windows_service.py
-  target: jswarm/installer/installer/services/platforms/windows_service.py
-  sha256: 522bc9ebf95dffc429c08008587adcc89e83e7051716f0d1b9d002718385c62c
-- source: scripts/jarviswarm/installer/services/platforms/windows_taskscheduler.py
-  target: jswarm/installer/installer/services/platforms/windows_taskscheduler.py
-  sha256: 043a7684e1371cee0c3e7d78384b0cebb9c93e11e8f31ca6829c351f5d9f2623
-- source: scripts/jarviswarm/installer/services/renderer.py
-  target: jswarm/installer/installer/services/renderer.py
-  sha256: b52dcb5e31251901b47e8dd9f440c930033462f4dc56daef7d3b9fd00f3f1a42
-- source: scripts/jarviswarm/installer/services/schema.py
-  target: jswarm/installer/installer/services/schema.py
-  sha256: d72a238950d59846c38a8c76216b72abdf3d23fc7688eb2e31a97c58035f7425
 - source: scripts/jarviswarm/jsetup/__init__.py
   target: jswarm/installer/jsetup/__init__.py
   sha256: d3cadd79cced4356a737458fefd57342d359d89ed90ed07f0e706152045d5f1e

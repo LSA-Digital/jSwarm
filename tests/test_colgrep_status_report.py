@@ -973,7 +973,7 @@ def test_long_running_launchd_set_matches_launchd_control_module():
     import is TEST-ONLY (colgrep_launchd_control imports
     `_parse_launchd_loaded` from colgrep_status_report, so a module-level
     import back here would be circular)."""
-    from jswarm import colgrep_launchd_control
+    from jswarm.platform import colgrep_launchd_control
 
     assert _LONG_RUNNING_LAUNCHD == colgrep_launchd_control.LONG_RUNNING_COMPONENTS
 
@@ -1063,7 +1063,7 @@ def test_fleet_plan_supervisor_blocked_worktree_appends_restart_after_infra_befo
 
     assert worktree_step["action"] == "restart-fleet-supervisor"
     assert worktree_step["command"] == (
-        ".venv/bin/python jswarm/colgrep_launchd_control.py restart "
+        ".venv/bin/python jswarm/platform/colgrep_launchd_control.py restart "
         "--component overlay-fleet-supervisor --json"
     )
     assert worktree_step["operator_gate"] is True

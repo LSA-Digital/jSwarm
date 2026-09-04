@@ -7,53 +7,23 @@ import json
 import shutil
 import socket
 import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
 from jswarm.compliance.sanitizer import contains_sensitive, sanitize
-from jswarm.installer.installer.services import detect
+from jswarm.platform import Platform, current as _current_platform
 
 _REQUIRED_PORTS = (9100, 9101)
 _SKIPPED_DOCKER_CAPABILITIES = ("stack start", "health check", "Compose validation", "Docker cleanup")
-_PLATFORM_GUIDANCE: dict[str, dict[str, str]] = {
-    detect.PLATFORM_DARWIN_LAUNCHD: {
-        "python": "Install a current Python 3.11+ runtime with your macOS package manager, then create the repository .venv.",
-        "docker": "Install Docker Desktop for macOS and confirm Docker Compose v2 with docker compose version.",
-        "git": "Install Git with Xcode Command Line Tools or your macOS package manager.",
-    },
-    detect.PLATFORM_LINUX_SYSTEMD: {
-        "python": "Install a current Python 3.11+ package and python venv support with your Linux package manager, then create the repository .venv.",
-        "docker": "Install Docker Engine and the Docker Compose v2 plugin for your systemd Linux distribution.",
-        "git": "Install Git with your Linux package manager.",
-    },
-    detect.PLATFORM_LINUX_OPENRC: {
-        "python": "Install a current Python 3.11+ runtime and venv support with your OpenRC distribution package manager, then create the repository .venv.",
-        "docker": "Install Docker Engine and Docker Compose v2 using your OpenRC distribution documentation.",
-        "git": "Install Git with your OpenRC distribution package manager.",
-    },
-    detect.PLATFORM_LINUX_SYSVINIT: {
-        "python": "Install a current Python 3.11+ runtime and venv support with your SysVinit distribution package manager, then create the repository .venv.",
-        "docker": "Install Docker Engine and Docker Compose v2 using your SysVinit distribution documentation.",
-        "git": "Install Git with your SysVinit distribution package manager.",
-    },
-    detect.PLATFORM_WINDOWS_SERVICE: {
-        "python": "Install a current Python 3.11+ runtime from the official Python distribution or your Windows package manager, then create the repository .venv.",
-        "docker": "Install Docker Desktop for Windows and confirm Docker Compose v2 with docker compose version.",
-        "git": "Install Git for Windows.",
-    },
-    detect.PLATFORM_WINDOWS_TASKSCHEDULER: {
-        "python": "Install a current Python 3.11+ runtime from the official Python distribution or your Windows package manager, then create the repository .venv.",
-        "docker": "Install Docker Desktop for Windows and confirm Docker Compose v2 with docker compose version.",
-        "git": "Install Git for Windows.",
-    },
-    detect.PLATFORM_UNSUPPORTED: {
-        "python": "Install a current Python 3.11+ runtime with venv support for your operating system, then create the repository .venv.",
-        "docker": "Install Docker Engine or Docker Desktop plus Docker Compose v2 for your operating system.",
-        "git": "Install Git for your operating system.",
-    },
+# macOS is the only supported platform (v0.1.0). An unsupported platform's
+# guidance always comes from `Platform.unsupported_message()` instead -- see
+# `_guidance` below.
+_MACOS_GUIDANCE: dict[str, str] = {
+    "python": "Install a current Python 3.11+ runtime with your macOS package manager, then create the repository .venv.",
+    "docker": "Install Docker Desktop for macOS and confirm Docker Compose v2 with docker compose version.",
+    "git": "Install Git with Xcode Command Line Tools or your macOS package manager.",
 }
 
 
@@ -104,8 +74,10 @@ class PreflightReport:
         }
 
 
-def _guidance(platform_key: str, topic: str) -> str:
-    return _PLATFORM_GUIDANCE.get(platform_key, _PLATFORM_GUIDANCE[detect.PLATFORM_UNSUPPORTED])[topic]
+def _guidance(platform: Platform, topic: str) -> str:
+    if not platform.is_supported():
+        return platform.unsupported_message()
+    return _MACOS_GUIDANCE[topic]
 
 
 def _default_probes(repo_root: Path) -> SimpleNamespace:
@@ -116,7 +88,6 @@ def _default_probes(repo_root: Path) -> SimpleNamespace:
     candidates = _candidate_python_interpreters()
     selected_interpreter = selected_venv_python or _select_interpreter(candidates)
     return SimpleNamespace(
-        platform_probe=detect.probe_host(),
         docker_available=docker_path is not None,
         docker_version=_read_version(("docker", "--version")) if docker_path is not None else None,
         compose_v2_available=_docker_compose_v2_available() if docker_path is not None else False,
@@ -132,8 +103,6 @@ def _default_probes(repo_root: Path) -> SimpleNamespace:
 
 
 def _repo_venv_python(repo_root: Path) -> Path:
-    if sys.platform.startswith("win"):
-        return repo_root / ".venv" / "Scripts" / "python.exe"
     return repo_root / ".venv" / "bin" / "python"
 
 
@@ -211,12 +180,11 @@ def run_preflight(*, repo_root: Path, probes: SimpleNamespace | None = None, req
     """Build a deterministic, host-read-only Layer-0 preflight report."""
 
     active_probes = probes if probes is not None else _default_probes(repo_root)
-    platform_probe = dict(getattr(active_probes, "platform_probe", {}) or {})
-    platform_key = detect.classify_platform(platform_probe)
+    platform = _current_platform()
     platform_info = {
-        "classifier": "com162-detect",
-        "platform_key": platform_key,
-        "guidance_source": f"COM-162 detect.py classifier selected {platform_key}",
+        "classifier": "jswarm.platform",
+        "platform_key": platform.name,
+        "guidance_source": f"jswarm.platform.current() selected {platform.name}",
     }
 
     errors: list[PreflightError] = []
@@ -229,7 +197,7 @@ def run_preflight(*, repo_root: Path, probes: SimpleNamespace | None = None, req
             PreflightError(
                 "DOCKER_UNAVAILABLE",
                 "Docker is not available, so Docker-backed demo stack operations will run in reduced mode.",
-                f"{platform_key}: {_guidance(platform_key, 'docker')}",
+                f"{platform.name}: {_guidance(platform, 'docker')}",
             )
         )
     elif not compose_available:
@@ -237,7 +205,7 @@ def run_preflight(*, repo_root: Path, probes: SimpleNamespace | None = None, req
             PreflightError(
                 "COMPOSE_V2_UNAVAILABLE",
                 "Docker Compose v2 is not available, so Compose-backed stack operations will run in reduced mode.",
-                f"{platform_key}: Install or enable Docker Compose v2, then verify with docker compose version.",
+                f"{platform.name}: Install or enable Docker Compose v2, then verify with docker compose version.",
             )
         )
 
@@ -255,7 +223,7 @@ def run_preflight(*, repo_root: Path, probes: SimpleNamespace | None = None, req
             PreflightError(
                 "PYTHON_QUARANTINED",
                 "Only quarantined Python candidates were found for the runtime path.",
-                f"{platform_key}: {_guidance(platform_key, 'python')} Do not use the quarantined system Python; create .venv with a supported interpreter.",
+                f"{platform.name}: {_guidance(platform, 'python')} Do not use the quarantined system Python; create .venv with a supported interpreter.",
             )
         )
     elif not usable_candidates:
@@ -264,7 +232,7 @@ def run_preflight(*, repo_root: Path, probes: SimpleNamespace | None = None, req
             PreflightError(
                 "PYTHON_UNAVAILABLE",
                 "No Python candidate can create the repository virtual environment.",
-                f"{platform_key}: {_guidance(platform_key, 'python')}",
+                f"{platform.name}: {_guidance(platform, 'python')}",
             )
         )
     else:
@@ -273,7 +241,7 @@ def run_preflight(*, repo_root: Path, probes: SimpleNamespace | None = None, req
             PreflightError(
                 "PYTHON_UNAVAILABLE",
                 "The repository .venv Python is not available yet.",
-                f"{platform_key}: Create the repository-local .venv with {selected_interpreter or 'a supported Python interpreter'}; preflight did not create it automatically.",
+                f"{platform.name}: Create the repository-local .venv with {selected_interpreter or 'a supported Python interpreter'}; preflight did not create it automatically.",
             )
         )
 
@@ -284,7 +252,7 @@ def run_preflight(*, repo_root: Path, probes: SimpleNamespace | None = None, req
             PreflightError(
                 "GIT_UNAVAILABLE",
                 "Git is not available, so git-baseline operations are degraded or blocked.",
-                f"{platform_key}: {_guidance(platform_key, 'git')}",
+                f"{platform.name}: {_guidance(platform, 'git')}",
             )
         )
 
@@ -317,7 +285,7 @@ def run_preflight(*, repo_root: Path, probes: SimpleNamespace | None = None, req
     enable_steps: list[str] = []
     if not docker_available or not compose_available:
         skipped.extend(_SKIPPED_DOCKER_CAPABILITIES)
-        enable_steps.append(f"Install Docker and Docker Compose v2 for {platform_key}, then re-run preflight.")
+        enable_steps.append(f"Install Docker and Docker Compose v2 for {platform.name}, then re-run preflight.")
     if python_status != "pass":
         skipped.extend(["Layer 1 doctor", "venv-backed CLI commands", "demo deploy", "tour engine"])
         enable_steps.append("Install a supported Python runtime and create the repository-local .venv before enabling full mode.")
@@ -434,7 +402,7 @@ If Docker, Compose v2, Git, a working `.venv`, or the default demo ports are not
 
 ## Platform guidance
 
-The preflight uses the COM-162 service-platform detector to choose platform-specific guidance. Follow the install documentation for your operating system and package manager, then re-run the preflight to confirm readiness.
+JarviSWARM v0.1.0 supports macOS only. On macOS, the preflight reports macOS-specific prerequisite guidance. On anything else it reports plainly that the platform is not supported, rather than guessing at guidance for it.
 
 ## Safety guarantees
 

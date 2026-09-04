@@ -285,7 +285,8 @@ def _scan_ps_lines_for_rebuilds(ps_stdout: str) -> list:
 
 
 def _parse_launchd_loaded(output: str, component: str) -> dict:
-    """Parse `launchctl list` output; EXACT-match the final label column == f'com.colgrep.{component}'.
+    """Parse this host's launchd job-list output (`jswarm.platform.macos.list_launchd_jobs`);
+    EXACT-match the final label column == f'com.colgrep.{component}'.
     Return {"loaded": bool|None, "pid": int|None}.
 
     A VALID row has an int-or-`-` PID in its first column. If at least one valid row
@@ -899,13 +900,13 @@ def build_report(probes: "Probes", *, now: float) -> dict:
         # action, not just advisory text — and never `generation_reaper reap` (that
         # tool refuses without a worktree-generation manifest and preserves served
         # names) and never `colgrep_index_lifecycle.py cleanup` (a bare LRU/global
-        # sweep, not scoped to the observed orphan family, and pairs a raw
-        # `launchctl unload` with NO restart, leaving the fleet unsupervised). The
+        # sweep, not scoped to the observed orphan family, and pairs a raw launchd
+        # job unload with NO restart, leaving the fleet unsupervised). The
         # guarded primitive for this exact case is `colgrep_orphan_cleanup.py`
         # (`plan`/`apply --family <family>`), which does its own finally-safe
-        # driver stop+restart — this report must never emit a bare `launchctl
-        # unload` itself. Placed first, before any rebuild step, per "evict
-        # orphans BEFORE any rebuild".
+        # driver stop+restart — this report must never emit a bare launchd
+        # job-unload command itself. Placed first, before any rebuild step, per
+        # "evict orphans BEFORE any rebuild".
         orphan_prefixes: dict[str, int] = {}
         for row in indices:
             if row["type"] == "orphan-generation":
@@ -1001,7 +1002,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
         # health-check, then watcher, then fleet-supervisor (a launchd state of
         # None/unknown is treated the same as "not loaded" — never a healthy default).
         # Fix 2/6 (COM-241 AC-6 jCritic pass): every mutating control step must be a
-        # REAL agent-runnable command, never raw `launchctl load` prose — route
+        # REAL agent-runnable command, never raw launchd-load prose — route
         # through the guarded `colgrep_launchd_control.py` wrapper (exact-label
         # match, before/after verification) instead. `restart` is used uniformly
         # rather than branching on a fabricated "never loaded" vs "loaded but died"
@@ -1024,7 +1025,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
                 _append_step(
                     component=label,
                     action=action_name,
-                    command=f".venv/bin/python jswarm/colgrep_launchd_control.py restart --component {key} --json",
+                    command=f".venv/bin/python jswarm/platform/colgrep_launchd_control.py restart --component {key} --json",
                     operator_gate=True,
                     verify=f"colgrep_launchd_control.py status --component {key} --json shows loaded: true",
                 )
@@ -1066,7 +1067,7 @@ def build_report(probes: "Probes", *, now: float) -> dict:
                                 component=component,
                                 action="restart-fleet-supervisor",
                                 command=(
-                                    ".venv/bin/python jswarm/colgrep_launchd_control.py restart "
+                                    ".venv/bin/python jswarm/platform/colgrep_launchd_control.py restart "
                                     "--component overlay-fleet-supervisor --json"
                                 ),
                                 operator_gate=True,
@@ -1256,6 +1257,7 @@ def _build_live_probes() -> "Probes":
     import urllib.parse
     import urllib.request
     from pathlib import Path as _Path
+    from jswarm.platform.macos import list_launchd_jobs as _list_launchd_jobs
 
     http_timeout = 3.0
     raw_root_code = _Path.home() / "dev" / "colgrep-idx" / "code"
@@ -1408,10 +1410,9 @@ def _build_live_probes() -> "Probes":
 
     def launchd_state() -> dict:
         try:
-            completed = _subprocess.run(["launchctl", "list"], capture_output=True, text=True, timeout=5)
+            out = _list_launchd_jobs()
         except Exception:  # noqa: BLE001 - fail-open to unknown (None), never a healthy default.
             return {key: {"loaded": None, "pid": None} for key in _LAUNCHD_COMPONENTS}
-        out = completed.stdout
         # Finding #8: use the pure, tested _parse_launchd_loaded helper so an
         # EXACT label match is required (e.g. `com.colgrep.watcher.backup` must
         # never mark `watcher` loaded).
@@ -1527,7 +1528,7 @@ def main(argv=None) -> int:
     """CLI entrypoint.
 
     Supports --json | --format md (default md); wires the REAL probes (HTTP
-    :3280/:3281, ps scan, du, launchctl, colgrep_index_lag_eta).
+    :3280/:3281, ps scan, du, this host's launchd jobs, colgrep_index_lag_eta).
     """
 
     import argparse
