@@ -1,6 +1,6 @@
 """A/C 3: per-project config resolver.
 
-Reads docs/_CONTROLLED_CONFIG/active-projects.yaml (COM-50 substrate) to identify
+Reads docs/_CONTROLLED_CONFIG/active-projects.yaml (substrate) to identify
 the project, then resolves the Jira key + ticket regex + plans dir. When the key
 cannot be resolved, returns enabled=False so hooks operate advisory-only (no writes).
 
@@ -207,7 +207,7 @@ def iter_plan_files(plans_dir: Path):
 
 def iter_canonical_plan_files(repo_root: Path):
     """Yield (ticket, path) for CANONICAL master plans only: direct children of
-    ``<repo>/.jswarm/plans/`` matching ``KEY-NNN.plan.<descr>.md`` (COM-138 BLOCK-1).
+    ``<repo>/.jswarm/plans/`` matching ``KEY-NNN.plan.<descr>.md`` (BLOCK-1).
 
     Excludes legacy ``docs/plans/``, per-ticket artifact subfolders (``.jswarm/plans/KEY/…``),
     and suffix artifacts. This is the apply set for the normalize backfill and the

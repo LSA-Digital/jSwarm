@@ -1,5 +1,5 @@
 # jswarm/portal/render_portal_config.py
-"""COM-398: render the decision-review portal config and launchd plist for THIS machine.
+"""Render the decision-review portal config and launchd plist for THIS machine.
 
 Templates carry ``__HOME__``, ``__JSWARM_COMMON__``, ``__PORT_UI__``, ``__PORT_BACKEND__``.
 """

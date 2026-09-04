@@ -1,6 +1,6 @@
 """Changed-scope audit: bounds a check to changed records + their neighborhood.
 
-(COM-234 Phase 7A, spec #295 S7.11; hardened Phase 7 fix-GREEN cycle 1.) A
+(Phase 7A, spec #295 S7.11; hardened Phase 7 fix-GREEN cycle 1.) A
 full audit run (`audit --ci`, `run_all_audits`) walks the whole seam-spine.
 Some workflows -- a small follow-up edit to one seam, for example -- only
 want to know: did *this* change introduce a new violation, without being
@@ -204,7 +204,7 @@ def _legacy_empty_carrier_cell_signals(
 def _violation_touches_scope(violation: dict[str, Any], checked_ids: set[str]) -> bool:
     """True if ``violation`` touches ``checked_ids`` -- directly or via a contributor.
 
-    (COM-234 Phase 7 fix-GREEN cycle 2, jCritic-xhigh B5.) A canonical
+    (Phase 7 fix-GREEN cycle 2, jCritic-xhigh B5.) A canonical
     group-by predicate (e.g. ``ui_surfaces_have_single_truth_source``) may
     report a violation under one *representative* contributor's
     ``record_id`` while every other contributor that fed the same group is

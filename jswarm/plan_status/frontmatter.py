@@ -17,7 +17,7 @@ except Exception:  # pragma: no cover
 
 FENCE = "---"
 
-#: COM-138 canonical frontmatter field order. Known keys are emitted in this order;
+#: canonical frontmatter field order. Known keys are emitted in this order;
 #: unknown/legacy keys (ticket:, last_updated:, issue_type:, labels:, ...) are
 #: preserved after the known block in their original relative order.
 CANONICAL_ORDER: list[str] = [
@@ -90,7 +90,7 @@ def frontmatter_is_invalid(text: str) -> bool:
     Distinguishes ``present-but-broken`` from ``absent`` — both of which ``read_frontmatter``
     flattens to ``{}``. Callers that mutate a plan use this to FAIL-OPEN (skip the write)
     on a broken block, instead of rewriting it from empty-derived defaults and mangling it
-    (COM-167 NFR-012: no destructive write on a malformed plan)."""
+    (NFR-012: no destructive write on a malformed plan)."""
     fm_lines, _body, _all = split_frontmatter(text)
     if fm_lines is None or yaml is None:
         return False  # no fenced block (or no parser) ⇒ not a "present-but-invalid" case
@@ -311,7 +311,7 @@ def canonicalize(text: str) -> str:
 def update_keys(path: Path, updates: dict[str, Any]) -> None:
     """Surgically set/insert frontmatter keys, preserving comments + other keys.
 
-    Hoists a not-at-line-1 block to the top first (COM-138), then sets/inserts the given
+    Hoists a not-at-line-1 block to the top first, then sets/inserts the given
     top-level keys. Raises FrontmatterError only when the document has no frontmatter
     block at all (so callers that catch it — cli/backfill — keep their skip semantics).
     """

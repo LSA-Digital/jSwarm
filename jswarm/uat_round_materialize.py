@@ -263,7 +263,7 @@ def _validate_patterns(
         expected_materialization = {
             "output_name": "<TICKET>.UAT-CURRENT-ROUND.md",
             "mode": "wholesale-replace-on-create; patch-in-place-mid-round",
-            "compatibility_baseline": "UAT_CURRENT_ROUND_TEMPLATE.md@pre-COM-266",
+            "compatibility_baseline": "UAT_CURRENT_ROUND_TEMPLATE.md@pre-",
         }
         if materialization != expected_materialization:
             raise ValidationError(
@@ -2723,7 +2723,7 @@ def _semantic_verdict_probe_dispositions(lines: list[str]) -> list[str]:
 def _validate_semantic_verdict(markdown: str, *, expected_scenario_id: str) -> None:
     """Deterministically refuse a malformed semantic verdict before a round is materialized.
 
-    Enforces the Phase 3 consumption gate (COM-307 AC-3): the frozen eight-column aggregate
+    Enforces the Phase 3 consumption gate (AC-3): the frozen eight-column aggregate
     row (exactly one row per scenario) must be internally consistent — all three layer
     dispositions present and parseable, an Overall PASS only when L1, L2, and L3 are all
     PASS, an L2 cell matching the frozen compact grammar with a formula-correct threshold

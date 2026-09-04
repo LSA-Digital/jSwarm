@@ -1,4 +1,4 @@
-"""Active-plan backfill sweep (COM-167 AC-6 gate / Oracle F3).
+"""Active-plan backfill sweep (AC-6 gate / Oracle F3).
 
 Before the HUD's file/body fallbacks are removed (Phase 5), every **active** plan
 must already carry derived ``phase``/``ac_complete`` in its frontmatter — otherwise
@@ -143,7 +143,7 @@ def _write_evidence(path: Path, result: dict, today: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     verdict = "UNBLOCKED" if not result["blocking"] else "BLOCKED"
     lines = [
-        "# COM-167 Backfill Evidence — Active-Plan Frontmatter Sweep",
+        "# Backfill Evidence — Active-Plan Frontmatter Sweep",
         "",
         f"**Generated:** {today or 'n/a'}",
         "**Scope:** `.jswarm/plans/*.plan.*.md` with derived status ∈ {ACTIVE, READY_FOR_MERGE} "

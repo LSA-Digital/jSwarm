@@ -1,4 +1,4 @@
-"""COM-389 Phase 3 — atomic, immutable decision-receipt store.
+"""Phase 3 — atomic, immutable decision-receipt store.
 
 A receipt file is named ``<created_at_utc compact>-<receipt_id>.json`` and is
 published once via the :mod:`jswarm.jinfra.lifecycle` atomic-write discipline:

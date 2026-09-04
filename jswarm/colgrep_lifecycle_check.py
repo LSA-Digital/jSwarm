@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""COM-204 Phase 4 — no-badgering ColGREP lifecycle check.
+"""Phase 4 — no-badgering ColGREP lifecycle check.
 
 The certain-only evictor (Phase 3) silently handles stale/orphan cases. This check
 computes the remaining AMBIGUOUS set and asks ONE consolidated, actionable question

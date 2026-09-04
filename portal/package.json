@@ -2,7 +2,7 @@
   "name": "@common/decision-review-ui",
   "version": "0.1.0",
   "private": true,
-  "description": "COM-389 — sibling Astro+Tailwind build-time-static decision-review render tier (SC-12 contract review pages from validated fix-decision JSON).",
+  "description": "sibling Astro+Tailwind build-time-static decision-review render tier (SC-12 contract review pages from validated fix-decision JSON).",
   "type": "module",
   "engines": {
     "node": ">=22.0.0 <25.0.0"

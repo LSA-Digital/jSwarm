@@ -1,17 +1,17 @@
-"""COM-119 P2 — stdlib-only JSON Schema (Draft-07 subset) validator.
+"""P2 — stdlib-only JSON Schema (Draft-07 subset) validator.
 
 Extracted-and-neutralized from ``scripts/feature-dashboard-system/render-feature-dashboard.py``
 (``_validate_json_schema`` and its helpers, lines 1578–1789 in that module).
 
 **Why this is hand-rolled and not ``jsonschema``:** the common ``.venv`` intentionally
 has no ``jsonschema`` dependency today (feature-dashboard-system code comment +
-COM-119 retro Action Item #1). Adding it would expand the supply-chain surface
+retro Action Item #1). Adding it would expand the supply-chain surface
 without buying us anything for the Draft-07 subset that the dashboard data
 objects actually use. If a future ticket proves we need ``$ref``-heavy schemas
 or full Draft-2020-12 semantics, swap implementations behind this module's
 ``validate(data, schema)`` function — callers don't need to change.
 
-Supported Draft-07 features (sufficient for COM-119/120/121/COM-77 dashboards):
+Supported Draft-07 features (sufficient for /120/121/dashboards):
   - type (single value or list)
   - const, enum
   - minLength, pattern, format=date (YYYY-MM-DD)

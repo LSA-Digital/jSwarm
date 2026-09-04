@@ -1,4 +1,4 @@
-"""`/jMerge` branch-vs-main lifecycle validation (COM-234 Phase 7B).
+"""`/jMerge` branch-vs-main lifecycle validation (Phase 7B).
 
 Answers one question before a branch lands on main: did this branch
 introduce a new lifecycle regression that main did not already have? A

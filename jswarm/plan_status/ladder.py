@@ -1,6 +1,6 @@
 """Definition-of status ladder helpers shared by plan tooling.
 
-COM-171 Phase 8: UAT/NFR matrix status cells use a four-state ladder where
+Phase 8: UAT/NFR matrix status cells use a four-state ladder where
 automation can advance rows to Ready, while Done requires explicit approval.
 """
 from __future__ import annotations

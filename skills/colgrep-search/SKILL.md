@@ -40,7 +40,7 @@ SEARCH PROTOCOL (MANDATORY — follow before touching any file):
 
 Discover active local OOB development indexes/checkouts. This is informational; use `cwd` for code search and do not restore the legacy `index=` calling pattern.
 
-## OOB per-checkout mode (COM-385) — preferred code-search shape
+## OOB per-checkout mode — preferred code-search shape
 
 When the OOB backend is active (`COLGREP_MCP_BACKEND=oob` on the ColGREP MCP
 server), `colgrep_search` queries the per-checkout index directly and `cwd`

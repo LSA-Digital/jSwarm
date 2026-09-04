@@ -1,4 +1,4 @@
-"""Generated diagram views over a seam-spine (COM-234 Phase 7A, spec #295 S7.10).
+"""Generated diagram views over a seam-spine (Phase 7A, spec #295 S7.10).
 
 Renders the seam path declared by a seam-spine's ``path``/``path_step``
 records into human-facing diagram formats:

@@ -1,4 +1,4 @@
-"""Strict parsing boundary for COM-387 resolver documents."""
+"""Strict parsing boundary for resolver documents."""
 
 from __future__ import annotations
 

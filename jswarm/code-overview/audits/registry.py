@@ -1,4 +1,4 @@
-"""Audit registry for the nine S3 fitness-function audits (COM-234 Phase 4).
+"""Audit registry for the nine S3 fitness-function audits (Phase 4).
 
 This module is the single place that:
 
@@ -402,7 +402,7 @@ class Audit:
     ) -> AuditResult:
         raw_items = self._raw_violation_fn(records, source_root=source_root, strict=strict)
 
-        # COM-234 fold 3: a raw item may carry an internal "_disposition"
+        # fold 3: a raw item may carry an internal "_disposition"
         # marker ("warning" | "deferral") diverting it away from the
         # ordinary violation path entirely -- freeze-ledger tolerance never
         # applies to it, since it was never a violation to begin with. Every

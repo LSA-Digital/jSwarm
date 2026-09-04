@@ -14,7 +14,7 @@ level: 2
 
 # uat-extract-assets — PDF slide → scenario image extraction
 
-Extract per-slide PNGs from a PDF and align them to the COM-122/COM-129 UAT scenarios JSON. A slide whose text contains a scenario id (e.g. `UAT.UPLOAD.STARTSCREEN`) is rasterized to `<assets-dir>/<id>.png`, and the image path + PDF-extracted provenance are **injected into the scenarios JSON** as `scenario.image`. The renderer then embeds the image inline in both render profiles. This skill is option 1 of the `/jUAT` menu.
+Extract per-slide PNGs from a PDF and align them to the /UAT scenarios JSON. A slide whose text contains a scenario id (e.g. `UAT.UPLOAD.STARTSCREEN`) is rasterized to `<assets-dir>/<id>.png`, and the image path + PDF-extracted provenance are **injected into the scenarios JSON** as `scenario.image`. The renderer then embeds the image inline in both render profiles. This skill is option 1 of the `/jUAT` menu.
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ Extract per-slide PNGs from a PDF and align them to the COM-122/COM-129 UAT scen
 ## Inputs (ask the user for any not supplied as arguments)
 
 1. **PDF path** (`--pdf`) — the slide deck. **REQUIRED.**
-2. **Scenarios JSON** (`--scenarios`) — the canonical UAT scenarios JSON. **REQUIRED.** For COM-122 adopters this is the project-supplied scenarios JSON (see the engine README / project localization); do not hardcode it.
+2. **Scenarios JSON** (`--scenarios`) — the canonical UAT scenarios JSON. **REQUIRED.** For adopters this is the project-supplied scenarios JSON (see the engine README / project localization); do not hardcode it.
 3. **Assets dir** (`--assets-dir`, optional) — where PNGs are written. Default `<scenarios-parent>/uat-assets`.
 4. **DPI** (`--dpi`, optional) — raster resolution, default `150`.
 

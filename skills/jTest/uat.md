@@ -33,7 +33,7 @@ Green unit or deterministic tests, a prior walk against an older script, checkou
 - Orchestrator verification: jQATester execution, then the ticket-owned `<ticket plan folder>/<TICKET>.UAT-CURRENT-ROUND.md` instantiated from `UAT_CURRENT_ROUND_TEMPLATE.md`.
 - UAT assets are mutable acceptance assets, not durable regression tests. Regression guidance lives in `regression.md`.
 - There is no separate E2E step-script asset: high-level E2E chains compose scenarios, and each scenario owns its steps.
-- Archive scenarios and tests that predate the acceptance baseline established by HAS-508; they are legacy/invalid until separately audited and aligned.
+- Archive scenarios and tests that predate the acceptance baseline established by ; they are legacy/invalid until separately audited and aligned.
 - Detailed background: `docs/devops-testing-master.md`; troubleshooting history: `docs/testing/uat-fix-playbook.md`.
 
 ## Point-of-use checklists
@@ -132,7 +132,7 @@ Use before delegating jQATester.
 
 ### UAT scenario JSON READ integration
 <!-- uat-scenarios:read-integration -->
-When a project has adopted the COM-122 scenario engine, query canonical JSON with `jswarm/uat-scenarios/query_uat_scenarios.py`; generated Markdown is derived/read-only. Projects without adoption continue using their Markdown inventory.
+When a project has adopted the scenario engine, query canonical JSON with `jswarm/uat-scenarios/query_uat_scenarios.py`; generated Markdown is derived/read-only. Projects without adoption continue using their Markdown inventory.
 
 Reference: `docs/testing/live-show-mode-guide.md` and `docs/templates/UAT_TEST_TEMPLATE.md`.
 

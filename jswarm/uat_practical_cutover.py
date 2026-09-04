@@ -22,7 +22,7 @@ _IDENTITY_FIELDS = (
 )
 # The unified ledger's uat_package block has no sealed_payload_sha256 member
 # (uat_feedback.UAT_PACKAGE_FIELDS), and uat_feedback._validated_ledger — the
-# identity-equality gate that refused HAS-617 round-014 — compares exactly these
+# identity-equality gate that refused round-014 — compares exactly these
 # six plus the ledger's top-level ticket.
 _LEDGER_IDENTITY_FIELDS = tuple(
     field for field in _IDENTITY_FIELDS if field != "sealed_payload_sha256"

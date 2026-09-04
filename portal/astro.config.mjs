@@ -1,5 +1,5 @@
 // @ts-check
-// COM-389 — Astro build config for the decision-review render tier (sibling of
+// Astro build config for the decision-review render tier (sibling of
 // dashboard-ui; same static-first conventions). Static build only: one review
 // page per input contract, driven by DECISION_REVIEW_DATA_FILE set by the
 // Python wrapper (jswarm/portal/render_ui.py).

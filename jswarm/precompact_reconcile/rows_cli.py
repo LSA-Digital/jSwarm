@@ -4,7 +4,7 @@
 
 Always exits 0 (fail-open). Run by /jPrecompact Surface 2 BEFORE the AC-10 status reconcile
 (``cli.py``) so the rebuilt rows are what the reconcile then sets statuses on and update-plan
-counts (COM-167 AC-11 → AC-10 → AC-9).
+counts (AC-11 → AC-10 → AC-9).
 """
 from __future__ import annotations
 

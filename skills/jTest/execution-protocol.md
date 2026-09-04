@@ -36,7 +36,7 @@ During any Live Show UAT or long-running E2E/regression execution, the agent mus
    - project wrapper stdout/stderr
    - Playwright stdout, trace, video, screenshot, JSON, and HTML-report paths
    - backend/API/service logs, container logs, workflow/runtime logs, SSE/streaming logs, and domain telemetry
-   - runtime monitor logs and JSONL ledgers, including COM-37/OpenCode monitor ledgers when available
+   - runtime monitor logs and JSONL ledgers, including /OpenCode monitor ledgers when available
 2. **Mechanical preflight — backend monitor starts before the runner.** When backend/API/workflow/streaming/persistence/dispatch behavior is in scope:
    - verify loud telemetry is enabled in the project `.env` (`LOG_LEVEL=DEBUG` and/or `DEBUG=true`); if it is off, turn it on before the run
    - start a Monitor task or an equivalent line-buffered capture such as `docker logs -f <api> 2>&1 | grep --line-buffered -Ei '<named-signatures>'`

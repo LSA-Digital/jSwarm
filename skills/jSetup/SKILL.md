@@ -5,7 +5,7 @@ description: Guided day-0 front door for a fresh JSWARM (JarviSWARM) clone.
 
 # /jSetup
 
-## Safety contract (COM-219 — destructive skill, agent-invocable)
+## Safety contract (destructive skill, agent-invocable)
 
 - **Default is read-only / no-write.** Invoked with no args (or `--help`/`status`), this skill only inspects and reports; it performs NO write, apply, push, delete, remote, or trim.
 - **Confirm before any mutation.** Before any state-changing mode, the invoker (human or agent) must obtain explicit confirmation — or run an approved preview/dry-run first and act only on that approved plan.

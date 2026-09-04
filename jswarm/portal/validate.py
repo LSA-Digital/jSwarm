@@ -1,4 +1,4 @@
-"""Validate fix-decision JSON documents against the COM-389 schemas.
+"""Validate fix-decision JSON documents against the schemas.
 
 Usage:
     .venv/bin/python -m jswarm.portal.validate PATH [--schema {envelope,defect,fix,manifest,receipt}]

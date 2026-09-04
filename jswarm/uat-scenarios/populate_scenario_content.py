@@ -198,7 +198,7 @@ def _merged_text(merged: JsonObject) -> str:
 
 
 def _validate_links(merged: JsonObject, scenarios_path: Path) -> None:
-    """Opt-in strict-link gate (COM-194): run the renderer's link-integrity check on the merged
+    """Opt-in strict-link gate: run the renderer's link-integrity check on the merged
     document and raise (nothing written) on any dangling ``image.path`` / unknown scenario ref.
 
     Off by default so the existing ``/uat`` option-2 behavior is unchanged; option 3's UPDATE

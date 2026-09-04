@@ -1,4 +1,4 @@
-"""Canonical three-branch browser-transport fallback ladder (COM-246 AC-1/AC-3).
+"""Canonical three-branch browser-transport fallback ladder (AC-1/AC-3).
 
 Pure selection logic: no I/O, no subprocess, no network. A hung probe is the
 failure class this module exists to avoid, so anything that can block lives in

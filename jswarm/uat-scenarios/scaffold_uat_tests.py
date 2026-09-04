@@ -46,7 +46,7 @@ JsonObject = dict[str, object]
 RUNBOOK_SUFFIX = ".uat-scenario-steps.md"
 PREVIEW_SUFFIX = ".uat-scenario-steps.PREVIEW.md"
 RECEIPT_SUFFIX = ".uat-scenario-steps.PREVIEW.receipt.json"
-# HAS-525 T5.1: read-compat only — a ticket folder that has not migrated yet still has its
+# T5.1: read-compat only — a ticket folder that has not migrated yet still has its
 # runbook content picked up (and carried forward) even though every WRITE now lands on the
 # canonical RUNBOOK_SUFFIX path above. Never write this suffix; never delete the legacy file.
 _LEGACY_RUNBOOK_SUFFIX = ".uat-test.md"

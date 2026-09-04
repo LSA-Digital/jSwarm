@@ -169,7 +169,7 @@ def test_production_build_preserves_com389_routes_and_adds_runtime_route(built_d
     assert (built_dist / "index.html").is_file()
     assert (built_dist / "uat/index.html").is_file()
     assert (built_dist / "fix/index.html").is_file()
-    assert list((built_dist / "review").glob("*/index.html")), "existing COM-389 review routes disappeared"
+    assert list((built_dist / "review").glob("*/index.html")), "existing review routes disappeared"
     index_html = (built_dist / "index.html").read_text(encoding="utf-8")
     assert 'href="/fix/"' in index_html
     assert 'href="/uat/"' in index_html

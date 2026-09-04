@@ -1,4 +1,4 @@
-"""PM impact-question surface (COM-234 Phase 6, spec #295 S7.8).
+"""PM impact-question surface (Phase 6, spec #295 S7.8).
 
 Answers a free-text PM-style question ("What breaks if X can run before Y?")
 by matching it against ``impact_tag`` records' ``product_question_terms``,

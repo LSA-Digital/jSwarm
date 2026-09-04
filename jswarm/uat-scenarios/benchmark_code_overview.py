@@ -47,7 +47,7 @@ def load_json_object(path: Path) -> JsonObject:
 def validate_scenarios_for_code_overview(data: JsonObject, schema: JsonObject) -> None:
     """Validate scenarios with the Phase 6 local ``type=code`` evidence extension.
 
-    The checked-in COM-122 schema remains the Phase 1-5 canonical schema where
+    The checked-in schema remains the Phase 1-5 canonical schema where
     evidence link types are limited to rendered-document references. Phase 6
     fixtures add ``evidence_links[].type == \"code\"`` as a benchmark-only
     touchpoint contract, so this benchmark validates against a deep-copied schema

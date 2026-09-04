@@ -1,4 +1,4 @@
-"""COM-389 Phase 3 — orchestrator receipt/Q&A consumer (at-least-once bridge).
+"""Phase 3 — orchestrator receipt/Q&A consumer (at-least-once bridge).
 
 Watches a receipt directory (and optionally a Q&A threads directory) with a
 stdlib polling loop (``os.listdir`` + mtime; no watchdog dependency) and

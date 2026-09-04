@@ -1,4 +1,4 @@
-"""Debt overlay classifier (COM-234 Phase 6, spec #296 S6).
+"""Debt overlay classifier (Phase 6, spec #296 S6).
 
 Classifies removal-candidate targets into one of five canonical states using
 multiple independent signal sources -- static-unused analysis (Knip/Vulture),

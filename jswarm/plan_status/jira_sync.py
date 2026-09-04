@@ -1,7 +1,7 @@
 """A/C 9: hybrid Jira sync — planning fire-and-forget, closeout retry-safe.
 
 Per-project transition NAMES are recorded here as a constant (T1.5). COM names were
-verified live via atlassian.jira_get_transitions(COM-84) on 2026-05-20:
+verified live via atlassian.jira_get_transitions on 2026-05-20:
     Backlog(11), Selected->Dev(21), In Progress(31), Done(41), Canceled(5).
 
 Criticality (Oracle Concern #5 + user-confirmed hybrid):
@@ -26,8 +26,8 @@ from typing import Callable, Optional
 from jswarm.plan_status import state as S
 
 # Per-project Jira transition NAMES keyed by plan_status (or prefix for IMPL).
-# COM verified live via jira_get_transitions(COM-84) 2026-05-20.
-# HAS verified live via jira_get_transitions(HAS-381) 2026-05-20 — IDENTICAL to COM.
+# COM verified live via jira_get_transitions 2026-05-20.
+# HAS verified live via jira_get_transitions 2026-05-20 — IDENTICAL to COM.
 _COM_TRANSITIONS = {
     S.STATE_LITE_INIT: "Backlog",
     S.STATE_LITE_REFINE: "Backlog",

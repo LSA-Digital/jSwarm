@@ -1,4 +1,4 @@
-"""COM-389 Phase 2 — deterministic Markdown projection of a contract review.
+"""Phase 2 — deterministic Markdown projection of a contract review.
 
 Renders the SC-12 review format (sections 1-8 summary frame + full contract
 body with stable section anchors) from the normalized view model produced by

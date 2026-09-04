@@ -1,4 +1,4 @@
-"""Generic Shape 1 fact-event append and fold helpers for COM-93."""
+"""Generic Shape 1 fact-event append and fold helpers for ."""
 from __future__ import annotations
 
 import fcntl
@@ -22,7 +22,7 @@ DEFAULT_LINE_SIZE_LIMIT = 4096
 
 _COMPAT_EVENT_FILES = {
     "plan_status": Path(".jswarm/ops/plan-status-events.ndjson"),
-    "jinfra_effort": Path(".jswarm/ops/jinfra-effort.ndjson"),  # COM-303 A/C 9
+    "jinfra_effort": Path(".jswarm/ops/jinfra-effort.ndjson"),  # A/C 9
 }
 
 

@@ -36,7 +36,7 @@ references are authoritative; prose does not infer axes.
 
 Decision 4B determines which source types are eligible for the unified ledger. Eligibility classification is not execution: `Automated UAT: yes` and its applicable phase declare that the deterministic UAT route is required, while the Phase-4 trigger implementation decides when that route fires after its required lower-level proof.
 
-Active `/jTest nfr verify` is deferred. NFR verification support is not an active COM-376 route and `/jTest` does not author NFR catalog data.
+Active `/jTest nfr verify` is deferred. NFR verification support is not an active route and `/jTest` does not author NFR catalog data.
 
 ## Verification rules
 

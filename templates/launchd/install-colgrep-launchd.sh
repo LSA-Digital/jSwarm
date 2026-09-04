@@ -9,7 +9,7 @@
 #   com.colgrep.watcher                   — overlay-freshness fswatch watcher (KeepAlive)
 #   com.colgrep.init-aris                 — ARIS content index init at load
 #   com.colgrep.overlay-fleet-supervisor  — per-worktree overlay supervisor fleet parent (KeepAlive)
-#   com.colgrep.freshness-probe           — COM-349 dual-primary standing freshness probe (StartInterval)
+#   com.colgrep.freshness-probe           — dual-primary standing freshness probe (StartInterval)
 #
 # Usage: bash deploy/launchd/install-colgrep-launchd.sh [--dry-run]
 set -euo pipefail

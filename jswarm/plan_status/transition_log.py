@@ -1,6 +1,6 @@
 """A/C 17: append plan-status fact transitions to common/.jswarm/ops/ as NDJSON.
 
-Schema-compatible with common/logs/command-usage.ndjson (COM-50 substrate).
+Schema-compatible with common/logs/command-usage.ndjson (substrate).
 One JSON object per line. Fail-open: never raises to the caller.
 """
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""COM-395 adapter for the single Phase-1 effective-digest authority."""
+"""adapter for the single Phase-1 effective-digest authority."""
 from pathlib import Path
 from jswarm.fix_localization import DigestVerdict, compose_effective_bytes as _compose, verify_effective_digest as _verify
 

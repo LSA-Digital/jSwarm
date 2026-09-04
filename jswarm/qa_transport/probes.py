@@ -1,4 +1,4 @@
-"""Slim pre-dispatch liveness probes for browser-QA transports (COM-246 AC-1).
+"""Slim pre-dispatch liveness probes for browser-QA transports (AC-1).
 
 Every probe runs under a hard timeout and returns a structured result instead
 of raising: agents cannot self-timebox a hung tool call, so the probe layer is

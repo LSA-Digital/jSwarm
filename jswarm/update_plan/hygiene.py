@@ -1,7 +1,7 @@
 """Content hygiene for plan files: relocate tech-spec content, archive historic
 content, and leave discoverability links behind.
 
-Design constraints (COM-167 spec / Oracle F2):
+Design constraints (spec / Oracle F2):
   * Default is **propose** — compute candidate moves, write nothing but normalization.
   * Only **explicit headings/markers** are ever moved, and only under ``--apply``.
   * Acceptance Criteria / active blockers / decisions / verification / ambiguous

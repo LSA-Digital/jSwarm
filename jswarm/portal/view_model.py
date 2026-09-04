@@ -1,4 +1,4 @@
-"""COM-389 Phase 2 — normalized view model for fix-decision contracts.
+"""Phase 2 — normalized view model for fix-decision contracts.
 
 Loads a contract JSON document, validates it against its schema (reusing
 :mod:`jswarm.portal.validate` internals), and produces ONE normalized

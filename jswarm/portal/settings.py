@@ -1,7 +1,7 @@
-"""COM-389 Phase 4 — ticket-local /fix gate-settings resolver (SC-15).
+"""Phase 4 — ticket-local /fix gate-settings resolver (SC-15).
 
 Parses the fixed-name ``.fix-settings.yaml`` dotfile that lives beside a
-ticket's plan artifacts (exemplar: HAS-617). The service only consumes the
+ticket's plan artifacts (exemplar:). The service only consumes the
 gate-authorization subset:
 
     schema: jswarm.fix-settings/v1

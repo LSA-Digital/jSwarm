@@ -26,7 +26,7 @@ For `TICKET-XXX`, the plan folder is `.jswarm/plans/TICKET-XXX/`, and the skill 
 | Pattern | Availability | Use |
 |---|---|---|
 | `standard@1` | Generally available | A compact Product-Engineer report with Technical Terms, Background / Relevant Context, Product Manager View, and Software Engineering Details. |
-| `has617-l1-pipeline@1` | HAS-617 ticket-local instance | HAS-617's L1 operational-pipeline vocabulary, stage table, direct blocker-to-outcome table, spend/envelope fields, review verdicts, and A/C 1–9 alignment. It is not a common catalog asset. |
+| `has617-l1-pipeline@1` | ticket-local instance | 's L1 operational-pipeline vocabulary, stage table, direct blocker-to-outcome table, spend/envelope fields, review verdicts, and A/C 1–9 alignment. It is not a common catalog asset. |
 
 A `--template` selector must exactly match either a generally available catalog identity or the identity of the already-materialized ticket-local template, always in `name@version` form. An unversioned or unknown selector is invalid; explain it and show the available choices instead of guessing. When the ticket-local template is absent, the authoring flow offers `standard@1` and materializes it only after explicit confirmation. A missing or malformed selection fails open with an explanation and falls back to `standard@1`; it never blocks ticket progress.
 

@@ -1,4 +1,4 @@
-"""`/jClose` lifecycle audit for a fixture ticket (COM-234 Phase 7B).
+"""`/jClose` lifecycle audit for a fixture ticket (Phase 7B).
 
 This module answers one question for a ticket about to close: does any
 anchor the ticket touched drift into a manual-reselect state

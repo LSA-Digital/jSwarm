@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Agent-runnable launchd control for the ColGREP daemon fleet (COM-241 AC-6).
+"""Agent-runnable launchd control for the ColGREP daemon fleet (AC-6).
 
 Raw ``launchctl`` prose is error-prone for an autonomous agent (exact label
 match, plist path resolution, before/after verification). This CLI wraps
@@ -43,7 +43,7 @@ if __package__ in (None, ""):
 COMPONENTS = ("overlay-fleet-supervisor", "watcher", "health-check")
 INSTALLER_HINT = "deploy/launchd/install-colgrep-launchd.sh"
 
-# COM-241 AC-6 finding #6: `launchctl kickstart`/`load` can leave a label
+# AC-6 finding #6: `launchctl kickstart`/`load` can leave a label
 # LOADED while the actual daemon process has exited or is crash-looping
 # (`launchctl list` shows the label with pid `-`). For a LONG-RUNNING daemon,
 # "loaded" alone is not proof of "up" — a live pid is required. A PERIODIC job

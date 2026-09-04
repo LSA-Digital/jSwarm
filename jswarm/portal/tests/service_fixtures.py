@@ -23,10 +23,10 @@ from jswarm.uat_round_materialize import (
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 EXAMPLES = REPO_ROOT / "schemas" / "fix-decisions" / "examples"
-# The exemplar fix contract is ticket HAS-617; the fixture repo tree mirrors
+# The exemplar fix contract is ticket ; the fixture repo tree mirrors
 # that ticket key so publication-load checks (settings/contract/receipt ticket
 # binding, HIGH 2) hold truthfully.
-TICKET = "HAS-617"
+TICKET = ""
 
 
 def make_publication(root: Path, publication_id: str = "pub-test-001", contract_name: str = "contract.json", manifest_digest=None):

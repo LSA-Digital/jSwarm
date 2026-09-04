@@ -1,4 +1,4 @@
-"""Centralized active-record/active-edge predicate (COM-234 Phase 4, jCritic B2-1).
+"""Centralized active-record/active-edge predicate (Phase 4, jCritic B2-1).
 
 Every edge/record audit that needs to know whether a record is currently
 "in force" must call `is_active_record` (or its `is_active_edge` alias) --

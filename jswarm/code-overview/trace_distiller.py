@@ -1,4 +1,4 @@
-"""Trace distiller (COM-234 Phase 5).
+"""Trace distiller (Phase 5).
 
 Ingests heterogeneous raw runtime-observation sources (SSE samples, outbox
 rows, a Temporal-history adapter, and generic preview/UI evidence), normalizes

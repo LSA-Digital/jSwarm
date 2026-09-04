@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""COM-204 Phase 8 — complete in-repo ColGREP activity log + launchd-triggered rotation.
+"""Phase 8 — complete in-repo ColGREP activity log + launchd-triggered rotation.
 
 A/C 13: every ColGREP activity class is logged in detail to the JarviSWARM repo's
 ``<repo_root>/log/colgrep.log`` (for the ``common`` repo: ``${JSWARM_HOME:-$HOME/dev/jswarm}/log/colgrep.log``;
@@ -41,7 +41,7 @@ ACTIVITY_COMPONENTS: frozenset[str] = frozenset({
     "delete-guard",       # guarded :3280 delete refusals / deletes
     "evictor",            # lifecycle evictor holds / would-delete / deletes
     "lifecycle",          # classify / coverage / cleanup / check
-    "reconcile",          # COM-204 Phase 9 manifest reconcile decisions
+    "reconcile",          # Phase 9 manifest reconcile decisions
     "base-health",        # base-index health checks / auto-restore
     "mcp",                # MCP-facing search/serve diagnostics
 })

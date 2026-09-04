@@ -11,7 +11,7 @@ check, then continue below.
 This is the owner-authorized front door for practical issuance. Do not edit the
 deployed config or invent an `active_round_sources` registration.
 
-## Good-enough rounds — first-class methodology (owner-ruled 2026-08-31, HAS-652)
+## Good-enough rounds — first-class methodology (owner-ruled 2026-08-31)
 
 Owner UAT exists to produce NEW information from owner minutes — experience quality and unpredicted inputs — not to re-prove defects automation already booked. Two binding practices follow; both apply to every ticket's rounds, and Option 4 executes them.
 
@@ -228,7 +228,7 @@ method that could not detect the watcher that did exist. Both checks also
 resolved state roots from the canonical plans path, although a worktree-based
 ticket roots its events inside the worktree.
 
-The HAS-617 lane contributed this procedure from field use (observed in field
+The lane contributed this procedure from field use (observed in field
 use, 2026-09-01).
 
 ### Enumerate mechanisms by path

@@ -1,4 +1,4 @@
-"""COM-389 Phase 3 — stdlib HTTP receipt service.
+"""Phase 3 — stdlib HTTP receipt service.
 
 Serves the review UI dist directory (if present) plus a narrow API:
 

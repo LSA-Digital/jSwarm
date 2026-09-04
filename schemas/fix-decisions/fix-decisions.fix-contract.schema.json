@@ -136,7 +136,7 @@
             "1.0",
             "1.1"
           ],
-          "description": "v1.1 (COM-389 Phase 5 review round, additive): cost_timeline.paragraphs, evidence_refs[].description, detail_refs[].label, terminal_outcome.incompleteness_guardrails, defects[].source_key, pm_view[].rationale, pm_anchor_map[].source_technical_references, approval_vocabulary_derivation."
+          "description": "v1.1 (Phase 5 review round, additive): cost_timeline.paragraphs, evidence_refs[].description, detail_refs[].label, terminal_outcome.incompleteness_guardrails, defects[].source_key, pm_view[].rationale, pm_anchor_map[].source_technical_references, approval_vocabulary_derivation."
         },
         "document_type": {
           "const": "fix-contract"
@@ -1092,7 +1092,7 @@
                 "1.0",
                 "1.1"
               ],
-              "description": "v1.1 (COM-389 Phase 5 review round, additive): cost_timeline.paragraphs, evidence_refs[].description, detail_refs[].label, terminal_outcome.incompleteness_guardrails, defects[].source_key, pm_view[].rationale, pm_anchor_map[].source_technical_references, approval_vocabulary_derivation."
+              "description": "v1.1 (Phase 5 review round, additive): cost_timeline.paragraphs, evidence_refs[].description, detail_refs[].label, terminal_outcome.incompleteness_guardrails, defects[].source_key, pm_view[].rationale, pm_anchor_map[].source_technical_references, approval_vocabulary_derivation."
             },
             "document_type": {
               "const": "fix-contract"

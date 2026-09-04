@@ -1,4 +1,4 @@
-"""COM-119 P2 — canonical JSON serialization for deterministic builds.
+"""P2 — canonical JSON serialization for deterministic builds.
 
 The canonical form is the input the Astro build consumes. Determinism (AC-119.5
 + R4) requires byte-stable serialization across runs and across mutation-

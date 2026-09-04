@@ -136,7 +136,7 @@ def main(argv: list[str]) -> int:
         return 0
 
     # Non-silent fail-open: a present-but-invalid frontmatter block is skipped (no write),
-    # not normalized — say so rather than reporting a misleading dash row (COM-167 NFR-012).
+    # not normalized — say so rather than reporting a misleading dash row (NFR-012).
     invalid_suffix = " invalid-frontmatter=skipped(no-write)" if FM.frontmatter_is_invalid(after) else ""
     print(
         f"update-plan {display_key}: "

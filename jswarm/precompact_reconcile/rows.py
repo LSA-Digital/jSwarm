@@ -1,4 +1,4 @@
-"""COM-167 AC-11 — /precompact-time ROW-REBUILD of the count-bearing matrices.
+"""AC-11 — /precompact-time ROW-REBUILD of the count-bearing matrices.
 
 Regenerates each plan traceability matrix's DATA rows from the ticket-local working
 slices — the UAT-Scenario matrix from ``KEY.uat-scenarios.md`` and the A/C-to-NFR matrix

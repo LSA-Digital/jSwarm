@@ -1,4 +1,4 @@
-"""Deterministic apply of an approved promotion-decision artifact (COM-201 Phase 3).
+"""Deterministic apply of an approved promotion-decision artifact (Phase 3).
 
 The interactive scan / recommend / approve flow lives in the ``/update-ticket`` SKILL;
 this module ONLY applies an explicit, frozen decision JSON. It is **atomic**: every
@@ -156,7 +156,7 @@ def _duplicate_locators(candidates: list[dict]) -> list[str]:
 
 
 def _resolve_plan(repo_root: Path, ticket: str) -> tuple[Path | None, str | None]:
-    # New-location-only by design (COM-201): promotion decisions resolve the master plan under
+    # New-location-only by design: promotion decisions resolve the master plan under
     # `.jswarm/plans/KEY.plan.*.md`. Legacy `docs/plans/` tickets predate the slice/matrix model
     # the promotion gate operates on and are intentionally out of scope.
     if not _TICKET_RE.match(ticket):
@@ -251,7 +251,7 @@ def apply(repo_root: Path, ticket: str, promotions_file: str | None) -> tuple[in
 
     # Semantic top-level validation: the artifact is a FROZEN authorization token, so it must be
     # for this schema version, this ticket, and this plan — a sha that merely happens to match is
-    # not enough authority to mutate (COM-201 B1 / NFR-014 no-false-green).
+    # not enough authority to mutate (B1 / NFR-014 no-false-green).
     if data.get("schema_version") != SCHEMA_VERSION:
         return 2, _summary(base, status="aborted", applied=0,
                            failures=[{"reason": "bad-schema-version", "expected": SCHEMA_VERSION, "got": data.get("schema_version")}])

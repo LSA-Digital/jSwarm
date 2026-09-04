@@ -43,7 +43,7 @@ If invoked with **no argument**, present the menu below and ask which option to 
 ## Notes
 
 - Python via `.venv/bin/python` only (system Python is quarantined).
-- jQATester browser dispatches (any mode) are governed by the `/jTest` skill's `uat.md` §"jQATester dispatch contract": COM-246 transport-ladder preflight (`PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.qa_transport ...`) + the thirteen-field handoff template (`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/templates/QA_DISPATCH_HANDOFF_TEMPLATE.md`). This menu never dispatches a browser agent without that contract.
+- jQATester browser dispatches (any mode) are governed by the `/jTest` skill's `uat.md` §"jQATester dispatch contract": transport-ladder preflight (`PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.qa_transport ...`) + the thirteen-field handoff template (`${JSWARM_HOME:-$HOME/dev/jswarm}/docs/templates/QA_DISPATCH_HANDOFF_TEMPLATE.md`). This menu never dispatches a browser agent without that contract.
 - The generated UAT Markdown is derived/read-only — edit the JSON (the extractor does), then regenerate. The renderer embeds `scenario.image` inline in both the `pm-summary` and `engineering` profiles.
 
 ## Next

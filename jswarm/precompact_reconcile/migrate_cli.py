@@ -5,7 +5,7 @@
 Always exits 0 (fail-open). Run by /jPrecompact Surface 2 FIRST — before the AC-11 row-rebuild
 (``rows_cli.py``) — so a legacy ticket self-heals (seeds slice indexes from hand-authored
 matrices; adds missing matrix sections) and the rest of the chain runs as if the assets were
-present at ticket creation (COM-167 AC-16).
+present at ticket creation (AC-16).
 """
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 /**
- * COM-389 Phase 2 — build-time data loader for the decision-review UI.
+ * Phase 2 — build-time data loader for the decision-review UI.
  *
  * Astro component frontmatter runs in Node at build time, so we read the
  * canonical review-build object from disk here. The Python wrapper

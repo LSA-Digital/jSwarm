@@ -1,4 +1,4 @@
-"""Fail-open per-session active-ticket binding writer (COM-174)."""
+"""Fail-open per-session active-ticket binding writer."""
 from __future__ import annotations
 
 import fcntl

@@ -1,4 +1,4 @@
-"""Extract agent prompt bodies for upgrade survival (COM-76 Phase 13).
+"""Extract agent prompt bodies for upgrade survival (Phase 13).
 
 OMC and OMO upgrades have historically wiped customized agent prompts in
 this host's agents directory (``*.md`` files under

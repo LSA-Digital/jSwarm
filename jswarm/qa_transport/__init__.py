@@ -1,4 +1,4 @@
-"""COM-246 P1a — browser-QA transport probes and canonical fallback ladder.
+"""P1a — browser-QA transport probes and canonical fallback ladder.
 
 The ladder (single formulation — every other doc defers here):
 

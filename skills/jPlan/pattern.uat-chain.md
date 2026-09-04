@@ -32,7 +32,7 @@ Rules:
 
 ## UAT-Scenario Traceability Matrix
 
-> **One row per UAT scenario** (NOT per A/C — that is the matrix above). The single Status aggregates ALL tests proving that scenario (1 scenario : many tests). `uat_complete` (derived frontmatter → HUD) = 🟢 rows / total rows. Include this matrix only when `Automated UAT: yes`; omit it for tickets with no UI/E2E impact (the field then stays absent → the HUD shows no UAT segment). `/jPrecompact` keeps the statuses truthful from the ticket-local UAT results each checkpoint (COM-167 AC-10). Status cells use the 4-state ladder: 🔴 Backlogged / 🟠 Drafted / 🟡 Ready / 🟢 Done.
+> **One row per UAT scenario** (NOT per A/C — that is the matrix above). The single Status aggregates ALL tests proving that scenario (1 scenario : many tests). `uat_complete` (derived frontmatter → HUD) = 🟢 rows / total rows. Include this matrix only when `Automated UAT: yes`; omit it for tickets with no UI/E2E impact (the field then stays absent → the HUD shows no UAT segment). `/jPrecompact` keeps the statuses truthful from the ticket-local UAT results each checkpoint (AC-10). Status cells use the 4-state ladder: 🔴 Backlogged / 🟠 Drafted / 🟡 Ready / 🟢 Done.
 
 | UAT scenario | A/C served | Test(s) / Evidence | Status |
 | ------------ | ---------- | ------------------ | ------ |
@@ -64,4 +64,4 @@ Rules:
 
 Use the UAT chain only after unit/integration proof. State whether execution is live-show-headed, headless automation, or diagnostic CDP; include driver, preflight, data, contracts, monitoring, durable report, and regression-promotion decision. Passing live-show flows are promoted or explicitly deferred.
 
-Provenance: `PLAN_TEMPLATE.md` / `PLAN_FEATURE_TEMPLATE.md` §§ Definition of Done-ness (UAT/NFR Status Ladder), UAT-Scenario Traceability Matrix, Automated UAT Plan, Automated UAT Results. Definition of Done-ness restored 2026-07-10 (COM-249 Slice B gate-4 round-1 MAJOR-1 remediation) — byte-identical between the two source templates; see `.jswarm/plans/COM-249/COM-249.dedrift-ledger.md`.
+Provenance: `PLAN_TEMPLATE.md` / `PLAN_FEATURE_TEMPLATE.md` §§ Definition of Done-ness (UAT/NFR Status Ladder), UAT-Scenario Traceability Matrix, Automated UAT Plan, Automated UAT Results. Definition of Done-ness restored 2026-07-10 (Slice B gate-4 round-1 MAJOR-1 remediation) — byte-identical between the two source templates; see `.jswarm/plans/TICKET-XXX/TICKET-XXX.dedrift-ledger.md`.

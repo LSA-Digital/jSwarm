@@ -230,7 +230,7 @@ def _is_safe_index_name(name: str) -> bool:
 
     Legitimate ColGREP index names never contain a path separator, ``..``, or
     whitespace/control chars; such a name reaching a shape-gated DELETE is a
-    smuggling attempt and is held fail-closed (COM-204 Phase-3 BLOCKER-4).
+    smuggling attempt and is held fail-closed (Phase-3 BLOCKER-4).
     """
     return not (
         "/" in name or "\\" in name or ".." in name

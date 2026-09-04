@@ -159,5 +159,5 @@ Use this option when the developer wants to understand the effective include sta
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-06-06 | COM-136 | Added one-line distillation rule for project/auto-memory items incorporated into local precompact includes; memory bodies must not be pasted verbatim. |
+| 2026-06-06 | | Added one-line distillation rule for project/auto-memory items incorporated into local precompact includes; memory bodies must not be pasted verbatim. |
 | 2026-06-05 | Claude | Initial global `/precompact-update` command for scope-aware precompact layer authoring, staged-cutover global edits, project/ticket include writes, and non-weakenable safety boundary restatement. |

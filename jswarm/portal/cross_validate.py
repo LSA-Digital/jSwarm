@@ -1,4 +1,4 @@
-"""Cross-document validation for COM-389 fix decisions.
+"""Cross-document validation for fix decisions.
 
 Structural JSON Schema cannot express cross-document referential constraints,
 so they are enforced here:

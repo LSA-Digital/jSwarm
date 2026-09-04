@@ -1,4 +1,4 @@
-"""COM-387 sealed /fix localization resolver; it never executes configured runners."""
+"""sealed /fix localization resolver; it never executes configured runners."""
 
 from __future__ import annotations
 

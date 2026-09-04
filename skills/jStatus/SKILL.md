@@ -45,7 +45,7 @@ The generally available catalog starts with:
 
 - `standard@1` — four-section Product-Engineer status.
 
-Projects and tickets may carry already-materialized, versioned local patterns. For example, HAS-617's `has617-l1-pipeline@1` remains in that ticket's plan folder; local patterns are instances, not generally available catalog assets.
+Projects and tickets may carry already-materialized, versioned local patterns. For example, 's `has617-l1-pipeline@1` remains in that ticket's plan folder; local patterns are instances, not generally available catalog assets.
 
 ## Quick mode
 

@@ -179,7 +179,7 @@ content_ownership:
   dashboard-delivery-render-tier: pattern.dashboard-render-tier.md
   feature-child-dashboard-projections: pattern.dashboard-projections.md
   required-reading-and-agent-assignment: pattern.plan-governance.md
-  full-risk-rollback-and-screenshot-evidence: pattern.plan-governance.md
+  full-risk_rollback-and-screenshot-evidence: pattern.plan-governance.md
   smoke-test-impact-assessment: pattern.plan-governance.md
   error-handling-and-observability-requirements: pattern.plan-governance.md
   test-catalog-review-and-e2e-tests-enabled: pattern.plan-governance.md

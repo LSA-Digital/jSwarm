@@ -14,7 +14,7 @@ level: 2
 
 # uat-populate-content — preview-gated scenario content authoring
 
-Turn source material into drafted UAT scenario content **with a mandatory human-review preview before anything is committed** to the canonical scenarios JSON. This skill is option 2 of the `/jUAT` menu (COM-129 RD-22). It pairs with option 1 (`uat-extract-assets`): option 1 injects each slide's image + PDF-extracted text into `scenario.image.source.extracted_text`; this skill can use that extracted text (and/or a source doc) to draft the scenario's *content*.
+Turn source material into drafted UAT scenario content **with a mandatory human-review preview before anything is committed** to the canonical scenarios JSON. This skill is option 2 of the `/jUAT` menu (RD-22). It pairs with option 1 (`uat-extract-assets`): option 1 injects each slide's image + PDF-extracted text into `scenario.image.source.extracted_text`; this skill can use that extracted text (and/or a source doc) to draft the scenario's *content*.
 
 The hard rule: **never call `apply` before a `preview` has been produced and approved by the developer.** The preview is rendered by the real engine renderer, so the developer sees exactly what will ship. A schema-invalid draft fails loud in both modes — the gate cannot be bypassed.
 
@@ -25,7 +25,7 @@ The hard rule: **never call `apply` before a `preview` has been produced and app
 
 ## Inputs (ask the user for any not supplied)
 
-1. **Scenarios JSON** (`--scenarios`) — the canonical UAT scenarios JSON. **REQUIRED.** For COM-122 adopters this is the project-supplied scenarios JSON (engine README / project localization); do not hardcode it.
+1. **Scenarios JSON** (`--scenarios`) — the canonical UAT scenarios JSON. **REQUIRED.** For adopters this is the project-supplied scenarios JSON (engine README / project localization); do not hardcode it.
 2. **Source material** (`--source`, optional) — a doc/notes to ground the drafts, and/or the `image.source.extracted_text` already present on scenarios from option 1. If none is supplied, use the scenario's existing fields + the extracted text already in the JSON.
 3. **Preview profile** (`--profile`, optional) — `pm-summary` (default), `engineering`, or `both`.
 
