@@ -4,9 +4,9 @@ Read `execution-protocol.md` first (MASTER INVARIANT in `SKILL.md`). This file h
 
 ## Route-proof tripwire (guards against the six-wrong-target-test failure mode)
 
-A route-proof test does not count if it fakes, directly calls, or bypasses the classifier or router instead of traversing the real public route to a visible/public outcome. A prior baseline shipped six wrong-target tests that passed while proving nothing about the real route — passing is not proof. A satisfying route-proof test must traverse the real public route (the actual entry point a user or caller invokes) and assert a visible/public outcome (observable state, response, or rendered UI); a test that fakes, directly calls, or bypasses the classifier/router is supplemental evidence at best — never route proof.
+A route-proof test does not count if it fakes, directly calls, or bypasses the classifier or router instead of traversing the real public route to a visible/public outcome. A prior baseline shipped six wrong-target tests that passed while proving nothing about the real route; passing is not proof. A satisfying route-proof test must traverse the real public route (the actual entry point a user or caller invokes) and assert a visible/public outcome (observable state, response, or rendered UI); a test that fakes, directly calls, or bypasses the classifier/router is supplemental evidence at best, never route proof.
 
-**Class boundary (owner-ruled 2026-07-08):** regression tests are the higher-effort DETERMINISTIC class, constructed to survive non-deterministic conditions (capture/replay, managed state). UAT-class assets (`uat-scenarios` + `uat-scenario-steps`, see `uat.md`) are flexible and rapid-change — they are NOT regression tests. Alignment rule: the capture-replay regression ticket owns the audit of ALL existing tests against updated uat-scenarios — update aligned tests, retire misaligned ones; anything predating the capture-replay regression rollout is legacy/invalid and gets archived.
+**Class boundary (owner-ruled 2026-07-08):** regression tests are the higher-effort DETERMINISTIC class, constructed to survive non-deterministic conditions (capture/replay, managed state). UAT-class assets (`uat-scenarios` + `uat-scenario-steps`, see `uat.md`) are flexible and rapid-change; they are NOT regression tests. Alignment rule: the capture-replay regression ticket owns the audit of ALL existing tests against updated uat-scenarios: update aligned tests, retire misaligned ones; anything predating the capture-replay regression rollout is legacy/invalid and gets archived.
 
 ## UAT-D4 regression eligibility
 
@@ -16,15 +16,15 @@ See [the instrument selection behavior lock](uat.md#instrument-selection-behavio
 
 ## Regression and replay ownership split
 
-**Layer 1 — durable, deterministic regression owned by affected product tickets.** This ownership rule does not author other tickets' tests. A Layer-1 invariant that tabletop review proves true is promoted to durable deterministic regression owned by the affected product ticket whose behavior it constrains, gated on real-route UI coverage: the promoted test must traverse the real public entry point to a visible/public outcome, never an implementation-level substitute.
+**Layer 1 (durable, deterministic regression owned by affected product tickets).** This ownership rule does not author other tickets' tests. A Layer-1 invariant that tabletop review proves true is promoted to durable deterministic regression owned by the affected product ticket whose behavior it constrains, gated on real-route UI coverage: the promoted test must traverse the real public entry point to a visible/public outcome, never an implementation-level substitute.
 
-A promoted Layer-1 regression test is still subject to the route-proof tripwire above — promotion never exempts it from that boundary: a test that fakes, directly calls, or bypasses the classifier/router is not route proof merely because its assertion started life as a Layer-1 invariant. Composition applies exactly as it does to every other regression test in this file.
+A promoted Layer-1 regression test is still subject to the route-proof tripwire above; promotion never exempts it from that boundary: a test that fakes, directly calls, or bypasses the classifier/router is not route proof merely because its assertion started life as a Layer-1 invariant. Composition applies exactly as it does to every other regression test in this file.
 
-**Layer 2 — bounded to ticket boundaries and official semantic smoke.** Semantic judgment (rubric-based LLM-judge review) runs ONLY at ticket boundaries — UAT rounds gated by the Phase 3 semantic-verdict consumption gate — and at the official semantic smoke, a bounded category of deliberately infrequent, hand-run checks; it is not a named scenario, fixture, or CI lane, and this ticket does not create one. There is no continuous LLM-judge CI suite, cron, scheduled job, or per-commit gate, and none may be added under this policy — binding exclusion #7.
+**Layer 2 (bounded to ticket boundaries and official semantic smoke).** Semantic judgment (rubric-based LLM-judge review) runs ONLY at ticket boundaries (UAT rounds gated by the Phase 3 semantic-verdict consumption gate) and at the official semantic smoke, a bounded category of deliberately infrequent, hand-run checks; it is not a named scenario, fixture, or CI lane, and this ticket does not create one. There is no continuous LLM-judge CI suite, cron, scheduled job, or per-commit gate, and none may be added under this policy: binding exclusion #7.
 
-**Layer 3 — stays semantic by default.** A Layer-3 continuation is a semantic-round obligation: its correctness is judged, not string-matched. Deterministic regression is added only for replayable fixed-copy or replayable typed continuation cases: fixed UI copy that never varies, or a typed continuation the router returns as a structured shape rather than free text. Any continuation whose proof depends on model phrasing stays semantic and is never converted into a deterministic regression test.
+**Layer 3 (stays semantic by default).** A Layer-3 continuation is a semantic-round obligation: its correctness is judged, not string-matched. Deterministic regression is added only for replayable fixed-copy or replayable typed continuation cases: fixed UI copy that never varies, or a typed continuation the router returns as a structured shape rather than free text. Any continuation whose proof depends on model phrasing stays semantic and is never converted into a deterministic regression test.
 
-**Capture-replay freezes mechanisms, not ideal sentences.** A replay fixture may pin a deterministic mechanism — a typed continuation, fixed UI copy, or a request/response shape — but must never pin a model's preferred phrasing as the expected answer. Doing so would recreate the exact-string false-fail that this three-layer method exists to reject, and that the Phase 2 tabletop case (b) explicitly overturned.
+**Capture-replay freezes mechanisms, not ideal sentences.** A replay fixture may pin a deterministic mechanism (a typed continuation, fixed UI copy, or a request/response shape) but must never pin a model's preferred phrasing as the expected answer. Doing so would recreate the exact-string false-fail that this three-layer method exists to reject, and that the Phase 2 tabletop case (b) explicitly overturned.
 
 ---
 
@@ -67,9 +67,9 @@ Coordinate LLM-traffic capture/replay regression promotion for an accepted UAT s
 
 **When to use:** a UAT scenario is accepted or ready for promotion and the durable regression must replay the same LLM traffic later.
 
-> **HARD PRECONDITION — DO NOT INVOKE** (owner directive 2026-06-29): a COMPLETE `TICKET-XXX.uat-scenarios.md` scenario AND its associated executable `TICKET-XXX.uat-scenario-steps.md` (legacy `uat-test.md`) scripts MUST both exist and be **owner-signed-off** before this option runs. No signed-off UAT pair ⇒ stay PARKED — no capture baseline, no replay authoring, no fixture promotion. Authoring/committing this option does NOT authorize using it; the signed-off scenario+scripts are the spec the guard encodes, so they are locked first. If invoked without that pair, STOP and report the missing/unratified input rather than capturing against an unratified scenario.
+> **HARD PRECONDITION, DO NOT INVOKE** (owner directive 2026-06-29): a COMPLETE `TICKET-XXX.uat-scenarios.md` scenario AND its associated executable `TICKET-XXX.uat-scenario-steps.md` (legacy `uat-test.md`) scripts MUST both exist and be **owner-signed-off** before this option runs. No signed-off UAT pair ⇒ stay PARKED: no capture baseline, no replay authoring, no fixture promotion. Authoring/committing this option does NOT authorize using it; the signed-off scenario+scripts are the spec the guard encodes, so they are locked first. If invoked without that pair, STOP and report the missing/unratified input rather than capturing against an unratified scenario.
 
-> **TIMING WEIGHTING — SHAPE-COUPLING** (owner directive 2026-07-03): this guard captures a STATIC LLM request/response SHAPE and replays it. If a later bugfix changes that shape, the guard must be UPDATED, and the non-deterministic→deterministic conversion is painful/expensive. Weight the timing before building: only build when the scenario's LLM/pipeline shape is STABLE — not while the ticket is mid-churn with imminent fixes (e.g. an in-flight broad-impact/choke-point fix that will alter the merge/build/terminal shape the capture encodes). Building mid-churn means paying the conversion cost again on the next shape change. **Prefer:** build guards for a complete scenario or a whole multi-leg e2e chain at a *stabilization point* (after the broad-impact fixes land + owner sign-off), not per-fix mid-flight — a chain-level guard also catches cross-leg regressions. If asked to build mid-churn, surface the shape-churn cost and recommend deferring to the stabilization point unless the owner accepts the re-capture cost.
+> **TIMING WEIGHTING, SHAPE-COUPLING** (owner directive 2026-07-03): this guard captures a STATIC LLM request/response SHAPE and replays it. If a later bugfix changes that shape, the guard must be UPDATED, and the non-deterministic→deterministic conversion is painful/expensive. Weight the timing before building: only build when the scenario's LLM/pipeline shape is STABLE, not while the ticket is mid-churn with imminent fixes (e.g. an in-flight broad-impact/choke-point fix that will alter the merge/build/terminal shape the capture encodes). Building mid-churn means paying the conversion cost again on the next shape change. **Prefer:** build guards for a complete scenario or a whole multi-leg e2e chain at a *stabilization point* (after the broad-impact fixes land + owner sign-off), not per-fix mid-flight; a chain-level guard also catches cross-leg regressions. If asked to build mid-churn, surface the shape-churn cost and recommend deferring to the stabilization point unless the owner accepts the re-capture cost.
 
 Offer points: `/jPrecompact` full-mode promotion review gate, when a UAT row is proposed for Done and needs regression promotion · `/jClose` Block 4, when Regression/E2E policy requires a deterministic promotion artifact · Options 5/6 above cover E2E-shaped promotion; use this option for the missing LLM-traffic replay layer.
 
@@ -87,7 +87,7 @@ Traceability must stay explicit: `uat-scenario id -> uat-test phase/branches -> 
 | `runner` | `jVerifier` by default; `jMicroCliSmoke` only for an exact command-output rerun | Execute the emitted replay test under `WORKFLOW_MOCK_AGENTS=instant` or `realistic`; run twice; prove deterministic; return commands, exit codes, evidence paths, fixture hashes, and log findings. | Change source/test files or recapture fixtures. |
 | `oracle` | `jOracle` | Answer technical capture/replay questions and classify infra uncertainty. | Own delivery or expand scope. |
 
-Every L2 dispatch MUST include this exact guard: `You may NOT dispatch, spawn, or delegate to ANY other agent — perform this entire task YOURSELF.` If an L2 identifies work requiring another agent, it reports that need back to `jTestEngineer` with evidence; it does not spawn.
+Every L2 dispatch MUST include this exact guard: `You may NOT dispatch, spawn, or delegate to ANY other agent: perform this entire task YOURSELF.` If an L2 identifies work requiring another agent, it reports that need back to `jTestEngineer` with evidence; it does not spawn.
 
 Authoring separation: the `jTestEngineer` running this option must not personally run live builds, browser captures, live LLM captures, Docker restarts/recreates, or replay executions while authoring the regression. It authors/wires the test and delegates capture to `jQATester` and replay to the runner role with the no-L3 guard above. If the owner explicitly asks `jTestEngineer` to execute a command directly in a later handoff, treat that as a separate execution task and still obey safe/quiescent-stack and no-in-flight constraints.
 
@@ -112,13 +112,13 @@ Authoring separation: the `jTestEngineer` running this option must not personall
    export WORKFLOW_MOCK_AGENTS=capture
    export MOCK_AGENTS_FIXTURE_PATH=tests/fixtures/llm-replay/proposals/TICKET-XXX-<scenario_slug>.json
    # Only in a safe/quiescent capture window so the backend reads the env above.
-   # jInfra is the single infrastructure authority — recreate through it, not a hand-rolled docker command.
+   # jInfra is the single infrastructure authority: recreate through it, not a hand-rolled docker command.
    # There is no `jInfra` on PATH: invoke by absolute path (jInfra SKILL.md § How to invoke).
    "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/jinfra_cli.py" \
      --docker-recreate --services hai-simulator --confirm
    jswarm/agent-e2e.sh verify tests/e2e/primary/pe2e_TICKETXXX_<scenario_slug>_llm_replay.spec.ts
    ```
-   Capture guardrails: do not use the default `tests/fixtures/llm-replay/smoke-fixture.json` for ticket promotion · capture into a proposal fixture first; do not capture directly into the committed canonical fixture unless the owner explicitly asks for a refresh of that fixture · record scenario id, session id, command, fixture path, entry count, and decisive evidence paths · capture replaces entries with the same deterministic key in the target file — this is why proposal-first promotion is mandatory.
+   Capture guardrails: do not use the default `tests/fixtures/llm-replay/smoke-fixture.json` for ticket promotion · capture into a proposal fixture first; do not capture directly into the committed canonical fixture unless the owner explicitly asks for a refresh of that fixture · record scenario id, session id, command, fixture path, entry count, and decisive evidence paths · capture replaces entries with the same deterministic key in the target file; this is why proposal-first promotion is mandatory.
 
 4. *Promote the fixture explicitly.* Never silently overwrite a promoted fixture. Inspect the proposal fixture entry count and a diff against any existing canonical fixture. Confirm the proposal covers every expected LLM call for the accepted scenario and its documented branches. Promote only by explicit action:
    ```bash
@@ -140,7 +140,7 @@ Authoring separation: the `jTestEngineer` running this option must not personall
    export REMOTE_USER="<dev-email>"
    export WORKFLOW_MOCK_AGENTS=instant
    export MOCK_AGENTS_FIXTURE_PATH=tests/fixtures/llm-replay/TICKET-XXX-<scenario_slug>.json
-   # jInfra is the single infrastructure authority — recreate through it, not a hand-rolled docker command.
+   # jInfra is the single infrastructure authority: recreate through it, not a hand-rolled docker command.
    # There is no `jInfra` on PATH: invoke by absolute path (jInfra SKILL.md § How to invoke).
    "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" "${JSWARM_HOME:-$HOME/dev/jswarm}/scripts/jinfra_cli.py" \
      --docker-recreate --services hai-simulator --confirm
@@ -176,7 +176,7 @@ Authoring separation: the `jTestEngineer` running this option must not personall
 
 **Why this ownership model exists.** The orchestrator should not be the hidden owner of a half-promoted regression. `jTestEngineer` owns the working deliverable, while bounded L2 delegation lets `jQATester`, runner, and oracle contribute without blowing the context limit or forcing the orchestrator through repeated capture/replay/debug cycles.
 
-Steps 3-6 above are the complete successor procedure — the standalone `test-regression` skill's separate command-shape cheatsheet carried no content beyond what is already written here and was not recreated. The project-local `test-regression` skill directory (including its cheatsheet and template assets) was fully removed on 2026-07-14 per owner ruling (controlled-config masters remain the source of truth); only a minimal redirect stub remains at `.claude/skills/test-regression/SKILL.md` pointing back to this file.
+Steps 3-6 above are the complete successor procedure; the standalone `test-regression` skill's separate command-shape cheatsheet carried no content beyond what is already written here and was not recreated. The project-local `test-regression` skill directory (including its cheatsheet and template assets) was fully removed on 2026-07-14 per owner ruling (controlled-config masters remain the source of truth); only a minimal redirect stub remains at `.claude/skills/test-regression/SKILL.md` pointing back to this file.
 
 ### Option 8: Run existing E2E/regression verification
 
@@ -196,7 +196,7 @@ Steps 3-6 above are the complete successor procedure — the standalone `test-re
 
 T4 ships the tooling layer this redesign's SKILL/doc layer does not: permutation manifest · call-slot registry · staleness CI · matrix-row generator · demo mode · runtime toggle.
 
-**Future-fidelity upgrade note: ordered ledger harness.** `tests/harness/llm_complete_capture_replay.py` is the future upgrade path for stricter complete-boundary capture/replay around `run_candidate_gate`. It supports proposal-only capture, explicit `promote_fixture`, and failure taxonomy such as `FIXTURE_STALE`, `COVERAGE_GAP`, `OUT_OF_ORDER`, `REPLAY_REGRESSION`, and `NFR_THRESHOLD_FAIL`. Do not require the ledger harness for Option 7 above — start with whole-pipeline `WORKFLOW_MOCK_AGENTS=capture`; upgrade to the ledger harness only when the ticket needs stricter prompt-order/staleness fidelity than provider-level replay gives.
+**Future-fidelity upgrade note: ordered ledger harness.** `tests/harness/llm_complete_capture_replay.py` is the future upgrade path for stricter complete-boundary capture/replay around `run_candidate_gate`. It supports proposal-only capture, explicit `promote_fixture`, and failure taxonomy such as `FIXTURE_STALE`, `COVERAGE_GAP`, `OUT_OF_ORDER`, `REPLAY_REGRESSION`, and `NFR_THRESHOLD_FAIL`. Do not require the ledger harness for Option 7 above; start with whole-pipeline `WORKFLOW_MOCK_AGENTS=capture`; upgrade to the ledger harness only when the ticket needs stricter prompt-order/staleness fidelity than provider-level replay gives.
 
 Do not invoke any T4-owned capability (permutation manifest, call-slot registry, staleness CI, matrix-row generator, demo mode, runtime toggle, or the ordered ledger harness) until T4 lands. Option 7 above is the "available today" half only.
 
@@ -204,6 +204,6 @@ Do not invoke any T4-owned capability (permutation manifest, call-slot registry,
 
 ## (3) Maintenance rule active now
 
-Any ticket that changes workflow/pipeline behavior updates the AFFECTED deterministic capture-replay regression tests and fixtures as part of its own Definition of Done (re-capture via Option 7 above) — per the project's Ticket Closure Standards ("Capture-replay regression maintenance"). A stale-fixture flag caused by a ticket's change is a blocking finding on THAT ticket — never deferred debt parked on the regression-suite ticket.
+Any ticket that changes workflow/pipeline behavior updates the AFFECTED deterministic capture-replay regression tests and fixtures as part of its own Definition of Done (re-capture via Option 7 above), per the project's Ticket Closure Standards ("Capture-replay regression maintenance"). A stale-fixture flag caused by a ticket's change is a blocking finding on THAT ticket, never deferred debt parked on the regression-suite ticket.
 
 Pre-T4, record the affected-fixture set (or an explicit deferral with rationale) in the ticket's plan/close-ticket artifacts. T4's staleness CI (§2 above) makes this mechanical once it lands.
