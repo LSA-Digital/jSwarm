@@ -29,7 +29,7 @@ class _AppendEvent(Protocol):
     ) -> Mapping[str, object]: ...
 
 
-append_event = cast(_AppendEvent, import_module("fact_events").append_event)
+append_event = cast(_AppendEvent, import_module("jswarm.fact_events").append_event)
 
 EVENTS_FILENAME = "plan-status-events.ndjson"
 

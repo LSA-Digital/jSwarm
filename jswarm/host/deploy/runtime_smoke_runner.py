@@ -40,7 +40,12 @@ from pathlib import Path
 from typing import Any
 
 if __package__ in (None, ""):
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    # Insert the repository root (parents[3]: jswarm/host/deploy/ -> jswarm/host/ ->
+    # jswarm/ -> repo root), not jswarm/ itself (parents[2]). jswarm/ on sys.path would
+    # shadow the stdlib for anything under jswarm/ sharing a name with it (e.g.
+    # jswarm/platform/ vs the stdlib platform module), and the jswarm.host.deploy.*
+    # imports below need the repo root on the path anyway.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from jswarm.host.deploy import deploy as _deploy_engine
 

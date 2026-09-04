@@ -16,10 +16,10 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from plan_status import config
-from plan_status import frontmatter as FM
-from plan_status import reconcile as RC
-from plan_status import state as ST
+from jswarm.plan_status import config
+from jswarm.plan_status import frontmatter as FM
+from jswarm.plan_status import reconcile as RC
+from jswarm.plan_status import state as ST
 
 ACTIVE_STATUSES = {"ACTIVE", "READY_FOR_MERGE"}
 

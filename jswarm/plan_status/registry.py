@@ -257,11 +257,11 @@ def _reduce_plan_status_events(events: list[dict[str, Any]], project_key: str) -
 
 
 def _fact_events_fold() -> Callable[..., dict[str, Any]]:
-    return cast(Callable[..., dict[str, Any]], import_module("fact_events").fold_events)
+    return cast(Callable[..., dict[str, Any]], import_module("jswarm.fact_events").fold_events)
 
 
 def _fact_events_canonical_root() -> Callable[[Path], Path]:
-    return cast(Callable[[Path], Path], import_module("fact_events").canonical_repo_root)
+    return cast(Callable[[Path], Path], import_module("jswarm.fact_events").canonical_repo_root)
 
 
 def fold_plan_status_events(

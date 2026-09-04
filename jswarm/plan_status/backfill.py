@@ -30,12 +30,17 @@ from dataclasses import dataclass
 from pathlib import Path
 
 _HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(_HERE.parent))
+# Insert the repository root (parent of jswarm/), not jswarm/ itself: this makes
+# `import jswarm.plan_status...` resolve whether this file is run directly by path
+# (as the lifecycle skills do) or imported as a module, without putting jswarm/'s
+# own directory at the front of sys.path -- which would shadow the stdlib for
+# anything under jswarm/ that happens to share a name with it (e.g. jswarm/platform/).
+sys.path.insert(0, str(_HERE.parent.parent))
 
-from plan_status import config as C
-from plan_status import frontmatter as FM
-from plan_status import registry as R
-from plan_status import state as S
+from jswarm.plan_status import config as C
+from jswarm.plan_status import frontmatter as FM
+from jswarm.plan_status import registry as R
+from jswarm.plan_status import state as S
 
 _PHASE_MARKER_RE = re.compile(r"^#{2,4}\s*Phase\s+(\d+)", re.IGNORECASE | re.MULTILINE)
 _IN_PROGRESS_MARKER = "\U0001F7E1"  # 🟡
@@ -258,7 +263,7 @@ def normalize_backfill(repo_root: Path, *, apply: bool = False,
     default; ``apply`` writes via the single normalization invariant (reconcile.normalize_text)
     under the per-file clean-tree gate. Idempotent (re-run = empty change set).
     """
-    from plan_status import reconcile as RC
+    from jswarm.plan_status import reconcile as RC
 
     repo_root = Path(repo_root)
     candidates: list[str] = []

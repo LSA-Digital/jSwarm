@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Optional
 
-from plan_status import state as S
+from jswarm.plan_status import state as S
 
 # Per-project Jira transition NAMES keyed by plan_status (or prefix for IMPL).
 # COM verified live via jira_get_transitions(COM-84) 2026-05-20.

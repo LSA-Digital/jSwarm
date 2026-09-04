@@ -50,17 +50,21 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 # Importable both as ``python jswarm/precompact_reconcile/lifecycle_audit.py`` and ``-m``.
-_SCRIPTS_DIR = str(Path(__file__).resolve().parents[1])
+# Insert the repository root (parents[2]: <pkg>/ -> jswarm/ -> repo root), not
+# jswarm/ itself (parents[1]). jswarm/ on sys.path would shadow the stdlib for
+# anything under jswarm/ sharing a name with it (e.g. jswarm/platform/ vs the
+# stdlib platform module).
+_SCRIPTS_DIR = str(Path(__file__).resolve().parents[2])
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
-from precompact_reconcile import migrate as MG  # noqa: E402
-from precompact_reconcile import rows as RW  # noqa: E402
-from precompact_reconcile.matrices import _TICKET_RE, resolve_uat_doc  # noqa: E402
-from plan_status import config as C  # noqa: E402
-from plan_status import frontmatter as FM  # noqa: E402
-from plan_status import reconcile as RC  # noqa: E402
-from plan_status import state as S  # noqa: E402
+from jswarm.precompact_reconcile import migrate as MG  # noqa: E402
+from jswarm.precompact_reconcile import rows as RW  # noqa: E402
+from jswarm.precompact_reconcile.matrices import _TICKET_RE, resolve_uat_doc  # noqa: E402
+from jswarm.plan_status import config as C  # noqa: E402
+from jswarm.plan_status import frontmatter as FM  # noqa: E402
+from jswarm.plan_status import reconcile as RC  # noqa: E402
+from jswarm.plan_status import state as S  # noqa: E402
 # NOTE: ``joptimize`` is deliberately NOT imported at module scope. This package is a
 # whole-directory managed-copy deployment (docs/_CONTROLLED_CONFIG/managed-deployments.yaml,
 # id: precompact-matrix-reconcile) declared "self-contained" and shipped WITHOUT

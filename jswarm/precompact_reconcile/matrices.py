@@ -13,7 +13,11 @@ import unicodedata
 from pathlib import Path
 
 # Importable both as ``python jswarm/precompact_reconcile/cli.py`` and ``-m``.
-_SCRIPTS_DIR = str(Path(__file__).resolve().parents[1])
+# Insert the repository root (parents[2]: <pkg>/ -> jswarm/ -> repo root), not
+# jswarm/ itself (parents[1]). jswarm/ on sys.path would shadow the stdlib for
+# anything under jswarm/ sharing a name with it (e.g. jswarm/platform/ vs the
+# stdlib platform module).
+_SCRIPTS_DIR = str(Path(__file__).resolve().parents[2])
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
@@ -45,7 +49,7 @@ except ImportError:  # markdown_tables lives under test-catalog/, which is enter
             text = text[2:]
         return text
 
-from plan_status import ladder as L
+from jswarm.plan_status import ladder as L
 
 _EMPTY_REPORT = {
     "nfr_matched": 0, "nfr_unmatched": 0,

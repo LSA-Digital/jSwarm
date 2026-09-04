@@ -19,11 +19,14 @@ from pathlib import Path
 # repo under test). Engine scripts and the interpreter are resolved relative to this, so the
 # wrapper is location-correct no matter which project's plans it is pointed at via --repo-root.
 _TOOL_ROOT = Path(__file__).resolve().parents[2]
-_SCRIPTS_DIR = str(_TOOL_ROOT / "jswarm")
-if _SCRIPTS_DIR not in sys.path:
-    sys.path.insert(0, _SCRIPTS_DIR)
+# Insert _TOOL_ROOT itself, not _TOOL_ROOT / "jswarm": jswarm/ on sys.path would shadow
+# the stdlib for anything under jswarm/ sharing a name with it (e.g. jswarm/platform/
+# vs the stdlib platform module). _TOOL_ROOT is already the repo root the jswarm
+# package lives in, so this is what makes `jswarm.update_ticket...` importable below.
+if str(_TOOL_ROOT) not in sys.path:
+    sys.path.insert(0, str(_TOOL_ROOT))
 
-from update_ticket import promotions  # noqa: E402
+from jswarm.update_ticket import promotions  # noqa: E402
 
 PRESETS: dict[str, list[str]] = {
     "precompact-full": ["promotion-gate", "migrate", "rebuild-rows", "reconcile-status", "count"],

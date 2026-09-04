@@ -11,14 +11,18 @@ from pathlib import Path
 # (script path; cwd=repo root) and `python -m update_plan.cli`. In the script-path case
 # `jswarm/` is NOT on sys.path, so the sibling `plan_status` package would fail to import.
 # Ensure the parent `jswarm/` dir is importable regardless of cwd / invocation style.
-_SCRIPTS_DIR = str(Path(__file__).resolve().parents[1])
+# Insert the repository root (parents[2]: <pkg>/ -> jswarm/ -> repo root), not
+# jswarm/ itself (parents[1]). jswarm/ on sys.path would shadow the stdlib for
+# anything under jswarm/ sharing a name with it (e.g. jswarm/platform/ vs the
+# stdlib platform module).
+_SCRIPTS_DIR = str(Path(__file__).resolve().parents[2])
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
-from plan_status import config
-from plan_status import frontmatter as FM
-from plan_status import reconcile as RC
-from update_plan import backfill, hygiene
+from jswarm.plan_status import config
+from jswarm.plan_status import frontmatter as FM
+from jswarm.plan_status import reconcile as RC
+from jswarm.update_plan import backfill, hygiene
 
 
 def _build_parser() -> argparse.ArgumentParser:

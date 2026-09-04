@@ -24,12 +24,16 @@ from pathlib import Path
 
 # Self-bootstrap so the sibling engine package imports whether run as a script
 # (python jswarm/update_ticket/cli.py) or imported as update_ticket.promotions.
-_SCRIPTS_DIR = str(Path(__file__).resolve().parents[1])
+# Insert the repository root (parents[2]: <pkg>/ -> jswarm/ -> repo root), not
+# jswarm/ itself (parents[1]). jswarm/ on sys.path would shadow the stdlib for
+# anything under jswarm/ sharing a name with it (e.g. jswarm/platform/ vs the
+# stdlib platform module).
+_SCRIPTS_DIR = str(Path(__file__).resolve().parents[2])
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
 # Reuse the existing matrix parsing/flip helpers — never re-roll matrix parsing.
-from precompact_reconcile.matrices import (  # noqa: E402
+from jswarm.precompact_reconcile.matrices import (  # noqa: E402
     _cells,
     _set_last_cell,
     _test_tuple,

@@ -32,7 +32,13 @@ from pathlib import Path
 from typing import Any, Callable
 
 if __package__ in (None, ""):
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    # Insert the repository root (parents[2]: jswarm/platform/ -> jswarm/ ->
+    # repo root), not jswarm/ itself (parents[1]). `jswarm/` on sys.path
+    # would shadow the stdlib for anything under jswarm/ that happens to
+    # share a name with it -- notably jswarm/platform/ itself against the
+    # stdlib `platform` module. The `jswarm.colgrep_status_report` import
+    # below needs the repo root on the path anyway.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 COMPONENTS = ("overlay-fleet-supervisor", "watcher", "health-check")
 INSTALLER_HINT = "deploy/launchd/install-colgrep-launchd.sh"

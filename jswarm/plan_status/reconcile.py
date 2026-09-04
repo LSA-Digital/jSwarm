@@ -19,13 +19,18 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 _HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(_HERE.parent))
+# Insert the repository root (parent of jswarm/), not jswarm/ itself: this makes
+# `import jswarm.plan_status...` resolve whether this file is run directly by path
+# (as the lifecycle skills do) or imported as a module, without putting jswarm/'s
+# own directory at the front of sys.path -- which would shadow the stdlib for
+# anything under jswarm/ that happens to share a name with it (e.g. jswarm/platform/).
+sys.path.insert(0, str(_HERE.parent.parent))
 
-from plan_status import config as C
-from plan_status import frontmatter as FM
-from plan_status import ladder as L
-from plan_status import registry as R
-from plan_status import state as S
+from jswarm.plan_status import config as C
+from jswarm.plan_status import frontmatter as FM
+from jswarm.plan_status import ladder as L
+from jswarm.plan_status import registry as R
+from jswarm.plan_status import state as S
 
 
 _SECTION_HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)

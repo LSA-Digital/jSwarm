@@ -26,11 +26,15 @@ import sys
 from pathlib import Path
 
 # Importable both as ``python jswarm/precompact_reconcile/rows_cli.py`` and ``-m``.
-_SCRIPTS_DIR = str(Path(__file__).resolve().parents[1])
+# Insert the repository root (parents[2]: <pkg>/ -> jswarm/ -> repo root), not
+# jswarm/ itself (parents[1]). jswarm/ on sys.path would shadow the stdlib for
+# anything under jswarm/ sharing a name with it (e.g. jswarm/platform/ vs the
+# stdlib platform module).
+_SCRIPTS_DIR = str(Path(__file__).resolve().parents[2])
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
-from precompact_reconcile.matrices import (  # noqa: E402
+from jswarm.precompact_reconcile.matrices import (  # noqa: E402
     _NFR_ID_RE, _TICKET_RE, _cells, _norm_id, _ticket_from_name,
     extract_nfr_ref, extract_uat_id,
 )
