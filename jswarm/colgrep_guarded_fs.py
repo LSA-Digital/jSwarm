@@ -29,7 +29,10 @@ import sys
 from pathlib import Path
 from typing import Callable
 
+from jswarm.host import current as _current_host
+
 _MIN_PATH_DEPTH = 3  # refuses "/", "/Users", "/Users/idengrenme"
+_HOST_DIR_NAME = _current_host().claude_home().name  # the one place this module names the host dir
 
 
 class GuardedFsRefusal(RuntimeError):
@@ -47,14 +50,16 @@ def _owned_prefix_roots() -> tuple[Path, ...]:
 
 
 def _worktrees_entry_root(resolved: Path) -> Path | None:
-    """Return the owning `.claude/worktrees/<name>` root if resolved is at or
-    below one, else None. The `worktrees` directory itself (the parent that
-    holds every `<name>` entry) is deliberately excluded -- only a specific
-    named worktree, or something beneath it, is owned.
+    """Return the owning `<host-dir>/worktrees/<name>` root if resolved is at or
+    below one, else None. `<host-dir>` is this host's config directory name
+    (`jswarm.host.claude_code.ClaudeCodeHost.claude_home`). The `worktrees`
+    directory itself (the parent that holds every `<name>` entry) is
+    deliberately excluded -- only a specific named worktree, or something
+    beneath it, is owned.
     """
     parts = resolved.parts
     for idx in range(len(parts) - 2):
-        if parts[idx] == ".claude" and parts[idx + 1] == "worktrees" and len(parts) > idx + 2:
+        if parts[idx] == _HOST_DIR_NAME and parts[idx + 1] == "worktrees" and len(parts) > idx + 2:
             return Path(*parts[: idx + 3])
     return None
 
@@ -75,10 +80,11 @@ def _resolved_is_owned(resolved: Path) -> bool:
 
 def _is_foreign_git_checkout_root(resolved: Path) -> bool:
     """Refuse a resolved path that is itself the root of a git checkout NOT
-    covered by a `.claude/worktrees/<name>` entry. A linked worktree's own
-    root carries a `.git` FILE (not directory), so this only fires for a
-    real checkout root -- defense in depth against a mis-scoped owned root
-    ever containing a full clone.
+    covered by a `<host-dir>/worktrees/<name>` entry (see
+    `_worktrees_entry_root`). A linked worktree's own root carries a `.git`
+    FILE (not directory), so this only fires for a real checkout root --
+    defense in depth against a mis-scoped owned root ever containing a full
+    clone.
     """
     if _worktrees_entry_root(resolved) is not None:
         return False

@@ -11,9 +11,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from jswarm.host import current as _current_host
 
-DEFAULT_MANIFEST_PATH = Path(".claude/project-command-injections.yaml")
-DEFAULT_SNIPPET_ROOT = Path(".claude/command-injections")
+
+DEFAULT_MANIFEST_PATH = _current_host().project_dir(Path(".")) / "project-command-injections.yaml"
+DEFAULT_SNIPPET_ROOT = _current_host().project_dir(Path(".")) / "command-injections"
 JPLAN_COMMAND_KEY = "jPlan.md"
 # Keep the legacy alias composed so removing its temporary broad authorization later
 # does not resurface the raw legacy token in repository bytes.
@@ -25,7 +27,8 @@ PHASE_ONE_MANAGED_COMMANDS = frozenset({JPLAN_COMMAND_KEY, "implement.md", "test
 # auto-scaffolded (they stay out of PHASE_ONE_MANAGED_COMMANDS):
 #   - close-ticket.md  — COM-123 component-governance gate (only common wires it).
 #   - code-overview.md — COM-122 UAT-scenario engine adopters (HAS-488 wired hai-sim-engine).
-#     Real global command at ~/.claude/commands/code-overview.md with three inject anchors;
+#     Real global command named code-overview.md, in this host's commands directory
+#     (`jswarm.host.claude_code.ClaudeCodeHost.commands_dir`), with three inject anchors;
 #     added to the allowlist by COM-128 WS4 so an adopter manifest validates and its
 #     jPlan parameters resolve (the allowlist was stale relative to HAS-488).
 MANAGED_COMMAND_ALLOWLIST = PHASE_ONE_MANAGED_COMMANDS | frozenset(
@@ -428,10 +431,10 @@ def command_parameters_for_project(
     """Fail-open reader for per-project command parameter defaults (COM-128 WS4).
 
     Returns the `parameters:` mapping declared under
-    ``managed_commands.<command_name>`` in the project's
-    ``.claude/project-command-injections.yaml``, or an empty dict when the manifest
-    is absent, the parameters block is missing, or the manifest cannot be
-    loaded/validated.
+    ``managed_commands.<command_name>`` in the project's manifest at
+    ``DEFAULT_MANIFEST_PATH`` (this host's project command-injection file),
+    or an empty dict when the manifest is absent, the parameters block is
+    missing, or the manifest cannot be loaded/validated.
 
     This NEVER raises. A broken or missing manifest must not break a live lifecycle
     command — the command simply falls back to its global defaults. The fail-LOUD
@@ -731,8 +734,7 @@ def _extract_markdown_links(text: str) -> list[str]:
 
 
 def _project_knowledge_file(project_root: Path) -> Path | None:
-    for relative in ("CLAUDE.md", "AGENTS.md"):
-        candidate = project_root / relative
+    for candidate in (_current_host().memory_path(project_root), project_root / "AGENTS.md"):
         if candidate.exists():
             return candidate
     return None
@@ -854,10 +856,10 @@ def canonical_command_source(common_root: Path, command_name: str) -> Path | Non
         / "docs/_CONTROLLED_CONFIG/dotclaude/user/skills"
         / stem
         / "SKILL.md",
-        root / ".claude/commands" / (
+        _current_host().project_dir(root) / "commands" / (
             LEGACY_JPLAN_COMMAND_KEY if command_name == JPLAN_COMMAND_KEY else command_name
         ),
-        root / ".claude/commands" / command_name,
+        _current_host().project_dir(root) / "commands" / command_name,
         root / "docs/_CONTROLLED_CONFIG/dotclaude/user/commands" / command_name,
         root / "docs/_CONTROLLED_CONFIG/dotclaude/repo.common/commands" / command_name,
     )
@@ -896,8 +898,8 @@ def bootstrap_project_injections(
         required_reading = _inferred_required_reading(project_root, command_name)
         advisories = _inferred_advisories(project_root, command_name)
 
-        required_snippet_rel = f".claude/command-injections/{command_name.replace('.md', '')}-required-reading.md"
-        advisory_snippet_rel = f".claude/command-injections/{command_name.replace('.md', '')}-advisories.md"
+        required_snippet_rel = f"{DEFAULT_SNIPPET_ROOT.as_posix()}/{command_name.replace('.md', '')}-required-reading.md"
+        advisory_snippet_rel = f"{DEFAULT_SNIPPET_ROOT.as_posix()}/{command_name.replace('.md', '')}-advisories.md"
 
         command_lines = [f"  {command_name}:", "    state: managed", "    anchors:"]
 
@@ -1030,7 +1032,7 @@ def audit_project_check(
                 status = "fail"
                 messages.append(
                     f"FAIL: canonical command missing: "
-                    f"{common_root / '.claude/commands' / command_name}"
+                    f"{_current_host().project_dir(common_root) / 'commands' / command_name}"
                 )
                 continue
 
@@ -1100,7 +1102,7 @@ def audit_project_check(
                 if command_name == JPLAN_COMMAND_KEY
                 else command_name
             )
-            target_file = project_root / ".claude/commands" / physical_name
+            target_file = _current_host().project_dir(project_root) / "commands" / physical_name
             if canonical_file is None or not target_file.exists():
                 status = "fail"
                 freshness_messages.append(

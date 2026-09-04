@@ -42,7 +42,7 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from jswarm.deploy import deploy as _deploy_engine
+from jswarm.host.deploy import deploy as _deploy_engine
 
 SUPPORTED_SURFACES = ("command", "hook", "skill", "rule", "command-injection", "settings")
 

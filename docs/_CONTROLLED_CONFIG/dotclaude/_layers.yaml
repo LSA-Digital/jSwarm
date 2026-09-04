@@ -2,7 +2,7 @@
 # This file is mastered here under docs/_CONTROLLED_CONFIG/dotclaude/ and is the
 # single source of truth for which physical contexts exist and where each one
 # deploys. Edit it here; it is read by deploy.py / verify_dotclaude_topology.py /
-# adopt.py / migrate_one_home.py via jswarm/deploy/layers.py.
+# adopt.py / migrate_one_home.py via jswarm/host/deploy/layers.py.
 #
 # ONE-HOME / ONE-TARGET MODEL: each context = exactly one deploy target. This is a
 # registry of physical contexts only — NOT a precedence registry. Runtime

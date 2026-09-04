@@ -33,8 +33,8 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from jswarm.deploy.layers import LayersError, LayersRegistry, load_layers  # noqa: E402
-from jswarm.deploy.verify_dotclaude_topology import (  # noqa: E402
+from jswarm.host.deploy.layers import LayersError, LayersRegistry, load_layers  # noqa: E402
+from jswarm.host.deploy.verify_dotclaude_topology import (  # noqa: E402
     _iter_install_artifacts,
     _validate_target_relpath,
     desired_merge_template_payload,
@@ -1598,7 +1598,7 @@ def run_runtime_smoke(*, surface: str, manifest_path: str | Path, home_root: str
     unattended engine call. The probe rides the operator's live acknowledgement: this seam
     only runs after an `apply --live-home` the operator explicitly invoked.
     """
-    from jswarm.deploy import runtime_smoke_runner as _runner  # lazy: avoids cycle
+    from jswarm.host.deploy import runtime_smoke_runner as _runner  # lazy: avoids cycle
 
     family_to_surface = {
         "commands": "command",

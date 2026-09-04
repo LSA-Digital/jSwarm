@@ -1,4 +1,4 @@
-# CONFIG-CONTROLLED — edit the master under jswarm/deploy/ (COM-176).
+# CONFIG-CONTROLLED — edit the master under jswarm/host/deploy/ (COM-176).
 """COM-176 shared layer loader for the controlled-config one-home model.
 
 Parses ``docs/_CONTROLLED_CONFIG/dotclaude/_layers.yaml`` once and shares the

@@ -128,22 +128,22 @@ files:
   target: jswarm/dashboard_ui/schema_validate.py
   sha256: 3c9beb7e33a293c143e967a1db95cdc281be330bdb4a52c19da2b9111605848b
 - source: scripts/controlled_config/__init__.py
-  target: jswarm/deploy/__init__.py
+  target: jswarm/host/deploy/__init__.py
   sha256: 13a1834b1cfa03cd323d06c2679e4f3a3ed5ac8e5d04d3f8a8a2eb14ff62f6f0
 - source: scripts/controlled_config/deploy.py
-  target: jswarm/deploy/deploy.py
+  target: jswarm/host/deploy/deploy.py
   sha256: ba33ac180e98bbc3d54654b36c5798d2b6708e0b467b22e816108959c231d6ea
 - source: scripts/controlled_config/layers.py
-  target: jswarm/deploy/layers.py
+  target: jswarm/host/deploy/layers.py
   sha256: 242c4a166688686e76859833e0592bcc4ea821575b5e6d6dab1f542da3945d62
 - source: scripts/controlled_config/runtime_smoke_runner.py
-  target: jswarm/deploy/runtime_smoke_runner.py
+  target: jswarm/host/deploy/runtime_smoke_runner.py
   sha256: 9bf97efb868b113f9da2ff1860e6de2a21a216c1b0494ffd5645a023cede6d81
 - source: scripts/controlled_config/topology_policy.py
-  target: jswarm/deploy/topology_policy.py
+  target: jswarm/host/deploy/topology_policy.py
   sha256: 04b75e36244f87903a27d741af00dad96125bcf832b9170d243a659a2a65f15b
 - source: scripts/controlled_config/verify_dotclaude_topology.py
-  target: jswarm/deploy/verify_dotclaude_topology.py
+  target: jswarm/host/deploy/verify_dotclaude_topology.py
   sha256: c8c83ea183dcd08243158bf1ea093c6e20440992b1c0e21839567c1c32f6913f
 - source: scripts/devops_command_injection.py
   target: jswarm/devops_command_injection.py

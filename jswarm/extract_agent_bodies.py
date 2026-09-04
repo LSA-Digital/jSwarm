@@ -1,7 +1,9 @@
 """Extract agent prompt bodies for upgrade survival (COM-76 Phase 13).
 
 OMC and OMO upgrades have historically wiped customized agent prompts in
-``~/.claude/agents/*.md`` and ``~/.config/opencode/oh-my-openagent.json``.
+this host's agents directory (``*.md`` files under
+`jswarm.host.claude_code.ClaudeCodeHost.agents_dir`) and
+``~/.config/opencode/oh-my-openagent.json``.
 This script extracts the prompt body (everything after the YAML frontmatter
 and any optional ``<ROUTE:...>`` tag) from each live agent file into a
 version-controlled body file at
@@ -20,7 +22,8 @@ agent files so the canonical bodies stay in sync.
 
 Round-trip contract: for every agent ``<slug>``,
   ``(frontmatter + leading-blanks + ROUTE-tag + post-ROUTE-blanks) + body``
-must equal the original ``~/.claude/agents/<slug>.md`` byte-for-byte.
+must equal the original ``<slug>.md`` file in this host's agents directory
+(`jswarm.host.claude_code.ClaudeCodeHost.agents_dir`) byte-for-byte.
 
 Usage:
   ${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python jswarm/extract_agent_bodies.py
@@ -39,8 +42,10 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from jswarm.host import current as _current_host
+
 _REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SRC = Path.home() / ".claude" / "agents"
+DEFAULT_SRC = _current_host().agents_dir()
 DEFAULT_DST = _REPO_ROOT / "docs" / "_CONTROLLED_CONFIG" / "agent-bodies"
 
 FRONTMATTER_RE = re.compile(r"^---\n.*?\n---\n", re.DOTALL)

@@ -686,8 +686,10 @@ def _resolve_claude_model(
     """Claude Code primary model for ``slug``.
 
     Reads the legacy ``agent_primary_model`` map — mirror-consistent with the
-    v2 ``agents.<slug>.claude.model`` field (enforced by the schema-v2 tests),
-    so the default lookup path is unchanged from the pre-COM-76 registry.
+    v2 schema's per-agent ``claude`` provider block (``model`` field under
+    ``agents.<slug>``, provider key ``claude``; enforced by the schema-v2
+    tests), so the default lookup path is unchanged from the pre-COM-76
+    registry.
     """
     model_slug = profiles.primary_model_slug(slug)
     if model_slug is None:

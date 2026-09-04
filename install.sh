@@ -22,7 +22,7 @@ COMMON_DIR="$(cd -P "$(dirname "$SCRIPT_SOURCE")/.." && pwd)"
 export JSWARM_COMMON="${JSWARM_COMMON:-$COMMON_DIR}"
 
 VENV_PY="$COMMON_DIR/.venv/bin/python"
-DEPLOY_PY="$COMMON_DIR/jswarm/deploy/deploy.py"
+DEPLOY_PY="$COMMON_DIR/jswarm/host/deploy/deploy.py"
 MASTER_ROOT="$COMMON_DIR/docs/_CONTROLLED_CONFIG/dotclaude"
 ATLASSIAN_MCP_URL="https://mcp.atlassian.com/v2/mcp"
 NONINTERACTIVE="${JSWARM_NONINTERACTIVE:-0}"

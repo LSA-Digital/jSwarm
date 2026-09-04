@@ -19,8 +19,8 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from jswarm.deploy.topology_policy import load_install_index_strict
-from jswarm.deploy.layers import LayersError, load_layers
+from jswarm.host.deploy.topology_policy import load_install_index_strict
+from jswarm.host.deploy.layers import LayersError, load_layers
 
 MAX_SYMLINK_DEPTH = 40
 USER_SCOPES = {"scope-user", "both"}

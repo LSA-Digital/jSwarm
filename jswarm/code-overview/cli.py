@@ -89,8 +89,9 @@ Exit codes (documented; each is distinct and stable across subcommands):
 This module lives directly under the generic Layer A code home and carries no
 project-specific vocabulary of its own -- every project value (scenario JSON
 path, spine manifest path, carrier names, ...) is resolved at runtime from the
-active project's `.claude/project-command-injections.yaml` localization
-anchors, never hard-coded here.
+active project's command-injection manifest (``DEFAULT_MANIFEST_PATH`` in
+``jswarm.devops_command_injection``) localization anchors, never hard-coded
+here.
 """
 
 from __future__ import annotations
@@ -139,7 +140,7 @@ from render_views import (  # noqa: E402
     render_summary,
 )
 from schema import load_spine, validate_spine  # noqa: E402
-from jswarm.devops_command_injection import load_manifest  # noqa: E402
+from jswarm.devops_command_injection import DEFAULT_MANIFEST_PATH, load_manifest  # noqa: E402
 from trace_distiller import distill  # noqa: E402
 
 __all__ = ["main"]
@@ -277,7 +278,7 @@ def _resolve_scenarios_path(project_root: Path) -> Path:
     if not isinstance(config, dict):
         raise LocalizationError(
             f"required anchor {V1_SCENARIO_SOURCE_ANCHOR_NAME!r} is not configured in "
-            f".claude/project-command-injections.yaml under managed_commands[{MANAGED_COMMAND_NAME!r}]."
+            f"{DEFAULT_MANIFEST_PATH.as_posix()} under managed_commands[{MANAGED_COMMAND_NAME!r}]."
         )
     content = _resolve_anchor_content(project_root, config)
     first_line = _first_non_empty_line(content)
@@ -318,7 +319,7 @@ def _resolve_spine_path(project_root: Path) -> tuple[Path, str]:
             raise LocalizationError(
                 f"anchor {SPINE_MANIFEST_ANCHOR_NAME!r} resolved to empty content; configure a "
                 "spine path (a single non-empty line) via 'content' or 'snippet_path' in "
-                ".claude/project-command-injections.yaml, or remove the anchor entirely to use "
+                f"{DEFAULT_MANIFEST_PATH.as_posix()}, or remove the anchor entirely to use "
                 "the packaged pilot fixture."
             )
         candidate = project_root / first_line.strip()

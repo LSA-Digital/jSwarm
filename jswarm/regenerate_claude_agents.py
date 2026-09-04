@@ -1,8 +1,9 @@
-"""COM-76 Phase 4/13b — regenerate ~/.claude/agents/*.md from the YAML.
+"""COM-76 Phase 4/13b — regenerate this host's live agent files from the YAML.
 
 This is the Claude-side regeneration helper. It assembles each live agent
-file ``~/.claude/agents/<slug>.md`` from three version-controlled sources in
-the ``common`` repo:
+file ``<slug>.md`` in this host's agents directory
+(`jswarm.host.claude_code.ClaudeCodeHost.agents_dir`) from three
+version-controlled sources in the ``common`` repo:
 
   1. ``docs/_CONTROLLED_CONFIG/subagent-context-profiles.yaml`` — the
      ``agents:`` block. Supplies the frontmatter mirror (``frontmatter:``) and
@@ -40,9 +41,10 @@ get no prefix ROUTE tag: their body file carries the ``[AGENT TEMPORARILY
 DISABLED]`` marker and a commented-out ROUTE verbatim.
 
 Why this exists (AC-13 — upgrade survival): OMC upgrades have historically
-overwritten ``~/.claude/agents/*.md`` with packaged defaults. After this
-helper lands, that wipeout is recoverable — every customization lives in the
-``common`` repo (YAML + body files) and ``--apply`` restores the live files.
+overwritten every agent file in this host's agents directory with packaged
+defaults. After this helper lands, that wipeout is recoverable — every
+customization lives in the ``common`` repo (YAML + body files) and
+``--apply`` restores the live files.
 
 Modes:
   --report  (default) : assemble every agent, diff against the live files,
@@ -79,14 +81,16 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 # Support running this file directly (``python jswarm/regenerate_claude_agents.py``,
 # per the module docstring) as well as ``-m``/package-relative import from tests —
 # the direct-script form has ``jswarm/`` (not the repo root) as ``sys.path[0]``, so
-# ``jswarm.subagent_context_budget`` would otherwise fail to resolve.
+# ``jswarm.subagent_context_budget`` (and ``jswarm.host``) would otherwise fail to
+# resolve.
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from jswarm.host import current as _current_host  # noqa: E402
 from jswarm.subagent_context_budget.registry import alias_status, is_legacy_slug  # noqa: E402
 DEFAULT_PROFILES = _REPO_ROOT / "docs" / "_CONTROLLED_CONFIG" / "subagent-context-profiles.yaml"
 DEFAULT_BODIES = _REPO_ROOT / "docs" / "_CONTROLLED_CONFIG" / "agent-bodies"
-DEFAULT_AGENTS_DIR = Path.home() / ".claude" / "agents"
+DEFAULT_AGENTS_DIR = _current_host().agents_dir()
 
 # Sentinel value in `claude.model` marking an agent that is intentionally
 # disabled. Such agents emit no prefix ROUTE tag.
@@ -627,7 +631,8 @@ def inject_deliverable_durability(body_text: str, slug: str) -> str:
 
 
 def assemble_agent_file(slug: str, agent: dict[str, Any], body_text: str, *, provider: str = "yaml") -> str:
-    """Assemble the full ``~/.claude/agents/<slug>.md`` content.
+    """Assemble the full content of one agent file in this host's agents
+    directory (`jswarm.host.claude_code.ClaudeCodeHost.agents_dir`).
 
     Canonical layout: frontmatter, one blank line, the ROUTE tag, one blank
     line, the body — with the COM-86 reliability preamble, the COM-91

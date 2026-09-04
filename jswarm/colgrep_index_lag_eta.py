@@ -29,6 +29,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Literal, Mapping
 
+from jswarm.host import current as _current_host
+
 try:  # Fail-open import: the shared lifecycle classifier is pure, but if the
     # sibling module is ever unavailable/broken we must still degrade to
     # "no observation" rather than let an import error propagate.
@@ -991,7 +993,7 @@ def _read_session_title(repo_root: Path, session_id: str | None) -> str | None:
         if value:
             return value
     try:
-        registry_path = Path.home() / ".claude" / "session-name-registry.ndjson"
+        registry_path = _current_host().claude_home() / "session-name-registry.ndjson"
         if session_id and registry_path.is_file():
             title: str | None = None
             for line in registry_path.read_text(encoding="utf-8").splitlines():
