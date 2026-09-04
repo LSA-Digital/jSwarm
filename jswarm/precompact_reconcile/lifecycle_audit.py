@@ -1,10 +1,10 @@
-"""COM-167 R2–R5 — lifecycle drift audit for the reconcile-engine inputs.
+"""R2–R5 — lifecycle drift audit for the reconcile-engine inputs.
 
 The reconcile engine (migrate → rebuild → reconcile → count) is deliberately **fail-open at
 the /jPrecompact checkpoint**: a missing result doc, an un-seedable matrix, or a still-0/N
 count never blocks a checkpoint. That is correct *there* — a checkpoint must always succeed.
 But the same silence at a **lifecycle boundary** (closing a ticket, promoting to merge, a fleet
-health sweep) is how COM-176/COM-197 reached ``READY_FOR_MERGE``/``DONE`` showing ``0/19``
+health sweep) is how two tickets reached ``READY_FOR_MERGE``/``DONE`` showing ``0/19``
 UAT and ``0/12`` NFR with nobody alerted (retro 2026-06-22, "silent 0/N from un-gated inputs").
 
 This module is the **fail-loud-at-the-boundary** half of that design. ``audit_ticket`` gathers
@@ -28,13 +28,13 @@ tickets (BACKLOG / planning) as drift** — 0/N is EXPECTED before implementatio
 flagged ONLY when its ``lifecycle_stage`` is one where the counts SHOULD be non-zero
 (implementation+, all-AC-met, ready-for-merge, merged). R6 scouting proved 4 of 6 apparent
 "silent 0/N" tickets were merely pre-implementation, not drift. Stage is read from the
-canonical ``plan_status`` (COM-84) — never guessed.
+canonical ``plan_status`` — never guessed.
 
 Ids are handled with the **permissive reconcile grammar** (``rows.validate_index_rows`` /
 ``matrices.extract_*``), NOT the strict ``nfr-catalog/nfr_common._REF_RE``: R1 made the engine a
 deliberate permissive superset so legacy/bare ids (``NFR-4``) reconcile, and these gates must not
 re-introduce a false flag on them. Canonical grammar enforcement lives in nfr-catalog + the R2
-authoring lint, not in this audit (docs/standards/catalog-id-convention.md, COM-198).
+authoring lint, not in this audit (docs/standards/catalog-id-convention.md).
 
 Fail-open by construction: any unreadable/ambiguous input degrades to a non-blocking verdict
 (``unknown`` / ``ok``), never a spurious block. The gates block only on a *positively confirmed*
@@ -82,7 +82,7 @@ SHOULD_HAVE_COUNTS = "should_have_counts"
 TERMINAL_ABANDONED = "terminal_abandoned"
 UNKNOWN = "unknown"
 
-# Canonical plan_status (COM-84) → stage class. Pre-implementation (planning/lite) is
+# Canonical plan_status → stage class. Pre-implementation (planning/lite) is
 # expected-empty; abandoned terminals carry no evidence obligation; merged/ready/all-AC-met/
 # in-implementation SHOULD have counts. NULL is intentionally "unknown" (no info ⇒ never flag).
 _PRE_IMPL_CATS = frozenset({S._CAT_LITE_INIT, S._CAT_LITE_REFINE, S._CAT_DETAILED})
@@ -101,7 +101,7 @@ _STATUS_FALLBACK = {
 
 
 def classify_stage(plan_status: str | None, status: str | None = None) -> str:
-    """Map a ticket's canonical ``plan_status`` (COM-84) to a drift stage class.
+    """Map a ticket's canonical ``plan_status`` to a drift stage class.
 
     Falls back to the legacy merge-state ``status:`` only when ``plan_status`` is absent or
     unrecognized, and even then resolves ambiguous states (ACTIVE/BACKLOG) to ``unknown`` so a
@@ -268,9 +268,9 @@ def audit_plan_text(
     # Un-seedable detection via the pure migrate dry-run (no IO). A matrix with rows but no
     # slice index that the seeder would refuse surfaces here as a "*_skipped: unseedable-*".
     # SCOPED TO UAT + NFR: the regression A/C-to-Test matrix is a separate, optional dimension
-    # outside COM-167 R2–R5 (which is about the count-bearing uat_complete/nfr_complete silent
+    # outside R2–R5 (which is about the count-bearing uat_complete/nfr_complete silent
     # 0/N). It is noncanonical/absent on the vast majority of tickets, so including it would
-    # false-flag nearly the whole fleet — including the healthy canonical reference COM-194.
+    # false-flag nearly the whole fleet — including a healthy canonical reference ticket.
     unseedable: list[str] = []
     try:
         _p, _u, _n, _t, report = MG.migrate_text(
@@ -292,7 +292,7 @@ def audit_plan_text(
 
     # Missing result docs — meaningful only for an applicable+matrix-bearing dimension that is
     # NOT already fully green. A 100%-green matrix is its own evidence: the result-doc FILE may
-    # have been cleaned up post-merge (COM-194 has nfr 12/12 but no nfr-test.md on disk), and
+    # have been cleaned up post-merge (one ticket has nfr 12/12 but no nfr-test.md on disk), and
     # blocking promotion/close on that is a false positive. The gap that matters is a missing
     # doc on a dimension whose counts are still short — that is the M2 root (no doc → 0/N).
     missing: list[str] = []
@@ -341,7 +341,7 @@ def _compute_verdict(a: TicketAudit) -> tuple[str, list[str]]:
         notes.append("indeterminate lifecycle stage — not flagged (fail-open)")
         return "unknown", notes
     # should_have_counts — positively confirmed drift wins, in severity order.
-    # (1) Active silent 0/N is the headline drift (COM-176/COM-197).
+    # (1) Active silent 0/N is the headline drift.
     if a.at_0_of_N:
         notes.append("silent 0/N at a should-have-counts stage — counts never moved off 🔴")
         return "drift_zero_of_n", notes
@@ -621,7 +621,7 @@ def lint_checkin_reviews(
     ticket_dir: Path,
     repo_root: Path | str = ".",
 ) -> list[tuple[str, str]]:
-    """COM-300 F1 — validate every row of the ``## Check-In Reviews`` table in a ticket's
+    """F1 — validate every row of the ``## Check-In Reviews`` table in a ticket's
     ``.state.md`` (row shape per the canonical contract's "## Recording" section: trigger,
     causal surface, rounds burned, verdict, cut items, resulting scope delta, evidence
     pointer) against the ``checkin-review@1`` mandatory evidence-packet contract.
@@ -701,10 +701,10 @@ def lint_checkin_reviews(
     return problems
 
 
-# ── COM-300 T4.3 advisor design-contract acceptance lint ────────────────────
+# ── T4.3 advisor design-contract acceptance lint ────────────────────
 
 def lint_advisor_acceptance(*, ticket_dir: Path) -> list[tuple[str, str]]:
-    """COM-300 T4.3 — validate every ``advisor-acceptance-*.json`` artifact recorded in a
+    """T4.3 — validate every ``advisor-acceptance-*.json`` artifact recorded in a
     ticket's folder against the ``advisor-contract@1`` §3 acceptance contract
     (``advisor_acceptance.validate_acceptance`` — the real, unmodified validator, not a
     re-derived check). Discovers artifacts by glob in ``ticket_dir``; multiple artifacts are
@@ -788,7 +788,7 @@ def lint_checkin_evaluation_rows(
     return problems
 
 
-# ── COM-300 AC-1 necessity gate ─────────────────────────────────────────────
+# ── AC-1 necessity gate ─────────────────────────────────────────────
 
 _NECESSITY_HEADING = "## Necessity Gate"
 _NECESSITY_COLUMNS = (
@@ -802,14 +802,14 @@ _NECESSITY_VALID_VERDICTS = {"PROCEED", "MINOR RESCOPE", "RETHINK PREMISE"}
 _NECESSITY_DEFERRAL_MARKERS = ("none yet", "future ticket", "tbd", "planned", "not yet built")
 _NECESSITY_NA_RE = re.compile(r"^n/a\s*[-–—]\s*\S", re.IGNORECASE)
 _NECESSITY_BARE_NA_RE = re.compile(r"^n/a$", re.IGNORECASE)
-# COM-300 AC-7c — closed-choice "none-yet" auto-verdicts RETHINK PREMISE; distinct from the
+# AC-7c — closed-choice "none-yet" auto-verdicts RETHINK PREMISE; distinct from the
 # space-separated "none yet" deferral marker above.
 _NECESSITY_NONE_YET_RE = re.compile(r"^none-yet\b", re.IGNORECASE)
 
-# COM-300 AC-7 — presence-required-for-new-work cutover. The live event log holds 64 tickets
-# with a first 3.implementation.* transition; the two most recent are COM-307
-# (2026-07-27T03:33:48Z) and COM-300 itself (2026-07-27T05:12:03Z). 2026-07-28 grandfathers
-# every in-flight ticket and binds only genuinely new work.
+# Presence-required-for-new-work cutover. The live event log holds 64 tickets
+# with a first 3.implementation.* transition; the two most recent first
+# transitioned on 2026-07-27T03:33:48Z and 2026-07-27T05:12:03Z. 2026-07-28
+# grandfathers every in-flight ticket and binds only genuinely new work.
 _NECESSITY_PRESENCE_CUTOVER = "2026-07-28T00:00:00Z"
 
 
@@ -819,7 +819,7 @@ def _necessity_is_deferral(value: str) -> bool:
 
 
 def _necessity_presence_required(ticket: str | None, repo_root: Path) -> bool:
-    """COM-300 AC-7 — eligible for presence-required-for-new-work when ``ticket``'s EARLIEST
+    """AC-7 — eligible for presence-required-for-new-work when ``ticket``'s EARLIEST
     ``3.implementation.*`` transition in ``.jswarm/ops/plan-status-events.ndjson`` is on or
     after ``_NECESSITY_PRESENCE_CUTOVER``. Earliest, not latest, so in-flight work is
     grandfathered and a copied/incident-born plan can't evade it by a later transition.
@@ -970,15 +970,15 @@ def _validate_necessity_row(cells: list[str], row_num: int, repo_root: Path) -> 
 def lint_necessity_gate(
     plan_text: str, *, repo_root: Path | str = ".", ticket: str | None = None,
 ) -> list[tuple[str, str]]:
-    """COM-300 AC-1 — validate every row of a plan's ``## Necessity Gate`` table (contract:
-    ``.jswarm/plans/COM-300/designs/COM-300.design.ac1-necessity-gate.md``) against the four
+    """AC-1 — validate every row of a plan's ``## Necessity Gate`` table (contract:
+    ``.jswarm/plans/TICKET-XXX/designs/TICKET-XXX.design.ac1-necessity-gate.md``) against the four
     mechanical blocking rules: a RETHINK PREMISE verdict, an unresolved production_reader, a
     deferral value in the production_writer/production_reader/reaching_path trio, or a
     malformed row.
 
     Validate-if-present (NFR-300-1): fail-open on an ABSENT heading — a plan that authors no
     ``## Necessity Gate`` section costs nothing here, UNLESS ``ticket`` is supplied and is
-    presence-required-for-new-work eligible (COM-300 AC-7: its earliest
+    presence-required-for-new-work eligible (AC-7: its earliest
     ``3.implementation.*`` transition is on or after ``_NECESSITY_PRESENCE_CUTOVER``), in
     which case the absent heading itself is the single blocking problem. ``ticket=None``
     preserves prior validate-if-present behavior exactly. Fail-LOUD when the heading IS
@@ -1018,11 +1018,11 @@ def lint_necessity_gate(
 def lint_slices(ticket: str, repo_root: Path | str = ".") -> LintResult:
     """R2 IO wrapper — resolve a ticket's plan + slices, then lint. Fail-open: a missing plan
     yields ok=True (nothing to lint). Also validates any ``## Check-In Reviews`` table present
-    in the ticket's ``.state.md`` (COM-300 F1, ``lint_checkin_reviews``) — an absent table is
+    in the ticket's ``.state.md`` (F1, ``lint_checkin_reviews``) — an absent table is
     free; a present malformed row fails this lint loud. Also validates any ``## Necessity
-    Gate`` table present in the plan itself (COM-300 AC-1, ``lint_necessity_gate``). Also
+    Gate`` table present in the plan itself (AC-1, ``lint_necessity_gate``). Also
     validates any ``advisor-acceptance-*.json`` artifacts present in the ticket's folder
-    (COM-300 T4.3, ``lint_advisor_acceptance``) — validate-if-present, an absent artifact
+    (T4.3, ``lint_advisor_acceptance``) — validate-if-present, an absent artifact
     is free."""
     repo_root = Path(repo_root)
     plan_path, tdir, reason = _resolve_paths(ticket, repo_root)
@@ -1186,7 +1186,7 @@ def main(argv=None) -> int:
             _print_audit(audit)
         return 0
     except ImportError as exc:
-        # COM-300: deliberately NOT fail-open. Every module-scope import here resolves before
+        # Deliberately NOT fail-open. Every module-scope import here resolves before
         # main() runs, so an ImportError reaching this point can only come from a validator
         # imported at its seam — i.e. an artifact that REQUIRES that validator is present.
         # Returning 0 with a warning would silently skip an authored control, which is exactly
