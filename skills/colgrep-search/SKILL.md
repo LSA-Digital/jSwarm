@@ -8,18 +8,18 @@ user-invocable: false
 
 Semantic search powered by ColBERT embeddings. Code search uses local per-checkout OOB indexes; ARIS/content search uses the independent :3281 content plane.
 
-**ColGREP is a first-class global MCP server.** Tools are directly callable — no lazy-mcp proxy needed.
+**ColGREP is a first-class global MCP server.** Tools are directly callable; no lazy-mcp proxy needed.
 
 ## Mandatory Subagent Search Protocol
 
 > **Orchestrators:** Copy this block verbatim into every `task()` delegation prompt for codebase work.
 
 ```
-SEARCH PROTOCOL (MANDATORY — follow before touching any file):
+SEARCH PROTOCOL (MANDATORY, follow before touching any file):
 1. Use ColGREP FIRST for any codebase question:
     colgrep_search(query="<describe what you need>", cwd="<absolute checkout/worktree path>", top_k=10)
-2. Read at most 5 files total — use ColGREP results to decide which ones
-3. Do NOT use grep/find/glob for exploratory questions — only for exact pattern matching AFTER ColGREP
+2. Read at most 5 files total: use ColGREP results to decide which ones
+3. Do NOT use grep/find/glob for exploratory questions; only for exact pattern matching AFTER ColGREP
 4. Do NOT enumerate directories or read files speculatively
 5. Development discovery (informational only): colgrep_list_dev_indices()
 ```
@@ -56,7 +56,7 @@ colgrep_search(query="<what you need>", cwd="<absolute checkout/worktree path>",
   use built-in `Grep` for exact matching. Results never leak outside the scope.
 - Queries never trigger indexing (`--no-update` always).
 - The response status line ends with index health: `index fresh`, or when
-  behind, `N unindexed, eta ~Ts` (count + ETA only — never a file list). A
+  behind, `N unindexed, eta ~Ts` (count + ETA only, never a file list). A
   `WARNING ... watcher not running` token means background refresh is down;
   results still return but may be outdated.
 
@@ -88,7 +88,7 @@ Discover available content indices with document counts. Call with no arguments.
 
 ### `colgrep_get_content_catalog`
 
-Returns the master catalog describing what each content index contains. **Call this first** before searching content — it tells you which index answers which questions.
+Returns the master catalog describing what each content index contains. **Call this first** before searching content: it tells you which index answers which questions.
 
 ## Usage Examples
 
@@ -138,14 +138,14 @@ colgrep_list_content_indices()
 
 | Method | Query | Results |
 |--------|-------|---------|
-| `grep("role assignment")` | Exact string match | **0 matches** — string doesn't exist |
+| `grep("role assignment")` | Exact string match | **0 matches**, string doesn't exist |
 | `colgrep_search("role-based access control")` | Semantic intent | **5+ functions** found by PURPOSE |
 
 ## Key Rules
 
 1. **Use `colgrep_list_dev_indices`** only for informational development discovery; search uses `cwd`
 2. **Increase `top_k`** when exploring (20-30 results)
-3. **NEVER run `colgrep` via Bash** — triggers expensive index rebuilds. ALWAYS use the MCP tool.
+3. **NEVER run `colgrep` via Bash**: triggers expensive index rebuilds. ALWAYS use the MCP tool.
 4. For exact text matching, use the built-in `Grep` tool instead
 
 ## CLI Fallback (Edge Cases Only)

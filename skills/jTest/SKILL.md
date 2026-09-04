@@ -5,15 +5,15 @@ description: "Symlink to the global /jTest command: single procedural entrypoint
 
 # /jTest - Testing Procedure Entry Point
 
-Use `/jTest` when you need to choose or execute a testing workflow. This is the single procedural entrypoint for the whole testing capability family — strategy, UAT, E2E, regression (creation, capture-replay, maintenance), backend-only proof, and diagnosis — so `CLAUDE.md` / `AGENTS.md` files can stay lean and point here.
+Use `/jTest` when you need to choose or execute a testing workflow. This is the single procedural entrypoint for the whole testing capability family (strategy, UAT, E2E, regression (creation, capture-replay, maintenance), backend-only proof, and diagnosis), so `CLAUDE.md` / `AGENTS.md` files can stay lean and point here.
 
 Sub-files (loaded per selected option, after `execution-protocol.md`):
 
-- `execution-protocol.md` — universal context-load/handoff/follow-along rules for every option
-- `uat.md` — options 2-4: Live Show scripts, jQATester execution, owner UAT invitation rounds
-- `regression.md` — options 5-8: E2E regression creation/promotion, deterministic LLM-replay capture/refresh, existing verification
-- `strategy-and-proof.md` — options 1, 9: testing strategy, backend/API/CLI-only proof
-- `diagnose.md` — option 10: diagnose a failed or flaky testing run
+- `execution-protocol.md`: universal context-load/handoff/follow-along rules for every option
+- `uat.md`: options 2-4, Live Show scripts, jQATester execution, owner UAT invitation rounds
+- `regression.md`: options 5-8, E2E regression creation/promotion, deterministic LLM-replay capture/refresh, existing verification
+- `strategy-and-proof.md`: options 1, 9, testing strategy, backend/API/CLI-only proof
+- `diagnose.md`: option 10, diagnose a failed or flaky testing run
 
 ## Global Command Project Localization
 
@@ -37,7 +37,7 @@ If invoked with `--localization-smoke`, do only the localization pass, print the
 
 ## MASTER INVARIANT
 
-Before executing ANY selected option: read and obey `execution-protocol.md`, THEN read the option's sub-file. The universal context-load/handoff/follow-along rules in `execution-protocol.md` bind every option (1-10) — strategy and proof, and diagnose included — not only UAT/regression. Sub-files may ADD requirements; none may skip the protocol.
+Before executing ANY selected option: read and obey `execution-protocol.md`, THEN read the option's sub-file. The universal context-load/handoff/follow-along rules in `execution-protocol.md` bind every option (1-10), strategy and proof, and diagnose included, not only UAT/regression. Sub-files may ADD requirements; none may skip the protocol.
 
 Before choosing a UAT verification instrument, apply the [instrument selection behavior lock](uat.md#instrument-selection-behavior-lock).
 
@@ -68,7 +68,7 @@ Do not continue until the option is clear. If a ticket is involved, capture the 
 
 ## Browser tool guard context (BLOCKING)
 
-Before using any browser automation driver for testing — Playwright MCP, Chrome DevTools MCP, headed Playwright, or project wrapper browser execution — create/update this marker:
+Before using any browser automation driver for testing (Playwright MCP, Chrome DevTools MCP, headed Playwright, or project wrapper browser execution), create/update this marker:
 
 ```json
 {

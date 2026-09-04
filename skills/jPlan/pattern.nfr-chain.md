@@ -4,9 +4,9 @@
 
 ## Header lines
 
-**NFR catalog:** applicable | N/A — <reason>
-**Automated NFR:** yes | no — <reason>
-**Per-Phase NFR Gate:** applicable | N/A — <reason>
+**NFR catalog:** applicable | N/A (<reason>)
+**Automated NFR:** yes | no (<reason>)
+**Per-Phase NFR Gate:** applicable | N/A (<reason>)
 
 ## Plan sections
 
@@ -16,14 +16,14 @@
 
 | A/C | NFR ref (full descriptor) | Dimension (tags) | Validation recipe / Evidence | Threshold / Pass criteria | Status |
 | --- | ------------------------- | ---------------- | ---------------------------- | ------------------------- | ------ |
-| A/C 1 | **NFR-[n]-[DESCRIPTOR]** | reliability / security / performance / maintainability | [test, review, metric, or evidence path] | [specific threshold or `N/A — reason`] | 🔴 Backlogged |
+| A/C 1 | **NFR-[n]-[DESCRIPTOR]** | reliability / security / performance / maintainability | [test, review, metric, or evidence path] | [specific threshold or `N/A (reason)`] | 🔴 Backlogged |
 
 ### NFR Validation Strategy
 
 **NFR status (derived):** 0/1
-**NFR catalog:** applicable | N/A — <reason>
-**Automated NFR:** yes | no — <reason>
-**Per-Phase NFR Gate:** applicable | N/A — <reason>
+**NFR catalog:** applicable | N/A (<reason>)
+**Automated NFR:** yes | no (<reason>)
+**Per-Phase NFR Gate:** applicable | N/A (<reason>)
 
 **Per-job / per-Pattern NFR weighting (AC-14):**
 
