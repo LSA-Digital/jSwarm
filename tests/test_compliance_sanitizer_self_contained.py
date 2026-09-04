@@ -1,5 +1,5 @@
-"""R6a follow-up: `compliance.sanitizer` must import and redact correctly
-without the COM-112 `substrate` dependency, which is enterprise-only
+"""Follow-up: `compliance.sanitizer` must import and redact correctly
+without the `substrate` dependency, which is enterprise-only
 (governance/reporting; see closure-config.yaml's compliance/substrate
 ent_marker) and deliberately not part of this repository. Trimmed the
 substrate *import* out rather than pulling in the substrate package or
@@ -28,8 +28,8 @@ def test_secret_patterns_tuple_carries_the_three_restored_detectors():
 
 
 def test_bare_email_is_detected_and_redacted():
-    assert contains_sensitive("contact keith@example.com for access") is True
-    assert sanitize("contact keith@example.com for access") == "contact [REDACTED] for access"
+    assert contains_sensitive("contact alex@example.com for access") is True
+    assert sanitize("contact alex@example.com for access") == "contact [REDACTED] for access"
 
 
 def test_sk_prefixed_key_is_detected_and_redacted():
