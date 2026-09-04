@@ -1,7 +1,7 @@
 """CLI entry point for ``python -m jswarm.installer.jsetup``.
 
 Guided day-0 front door for a fresh JarviSWARM clone: inspects the
-repository-local ``.venv`` and dependency-lock state and reports whether
+repository-local ``.venv`` and dependency-source state and reports whether
 the environment is healthy, using the checks in
 :mod:`jswarm.installer.jsetup.bootstrap`.
 
@@ -9,7 +9,7 @@ Per the safety contract in ``skills/jSetup/SKILL.md``, the default
 invocation (no args, ``--help``, or the explicit ``status`` subcommand) is
 strictly read-only: it only calls :func:`bootstrap.check_bootstrap` and
 never writes to disk. The one state-changing action -- creating or
-repairing ``.venv`` and installing the locked dependencies -- lives behind
+repairing ``.venv`` and installing the required dependencies -- lives behind
 the ``repair`` subcommand and requires an explicit ``--yes`` flag; without
 it, ``repair`` prints the same read-only preview as ``status``.
 """
@@ -43,8 +43,10 @@ def _print_report(report: BootstrapReport) -> None:
     else:
         print("jSetup: environment is NOT healthy (see FAIL lines above).")
         print(
-            "Next: .venv/bin/python -m jswarm.installer.jsetup repair --yes"
-            "   (mutates: creates/repairs .venv and installs locked deps)"
+            'Next: PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" '
+            '"${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" '
+            "-m jswarm.installer.jsetup repair --yes"
+            "   (mutates: creates/repairs .venv and installs deps)"
         )
 
 
@@ -65,8 +67,9 @@ def _cmd_repair(args: argparse.Namespace) -> int:
     if not args.yes:
         preview = check_bootstrap(_REPO_ROOT, dev=args.dev)
         _emit(preview, as_json=args.json)
-        print()
-        print("repair: read-only preview only, nothing was changed. Re-run with --yes to apply.")
+        if not args.json:
+            print()
+            print("repair: read-only preview only, nothing was changed. Re-run with --yes to apply.")
         return 0 if preview.healthy else 1
     report = repair_bootstrap(_REPO_ROOT, dev=args.dev, replace_invalid=args.replace_invalid)
     _emit(report, as_json=args.json)
@@ -89,7 +92,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     repair = sub.add_parser(
         "repair",
-        help="create/repair .venv and install locked deps (mutates; requires --yes)",
+        help="create/repair .venv and install required deps (mutates; requires --yes)",
     )
     repair.add_argument("--yes", action="store_true", help="confirm the mutation; without it this is a read-only preview")
     repair.add_argument(

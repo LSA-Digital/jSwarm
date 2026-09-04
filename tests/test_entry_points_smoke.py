@@ -31,12 +31,31 @@ fixed here:
    `${JSWARM_HOME:-$HOME/dev/jswarm}`-parameterized paths -- the form this
    repo uses everywhere to declare "this must work from an arbitrary
    adopted-project directory" -- is now run from a fresh `tmp_path`
-   standing in for that adopted project instead. A command that is
-   genuinely install-time (bare `.venv/bin/python`, no `${JSWARM_HOME...}`
-   token anywhere in the statement -- e.g. `/jSetup`, meant to run from
-   inside a freshly-cloned jSwarm itself, before any project has been
-   adopted) keeps the original `cwd=REPO_ROOT`; that is where its own docs
-   say to run it, so testing it there is not a weaker check.
+   standing in for that adopted project instead.
+
+   `/jSetup` was originally carved out of that rule here, on the reasoning
+   that a bare `.venv/bin/python -m jswarm.installer.jsetup` (no
+   `${JSWARM_HOME...}` token) is "genuinely install-time" and meant to run
+   from inside a freshly-cloned jSwarm, before any project has been
+   adopted -- so testing it with `cwd=REPO_ROOT` was treated as no weaker
+   a check than testing it anywhere else. That reasoning was wrong: the
+   product's own `install.sh adopt` ends by telling the user to run
+   `/jSetup` next, *from the adopted project it just created* (see
+   `jswarm/installer/adopt.py`'s "Next: /jSetup" message), which has no
+   `.venv` of its own at all. A bare-relative `/jSetup` invocation is dead
+   on arrival there (`zsh: no such file or directory: .venv/bin/python`),
+   and this test's `cwd=REPO_ROOT` carve-out is exactly what let that ship.
+   `/jSetup`'s own command now carries the `${JSWARM_HOME...}` token like
+   every other lifecycle command, so it is picked up by the general rule
+   above on its own merits -- but because doc phrasing is what drives that
+   rule, a future edit that quietly strips the token back out would make
+   this test silently forgive the same regression a second time. Module
+   `jswarm.installer.jsetup` is therefore also listed in
+   `_MUST_RESOLVE_FROM_ADOPTED_PROJECT` below, which keeps it pinned to
+   `cwd=tmp_path` regardless of what the doc text says, so that regression
+   cannot recur unnoticed. No other command in this repo is named as a
+   legitimate `cwd=REPO_ROOT` exception; the general rule above governs
+   everything else.
 2. **Wrong environment.** A `${JSWARM_HOME...}`-parameterized `-m jswarm.X`
    invocation needs `PYTHONPATH` naming the clone (`-m` puts cwd, not the
    script's own directory, on `sys.path[0]`); the correct spelling already
@@ -144,6 +163,15 @@ _JSWARM_HOME_RE = re.compile(r"\$\{JSWARM_HOME:-\$HOME/dev/jswarm\}")
 # PYTHONPATH it needs to resolve the package from an arbitrary cwd.
 _PYTHONPATH_RE = re.compile(r'PYTHONPATH="\$\{JSWARM_HOME:-\$HOME/dev/jswarm\}"')
 
+# Entry points this test pins to cwd=tmp_path (adopted-project stand-in)
+# regardless of whether the doc text carries the ${JSWARM_HOME...} token,
+# so a future edit cannot silently un-fix a known regression by dropping
+# the token back out of the doc (see module docstring: this is exactly how
+# /jSetup's bare-relative form went undetected before). Add an entry point
+# here only once a real bug proved it belongs -- this is a regression
+# guard for known history, not a place to pre-emptively declare intent.
+_MUST_RESOLVE_FROM_ADOPTED_PROJECT = {"module:jswarm.installer.jsetup"}
+
 # Python's own import/exec machinery talking, before the target module's own
 # code (argparse included) ever got a chance to run.
 _DEAD_ON_ARRIVAL_SIGNATURES = (
@@ -187,9 +215,11 @@ class Invocation:
                 # forgot PYTHONPATH -- a real user's shell would not have it.
                 env.pop("PYTHONPATH", None)
         else:
-            # Bare form: this repo's own convention for "run me from inside
-            # the jSwarm clone itself" (e.g. /jSetup, pre-adoption). Same cwd
-            # this test always used for these -- not weakened.
+            # Bare form, and not in _MUST_RESOLVE_FROM_ADOPTED_PROJECT: no
+            # command in this repo is actually documented to require this
+            # cwd (see module docstring); this is the historical fallback,
+            # preserved so an unnamed future bare invocation still gets a
+            # test run rather than being skipped outright.
             cwd = REPO_ROOT
 
         if kind == "module":
@@ -257,7 +287,11 @@ def _extract_invocations() -> list[Invocation]:
         # Strict wins for fail_open, same as before: a target seen even once
         # without the marker stays strict.
         fail_open = all(flags["fail_open"])
-        parameterized = any(flags["parameterized"])
+        # `or raw in _MUST_RESOLVE_FROM_ADOPTED_PROJECT` is the regression
+        # guard: for a known-history entry point this is True even if every
+        # occurrence in the docs happens to lack the ${JSWARM_HOME...}
+        # token, so reverting the doc text alone cannot resurrect the bug.
+        parameterized = any(flags["parameterized"]) or raw in _MUST_RESOLVE_FROM_ADOPTED_PROJECT
         # Strict wins here too: PYTHONPATH must be set on every parameterized
         # occurrence, or a real user hitting the unset one would still fail.
         pythonpath_set = all(flags["pythonpath_set"]) if any(flags["pythonpath_set"]) else False

@@ -15,5 +15,5 @@ description: Guided day-0 front door for a fresh JSWARM (JarviSWARM) clone.
 Guided day-0 front door for a fresh JSWARM (JarviSWARM) clone.
 
 ```bash
-.venv/bin/python -m jswarm.installer.jsetup "$@"
+PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.installer.jsetup "$@"
 ```

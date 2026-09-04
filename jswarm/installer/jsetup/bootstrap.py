@@ -18,7 +18,6 @@ from jswarm.installer.preflight import (
 Runner = Callable[..., object]
 
 _MIN_PYTHON = (3, 11)
-_PIN_RE = re.compile(r"^([A-Za-z0-9_.-]+)(?:\[[A-Za-z0-9_,.-]+\])?==([^\s\\]+)(?:\s*\\)?$")
 _SOURCE_REQ_RE = re.compile(r"^([A-Za-z0-9_.-]+)(?:\[[A-Za-z0-9_,.-]+\])?\s*(?:===|~=|==|!=|<=|>=|<|>)")
 _VERSION_RE = re.compile(r"(?:Python\s+)?(\d+)\.(\d+)(?:\.(\d+))?")
 _DIRECT_IMPORTS: dict[str, str | None] = {
@@ -43,10 +42,8 @@ class BootstrapError(Exception):
 class DepSourceStatus:
     repo_root: str
     has_requirements: bool
-    has_lock: bool
     dev: bool
     source_path: str | None
-    lock_path: str | None
     present: bool
 
 
@@ -59,12 +56,6 @@ class VenvIdentity:
     version: str | None
     supported: bool
     valid: bool
-
-
-@dataclass(frozen=True)
-class LockSourceConsistency:
-    consistent: bool
-    reasons: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -114,25 +105,28 @@ def _as_repo_root(repo_root: Path) -> Path:
     return Path(repo_root).resolve()
 
 
-def _dep_paths(repo_root: Path, *, dev: bool) -> tuple[Path, Path]:
+def _dep_paths(repo_root: Path, *, dev: bool) -> Path:
+    # No lock file: this repo ships a minimal requirements.txt and nothing
+    # else has ever produced or consumed a requirements.lock. install.sh
+    # builds the venv directly from requirements.txt
+    # (`.venv/bin/python -m pip install -q -r requirements.txt`), so jsetup
+    # checks health against that same, actually-installed-from source of
+    # truth instead of a file nothing ever creates.
     if dev:
-        return repo_root / "requirements-dev.txt", repo_root / "requirements-dev.lock"
-    return repo_root / "requirements.txt", repo_root / "requirements.lock"
+        return repo_root / "requirements-dev.txt"
+    return repo_root / "requirements.txt"
 
 
 def dep_source_status(repo_root: Path, *, dev: bool = False) -> DepSourceStatus:
     root = _as_repo_root(repo_root)
-    source_path, lock_path = _dep_paths(root, dev=dev)
+    source_path = _dep_paths(root, dev=dev)
     has_requirements = source_path.is_file()
-    has_lock = lock_path.is_file()
     return DepSourceStatus(
         repo_root=str(root),
         has_requirements=has_requirements,
-        has_lock=has_lock,
         dev=dev,
         source_path=str(source_path) if has_requirements else None,
-        lock_path=str(lock_path) if has_lock else None,
-        present=has_requirements and has_lock,
+        present=has_requirements,
     )
 
 
@@ -232,58 +226,6 @@ def _source_requirements(source_path: Path) -> dict[str, str]:
     return requirements
 
 
-def _locked_versions(lock_path: Path) -> dict[str, str]:
-    versions: dict[str, str] = {}
-    if not lock_path.is_file():
-        return versions
-    for raw_line in lock_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or line.startswith("-r ") or line.startswith("-c ") or line.startswith("--hash="):
-            continue
-        match = _PIN_RE.match(line)
-        if match:
-            name = _normalize_dist_name(match.group(1))
-            versions[name] = match.group(2).rstrip("\\")
-    return versions
-
-
-def lock_source_consistency(repo_root: Path, *, dev: bool) -> LockSourceConsistency:
-    root = _as_repo_root(repo_root)
-    source_path, lock_path = _dep_paths(root, dev=dev)
-    reasons: list[str] = []
-    source_requirements = _source_requirements(source_path)
-    pinned: dict[str, str] = {}
-
-    if lock_path.is_file():
-        for line_number, raw_line in enumerate(lock_path.read_text(encoding="utf-8").splitlines(), start=1):
-            line = raw_line.strip()
-            if not line or line.startswith("#") or line.startswith("-r ") or line.startswith("-c ") or line.startswith("--hash="):
-                continue
-            match = _PIN_RE.match(line)
-            if match:
-                pinned[_normalize_dist_name(match.group(1))] = match.group(2).rstrip("\\")
-                continue
-            reasons.append(f"malformed or unpinned lock line {line_number}: {raw_line}")
-
-    if source_requirements and not pinned:
-        reasons.append("lock has zero pinned distributions while dependency source has requirements")
-
-    missing = sorted(name for name in source_requirements if name not in pinned)
-    if missing:
-        reasons.append("direct source requirements missing from lock: " + ", ".join(missing))
-
-    return LockSourceConsistency(consistent=not reasons, reasons=tuple(reasons))
-
-
-def _lock_has_hashes(lock_path: Path) -> bool:
-    if not lock_path.is_file():
-        return False
-    for raw_line in lock_path.read_text(encoding="utf-8").splitlines():
-        if "--hash=" in raw_line:
-            return True
-    return False
-
-
 def _direct_import_map(*, dev: bool) -> dict[str, str | None]:
     imports = dict(_DIRECT_IMPORTS)
     if dev:
@@ -320,12 +262,12 @@ def _hash_file(path: Path) -> str | None:
 def _write_state_marker(repo_root: Path, *, dev: bool) -> None:
     venv_python = _venv_python(repo_root)
     marker = venv_python.parent.parent / "jarviswarm-bootstrap.json"
-    _, lock_path = _dep_paths(repo_root, dev=dev)
+    source_path = _dep_paths(repo_root, dev=dev)
     state = {
         "python": str(venv_python),
         "dev": dev,
-        "lock_path": str(lock_path),
-        "lock_sha256": _hash_file(lock_path),
+        "source_path": str(source_path),
+        "source_sha256": _hash_file(source_path),
     }
     marker.write_text(json.dumps(state, sort_keys=True, indent=2) + "\n", encoding="utf-8")
 
@@ -335,7 +277,7 @@ def _verify_with_steps(repo_root: Path, *, dev: bool, runner: Runner) -> tuple[b
     venv_python = _venv_python(repo_root)
     status = dep_source_status(repo_root, dev=dev)
     if not status.present:
-        steps.append(_step("dep-source", "fail", "requirements source and lock are required"))
+        steps.append(_step("dep-source", "fail", "requirements source is required"))
         return False, tuple(steps)
 
     identity = venv_identity(repo_root, runner=runner)
@@ -351,33 +293,31 @@ def _verify_with_steps(repo_root: Path, *, dev: bool, runner: Runner) -> tuple[b
         return False, tuple(steps)
     steps.append(_step("venv", "ok", f"{identity.path} ({identity.version})"))
 
-    consistency = lock_source_consistency(repo_root, dev=dev)
-    if not consistency.consistent:
-        steps.append(_step("lock-source", "fail", "; ".join(consistency.reasons)))
-        return False, tuple(steps)
-    steps.append(_step("lock-source", "ok", "dependency source and lock are consistent"))
-
-    _, lock_path = _dep_paths(repo_root, dev=dev)
-    locked = _locked_versions(lock_path)
+    # No lock file to reconcile against: requirements.txt (what install.sh
+    # actually installs from) is the only source of truth. Health here means
+    # "every direct dependency it names is installed and importable in this
+    # venv" -- the same thing `pip install -r requirements.txt` already
+    # enforced at install time, re-checked so a later corruption is caught.
+    source_path = _dep_paths(repo_root, dev=dev)
+    source_requirements = _source_requirements(source_path)
     relevant_imports = {
-        name: import_name for name, import_name in _direct_import_map(dev=dev).items() if _normalize_dist_name(name) in locked
+        name: import_name
+        for name, import_name in _direct_import_map(dev=dev).items()
+        if _normalize_dist_name(name) in source_requirements
     }
     probe_script = """
 import importlib
 import importlib.metadata
 import json
 import sys
-locked = json.loads(sys.argv[1])
+requirements = json.loads(sys.argv[1])
 imports = json.loads(sys.argv[2])
 missing = []
-for name, expected in locked.items():
+for name in requirements:
     try:
-        installed = importlib.metadata.version(name)
+        importlib.metadata.version(name)
     except importlib.metadata.PackageNotFoundError:
-        missing.append(f"{name}: missing")
-        continue
-    if installed != expected:
-        missing.append(f"{name}: {installed} != {expected}")
+        missing.append(f"{name}: not installed")
 for dist_name, import_name in imports.items():
     if import_name is None:
         continue
@@ -388,7 +328,7 @@ for dist_name, import_name in imports.items():
 if missing:
     print("; ".join(missing))
     raise SystemExit(1)
-print("locked distributions ok")
+print("required distributions ok")
 """.strip()
     probe = _run(
         runner,
@@ -396,17 +336,17 @@ print("locked distributions ok")
             str(venv_python),
             "-c",
             probe_script,
-            json.dumps(locked, sort_keys=True),
+            json.dumps(sorted(source_requirements), sort_keys=True),
             json.dumps(relevant_imports, sort_keys=True),
         ),
         cwd=repo_root,
         timeout=30,
     )
     if _returncode(probe) != 0:
-        detail = (_stdout(probe) or _stderr(probe)).strip() or "locked dependency probe failed"
+        detail = (_stdout(probe) or _stderr(probe)).strip() or "required dependency probe failed"
         steps.append(_step("deps", "fail", detail))
         return False, tuple(steps)
-    steps.append(_step("deps", "ok", _stdout(probe).strip() or "locked distributions ok"))
+    steps.append(_step("deps", "ok", _stdout(probe).strip() or "required distributions ok"))
 
     pip_check = _run(runner, (str(venv_python), "-m", "pip", "check"), cwd=repo_root, timeout=30)
     if _returncode(pip_check) != 0:
@@ -450,18 +390,16 @@ def check_bootstrap(repo_root: Path, *, dev: bool = False, runner: Runner | None
     active_runner = runner or _default_runner
     status = dep_source_status(root, dev=dev)
     identity = venv_identity(root, runner=active_runner)
-    consistency = lock_source_consistency(root, dev=dev)
     steps: list[dict[str, str]] = [
         _step("dep-source", "ok" if status.present else "fail", "dependency source present" if status.present else "dependency source missing"),
         _step("venv", "ok" if identity.valid else "fail", str(_venv_python(root))),
-        _step("lock-source", "ok" if consistency.consistent else "fail", "dependency source and lock are consistent" if consistency.consistent else "; ".join(consistency.reasons)),
     ]
     deps_installed = False
-    if identity.valid and status.present and consistency.consistent:
+    if identity.valid and status.present:
         deps_installed, verify_steps = _verify_with_steps(root, dev=dev, runner=active_runner)
         steps.extend(verify_steps)
     else:
-        steps.append(_step("deps", "skip", "dependency verification requires valid venv and consistent lock"))
+        steps.append(_step("deps", "skip", "dependency verification requires a valid venv and a dependency source"))
     return BootstrapReport(
         repo_root=str(root),
         action="check",
@@ -470,7 +408,7 @@ def check_bootstrap(repo_root: Path, *, dev: bool = False, runner: Runner | None
         interpreter_selected=None,
         dep_source=status,
         deps_installed=deps_installed,
-        healthy=identity.valid and status.present and consistency.consistent and deps_installed,
+        healthy=identity.valid and status.present and deps_installed,
         mutated=False,
         steps=tuple(steps),
     )
@@ -501,13 +439,9 @@ def repair_bootstrap(
     status = dep_source_status(root, dev=dev)
     venv_python = _venv_python(root)
     identity = venv_identity(root, runner=active_runner)
-    consistency = lock_source_consistency(root, dev=dev)
     steps: list[dict[str, str]] = []
     if not status.present:
         steps.append(_step("dep-source", "fail", "dependency source missing"))
-        return BootstrapReport(str(root), "repair", identity.valid, identity.path if identity.valid else None, None, status, False, False, False, tuple(steps))
-    if not consistency.consistent:
-        steps.append(_step("lock-source", "fail", "; ".join(consistency.reasons)))
         return BootstrapReport(str(root), "repair", identity.valid, identity.path if identity.valid else None, None, status, False, False, False, tuple(steps))
 
     selected: str | None = None
@@ -543,24 +477,20 @@ def repair_bootstrap(
         deps_installed, verify_steps = _verify_with_steps(root, dev=dev, runner=active_runner)
     steps.extend(verify_steps)
     if not deps_installed:
-        _, lock_path = _dep_paths(root, dev=dev)
-        install_cmd: tuple[str, ...]
-        if _lock_has_hashes(lock_path):
-            install_cmd = (str(venv_python), "-m", "pip", "install", "--require-hashes", "-r", str(lock_path))
-        else:
-            install_cmd = (str(venv_python), "-m", "pip", "install", "-r", str(lock_path))
+        source_path = _dep_paths(root, dev=dev)
+        install_cmd = (str(venv_python), "-m", "pip", "install", "-r", str(source_path))
         install = _run(active_runner, install_cmd, cwd=root, timeout=300)
         if _returncode(install) != 0:
             detail = (_stdout(install) or _stderr(install)).strip() or "pip install failed"
             steps.append(_step("pip-install", "fail", detail))
             return BootstrapReport(str(root), "repair", venv_python.is_file(), str(venv_python) if venv_python.is_file() else None, selected, status, False, False, True, tuple(steps))
         mutated = True
-        steps.append(_step("pip-install", "ok", str(lock_path)))
+        steps.append(_step("pip-install", "ok", str(source_path)))
         deps_installed, verify_steps = _verify_with_steps(root, dev=dev, runner=active_runner)
         steps.extend(verify_steps)
 
     final_identity = venv_identity(root, runner=active_runner)
-    healthy = final_identity.valid and status.present and consistency.consistent and deps_installed
+    healthy = final_identity.valid and status.present and deps_installed
     if healthy and mutated:
         try:
             _write_state_marker(root, dev=dev)
@@ -586,9 +516,8 @@ def verify_env(repo_root: Path, *, dev: bool = False, runner: Runner | None = No
     active_runner = runner or _default_runner
     status = dep_source_status(root, dev=dev)
     identity = venv_identity(root, runner=active_runner)
-    consistency = lock_source_consistency(root, dev=dev)
     deps_installed, steps = _verify_with_steps(root, dev=dev, runner=active_runner)
-    healthy = identity.valid and status.present and consistency.consistent and deps_installed
+    healthy = identity.valid and status.present and deps_installed
     return BootstrapReport(
         repo_root=str(root),
         action="check",
