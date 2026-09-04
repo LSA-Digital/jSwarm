@@ -45,7 +45,7 @@ you.
 |---|---|---|
 | `/jSetup` | `/jsetup` | Doctor and guided setup from inside the agent session |
 | `/jPlan <work-item>` | same | Plan the work item, write the spec |
-| `/jGo` | same | Build it |
+| `/jGo` | same | Build it (creates `feat/<id>` first, when you're still on the default branch) |
 | `/jTest` | `/test` | Automated tests, level 1, and the agent smoke walk, level 2 |
 | `/jUAT` | `/uat` | Issue a round to the portal, author scenarios |
 | `/jFix <problem>` | `/fix` | Diagnose, Contract, Repair, Prove |

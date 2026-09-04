@@ -48,10 +48,10 @@ plan requires confirmation before re-running.
 
 ## Lifecycle router
 
-Keep the public ordering: admission before `started`; accepted phase before
-`phase-advanced`; final applicable gates, then `implement-gate`, ready status,
-and the `ready-for-merge` event. Preserve lifecycle stage `implement` and the
-existing `implement_progress_contract` dashboard contract.
+Keep the public ordering: admission, then the branch, then task work; accepted
+phase before the next phase; final applicable gates, then `implement-gate`
+and the ready status. Preserve lifecycle stage `implement` (the `--audit-stage
+implement` grammar `update-ticket` owns; see `completion.md`).
 
 Load **only one companion at a time**, at its seam:
 

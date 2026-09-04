@@ -98,11 +98,18 @@ continues; nothing about closing the work item locally depends on them.
 /jMerge
 ```
 
-Fetches, rebases (or merges, per your project's `merge.strategy`), pushes,
-opens a pull request when one is configured, confirms `/jClose` already ran,
-and deletes the branch. `describe()` on the tracker boundary reports
-`configured: false`, so the only record of closure is local:
-`close.json` and the retro.
+Rebases (or merges, per your project's `merge.strategy`), lands the branch on
+your target branch, opens a pull request when one is configured, confirms
+`/jClose` already ran, and deletes the branch. `describe()` on the tracker
+boundary reports `configured: false`, so the only record of closure is
+local: `close.json` and the retro.
+
+A project this tutorial adopted has no `origin` remote either -- `adopt`
+never creates one. `/jMerge` detects that and integrates locally: no fetch,
+no push, no pull request. Everything above still happens; only the parts
+that genuinely need a remote (pushing, opening a PR, deleting the remote
+branch) are skipped, each with a one-line reason, the same way a missing
+tracker is reported.
 
 ## What is different from the Jira path
 

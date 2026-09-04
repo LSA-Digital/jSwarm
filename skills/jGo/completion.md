@@ -22,10 +22,9 @@ Use this companion only after every phase is accepted.
      5.closed.ready_for_merge --actor /jGo --proof-source verification-complete
    ```
 
-4. After final gates, `implement-gate`, and the ready status record succeed,
-   call the existing `ready-for-merge` dashboard event through the established
-   `implement_progress_contract` owner contract. Do not create a receipt schema
-   or write legacy dashboard machine cells.
+## Extension steps
+
+Run `PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.ext jGo`. For each path printed, in order, read the file and carry out its steps here before continuing. If nothing is printed, continue. This is the hook point for anything wanting to observe or record completion (a dashboard, a metrics sink) without this repo hardcoding an integration it does not ship.
 
 Report concise completion state. `/jGo` builds and stops here. **Next:** run
 `/jTest` in this project's agent session.

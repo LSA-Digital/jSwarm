@@ -185,6 +185,53 @@ def find_unresolved_slash_commands(root: Path, known: set[str]) -> list[str]:
     return broken
 
 
+PY_SYMBOL_REF_RE = re.compile(r"`([\w./-]+\.py)::([A-Za-z_][A-Za-z0-9_]*)`")
+_SYMBOL_DEF_RE_TEMPLATE = r"^(?:async\s+def|def|class)\s+{name}\b|^{name}\s*="
+
+
+def find_dangling_py_symbol_refs(root: Path, repo_root: Path) -> list[str]:
+    """Backtick-quoted `` `path/to/file.py::symbol_name` `` references (this
+    repo's own shape for "the exact function a step must call", e.g.
+    `` `jswarm/uat_trigger.py::evaluate_phase_exit` `` in
+    skills/jGo/phase-exit.md) whose file is missing, or whose file exists
+    but never defines that symbol.
+
+    A guard for "no lifecycle skill references a Python module or entry
+    point absent from this repository": `implement_progress_contract`
+    (skills/jGo/{SKILL,session,phase-exit,completion}.md, removed in the
+    same change that added this check -- see
+    test_known_dangling_references_stay_fixed) was never written in this
+    `file.py::symbol` shape, which is exactly why nothing caught it: it was
+    a bare, unformatted word claiming to be "the existing ... contract",
+    not a citation of a specific file and symbol. A fully generic bare
+    "any snake_case backtick word must be a real Python symbol" check was
+    considered and rejected -- skills/ is full of legitimate bare
+    snake_case backtick words that are JSON/YAML field names, not Python
+    symbols (`plan_status`, `ac_complete`, `judgment_rubric`, dozens more
+    across jPlan/, jTest/, jPrecompact/), so that shape would either drown
+    in false positives or need a large, growing allowlist. This check
+    instead covers the one unambiguous shape this repo already uses for a
+    real code citation, and `implement_progress_contract`'s reappearance is
+    separately pinned as a targeted regression below.
+    """
+    broken = []
+    for md in sorted(root.rglob("*.md")):
+        if md.name in _ILLUSTRATIVE_FILES:
+            continue
+        text = md.read_text(encoding="utf-8", errors="replace")
+        for n, line in enumerate(text.splitlines(), 1):
+            for m in PY_SYMBOL_REF_RE.finditer(line):
+                relpath, symbol = m.group(1), m.group(2)
+                target = (repo_root / relpath).resolve()
+                if not target.is_file():
+                    broken.append(f"{md.relative_to(root.parent)}:{n}: {relpath}::{symbol} (file not found)")
+                    continue
+                pattern = re.compile(_SYMBOL_DEF_RE_TEMPLATE.format(name=re.escape(symbol)), re.MULTILINE)
+                if not pattern.search(target.read_text(encoding="utf-8", errors="replace")):
+                    broken.append(f"{md.relative_to(root.parent)}:{n}: {relpath}::{symbol} (symbol not defined in file)")
+    return broken
+
+
 def test_helpers_catch_a_planted_dangling_reference(tmp_path):
     """Prove the checkers actually bite before trusting them repo-wide."""
     skills = tmp_path / "skills"
@@ -214,6 +261,23 @@ def test_helpers_catch_a_planted_dangling_reference(tmp_path):
     assert any("jghostbare" in b for b in broken_commands)
     assert not any(b.endswith("/jReal") for b in broken_commands)
 
+    # A file that doesn't exist, and a real file missing the cited symbol.
+    py_root = tmp_path / "pyroot"
+    (py_root / "jswarm").mkdir(parents=True)
+    (py_root / "jswarm" / "real_module.py").write_text("def real_function():\n    pass\n", encoding="utf-8")
+    caller_py = skills / "jPyCaller"
+    caller_py.mkdir()
+    (caller_py / "SKILL.md").write_text(
+        "Call `jswarm/real_module.py::real_function` (fine) and "
+        "`jswarm/real_module.py::ghost_function` (missing symbol) and "
+        "`jswarm/no_such_module.py::whatever` (missing file).\n",
+        encoding="utf-8",
+    )
+    broken_symbols = find_dangling_py_symbol_refs(skills, py_root)
+    assert any("ghost_function" in b and "symbol not defined" in b for b in broken_symbols)
+    assert any("no_such_module.py" in b and "file not found" in b for b in broken_symbols)
+    assert not any("real_function" in b for b in broken_symbols)
+
 
 def test_skill_relative_links_resolve():
     broken = find_broken_relative_links(SKILLS_ROOT)
@@ -223,6 +287,15 @@ def test_skill_relative_links_resolve():
 def test_no_broken_jswarm_home_docs_references():
     broken = find_broken_jswarm_home_docs_refs(SKILLS_ROOT)
     assert not broken, "dangling ${JSWARM_HOME}/docs/... reference(s):\n" + "\n".join(broken)
+
+
+def test_no_dangling_py_symbol_references_anywhere_in_skills():
+    """Every `` `path/to/file.py::symbol` `` under skills/ must cite a real
+    file and a real symbol in this repository (see find_dangling_py_symbol_refs
+    for what this does and does not cover, and why).
+    """
+    broken = find_dangling_py_symbol_refs(SKILLS_ROOT, REPO_ROOT)
+    assert not broken, "dangling file.py::symbol reference(s):\n" + "\n".join(broken)
 
 
 def test_no_unresolved_slash_commands_anywhere_in_skills():
@@ -258,6 +331,20 @@ def test_known_dangling_references_stay_fixed():
         ("jStatus/SKILL.md", ("jregister", "jdeploy", "governed catalog lifecycle")),
         ("jStatus/README.md", ("jregister", "jdeploy", "governed catalog lifecycle")),
         ("jPlan.ceremony-selector/SKILL.md", ("jregister", "jdeploy")),
+        # clean-mac-walk.md finding 7: jGo's session/phase-exit/completion
+        # companions referenced a "dashboard" mechanism -- including the bare
+        # word `implement_progress_contract` -- with zero implementation
+        # anywhere in this repo (see find_dangling_py_symbol_refs' docstring
+        # for why that shape needed a targeted regression rather than a
+        # generic check). Concluded dead/enterprise-only, per
+        # pattern.dashboard-projections.md's own precedent for the same
+        # family of stripped enterprise dashboard features; removed, with
+        # completion.md gaining the same `jswarm.ext jGo` extension-point
+        # hook the other lifecycle skills already use.
+        ("jGo/SKILL.md", ("implement_progress_contract", "dashboard contract", "ready-for-merge event")),
+        ("jGo/session.md", ("implement_progress_contract", "dashboard-facts", "dashboard `started`")),
+        ("jGo/phase-exit.md", ("implement_progress_contract", "phase-advanced` dashboard")),
+        ("jGo/completion.md", ("implement_progress_contract", "ready-for-merge` dashboard")),
     ]
     for relpath, forbidden in checks:
         text = (SKILLS_ROOT / relpath).read_text(encoding="utf-8")

@@ -48,7 +48,11 @@ re-running.
 
 ## What it writes
 
-- Implementation commits on a branch for the work item
+- `feat/<id>`, if it does not already exist and you are still on the
+  repository's default branch. `/jClose`, `/jMerge`, and `/jUAT` all resolve
+  against this branch, so `/jGo` is where it comes from. Already on a branch
+  of your own for this work? `/jGo` leaves it alone and builds there instead.
+- Implementation commits on that branch
 - Tests added alongside the implementation
 - Updates to the plan's phase and status tracking, ending in
   `READY_FOR_MERGE` once every phase is accepted

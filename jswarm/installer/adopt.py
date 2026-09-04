@@ -3,13 +3,16 @@
 Never clobbers. An existing `CLAUDE.md` keeps every byte the user wrote; the
 managed content goes into a block marked `<!-- jswarm:begin -->` /
 `<!-- jswarm:end -->`. An existing `.claude/settings.json` is deep-merged so
-every existing key survives, including nested ones. Both are backed up,
-under `<repo>/.jswarm/backups/<utc-timestamp>/`, before anything is written.
+every existing key survives, including nested ones. An existing `.gitignore`
+keeps every byte the user wrote too, the same way `CLAUDE.md` does, with the
+managed content in a block marked `# jswarm:begin` / `# jswarm:end` (see
+`merge_gitignore`). All three are backed up, under
+`<repo>/.jswarm/backups/<utc-timestamp>/`, before anything is written.
 
 Re-running `adopt` on an already-adopted repository replaces the managed
-CLAUDE.md block in place (never appends a second one) and re-merges the
-settings hooks the same way, so `adopt` is safe to run again to pick up a
-new `--jira-key` or a newer jSwarm checkout.
+CLAUDE.md and .gitignore blocks in place (never appends a second one) and
+re-merges the settings hooks the same way, so `adopt` is safe to run again
+to pick up a new `--jira-key` or a newer jSwarm checkout.
 """
 from __future__ import annotations
 
@@ -27,6 +30,12 @@ from jswarm.installer.fsops import WriteContext
 
 MARK_BEGIN = "<!-- jswarm:begin -->"
 MARK_END = "<!-- jswarm:end -->"
+
+# .gitignore uses `#`-comment markers instead of the HTML-comment ones above
+# (an HTML comment is not a comment in .gitignore syntax -- it would try to
+# match a literal file named "<!-- jswarm:begin -->").
+GITIGNORE_MARK_BEGIN = "# jswarm:begin"
+GITIGNORE_MARK_END = "# jswarm:end"
 
 # Any hook whose command contains this is ours; unadopt uses the same test
 # to remove only jswarm's own entries and leave everything else alone. The
@@ -77,6 +86,54 @@ def merge_claude_md(existing: str, block: str) -> str:
     end = existing.find(MARK_END)
     if start != -1 and end != -1:
         end += len(MARK_END)
+        return existing[:start] + block + existing[end:]
+    if not existing:
+        return block
+    stripped = existing.rstrip("\n")
+    return stripped + "\n\n" + block
+
+
+# What adopt puts under version control versus what it ignores, decided once
+# here:
+#
+# - `.jswarm/plans/`, `.jswarm/work/` (state.json, retro.md, close.json,
+#   uat-round/*), and `.jswarm/config.yaml` are the product's own record of
+#   a work item's lifecycle -- exactly what a team wants in history and code
+#   review, the same as the plan file itself. Not ignored.
+# - `.claude/` (settings, skills) is portable project configuration, the
+#   whole point of which is to be shared through version control. Not
+#   ignored.
+# - `.jswarm/backups/` is `adopt`'s own pre-write safety copies and
+#   `.jswarm/.adopted` is a local "this checkout ran adopt" marker with a
+#   machine-local timestamp -- neither is project state a team reviews or
+#   needs on a teammate's clone. Ignored.
+# - `__pycache__/` and `*.pyc` are Python's own bytecode cache, produced by
+#   running any of jswarm's own tooling inside the adopted project. Ignored.
+_GITIGNORE_LINES = (
+    "# jSwarm installer bookkeeping: local-only, not project state.",
+    ".jswarm/backups/",
+    ".jswarm/.adopted",
+    "",
+    "# Python bytecode cache.",
+    "__pycache__/",
+    "*.pyc",
+)
+
+
+def _gitignore_block() -> str:
+    lines = [GITIGNORE_MARK_BEGIN, *_GITIGNORE_LINES, GITIGNORE_MARK_END, ""]
+    return "\n".join(lines)
+
+
+def merge_gitignore(existing: str, block: str) -> str:
+    """Same rule as `merge_claude_md`: replace the managed block in place if
+    one is present; otherwise append the block after whatever the user
+    already wrote, byte-for-byte preserved.
+    """
+    start = existing.find(GITIGNORE_MARK_BEGIN)
+    end = existing.find(GITIGNORE_MARK_END)
+    if start != -1 and end != -1:
+        end += len(GITIGNORE_MARK_END)
         return existing[:start] + block + existing[end:]
     if not existing:
         return block
@@ -197,9 +254,10 @@ def adopt(
     host = current_host()
     claude_md = host.memory_path(repo)
     settings_path = host.settings_path(repo)
+    gitignore_path = repo / ".gitignore"
     timestamp = backup.utc_timestamp()
 
-    for target in (claude_md, settings_path):
+    for target in (claude_md, settings_path, gitignore_path):
         backed_up = backup.backup_path(ctx, repo, target, timestamp)
         if backed_up is not None:
             result.backed_up.append(backed_up)
@@ -208,6 +266,11 @@ def adopt(
     new_md = merge_claude_md(existing_md, _claude_md_block(key))
     ctx.write_text(claude_md, new_md)
     result.report_lines.append(f"adopt: merged {claude_md}")
+
+    existing_gitignore = gitignore_path.read_text(encoding="utf-8") if gitignore_path.exists() else ""
+    new_gitignore = merge_gitignore(existing_gitignore, _gitignore_block())
+    ctx.write_text(gitignore_path, new_gitignore)
+    result.report_lines.append(f"adopt: merged {gitignore_path}")
 
     if hooks:
         existing_settings: dict = {}

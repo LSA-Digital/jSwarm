@@ -25,7 +25,13 @@ from pathlib import Path
 
 from jswarm.host import current as current_host
 from jswarm.installer import backup, registry
-from jswarm.installer.adopt import MARK_BEGIN, MARK_END, _is_jswarm_hook_entry
+from jswarm.installer.adopt import (
+    GITIGNORE_MARK_BEGIN,
+    GITIGNORE_MARK_END,
+    MARK_BEGIN,
+    MARK_END,
+    _is_jswarm_hook_entry,
+)
 from jswarm.installer.fsops import WriteContext
 
 
@@ -37,12 +43,12 @@ class UnadoptResult:
     report_lines: list[str] = field(default_factory=list)
 
 
-def _strip_claude_md_block(text: str) -> str:
-    start = text.find(MARK_BEGIN)
-    end = text.find(MARK_END)
+def _strip_marked_block(text: str, mark_begin: str, mark_end: str) -> str:
+    start = text.find(mark_begin)
+    end = text.find(mark_end)
     if start == -1 or end == -1:
         return text
-    end += len(MARK_END)
+    end += len(mark_end)
     before = text[:start].rstrip("\n")
     after = text[end:].lstrip("\n")
     if before and after:
@@ -50,6 +56,14 @@ def _strip_claude_md_block(text: str) -> str:
     if before:
         return before + "\n"
     return after
+
+
+def _strip_claude_md_block(text: str) -> str:
+    return _strip_marked_block(text, MARK_BEGIN, MARK_END)
+
+
+def _strip_gitignore_block(text: str) -> str:
+    return _strip_marked_block(text, GITIGNORE_MARK_BEGIN, GITIGNORE_MARK_END)
 
 
 def _strip_jswarm_hooks(settings: dict) -> dict:
@@ -86,6 +100,7 @@ def unadopt(repo: Path, *, dry_run: bool = False, home: Path | None = None) -> U
     host = current_host()
     claude_md = host.memory_path(repo)
     settings_path = host.settings_path(repo)
+    gitignore_path = repo / ".gitignore"
     oldest = backup.oldest_session(repo)
 
     if oldest is not None:
@@ -104,6 +119,14 @@ def unadopt(repo: Path, *, dry_run: bool = False, home: Path | None = None) -> U
         elif settings_path.exists():
             ctx.remove(settings_path)
             result.report_lines.append(f"unadopt: removed {settings_path} (did not exist before adoption)")
+
+        backed_up_gitignore = oldest / gitignore_path.name
+        if backed_up_gitignore.exists():
+            ctx.copy_file(backed_up_gitignore, gitignore_path)
+            result.report_lines.append(f"unadopt: restored {gitignore_path} from {oldest}")
+        elif gitignore_path.exists():
+            ctx.remove(gitignore_path)
+            result.report_lines.append(f"unadopt: removed {gitignore_path} (did not exist before adoption)")
     else:
         if claude_md.exists():
             stripped = _strip_claude_md_block(claude_md.read_text(encoding="utf-8"))
@@ -117,6 +140,10 @@ def unadopt(repo: Path, *, dry_run: bool = False, home: Path | None = None) -> U
             if isinstance(existing, dict):
                 ctx.write_json(settings_path, _strip_jswarm_hooks(existing))
                 result.report_lines.append(f"unadopt: removed jswarm hook entries from {settings_path} (no backup on record)")
+        if gitignore_path.exists():
+            stripped_gitignore = _strip_gitignore_block(gitignore_path.read_text(encoding="utf-8"))
+            ctx.write_text(gitignore_path, stripped_gitignore)
+            result.report_lines.append(f"unadopt: stripped the managed block from {gitignore_path} (no backup on record)")
 
     ctx.remove(marker)
     config_path = jswarm_dir / "config.yaml"
