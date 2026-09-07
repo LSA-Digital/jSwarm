@@ -56,56 +56,21 @@ def test_no_lifecycle_module_imports_the_jira_adapter_directly():
     assert offenders == [], offenders
 
 
-# --- JiraTracker must never raise out of comment() or transition() -------
-#
-# These stub the MCP client entirely (no network calls): JiraMcpClient.call_tool
-# is replaced at the class level with a function that raises immediately, so
-# retry()'s backoff never sleeps for real and no socket is ever opened.
+
+@pytest.mark.parametrize("action,args", [("resolve", ()), ("comment", ("hello",)), ("transition", ("Done",))])
+def test_jira_requests_host_instead_of_contacting_a_local_proxy(monkeypatch, action, args):
+    import socket
+    def unexpected_connection(*args, **kwargs):
+        pytest.fail("Jira must use the active host's authenticated tools")
+    monkeypatch.setattr(socket, "create_connection", unexpected_connection)
+    request = getattr(jira_mod.JiraTracker("PS"), action)("PS-14", *args)
+    assert request.status == "requires_host"
+    assert request.server == "atlassian"
+    assert request.ok is False and request.skipped is False
 
 
-def _stub_failing_call_tool(monkeypatch, message="simulated MCP outage"):
-    def boom(self, name, arguments):
-        raise jira_mod.JiraMcpError(message)
-
-    monkeypatch.setattr(jira_mod.JiraMcpClient, "call_tool", boom)
-
-
-def test_jira_comment_failure_returns_result_without_raising(monkeypatch):
-    _stub_failing_call_tool(monkeypatch)
-    t = jira_mod.JiraTracker(key_prefix="PS", attempts=1, backoff_seconds=0)
-
-    r = t.comment("PS-14", "hello")
-
-    assert r.ok is False
-    assert r.skipped is False
-    assert "PS-14" in r.message
-    assert "simulated MCP outage" in r.message
-
-
-def test_jira_transition_failure_returns_result_without_raising(monkeypatch):
-    _stub_failing_call_tool(monkeypatch)
-    t = jira_mod.JiraTracker(key_prefix="PS", attempts=1, backoff_seconds=0)
-
-    r = t.transition("PS-14", "Done")
-
-    assert r.ok is False
-    assert r.skipped is False
-    assert "PS-14" in r.message
-    assert "Done" in r.message
-    assert "simulated MCP outage" in r.message
-
-
-def test_jira_transition_to_unknown_state_is_a_result_not_an_exception(monkeypatch):
-    def only_lists_todo(self, name, arguments):
-        if name == "jira_get_transitions":
-            return {"content": [{"type": "text", "text": '[{"id": "1", "name": "To Do"}]'}]}
-        raise AssertionError(f"unexpected tool call: {name}")
-
-    monkeypatch.setattr(jira_mod.JiraMcpClient, "call_tool", only_lists_todo)
-    t = jira_mod.JiraTracker(key_prefix="PS", attempts=1, backoff_seconds=0)
-
-    r = t.transition("PS-14", "Done")
-
-    assert r.ok is False
-    assert r.skipped is False
-    assert "Done" in r.message
+def test_local_slugs_remain_available_in_a_jira_project():
+    tracker = jira_mod.JiraTracker("PS")
+    assert tracker.resolve("add-csv-export") is None
+    assert tracker.comment("add-csv-export", "hello").skipped
+    assert tracker.transition("add-csv-export", "Done").skipped

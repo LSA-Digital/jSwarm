@@ -178,6 +178,12 @@ added to the project's `CLAUDE.md`, and jSwarm's hooks merged into its
 `.claude/settings.json`. Adoption merges into existing files; nothing you
 already wrote there is replaced.
 
+Before your first plan, open Terminal in the **application repository** and run
+`git status --short` and `git diff`. Review the adoption changes, including
+`.gitignore`, `CLAUDE.md`, and `.claude/settings.json`. Commit only the setup
+files you intend to keep, leaving unrelated work out. Start `/jPlan` with a
+clean working tree.
+
 To connect Jira, register Atlassian's hosted MCP server and authorize it once.
 Run both commands in Terminal on the Mac where you will use Claude Code; the
 second command opens your browser for approval:
@@ -193,6 +199,12 @@ confirm Atlassian is connected. For SSH or another headless session, use
 `claude mcp login atlassian --no-browser` and follow the URL and redirect
 instructions in Terminal. There is no self-hosted Jira container in jSwarm;
 this is host-specific setup and is documented as such.
+
+Claude Code performs Jira reads and writes through that authenticated connection.
+If you run the Python tracker helper yourself, `requires_host` means the active
+agent still has work to do, not that Jira was updated. See the
+[host bridge procedure](jira-host-bridge.md). A failed Jira read stops planning;
+failed writes keep your local evidence and report the unsynchronized state.
 
 ## 8. Start the local review portal
 

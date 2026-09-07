@@ -12,11 +12,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from dataclasses import asdict
 from pathlib import Path
 
 from jswarm.tracker.resolve import load
+from jswarm.tracker.base import HostRequest
+from jswarm.tracker.jira import complete_request
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -26,6 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo", default=".", help="repository root holding .jswarm/config.yaml")
     parser.add_argument("--text", help="comment body, for action=comment")
     parser.add_argument("--state", help="target state name, for action=transition")
+    parser.add_argument("--result-file", type=Path, help="host-observed Atlassian result for this exact request; see docs/jira-host-bridge.md")
     args = parser.parse_args(argv)
 
     tracker = load(Path(args.repo))
@@ -41,11 +43,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(f"action {args.action!r} requires a work item id")
 
     if args.action == "resolve":
-        item = tracker.resolve(args.work_id)
-        print(json.dumps(asdict(item) if item is not None else None))
-        return 0
-
-    if args.action == "comment":
+        result = tracker.resolve(args.work_id)
+    elif args.action == "comment":
         if not args.text:
             parser.error("action 'comment' requires --text")
         result = tracker.comment(args.work_id, args.text)
@@ -54,8 +53,17 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("action 'transition' requires --state")
         result = tracker.transition(args.work_id, args.state)
 
-    print(json.dumps({"ok": result.ok, "skipped": result.skipped, "message": result.message}))
-    # Never a gate: a skill reads ok/skipped/message and continues either way.
+    if isinstance(result, HostRequest) and args.result_file:
+        try:
+            result = complete_request(result, json.loads(args.result_file.read_text(encoding="utf-8")))
+        except (OSError, ValueError) as error:
+            print(json.dumps({"ok": False, "skipped": False, "message": f"Invalid host result: {error}"}))
+            return 2
+    elif args.result_file:
+        parser.error("--result-file requires a configured host-backed tracker operation")
+    print(json.dumps(asdict(result) if result is not None else None))
+    # Exit 0 means valid JSON, not remote success. The skill must handle
+    # requires_host and failed reads before continuing its lifecycle.
     return 0
 
 

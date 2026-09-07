@@ -1,6 +1,17 @@
 # Changelog
 
-## v0.1.0
+## v1.0.0 (unreleased)
+
+The first release is being prepared as v1.0.0. Publication is pending the
+clean-machine acceptance run and release approval; a green CI run is not
+evidence that the full live lifecycle has been accepted.
+
+- Jira lifecycle operations use the active Claude Code session's authenticated
+  Atlassian tools, with explicit pending requests and validated observed results.
+- ColGREP can be added after a core-only install and interrupted setup can resume.
+- Local work-item slugs remain usable, including in Jira-configured projects.
+- Adoption excludes local runtime state from Git; review and commit the setup
+  changes before starting the first plan.
 
 First public cut of the core loop: `/jPlan`, `/jGo`, `/jTest`, `/jUAT`,
 `/jFix`, `/jClose`, and `/jMerge`, plus `/jSetup` and `/jPrecompact`. The

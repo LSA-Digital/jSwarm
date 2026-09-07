@@ -24,14 +24,14 @@ REQUIRED_INSTALL_STEPS = ("venv", "skills", "portal_config")
 def _public_version(source: Path, *, env: dict[str, str] | None = None) -> str:
     try:
         result = subprocess.run(
-            ["git", "-C", str(source), "describe", "--tags", "--always"],
+            ["git", "-C", str(source), "describe", "--tags", "--always", "--dirty"],
             capture_output=True, text=True, timeout=5, env=env,
         )
     except (OSError, subprocess.TimeoutExpired):
-        return "v0.1.0-dev"
+        return "v1.0.0-dev"
     if result.returncode == 0 and result.stdout.strip():
         return result.stdout.strip()
-    return "v0.1.0-dev"
+    return "v1.0.0-dev"
 
 
 # --------------------------------------------------------------------- check

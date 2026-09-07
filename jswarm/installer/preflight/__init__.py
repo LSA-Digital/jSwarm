@@ -17,7 +17,7 @@ from jswarm.platform import Platform, current as _current_platform
 
 _REQUIRED_PORTS = (9100, 9101)
 _SKIPPED_DOCKER_CAPABILITIES = ("stack start", "health check", "Compose validation", "Docker cleanup")
-# macOS is the only supported platform (v0.1.0). An unsupported platform's
+# macOS is the only supported platform (v1.0.0). An unsupported platform's
 # guidance always comes from `Platform.unsupported_message()` instead -- see
 # `_guidance` below.
 _MACOS_GUIDANCE: dict[str, str] = {
@@ -402,7 +402,7 @@ If Docker, Compose v2, Git, a working `.venv`, or the default demo ports are not
 
 ## Platform guidance
 
-JarviSWARM v0.1.0 supports macOS only. On macOS, the preflight reports macOS-specific prerequisite guidance. On anything else it reports plainly that the platform is not supported, rather than guessing at guidance for it.
+JarviSWARM v1.0.0 supports macOS only. On macOS, the preflight reports macOS-specific prerequisite guidance. On anything else it reports plainly that the platform is not supported, rather than guessing at guidance for it.
 
 ## Safety guarantees
 

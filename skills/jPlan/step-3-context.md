@@ -53,7 +53,7 @@ grep -ri "<feature_keywords>" tests/ --include="*.py" --include="*.spec.ts" | he
 ### 3.4: Codebase context via ColGREP
 
 ```
-colgrep_search({"query": "<A/C keywords>", "index": "<project>", "top_k": 10})
+colgrep_search(query="<A/C keywords>", cwd="<absolute application repository path>", top_k=10)
 ```
 
 ### 3A: Locate the official UAT scenario inventory (when `Automated UAT: yes`)

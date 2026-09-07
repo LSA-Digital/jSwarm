@@ -1,4 +1,4 @@
-"""macOS: the only platform supported in v0.1.0.
+"""macOS: the only platform supported in v1.0.0.
 
 This module is the one place in the public core allowed to know that
 Homebrew, Xcode command line tools, launchd, and the interactive shell's

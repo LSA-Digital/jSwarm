@@ -1,4 +1,4 @@
-"""The platform boundary. macOS is the only platform supported in v0.1.0;
+"""The platform boundary. macOS is the only platform supported in v1.0.0;
 nothing outside this package may branch on the operating system itself.
 """
 from __future__ import annotations

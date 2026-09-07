@@ -1,130 +1,92 @@
-"""The Jira adapter: wraps the existing local Atlassian MCP client
-(`jswarm.jira_mcp_closeout`) behind the `Tracker` interface.
+"""Jira operations through the active host's authenticated Atlassian MCP.
 
-`jira_mcp_closeout.py` was built for one workflow, closeout, and its shape
-does not fit `Tracker` cleanly in two ways that matter here:
-
-- `transition_done()` only ever searches for a transition whose name
-  contains "done"; `Tracker.transition()` must reach any `target_state`.
-- `get_issue()` requests `summary,status,updated,parent,issuetype` and never
-  `description`; `Tracker.resolve()` needs a description.
-
-Rather than change that module, which is out of scope for this task, this
-adapter drives its `JiraMcpClient` directly for get-issue and transition, and
-reuses `add_comment()` unchanged since it already fits `comment()` exactly.
+Claude Code owns OAuth. A shell process cannot inherit its authenticated MCP
+session. Emit an explicit host request instead of silently targeting a local
+proxy. The lifecycle skill runs the tools and supplies the observed evidence
+to complete_request; emitting a request is never reported as success.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 
-from jswarm.jira_mcp_closeout import (
-    DEFAULT_MCP_URL,
-    JiraMcpClient,
-    JiraMcpError,
-    add_comment,
-    extract_json_text,
-    retry,
-)
-from jswarm.tracker.base import Result, WorkItem
+from jswarm.tracker.base import HostRequest, Result, WorkItem
+from jswarm.workitem.identity import parse
+
+
+def _request(action: str, work_id: str, *, text: str | None = None,
+             target_state: str | None = None) -> HostRequest:
+    if parse(work_id).kind != "tracker-key":
+        raise ValueError("Jira requires an issue key such as PS-14; use a tracker-free project for local slugs")
+    payload = json.dumps([action, work_id, text, target_state], ensure_ascii=False)
+    request_id = hashlib.sha256(payload.encode()).hexdigest()
+    return HostRequest(action, work_id, request_id, text, target_state)
 
 
 @dataclass(frozen=True)
 class JiraTracker:
     key_prefix: str
-    mcp_url: str = DEFAULT_MCP_URL
-    attempts: int = 3
-    backoff_seconds: float = 2.0
 
     def is_configured(self) -> bool:
+        # Configuration does not imply authenticated, reachable, or synchronized.
         return True
 
     def describe(self) -> str:
-        return f"Jira ({self.key_prefix})"
+        return f"Jira ({self.key_prefix}), via the host's authenticated Atlassian MCP"
 
-    def _client(self) -> JiraMcpClient:
-        return JiraMcpClient(self.mcp_url)
-
-    def resolve(self, work_id: str) -> WorkItem | None:
-        client = self._client()
-        result = client.call_tool(
-            "jira_get_issue",
-            {
-                "issue_key": work_id,
-                "fields": "summary,description,status",
-                "comment_limit": 0,
-                "update_history": False,
-            },
-        )
-        data = extract_json_text(result)
-        if not isinstance(data, dict):
+    def resolve(self, work_id: str) -> HostRequest | None:
+        if parse(work_id).kind == "slug":
             return None
-        status = data.get("status")
-        status_name = status.get("name") if isinstance(status, dict) else str(status or "")
-        return WorkItem(
-            key=work_id,
-            title=str(data.get("summary") or ""),
-            description=str(data.get("description") or ""),
-            status=status_name,
-        )
+        return _request("resolve", work_id)
 
-    def comment(self, work_id: str, text: str) -> Result:
-        try:
-            retry(
-                lambda: add_comment(self._client(), work_id, text),
-                attempts=self.attempts,
-                backoff_seconds=self.backoff_seconds,
-            )
-        except Exception as error:  # noqa: BLE001 - a tracker outage must never take the lifecycle down
-            return Result(
-                ok=False,
-                skipped=False,
-                message=(
-                    f"comment on {work_id} failed: {error}. Local state was already "
-                    f"written; add this comment in Jira by hand, or re-run once Jira "
-                    f"is reachable."
-                ),
-            )
-        return Result(ok=True, skipped=False, message=f"commented on {work_id}")
+    def comment(self, work_id: str, text: str) -> HostRequest | Result:
+        if parse(work_id).kind == "slug":
+            return Result(True, True, "Local work item; no Jira comment needed.")
+        return _request("comment", work_id, text=text)
 
-    def transition(self, work_id: str, target_state: str) -> Result:
-        try:
-            retry(
-                lambda: self._transition_to(work_id, target_state),
-                attempts=self.attempts,
-                backoff_seconds=self.backoff_seconds,
-            )
-        except Exception as error:  # noqa: BLE001 - a tracker outage must never take the lifecycle down
-            return Result(
-                ok=False,
-                skipped=False,
-                message=(
-                    f"transition of {work_id} to {target_state!r} failed: {error}. "
-                    f"Local state was already written; make the transition in Jira "
-                    f"by hand, or re-run once Jira is reachable."
-                ),
-            )
-        return Result(ok=True, skipped=False, message=f"transitioned {work_id} to {target_state}")
+    def transition(self, work_id: str, target_state: str) -> HostRequest | Result:
+        if parse(work_id).kind == "slug":
+            return Result(True, True, "Local work item; no Jira transition needed.")
+        return _request("transition", work_id, target_state=target_state)
 
-    def _transition_to(self, work_id: str, target_state: str) -> None:
-        client = self._client()
-        transitions_result = client.call_tool("jira_get_transitions", {"issue_key": work_id})
-        transitions = extract_json_text(transitions_result)
-        if not isinstance(transitions, list):
-            raise JiraMcpError("jira_get_transitions did not return a list")
-        match = next(
-            (
-                item
-                for item in transitions
-                if isinstance(item, dict) and str(item.get("name", "")).lower() == target_state.lower()
-            ),
-            None,
-        )
-        if not match or not match.get("id"):
-            names = [str(item.get("name")) for item in transitions if isinstance(item, dict)]
-            raise JiraMcpError(
-                f"no {target_state!r} transition available for {work_id}; available: {names}"
-            )
-        client.call_tool(
-            "jira_transition_issue",
-            {"issue_key": work_id, "transition_id": str(match["id"])},
-        )
+
+def complete_request(request: HostRequest, evidence: object) -> WorkItem | Result:
+    """Validate host-observed results bound to this exact operation.
+
+    This validates a receipt; it does not independently authenticate the remote
+    service. The host must populate it from real tool responses, not estimates.
+    """
+    if not isinstance(evidence, dict):
+        raise ValueError("host result must be a JSON object")
+    for field in ("request_id", "work_id", "action", "server"):
+        if evidence.get(field) != getattr(request, field):
+            raise ValueError(f"host result {field} does not match this request")
+    if evidence.get("ok") is False:
+        message = evidence.get("error")
+        if not isinstance(message, str) or not message.strip():
+            raise ValueError("failed host result requires the observed error")
+        return Result(False, False, f"Jira {request.action} failed: {message}. Local evidence is preserved.")
+    if evidence.get("ok") is not True:
+        raise ValueError("host result requires a boolean ok")
+    if not isinstance(evidence.get("tool"), str) or not evidence["tool"].strip():
+        raise ValueError("host result requires the actual Atlassian tool name")
+    observed = evidence.get("observed")
+    if not isinstance(observed, dict) or observed.get("key") != request.work_id:
+        raise ValueError("observed Jira issue key does not match this request")
+    if request.action == "resolve":
+        if not all(isinstance(observed.get(f), str) for f in ("title", "description", "status")):
+            raise ValueError("resolved issue requires title, description, and status strings")
+        if not observed["title"].strip() or not observed["status"].strip():
+            raise ValueError("resolved issue requires a non-empty title and status")
+        return WorkItem(request.work_id, observed["title"], observed["description"], observed["status"])
+    if request.action == "comment":
+        if not str(observed.get("comment_id") or "").strip() or observed.get("text") != request.text:
+            raise ValueError("comment receipt requires its Jira id and exact posted text")
+        return Result(True, False, f"commented on {request.work_id}; Jira comment {observed['comment_id']}")
+    if request.action == "transition":
+        status = observed.get("status")
+        if not isinstance(status, str) or status.casefold() != (request.target_state or "").casefold():
+            raise ValueError("read-back Jira status does not match the requested target state")
+        return Result(True, False, f"transitioned {request.work_id} to {status}, verified by reading the issue")
+    raise ValueError("unsupported host request action")

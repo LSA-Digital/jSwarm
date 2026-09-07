@@ -8,7 +8,7 @@ def run(*args, home):
 def test_verify_on_a_partial_install_names_the_fix(tmp_path):
     (tmp_path / ".jswarm").mkdir()
     (tmp_path / ".jswarm/install.lock.yaml").write_text(
-        yaml.safe_dump({"public_version": "v0.1.0", "state": "partial", "steps_completed": ["venv"]}))
+        yaml.safe_dump({"public_version": "v1.0.0", "state": "partial", "steps_completed": ["venv"]}))
     r = run("verify", home=tmp_path)
     assert r.returncode != 0
     out = r.stdout + r.stderr

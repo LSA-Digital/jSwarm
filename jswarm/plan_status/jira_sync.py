@@ -1,20 +1,7 @@
-"""A/C 9: hybrid Jira sync — planning fire-and-forget, closeout retry-safe.
+"""Plan-status transition intents and optional host-backed tracker sync.
 
-Per-project transition NAMES are recorded here as a constant (T1.5). COM names were
-verified live via atlassian.jira_get_transitions on 2026-05-20:
-    Backlog(11), Selected->Dev(21), In Progress(31), Done(41), Canceled(5).
-
-Criticality (Oracle Concern #5 + user-confirmed hybrid):
-  - Planning-stage transitions (Backlog / Selected->Dev / In Progress) are
-    FIRE-AND-FORGET: best effort, tolerate MCP timeouts, never block, never queue.
-  - Closeout transitions (Done at 6.closed.merged; Canceled/Backlog at terminals)
-    are RETRY-SAFE: delegate to jswarm/jira_mcp_closeout.py and, on failure, the
-    caller appends to the registry jira_retry_queue for /devops-maint resync.
-
-This module does not import the Atlassian MCP directly (hooks/commands run agent-side
-or shell out). The closeout path shells to the existing retry-safe helper; the planning
-path is advisory and is pushed by the slash-command agent context (Phase 3) or by
-/devops-maint plan-status-resync-jira (Phase 4).
+Project-specific mappings are advisory. The lifecycle executes any requires_host
+request using the active host's authenticated tools; Python never borrows OAuth.
 """
 from __future__ import annotations
 
@@ -48,7 +35,6 @@ TRANSITION_NAMES_BY_PROJECT: dict[str, dict[str, str]] = {
 # Closeout (retry-safe) target states.
 RETRY_SAFE_STATES = frozenset({S.STATE_MERGED, S.STATE_WONT_DO, S.STATE_DEFERRED})
 
-CLOSEOUT_HELPER = "jswarm/jira_mcp_closeout.py"
 
 
 @dataclass
@@ -88,34 +74,19 @@ def sync_closeout(
     venv_python: Optional[str] = None,
     runner: Optional[Runner] = None,
 ) -> dict:
-    """Retry-safe closeout sync. Returns {ok, action, detail}.
+    """Return the configured tracker's result, including a pending host request.
 
-    All retry-safe states (6.closed.merged, terminal.wont_do, terminal.deferred)
-    map to Jira "Done" (spec §1) and are transitioned via the existing
-    `transition-done` helper subcommand. Never raises — returns ok=False on any
-    failure so callers can append to the registry jira_retry_queue.
+    Kept for plan-status --sync-jira compatibility. No shell process can borrow
+    Claude's OAuth session. The lifecycle must execute and validate requires_host.
     """
-    runner = runner or _default_runner
-    repo_root = Path(repo_root)
-    py = venv_python or str(repo_root / ".venv" / "bin" / "python")
-    helper = str(repo_root / CLOSEOUT_HELPER)
+    from dataclasses import asdict
+    from jswarm.tracker.resolve import load
 
     if not is_retry_safe(plan_status):
-        return {
-            "ok": False,
-            "action": "not-retry-safe",
-            "detail": f"{plan_status} is not a retry-safe closeout state",
-        }
-
-    # 6.closed.merged + both terminals all map to Jira "Done" (spec §1).
-    cmd = [py, helper, "--ticket-context", ticket, "transition-done", ticket]
+        return {"ok": False, "action": "not-retry-safe",
+                "detail": f"{plan_status} is not a retry-safe closeout state"}
     try:
-        proc = runner(cmd)
-        ok = proc.returncode == 0
-        return {
-            "ok": ok,
-            "action": "transition-done",
-            "detail": (proc.stdout or proc.stderr or "").strip()[:500],
-        }
-    except Exception as exc:  # never raise into a closeout flow
-        return {"ok": False, "action": "transition-done", "detail": f"error: {exc}"}
+        return asdict(load(Path(repo_root)).transition(ticket, "Done"))
+    except Exception as exc:
+        return {"ok": False, "skipped": False, "action": "transition",
+                "detail": f"error: {exc}"}

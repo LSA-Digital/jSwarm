@@ -40,27 +40,7 @@ def test_close_and_merge_artefacts_are_local(tmp_path):
     assert load(repo).describe() == "no tracker"
 
 
-# --- strengthening beyond the brief's minimal version ------------------------------
-#
-# Candidates considered from the task brief, checked against what actually holds:
-#
-# - "work_dir is identical in shape for a slug and for a tracker key": already covered,
-#   directly and thoroughly, by tests/test_workitem_identity.py::
-#   test_work_dir_is_identical_for_both_kinds. Not duplicated here.
-#
-# - "a tracker failure, as distinct from a skipped call, also leaves local state intact":
-#   holds. jswarm/tracker/jira.py's comment()/transition() catch every exception from the
-#   underlying MCP client and return Result(ok=False, skipped=False, ...) rather than
-#   raising -- distinct from NullTracker's Result(ok=True, skipped=True, ...). Covered
-#   below with local state written first, then a failing tracker call, then re-asserting
-#   the local state is untouched.
-#
-# - "nothing under jswarm/workitem/ imports the tracker at all": holds. Verified below
-#   by statically checking every jswarm/workitem/*.py file for an import of jswarm.tracker
-#   (the word "tracker" appears only in docstrings/comments there, never in an import).
-
-
-def test_tracker_failure_is_distinct_from_skip_and_leaves_local_state_intact(monkeypatch, tmp_path):
+def test_tracker_failure_is_distinct_from_skip_and_leaves_local_state_intact(tmp_path):
     import dataclasses
 
     from jswarm.tracker import jira as jira_mod
@@ -76,24 +56,18 @@ def test_tracker_failure_is_distinct_from_skip_and_leaves_local_state_intact(mon
     (d / "state.yaml").write_text(yaml.safe_dump({"status": "planned"}))
     before = {p.name: p.read_text() for p in d.iterdir()}
 
-    def boom(self, name, arguments):
-        raise jira_mod.JiraMcpError("simulated MCP outage")
-
-    monkeypatch.setattr(jira_mod.JiraMcpClient, "call_tool", boom)
-
-    # load() reads the real config wiring (adapter/key_prefix); attempts/backoff are
-    # overridden only so the test doesn't sit through real retry backoff sleeps.
-    tracker = dataclasses.replace(load(repo), attempts=1, backoff_seconds=0)
+    tracker = load(repo)
     assert tracker.is_configured()
-    for result in (
+    for request in (
         tracker.comment(wid.value, "planned"),
         tracker.transition(wid.value, "In Progress"),
     ):
-        # ok=False, skipped=False: a real failure, never confused with the null
-        # adapter's ok=True, skipped=True "there is nothing to do here" skip.
+        evidence = dataclasses.asdict(request)
+        evidence.update(ok=False, error="simulated hosted MCP outage")
+        result = jira_mod.complete_request(request, evidence)
         assert result.ok is False
         assert result.skipped is False
-        assert "Local state was already written" in result.message
+        assert "Local evidence is preserved" in result.message
 
     after = {p.name: p.read_text() for p in d.iterdir()}
     assert after == before

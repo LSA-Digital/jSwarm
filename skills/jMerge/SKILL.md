@@ -81,7 +81,7 @@ Read `.jswarm/work/<ID>/close.json` written by `/jClose`. If it is missing, Step
 PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli describe --repo "$PROJECT_ROOT"
 ```
 
-`configured: false` means there is nothing further to confirm upstream; local state (`close.json`, the retro) is the record of closure. Print the tracker's state (or the local-only note) once.
+`configured: false` means there is nothing further to confirm upstream; local state (`close.json`, the retro) is the record of closure. For a configured tracker, `describe` is only configuration information, not proof of closure. Run the tracker CLI `resolve <ID> --repo "$PROJECT_ROOT"`; for `status: requires_host`, follow `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jira-host-bridge.md`, read the real issue, and validate the receipt with `--result-file`. If the requested close transition was not completed, run the tracker `transition` request through that same host procedure and verify the resulting status. Report a failure as failed; never print confirmed closed based only on configuration. Print the actual state or local-only note once.
 
 Flip the plan's status to merged:
 

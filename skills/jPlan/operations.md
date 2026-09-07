@@ -119,6 +119,8 @@ Legacy-safe: plans with no ceremony selection / no-selection recorded remain val
 
 ### Step 2A: Work item identity (tracker-optional)
 
+**Hosted tracker requests:** whenever a tracker CLI call returns `status: requires_host`, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jira-host-bridge.md` and complete that procedure in the current authenticated host session. Validate the observed receipt using the same CLI command plus `--result-file` before using its result. A pending request is not a resolved issue or a successful write. This applies to resolve, planning comments, and the optional In Progress transition below.
+
 `/jPlan <work-item>` accepts either identity form (`jswarm.workitem.identity.parse`):
 
 - a tracker key, `^[A-Z][A-Z0-9]+-\d+$` (e.g. `PS-14`), only meaningful when a tracker is configured;
@@ -162,9 +164,9 @@ Record the work item's identity, kind, and plan-file path in `.jswarm/work/<ID>/
 PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python" -m jswarm.tracker.cli resolve <ID> --repo "$PROJECT_ROOT"
 ```
 
-There is no tracker `create` verb at the boundary in v0.1.0 (only `resolve`/`comment`/`transition`); when the user wants a brand-new tracked issue rather than an existing key or a local slug, create it directly with the connected tracker's own tool (for Jira: the connected Atlassian MCP's create-issue tool) using the project key from `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/devops_command_injection.py jira-key --project-root <PROJECT_ROOT>`, then treat the returned key as `<ID>` for the rest of this step. With a slug argument, or with no tracker configured at all, there is nothing to create upstream; local state is the whole of it.
+There is no tracker `create` verb at the boundary in v1.0.0 (only `resolve`/`comment`/`transition`); when the user wants a brand-new tracked issue rather than an existing key or a local slug, create it directly with the connected tracker's own tool (for Jira: the connected Atlassian MCP's create-issue tool) using the project key from `${JSWARM_HOME:-$HOME/dev/jswarm}/.venv/bin/python ${JSWARM_HOME:-$HOME/dev/jswarm}/jswarm/devops_command_injection.py jira-key --project-root <PROJECT_ROOT>`, then treat the returned key as `<ID>` for the rest of this step. With a slug argument, or with no tracker configured at all, there is nothing to create upstream; local state is the whole of it.
 
-`resolve` returning `null` (issue not found, or `is-configured` was already false) is not a hard stop for an otherwise-valid slug flow; it only matters for a tracker-key argument, and the hard stop above already covers "no tracker at all". A tracker-key argument that a *configured* tracker cannot resolve is reported to the user as a normal not-found condition, not this skill inventing a substitute id.
+`resolve` returning `null` is normal for a local slug. A tracker-key argument requires a validated resolved issue. If the configured tracker cannot read it, STOP, show the actual error, and ask the user to fix access or the key. Do not invent an issue, substitute a slug, or proceed with an empty issue. A `requires_host` response must be completed through the shared host procedure before continuing.
 
 > **Point-of-impact reminder:** after establishing ANY work item (even a side-task filed mid-work), create at least a `/jPlan --lite` plan at `.jswarm/plans/ID.plan.<slug>.md`. For a side-task inside another item's active session, do NOT rename the session away from the parent item.
 

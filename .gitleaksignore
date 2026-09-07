@@ -1,0 +1,13 @@
+# Reviewed 2026-09-07. Exact historical findings only; new occurrences still fail.
+# Catalog ingredient identifiers for BDD/UAT and thin-slice proof, not credentials.
+1e419e516662b1becce931a1dc7819fb6ea290f8:docs/_JarviSWARM/patterns/PAT-005-bdd-uat-scenarios.pattern.yaml:generic-api-key:4
+1e419e516662b1becce931a1dc7819fb6ea290f8:docs/_JarviSWARM/patterns/PAT-001-thin-slice-acceptance-proof.pattern.yaml:generic-api-key:4
+1e419e516662b1becce931a1dc7819fb6ea290f8:docs/_JarviSWARM/patterns/PAT-010-story-low-essential.pattern.yaml:generic-api-key:165
+1e419e516662b1becce931a1dc7819fb6ea290f8:docs/_JarviSWARM/patterns/PAT-011-story-medium-standard.pattern.yaml:generic-api-key:166
+1e419e516662b1becce931a1dc7819fb6ea290f8:docs/_JarviSWARM/patterns/PAT-011-story-medium-standard.pattern.yaml:generic-api-key:178
+1e419e516662b1becce931a1dc7819fb6ea290f8:docs/_JarviSWARM/patterns/PAT-012-story-high-assurance.pattern.yaml:generic-api-key:170
+1e419e516662b1becce931a1dc7819fb6ea290f8:docs/_JarviSWARM/patterns/PAT-012-story-high-assurance.pattern.yaml:generic-api-key:182
+# Synthetic sequential alphabet AWS token used to test the sanitizer.
+0ec54b08423b30a0bccf8e5f3be01874ffd1107f:tests/test_compliance_sanitizer_self_contained.py:aws-access-token:25
+# Historical change-reference identifier, not an API key.
+e490105f410fedb45a73de9237fd396d42588a53:skills/test/UAT_RULES.json:generic-api-key:398

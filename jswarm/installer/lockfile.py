@@ -2,7 +2,7 @@
 
 Shape:
 
-    public_version: v0.1.0
+    public_version: v1.0.0
     installed_at: 2026-09-03T00:00:00Z
     state: complete            # or partial
     steps_completed: [venv, skills, portal_config]

@@ -9,6 +9,12 @@
 # changed, the occurrence was fixed) also fails the gate, so this list can
 # never silently rot.
 allow:
+  - path: tests/test_release_version.py
+    pattern: '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+    reason: >-
+      Reserved example-domain identity used only for commits in a temporary
+      Git fixture, so the test never reads or depends on a developer's identity.
+
   - path: jswarm/compliance/sanitizer.py
     pattern: '/Users/|/home/|/root/'
     reason: >-

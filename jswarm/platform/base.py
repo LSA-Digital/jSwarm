@@ -1,4 +1,4 @@
-"""The platform interface. macOS is the only platform supported in v0.1.0;
+"""The platform interface. macOS is the only platform supported in v1.0.0;
 `current()` in `jswarm.platform` returns `UnsupportedPlatform` for anything
 else, honestly and without pretending any of its operations work.
 """
@@ -55,7 +55,7 @@ class UnsupportedPlatform:
         return False
 
     def unsupported_message(self) -> str:
-        return f"{self.name} is not supported. JarviSWARM v0.1.0 supports {SUPPORTED_PLATFORM_NAME} only."
+        return f"{self.name} is not supported. JarviSWARM v1.0.0 supports {SUPPORTED_PLATFORM_NAME} only."
 
     def check_prerequisites(self) -> list[Check]:
         return [Check("platform", False, self.unsupported_message())]

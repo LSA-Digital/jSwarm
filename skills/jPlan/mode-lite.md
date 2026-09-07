@@ -3,6 +3,8 @@
 
 ## Lite mode
 
+For every tracker CLI response with `status: requires_host`, follow `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jira-host-bridge.md` using this session's authenticated Atlassian tools. Validate the observed result with `--result-file` before treating an issue as resolved or a comment/transition as complete. Failed reads stop planning; failed writes preserve the local plan and report the actual failure.
+
 **Triggers:** `/jPlan --lite`, `/jPlan lite`, or clear user intent ("briefing only", "context dump", "no phases yet", "not ready to plan implementation").
 
 **Forbidden in Lite (non-exhaustive):** Technical design spec (`*.specs.md`); Step 3 codebase/test research (no required ColGREP or `TEST_CATALOG` trawling); Oracle; implementation phases; task/checkbox work breakdown; A/C-to-test traceability matrices; testing strategy / execution-team / UAT / E2E / test-data header blocks; `*.uat-scenarios.md` / `*.uat-test.md`; Feature `integr-fixes` / `pe2e-fixes`; any prose prescribing *how* to build beyond restating goals.

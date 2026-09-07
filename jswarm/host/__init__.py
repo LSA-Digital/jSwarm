@@ -1,5 +1,5 @@
 """The agent-host boundary. Claude Code is the only implementation shipped
-in v0.1.0; nothing outside this package (and `jswarm.installer`, which is
+in v1.0.0; nothing outside this package (and `jswarm.installer`, which is
 allowed to know the host exists in order to install it) may reach for
 `~/.claude` or `CLAUDE.md` on its own.
 """
@@ -10,7 +10,7 @@ from jswarm.host.claude_code import ClaudeCodeHost
 
 
 def current() -> Host:
-    """The configured agent host. Claude Code is the only one in v0.1.0."""
+    """The configured agent host. Claude Code is the only one in v1.0.0."""
     return ClaudeCodeHost()
 
 

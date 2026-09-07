@@ -10,6 +10,9 @@ slug and no tracker at all.
 
 ## Install
 
+The first release is **v1.0.0**. Until its release tag is published, `main` is
+a development checkout, not a released version.
+
 ```bash
 git clone https://github.com/LSA-Digital/jSwarm ~/dev/jswarm && cd ~/dev/jswarm
 ./install.sh check
@@ -46,8 +49,9 @@ the exact statement of what is and is not supported.
 jSwarm is the open core: a complete way to run one work item through the
 loop, on your own machine, with nothing hidden behind it. Multi-model
 routing, cost controls, coordinated agent orchestration, and compliance
-gates for larger and regulated teams are available as an enterprise add-on
-that installs on top of this open core and never forks it. See
+gates for larger and regulated teams are the focus of the Enterprise offering.
+Contact us to confirm capabilities, prerequisites, and rollout scope. Enterprise
+is additive to the open core, never a fork. See
 [jarviswarm.com](https://jarviswarm.com) for details.
 
 ## License

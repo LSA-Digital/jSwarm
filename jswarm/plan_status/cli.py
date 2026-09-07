@@ -8,7 +8,7 @@ cache AND emits an NDJSON event. Jira sync is split by criticality:
   - planning transitions: the CALLING AGENT pushes the (fire-and-forget) Jira
     transition via the Atlassian MCP; this CLI only reports the intended transition.
   - closeout transitions (6.closed.merged + terminals): pass --sync-jira to delegate
-    to the retry-safe jswarm/jira_mcp_closeout.py helper.
+    to the configured tracker; handle requires_host in the active agent.
 
 Advisory-only: if project config is unresolved, prints a notice and exits 0 without
 writing (so the command flow never breaks on a misconfigured project).

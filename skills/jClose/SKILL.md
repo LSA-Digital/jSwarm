@@ -80,6 +80,8 @@ Run `PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}" "${JSWARM_HOME:-$HOME/dev/jsw
 
 ## Step 4: Sync the tracker
 
+When a tracker CLI call returns `status: requires_host`, read `${JSWARM_HOME:-$HOME/dev/jswarm}/docs/jira-host-bridge.md` and execute the operation through the current session's authenticated Atlassian tools. Re-run the same command with `--result-file <receipt-path>` to validate the observed response. Do not continue with a pending request: either complete it or record the actual failure. Only validated results belong in `close.json`; configured does not mean synchronized.
+
 Comment with the retro summary, then transition the work item, through the tracker boundary; never by inventing tracker behavior in this file. Both calls are safe to run whether or not a tracker is configured:
 
 ```bash
@@ -111,8 +113,8 @@ Record the close itself at `.jswarm/work/<ID>/close.json`:
   "id": "<ID>",
   "closed_at": "<UTC ISO-8601>",
   "retro": ".jswarm/work/<ID>/retro.md",
-  "tracker_comment": {"ok": "...", "skipped": "...", "message": "..."},
-  "tracker_transition": {"ok": "...", "skipped": "...", "message": "..."}
+  "tracker_comment": {"ok": false, "skipped": false, "message": "Replace with the validated tracker result"},
+  "tracker_transition": {"ok": false, "skipped": false, "message": "Replace with the validated tracker result"}
 }
 ```
 

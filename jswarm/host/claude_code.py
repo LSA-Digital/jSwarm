@@ -1,4 +1,4 @@
-"""Claude Code: the only agent host supported in v0.1.0.
+"""Claude Code: the only agent host supported in v1.0.0.
 
 This module is the one place in the public core allowed to know that
 `~/.claude` and `CLAUDE.md` exist. Everything specific to Claude Code lives
