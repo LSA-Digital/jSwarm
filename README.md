@@ -39,8 +39,10 @@ private -- see [Getting started](docs/getting-started.md#colgrep-optional-code-s
 
 ## Support
 
-macOS is the only supported platform, Claude Code is the only supported
-agent host, and Jira is the only tracker adapter shipped in this release.
+The shell workflow targets macOS, Linux, and Windows through WSL2/Ubuntu.
+Native Windows shells are not supported. See [Platform setup](docs/platforms.md)
+for prerequisites and the distinction between automated tests and clean-machine acceptance.
+Claude Code is the only supported agent host, and Jira is the only tracker adapter shipped in this release.
 See [Getting started](docs/getting-started.md#what-this-guide-supports) for
 the exact statement of what is and is not supported.
 

@@ -49,10 +49,6 @@ def _cmd_check(args: argparse.Namespace) -> int:
         missing = missing or (not c.ok and not c.optional)
 
     print()
-    if not plat.is_supported():
-        print(plat.unsupported_message())
-        print("Next: ./install.sh install --dry-run   (here, in the jSwarm clone)")
-        return 2
     if missing:
         print("check: required items missing (see fix lines above)")
         print("Next: run the fix commands above, then ./install.sh check   (here, in the jSwarm clone)")
@@ -494,10 +490,16 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
 
     if args.dry_run:
         pieces = ", ".join(["skills", "portal_config"] + (["colgrep"] if "colgrep" in lock.steps_completed else []))
-        print(f"DRY-RUN: would redeploy {pieces} and rewrite {lockfile.lock_path(home)}")
+        print(f"DRY-RUN: would refresh Python dependencies, redeploy {pieces} and rewrite {lockfile.lock_path(home)}")
         print("Next: ./install.sh upgrade   (here, in the jSwarm clone) to apply it.")
         return 0
 
+    result = ctx.run([str(jswarm_paths.python()), "-m", "pip", "install", "-q", "-r", str(source / "requirements.txt")])
+    if result is not None and result.returncode != 0:
+        print("upgrade: Python dependency refresh failed; deployed skills and lock left unchanged.")
+        print(result.stderr or result.stdout or "")
+        print("Next: ./install.sh install   (here, in the jSwarm clone) to repair dependencies")
+        return 1
     timestamp = backup_mod.utc_timestamp()
     colgrep_ready = "colgrep" in lock.steps_completed
     _install_skills(ctx, home, source, timestamp, with_colgrep=colgrep_ready)
@@ -515,30 +517,9 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
 
 # ----------------------------------------------------------------- uninstall
 def _stop_portal_daemon(ctx, home: Path) -> None:
-    import os
-    import signal
+    from jswarm.portal.process import stop
 
-    d = home / ".jswarm" / "decision-review"
-    for name in ("server.pid", "service.pid"):
-        p = d / name
-        if not p.is_file():
-            continue
-        try:
-            pid = int(p.read_text().strip())
-        except (ValueError, OSError):
-            ctx.remove(p)
-            continue
-        if ctx.dry_run:
-            print(f"  would stop portal pid {pid} ({name})")
-        else:
-            try:
-                os.kill(pid, signal.SIGTERM)
-                print(f"  stopped portal pid {pid} ({name})")
-            except ProcessLookupError:
-                print(f"  {name} held pid {pid}, which is not running")
-            except PermissionError:
-                print(f"  could not stop pid {pid} ({name}); stop it by hand")
-        ctx.remove(p)
+    stop(home, dry_run=ctx.dry_run)
 
 
 def _cmd_uninstall(args: argparse.Namespace) -> int:

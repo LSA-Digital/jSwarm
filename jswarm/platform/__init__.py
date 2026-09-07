@@ -1,19 +1,15 @@
-"""The platform boundary. macOS is the only platform supported in v1.0.0;
-nothing outside this package may branch on the operating system itself.
-"""
-from __future__ import annotations
+"""Inspect tools rather than rejecting a machine because it is not a Mac.
 
+The documented shell environments are macOS, Linux, and Windows via WSL2.
+Native Windows shells are not covered by the Bash installer and skills.
+"""
 import sys
 
-from jswarm.platform.base import Check, Platform, UnsupportedPlatform, UnsupportedPlatformError
-from jswarm.platform.macos import MacOSPlatform
+from jswarm.platform.base import Check, ToolPlatform
 
 
-def current() -> Platform:
-    """This machine's platform. MacOSPlatform on darwin, UnsupportedPlatform elsewhere."""
-    if sys.platform == "darwin":
-        return MacOSPlatform()
-    return UnsupportedPlatform(sys.platform)
+def current() -> ToolPlatform:
+    return ToolPlatform("macos" if sys.platform == "darwin" else sys.platform)
 
 
-__all__ = ["Check", "Platform", "UnsupportedPlatform", "UnsupportedPlatformError", "MacOSPlatform", "current"]
+__all__ = ["Check", "ToolPlatform", "current"]

@@ -182,9 +182,9 @@ def test_check_reports_rust_toolchain_as_optional(tmp_path):
 
     sys.path.insert(0, str(REPO_ROOT))
     from jswarm.platform.base import Check
-    from jswarm.platform.macos import MacOSPlatform
+    from jswarm.platform.base import ToolPlatform
 
-    plat = MacOSPlatform()
+    plat = ToolPlatform("test")
     checks = plat.check_prerequisites()
     rust = [c for c in checks if "rust" in c.name.lower()]
     assert len(rust) == 1, f"expected exactly one Rust toolchain check, got: {checks}"
@@ -193,18 +193,18 @@ def test_check_reports_rust_toolchain_as_optional(tmp_path):
 
 
 def test_rust_toolchain_check_reflects_path(tmp_path, monkeypatch):
-    from jswarm.platform.macos import MacOSPlatform
+    from jswarm.platform.base import ToolPlatform
 
     empty_bin = tmp_path / "empty-bin"
     empty_bin.mkdir()
     monkeypatch.setenv("PATH", str(empty_bin))
-    assert MacOSPlatform()._rust_toolchain_check().ok is False
+    assert ToolPlatform("test")._rust_toolchain_check().ok is False
 
     cargo_bin = tmp_path / "cargo-bin"
     cargo_bin.mkdir()
     _write_stub(cargo_bin / "cargo", "exit 0")
     monkeypatch.setenv("PATH", str(cargo_bin))
-    assert MacOSPlatform()._rust_toolchain_check().ok is True
+    assert ToolPlatform("test")._rust_toolchain_check().ok is True
 
 
 def test_optional_check_failing_does_not_fail_cmd_check(monkeypatch, capsys):

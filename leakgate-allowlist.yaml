@@ -55,15 +55,3 @@ allow:
       Sample host path ("/Users/example/secret.txt") the test feeds to the
       sanitizer to prove host-path detection actually works; removing it
       would gut the test.
-
-  - path: PROVENANCE.yaml
-    pattern: '(?i)lsars'
-    reason: >-
-      The `source:` field for the decision-review launchd plist template
-      records the file's real path in the private common repository
-      (deploy/launchd/com.lsars.decision-review.plist.template), which
-      scripts/upstream-diff.sh needs to stay accurate to diff this repo
-      against upstream. The shipped `target:` copy itself was renamed to
-      com.jswarm.decision-review.plist.template (filename and internal
-      bundle-id both), so this is the one remaining reference and it is
-      provenance metadata, not shipped content.

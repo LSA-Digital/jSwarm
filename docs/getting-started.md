@@ -1,40 +1,38 @@
 # Getting started
 
-Install jSwarm on a Mac, verify it, and adopt one application repository. This
+Install jSwarm, verify it, and adopt one application repository. This
 is the manual path: every command below runs in a terminal, and you can see
 exactly what each one changes before it changes it.
 
 ## What this guide supports
 
-- **macOS is the only supported platform. Linux and Windows are not supported.**
+- **Use macOS, Linux, or Windows through WSL2/Ubuntu.** Run all commands and Claude Code in that environment. Native Windows PowerShell/CMD execution is not supported. See [Platform setup and validation](platforms.md).
 - **Claude Code is the only supported agent host. Codex, Cursor, and ChatGPT are not supported.**
 - **Jira is optional, and it is the only tracker implemented in this release.** You can run the
   complete lifecycle with no tracker at all; see [Working without a tracker](without-jira.md).
 
-If you use a different platform, agent, or tracker today, jSwarm is not yet a fit. The
+If you use a different agent or need another tracker integration today, jSwarm is not yet a fit. The
 boundaries above are real code boundaries (`jswarm/platform/`, `jswarm/host/`,
 `jswarm/tracker/`), not marketing language, and a future release can add an adapter
 without moving the loop underneath it.
 
 ## 1. Before you start
 
-You need a Mac, a local git repository you can safely test against, and about
+You need a supported shell environment, a local git repository you can safely test against, and about
 twenty minutes.
 
-Required (this is exactly what `./install.sh check` verifies):
+Required tools (`./install.sh check` reports these; install them by any method):
 
-- **Xcode command line tools**: `xcode-select --install`
-- **Homebrew**: install it from [brew.sh](https://brew.sh)
-- **Python 3.12**: `brew install python@3.12`
-- **git**: `brew install git` (Xcode command line tools normally provide this already)
-- **GitHub CLI**: `brew install gh`, then `gh auth login`
-- **Claude Code**: `npm install -g @anthropic-ai/claude-code`, then run `claude` once to sign in
+- **Python 3.12 or newer**, including `venv` support, available as `python3.12` or `python3`.
+- **Git**, available as `git`.
+- **GitHub CLI**, available as `gh`; then run `gh auth login`.
+- **Claude Code**, available as `claude`; run it once to sign in. See [Claude Code setup](https://code.claude.com/docs/en/setup).
 - **A git identity**: the name and email used for your commits (not checked by `check`, but
   needed for the commits the loop makes on your behalf)
 
 Only if you use the related feature:
 
-- **fnm and Node 24** are needed for the local review portal.
+- **Node 24 with npm** is needed for the local review portal. fnm is an option, not a requirement.
 - **A Jira account and project** are needed only if you connect a project to Jira.
 - **A Rust toolchain** (`cargo`) is needed only for `install --with-colgrep`; see below.
   `check` reports it like any other prerequisite, but it never fails `check` on its own
@@ -185,7 +183,7 @@ files you intend to keep, leaving unrelated work out. Start `/jPlan` with a
 clean working tree.
 
 To connect Jira, register Atlassian's hosted MCP server and authorize it once.
-Run both commands in Terminal on the Mac where you will use Claude Code; the
+Run both commands in the same Mac/Linux/Ubuntu terminal environment as Claude Code; the
 second command opens your browser for approval:
 
 ```bash

@@ -20,7 +20,8 @@ def test_getting_started_matches_contract():
 def test_support_is_stated_honestly():
     t = Path("docs/getting-started.md").read_text().lower()
     assert "macos" in t and "claude code" in t
-    for unsupported in ("codex", "cursor", "linux", "windows"):
+    assert "wsl2/ubuntu" in t and "native windows" in t
+    for unsupported in ("codex", "cursor"):
         # may be mentioned only as not supported, never as a supported option
         for line in t.splitlines():
             if unsupported in line:

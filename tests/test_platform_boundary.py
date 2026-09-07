@@ -13,15 +13,13 @@ def test_platform_detection_lives_only_in_the_platform_layer():
                 offenders.append(f"{p}:{n}: {line.strip()}")
     assert offenders == [], "platform specifics outside the platform layer:\n" + "\n".join(offenders)
 
-def test_unsupported_platform_is_honest():
-    from jswarm.platform.base import UnsupportedPlatform
-    up = UnsupportedPlatform("linux")
-    assert not up.is_supported()
-    m = up.unsupported_message()
-    assert "linux" in m and "macOS" in m
-    assert "not supported" in m.lower()
-
-def test_macos_is_supported_here():
-    if sys.platform != "darwin":
-        return
-    assert current().is_supported() and current().name == "macos"
+def test_os_does_not_add_a_prerequisite_gate(monkeypatch):
+    monkeypatch.setattr("shutil.which", lambda name: f"/tools/{name}")
+    for name in ("darwin", "linux", "win32"):
+        monkeypatch.setattr(sys, "platform", name)
+        checks = current().check_prerequisites()
+        assert {check.name for check in checks} == {
+            "Python 3.12+", "git", "gh", "claude-code", "Rust toolchain (for --with-colgrep)"
+        }
+        assert not hasattr(current(), "daemon_install")
+        assert not hasattr(current(), "shell_profile")

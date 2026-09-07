@@ -23,7 +23,7 @@ class ClaudeCodeHost:
         """Whether this host can actually be used: whether the `claude`
         lifecycle binary is runnable from `PATH`.
 
-        The only caller (`jswarm.platform.macos.MacOSPlatform._agent_host_check`,
+        The only caller (`jswarm.platform.base.ToolPlatform.check_prerequisites`,
         feeding the `check` prerequisites report) uses this to tell a new user
         "you can run Claude Code commands." A bare `~/.claude` directory does
         not mean that -- it can be a leftover from an old install, a dotfiles
@@ -66,6 +66,9 @@ class ClaudeCodeHost:
 
     def hook_interpreter(self) -> str:
         return _HOOK_INTERPRETER
+
+    def install_hint(self) -> str:
+        return "Install and authenticate Claude Code: https://code.claude.com/docs/en/setup"
 
     def register_mcp_hint(self) -> str:
         return _MCP_HINT

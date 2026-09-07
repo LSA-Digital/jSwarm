@@ -150,7 +150,10 @@ def _is_jswarm_hook_entry(entry: dict) -> bool:
 
 def _jswarm_hooks_payload() -> dict:
     interpreter = current_host().hook_interpreter()
-    command = f"{interpreter} -m jswarm.installer.hooks precompact_reminder"
+    command = (
+        'PYTHONPATH="${JSWARM_HOME:-$HOME/dev/jswarm}${PYTHONPATH:+:$PYTHONPATH}" '
+        f'"{interpreter}" -m jswarm.installer.hooks precompact_reminder'
+    )
     return {
         "PreCompact": [
             {"matcher": "", "hooks": [{"type": "command", "command": command}]},

@@ -226,8 +226,8 @@ def build_review_data(build_manifest_path: Path) -> dict:
 def _npm() -> Path:
     if not (NODE_BIN_DIR / "node").exists():
         raise RuntimeError(
-            "Node 24 via fnm is required to build the portal; "
-            "run: brew install fnm && fnm install 24"
+            "Node 24 with npm is required to build the portal; "
+            "install it using your preferred package manager (see docs/platforms.md)"
         )
     npm = NODE_BIN_DIR / "npm"
     if not npm.exists():

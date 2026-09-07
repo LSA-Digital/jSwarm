@@ -1,14 +1,9 @@
-"""The platform interface. macOS is the only platform supported in v1.0.0;
-`current()` in `jswarm.platform` returns `UnsupportedPlatform` for anything
-else, honestly and without pretending any of its operations work.
-"""
+"""Tool prerequisites shared by the supported shell environments."""
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Protocol
-
-SUPPORTED_PLATFORM_NAME = "macOS"
+import shutil
+import sys
 
 
 @dataclass(frozen=True)
@@ -16,55 +11,25 @@ class Check:
     name: str
     ok: bool
     remedy: str
-    # True for a prerequisite an optional component needs (e.g. the Rust
-    # toolchain for `--with-colgrep`): reported like any other check, but
-    # `check` never fails the whole run over it -- only over a required one.
     optional: bool = False
 
 
-class UnsupportedPlatformError(Exception):
-    """Raised by an `UnsupportedPlatform`'s mutating operations."""
-
-
-class Platform(Protocol):
-    name: str
-
-    def is_supported(self) -> bool: ...
-
-    def unsupported_message(self) -> str: ...
-
-    def check_prerequisites(self) -> list[Check]: ...
-
-    def daemon_install(self, plist: Path) -> None: ...
-
-    def daemon_uninstall(self, label: str) -> None: ...
-
-    def shell_profile(self) -> Path: ...
-
-
 @dataclass(frozen=True)
-class UnsupportedPlatform:
-    """Anything but macOS. Every operation is honest about being unable to
-    run rather than silently doing nothing or guessing at a macOS-shaped
-    answer.
-    """
-
+class ToolPlatform:
     name: str
-
-    def is_supported(self) -> bool:
-        return False
-
-    def unsupported_message(self) -> str:
-        return f"{self.name} is not supported. JarviSWARM v1.0.0 supports {SUPPORTED_PLATFORM_NAME} only."
 
     def check_prerequisites(self) -> list[Check]:
-        return [Check("platform", False, self.unsupported_message())]
+        from jswarm.host import current as current_host
+        host = current_host()
+        return [
+            Check("Python 3.12+", sys.version_info >= (3, 12),
+                  "Install Python 3.12+ with venv support: https://www.python.org/downloads/"),
+            Check("git", shutil.which("git") is not None, "Install Git: https://git-scm.com/downloads"),
+            Check("gh", shutil.which("gh") is not None, "Install GitHub CLI: https://cli.github.com/"),
+            Check(host.name, host.is_present(), host.install_hint()),
+            self._rust_toolchain_check(),
+        ]
 
-    def daemon_install(self, plist: Path) -> None:
-        raise UnsupportedPlatformError(self.unsupported_message())
-
-    def daemon_uninstall(self, label: str) -> None:
-        raise UnsupportedPlatformError(self.unsupported_message())
-
-    def shell_profile(self) -> Path:
-        raise UnsupportedPlatformError(self.unsupported_message())
+    def _rust_toolchain_check(self) -> Check:
+        return Check("Rust toolchain (for --with-colgrep)", shutil.which("cargo") is not None,
+                     "Install Rust and your platform's build tools: https://rustup.rs/", optional=True)

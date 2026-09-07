@@ -622,9 +622,6 @@ files:
 - source: deploy/decision-review/config.template.json
   target: templates/decision-review/config.template.json
   sha256: 2c2b636084a854a92f988c6246ac10e0fa7178de765935e325a7f72e8bf2963e
-- source: deploy/launchd/com.lsars.decision-review.plist.template
-  target: templates/launchd/com.jswarm.decision-review.plist.template
-  sha256: dbda22f9b698e73d75ee5970becf79de0337f3752f5ca1ed1df9e8f7fb422979
 - source: scripts/fact_events/__init__.py
   target: jswarm/fact_events/__init__.py
   sha256: 853363940b95df2a9e01b4299b78b7b87cee06ac076efe07d20dc77543d94c8c

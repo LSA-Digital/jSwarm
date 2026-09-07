@@ -85,7 +85,7 @@ def test_check_with_only_an_optional_item_missing_exits_zero_and_points_at_insta
     home.mkdir()
     bindir = tmp_path / "bin"
     bindir.mkdir()
-    for name in ("brew", "python3.12", "gh", "claude"):
+    for name in ("git", "gh", "claude"):
         _write_stub(bindir / name)
     path = f"{bindir}:{BARE_SYSTEM_PATH}"
 

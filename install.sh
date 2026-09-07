@@ -93,7 +93,7 @@ die_if_not_installed() {
 cmd_check() {
   [[ $# -eq 0 ]] || die "check: unknown option: $1"
   local py; py="$(resolve_py_readonly)"
-  [[ -n "$py" ]] || die "check: no Python 3 found on PATH. Install Python 3.12: brew install python@3.12"
+  [[ -n "$py" ]] || die "check: no Python 3 found on PATH. Install Python 3.12+ with venv support (see docs/platforms.md)"
   ( cd "$JSWARM_HOME" && "$py" -m jswarm.installer.cli check )
 }
 
@@ -113,7 +113,7 @@ cmd_install() {
   local colgrepflag=""; [[ "$colgrep" -eq 1 ]] && colgrepflag="--with-colgrep"
 
   local venv_ready=0
-  if [[ -x "$VENV_PY" ]] && "$VENV_PY" -c "import yaml" >/dev/null 2>&1; then
+  if [[ -x "$VENV_PY" ]] && "$VENV_PY" -c "import yaml, psutil" >/dev/null 2>&1; then
     venv_ready=1
   fi
 
@@ -122,7 +122,7 @@ cmd_install() {
       step "install: preview (no venv yet)"
       warn "DRY-RUN: nothing under \$HOME will be written."
       echo "  would write: ${HOME:-\$HOME}/.jswarm/install.lock.yaml"
-      echo "  would run  : python3.12 -m venv .venv && .venv/bin/python -m pip install -q -r requirements.txt   (venv)"
+      echo "  would create: .venv using Python 3.12+ and install requirements.txt into it"
       echo "  would run  : skills -> ~/.claude/skills"
       echo "  would run  : portal_config -> ~/.jswarm/decision-review/config.json"
       if [[ "$colgrep" -eq 1 ]]; then
@@ -136,8 +136,14 @@ cmd_install() {
       return 0
     fi
     step "install: python venv ($JSWARM_HOME/.venv)"
-    command -v python3.12 >/dev/null 2>&1 || die "install: python3.12 not found. Fix: brew install python@3.12, then re-run: $(basename "$0") install"
-    ( cd "$JSWARM_HOME" && python3.12 -m venv .venv && .venv/bin/python -m pip install -q --upgrade pip && .venv/bin/python -m pip install -q -r requirements.txt )
+    local bootstrap_py=""
+    for candidate in python3.12 python3; do
+      if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c 'import sys; raise SystemExit(sys.version_info < (3, 12))' >/dev/null 2>&1; then
+        bootstrap_py="$candidate"; break
+      fi
+    done
+    [[ -n "$bootstrap_py" ]] || die "install: Python 3.12+ with venv support is required. See docs/platforms.md, then re-run: $(basename "$0") install"
+    ( cd "$JSWARM_HOME" && "$bootstrap_py" -m venv .venv && .venv/bin/python -m pip install -q --upgrade pip && .venv/bin/python -m pip install -q -r requirements.txt )
     ok "venv created"
   fi
 
@@ -242,21 +248,8 @@ cmd_uninstall() {
 
 # ---------------------------------------------------------------- portal
 cmd_portal_stop() {
-  local dir="$HOME/.jswarm/decision-review"
-  local found=0 f p pid
-  for f in server.pid service.pid; do
-    p="$dir/$f"
-    [[ -f "$p" ]] || continue
-    found=1
-    pid="$(tr -d '[:space:]' <"$p" 2>/dev/null || true)"
-    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
-      if kill "$pid" 2>/dev/null; then ok "stopped portal pid $pid ($f)"; else warn "could not stop pid $pid ($f); stop it by hand"; fi
-    else
-      warn "$f held pid '${pid:-<empty>}', which is not running; removing the stale file"
-    fi
-    rm -f "$p"
-  done
-  [[ "$found" -eq 1 ]] || ok "no portal pid file under $dir; nothing to stop"
+  local py; py="$(resolve_py_or_empty)"; die_if_not_installed portal "$py"
+  ( cd "$JSWARM_HOME" && "$py" -m jswarm.portal.process --stop "$@" )
 }
 
 cmd_portal() {
@@ -272,7 +265,7 @@ cmd_portal() {
   done
   if [[ "$stop" -eq 1 ]]; then
     step "portal: stop"
-    cmd_portal_stop
+    if [[ "$dry" -eq 1 ]]; then cmd_portal_stop --dry-run; else cmd_portal_stop; fi
     return 0
   fi
   local py; py="$(resolve_py_or_empty)"; die_if_not_installed portal "$py"
@@ -291,36 +284,15 @@ cmd_portal() {
   if [[ "$dry" -eq 1 ]]; then
     warn "would run: npm ci --ignore-scripts && npm run build (jswarm.portal.render_ui --build-only)"
   else
-    command -v node >/dev/null 2>&1 || die "portal: Node is required to build the UI. Fix: brew install fnm && fnm install 24 && fnm use 24"
+    command -v node >/dev/null 2>&1 || die "portal: Node is required to build the UI. Install Node 24 with npm (any installation method; see docs/platforms.md)"
     ( cd "$JSWARM_HOME" && "$py" -m jswarm.portal.render_ui --build-only )
   fi
 
-  # jswarm.portal.server runs one listener, serving the built UI and the API
-  # together, on the config's "port" (default 8766). It never kills anything
-  # holding the port: if 8766 is occupied, it names the process and how to
-  # choose a different port instead.
-  step "portal 3/3: serve http://localhost:8766/uat/"
-  local port_pid; port_pid="$(lsof -ti:8766 2>/dev/null | head -1 || true)"
-  if [[ -n "$port_pid" && "$dry" -eq 0 ]]; then
-    local holder; holder="$(ps -o comm= -p "$port_pid" 2>/dev/null || echo unknown)"
-    die "portal: port 8766 is already in use by pid $port_pid ($holder). Stop it yourself, or choose a different port by editing \"port\" in $cfg."
-  fi
-  if [[ "$dry" -eq 1 ]]; then
-    local mode="foreground"; [[ "$bg" -eq 1 ]] && mode="background"
-    warn "would run in the $mode: $py -m jswarm.portal.server --config $cfg"
-    echo "Next: $(basename "$0") portal   (here, in the jSwarm clone) to apply it."
-    return 0
-  fi
-  if [[ "$bg" -eq 1 ]]; then
-    mkdir -p "$HOME/.jswarm/decision-review"
-    ( cd "$JSWARM_HOME" && nohup "$py" -m jswarm.portal.server --config "$cfg" >"$HOME/.jswarm/decision-review/server.log" 2>&1 & echo $! >"$HOME/.jswarm/decision-review/server.pid" )
-    ok "started in background (pid $(cat "$HOME/.jswarm/decision-review/server.pid")); log: ~/.jswarm/decision-review/server.log"
-    echo "Next: $(basename "$0") portal --stop   (here, in the jSwarm clone) when you're done."
-  else
-    ok "starting in the foreground (Ctrl-C to stop)"
-    echo "Next: Ctrl-C to stop   (here, in this terminal)."
-    ( cd "$JSWARM_HOME" && exec "$py" -m jswarm.portal.server --config "$cfg" )
-  fi
+  step "portal 3/3: start server"
+  local args=()
+  [[ "$bg" -eq 1 ]] && args+=(--background)
+  [[ "$dry" -eq 1 ]] && args+=(--dry-run)
+  ( cd "$JSWARM_HOME" && "$py" -m jswarm.portal.process ${args[@]+"${args[@]}"} )
 }
 
 # ---------------------------------------------------------------- dispatch

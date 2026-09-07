@@ -1,5 +1,5 @@
 # jswarm/portal/render_portal_config.py
-"""Render the decision-review portal config and launchd plist for THIS machine.
+"""Render the decision-review portal config for this machine.
 
 Templates carry ``__HOME__``, ``__JSWARM_COMMON__``, ``__PORT_UI__``, ``__PORT_BACKEND__``.
 """
@@ -14,7 +14,6 @@ from jswarm.paths import jswarm_home
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_TEMPLATE = REPO_ROOT / "templates" / "decision-review" / "config.template.json"
-PLIST_TEMPLATE = REPO_ROOT / "templates" / "launchd" / "com.jswarm.decision-review.plist.template"
 
 
 def render(template: str, *, home: Path, common: Path, port_ui: int = 8765, port_backend: int = 8766) -> str:
@@ -32,7 +31,6 @@ def render(template: str, *, home: Path, common: Path, port_ui: int = 8765, port
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", required=True, type=Path, help="where to write config.json")
-    parser.add_argument("--plist-out", type=Path, default=None, help="optionally also render the launchd plist")
     parser.add_argument("--port-ui", type=int, default=8765)
     parser.add_argument("--port-backend", type=int, default=8766)
     args = parser.parse_args(argv)
@@ -46,14 +44,6 @@ def main(argv: list[str] | None = None) -> int:
         encoding="utf-8",
     )
     print(f"wrote {args.out}")
-    if args.plist_out:
-        args.plist_out.parent.mkdir(parents=True, exist_ok=True)
-        args.plist_out.write_text(
-            render(PLIST_TEMPLATE.read_text(encoding="utf-8"), home=home, common=common,
-                   port_ui=args.port_ui, port_backend=args.port_backend),
-            encoding="utf-8",
-        )
-        print(f"wrote {args.plist_out}")
     return 0
 
 

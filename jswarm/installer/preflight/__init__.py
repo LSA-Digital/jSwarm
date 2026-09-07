@@ -13,17 +13,14 @@ from types import SimpleNamespace
 from typing import Any
 
 from jswarm.compliance.sanitizer import contains_sensitive, sanitize
-from jswarm.platform import Platform, current as _current_platform
+from jswarm.platform import ToolPlatform, current as _current_platform
 
 _REQUIRED_PORTS = (9100, 9101)
 _SKIPPED_DOCKER_CAPABILITIES = ("stack start", "health check", "Compose validation", "Docker cleanup")
-# macOS is the only supported platform (v1.0.0). An unsupported platform's
-# guidance always comes from `Platform.unsupported_message()` instead -- see
-# `_guidance` below.
-_MACOS_GUIDANCE: dict[str, str] = {
-    "python": "Install a current Python 3.11+ runtime with your macOS package manager, then create the repository .venv.",
-    "docker": "Install Docker Desktop for macOS and confirm Docker Compose v2 with docker compose version.",
-    "git": "Install Git with Xcode Command Line Tools or your macOS package manager.",
+_TOOL_GUIDANCE: dict[str, str] = {
+    "python": "Install Python 3.12+ with venv support, then create the repository .venv.",
+    "docker": "If this application needs containers, install Docker Engine or Desktop and confirm Docker Compose v2 with docker compose version.",
+    "git": "Install Git using your package manager or https://git-scm.com/downloads.",
 }
 
 
@@ -74,10 +71,8 @@ class PreflightReport:
         }
 
 
-def _guidance(platform: Platform, topic: str) -> str:
-    if not platform.is_supported():
-        return platform.unsupported_message()
-    return _MACOS_GUIDANCE[topic]
+def _guidance(platform: ToolPlatform, topic: str) -> str:
+    return _TOOL_GUIDANCE[topic]
 
 
 def _default_probes(repo_root: Path) -> SimpleNamespace:
@@ -402,7 +397,7 @@ If Docker, Compose v2, Git, a working `.venv`, or the default demo ports are not
 
 ## Platform guidance
 
-JarviSWARM v1.0.0 supports macOS only. On macOS, the preflight reports macOS-specific prerequisite guidance. On anything else it reports plainly that the platform is not supported, rather than guessing at guidance for it.
+Run the shell workflow on macOS, Linux, or Windows through WSL2/Ubuntu. Preflight checks tools rather than requiring a particular package manager. Native Windows shells are not supported. See docs/platforms.md for setup and validation limits.
 
 ## Safety guarantees
 

@@ -4,12 +4,12 @@
 # Mac, not just a developer's, can go from nothing to a working jSwarm.
 #
 # Before running this, the account must already have installed:
-#   - Xcode command line tools    (xcode-select --install)
-#   - Homebrew                    (https://brew.sh)
-#   - git                         (brew install git)
-#   - gh                          (brew install gh)            -- for step 9/10 (opening the merge PR)
-#   - Python 3.12                 (brew install python@3.12)   -- `install.sh check` verifies this
-#   - Node                        (brew install fnm && fnm install 24 && fnm use 24)
+#   The same script can be used in Linux or Windows WSL2/Ubuntu. See docs/platforms.md.
+#   Install by any method; no package manager or Apple tooling is required:
+#   - git
+#   - gh                          -- for step 9/10 (opening the merge PR)
+#   - Python 3.12+ with venv       -- `install.sh check` verifies the running version
+#   - Node 24 with npm
 #                                  -- NOT verified by `install.sh check`; only the `portal` step
 #                                  needs it (it builds the portal), and dies there by name
 #                                  if missing. Installing it up front avoids a mid-run stop.

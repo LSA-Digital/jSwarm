@@ -17,6 +17,10 @@ class Host(Protocol):
 
     def is_present(self) -> bool: ...
 
+    def install_hint(self) -> str:
+        """Where to install and authenticate the host, for prerequisite reports."""
+        ...
+
     def skills_dir(self) -> Path:
         """Where this host's global skills are installed: `~/.claude/skills`."""
         ...

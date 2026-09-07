@@ -2,13 +2,20 @@ name: ci
 on: [push, pull_request]
 jobs:
   test:
-    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - uses: actions/setup-node@v4
         with: { node-version-file: "portal/.nvmrc" }
+      # No sign-in: containment tests exercise real MCP configuration in
+      # temporary homes, not authenticated lifecycle calls.
+      - run: npm install -g @anthropic-ai/claude-code
       - run: python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
       - run: .venv/bin/python -m pytest -q
       - run: .venv/bin/python -m jswarm.leakgate
