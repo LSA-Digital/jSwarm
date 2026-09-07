@@ -42,6 +42,7 @@ import time
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from socketserver import TCPServer
 from urllib.parse import unquote, urlsplit
 
 # Direct-file invocation bootstrap (`python jswarm/portal/server.py`):
@@ -2480,6 +2481,13 @@ def serve(
         # RemoteDisconnected with no response. 128 is the conventional
         # listen backlog for a small local service.
         request_queue_size = 128
+
+        def server_bind(self):
+            # HTTPServer performs reverse DNS just to label server_name. That
+            # lookup can stall local startup on hosts with unavailable DNS.
+            # Nothing here needs a canonical hostname; retain the bound address.
+            TCPServer.server_bind(self)
+            self.server_name, self.server_port = self.server_address[:2]
 
         def close_request(self, request):
             # Double-close guard (round-2 residue): under the loopback

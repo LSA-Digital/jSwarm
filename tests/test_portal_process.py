@@ -12,6 +12,22 @@ import pytest
 from jswarm.portal.process import PortalProcessError, start, state_dir, stop
 
 
+def test_server_start_does_not_require_reverse_dns(tmp_path, monkeypatch):
+    from jswarm.portal.server import serve
+
+    def unavailable_dns(*args, **kwargs):
+        raise AssertionError("local portal startup must not perform reverse DNS")
+
+    monkeypatch.setattr(socket, "getfqdn", unavailable_dns)
+    server = serve(tmp_path / "publications", tmp_path / "threads", [tmp_path],
+                   bind_host="127.0.0.1", port=0)
+    try:
+        assert server.server_name == "127.0.0.1"
+        assert server.server_port == server.server_address[1]
+    finally:
+        server.server_close()
+
+
 @pytest.fixture
 def portal(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(tmp_path))
@@ -29,8 +45,15 @@ def portal(tmp_path, monkeypatch):
         "threads_dir": str(tmp_path / "threads"), "dist_dir": str(tmp_path / "dist"),
         "port": port, "bind_host": "127.0.0.1", "service_store_root": str(directory),
     }))
-    yield tmp_path, config, port
-    stop(tmp_path)
+    try:
+        yield tmp_path, config, port
+    finally:
+        # Pytest displays this only for failures, including CI-only startup
+        # problems whose temporary server log would otherwise be lost.
+        log = directory / "server.log"
+        if log.exists():
+            print(log.read_text()[-4000:])
+        stop(tmp_path)
 
 
 def test_real_start_ready_duplicate_stop_and_restart(portal, capsys):
