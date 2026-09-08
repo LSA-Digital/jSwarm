@@ -32,6 +32,7 @@ private -- see [Getting started](docs/getting-started.md#colgrep-optional-code-s
 ## Docs
 
 - [Getting started](docs/getting-started.md), install, verify, and adopt a project
+- [Update jSwarm](docs/updating.md), get the latest source, upgrade installed skills, and restart Claude
 - [Your first ticket](docs/your-first-ticket.md), the complete reference loop with Jira
 - [How the loop works](docs/how-the-loop-works.md), the three operating contexts and what each command does
 - [Working without a tracker](docs/without-jira.md), the same loop with no tracker configured

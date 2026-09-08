@@ -231,6 +231,9 @@ process holds it and how to choose another; it never kills anything for you.
 
 ## Recovering from a bad start
 
+To get the latest code without starting over, follow [Update jSwarm](updating.md).
+Pulling the repository alone does not refresh the installed skills.
+
 - **`./install.sh unadopt <repo-path> [--dry-run]`** removes `.jswarm/`, the
   managed `CLAUDE.md` block, and jSwarm's hook entries from the project,
   restoring `CLAUDE.md` and `.claude/settings.json` to their state from

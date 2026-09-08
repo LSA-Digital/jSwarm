@@ -1,6 +1,8 @@
 # v1.1 candidate: private feedback and optional HUD
 
 These additions are being prepared for v1.1.0. They do not change the delivery loop or require Jira.
+They are available from `main`; existing users should follow [Update jSwarm](updating.md)
+before trying the new command or enabling the HUD. A published version tag remains separate.
 
 Contract addition: `/jFeedback` is an auxiliary public command, not a lifecycle step.
 Personal provider-quota display is included in the public HUD; routing, account collectors,
