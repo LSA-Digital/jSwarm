@@ -63,6 +63,7 @@ def test_upgrade_deploys_feedback_without_resetting_projects_or_enabling_hud(tmp
 
     assert cli._cmd_upgrade(argparse.Namespace(dry_run=False)) == 0
     assert (tmp_path / ".claude/skills/jFeedback/SKILL.md").read_bytes() == (source / "skills/jFeedback/SKILL.md").read_bytes()
+    assert (tmp_path / ".claude/skills/jSettings/SKILL.md").read_bytes() == (source / "skills/jSettings/SKILL.md").read_bytes()
     assert old_skill.read_bytes() == (source / "skills/jPlan/SKILL.md").read_bytes()
     assert any(p.read_text() == "previous installed skill\n" for p in (tmp_path / ".jswarm/backups").rglob("SKILL.md"))
     assert settings.read_bytes() == before_settings

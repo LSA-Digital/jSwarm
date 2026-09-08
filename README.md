@@ -50,8 +50,10 @@ the exact statement of what is and is not supported.
 
 ## v1.1 preview: feedback and HUD
 
-The v1.1 candidate adds `/jFeedback` for private, reviewed reports to LSA and an
-optional local HUD with provider-quota usage and reset times. See
+The v1.1 candidate adds `/jSettings` for previewed HUD controls, `/jUpgrade` for
+guided updates, and `/jFeedback` for reviewed reports to LSA. Direct sending needs
+a one-time LSA credential connection and activated server intake. The optional
+local HUD shows available provider-quota usage and reset times. See
 [Feedback and HUD](docs/feedback-and-hud.md) for setup and data-source limits.
 This is not a v1.1 release announcement.
 

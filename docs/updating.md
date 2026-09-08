@@ -93,7 +93,11 @@ Preview each change, then apply it:
 
 ## 4. Optional: enable the new HUD
 
-Still in Terminal in the jSwarm clone:
+In Claude Code, run `/jSettings` and ask to enable the HUD. Review the preview,
+approve the change, then restart Claude when instructed. No installer flags are
+needed for this normal path.
+
+Terminal recovery alternative, from the jSwarm clone:
 
 ```bash
 ./install.sh hud enable --dry-run

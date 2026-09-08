@@ -5,6 +5,9 @@ They are available from `main`; existing users should follow [Update jSwarm](upd
 before trying the new command or enabling the HUD. A published version tag remains separate.
 
 Contract addition: `/jFeedback` is an auxiliary public command, not a lifecycle step.
+`/jSettings` is the everyday settings command. It inspects settings without changes
+and guides HUD enable/disable through preview, approval, and verification. See the
+[everyday controls contract](everyday-controls-contract.md).
 `/jUpgrade` is also auxiliary: it checks and upgrades the public main channel with
 explicit source-update and installer-preview approvals. It does not upgrade projects
 or Enterprise; pinned tags and custom branches stop for manual channel selection.
@@ -19,15 +22,40 @@ Only the jSwarm commit, OS, CPU architecture, Python version, and text you selec
 No automatic transcript, source-code, credential, or log collection occurs. Recognizable sensitive
 strings are redacted locally, but you must still review for confidential information.
 
-The draft stays on your machine until you choose it at https://jarviswarm.com/feedback and click
-**Send privately to LSA**. Choosing the file only opens it in the browser; submission is separate.
-Reports go to LSA by its email delivery provider (Brevo), not a public issue tracker. Google
-reCAPTCHA protects submission. A reply email is optional. The receipt means the email provider
-accepted the message; it does not prove inbox delivery or human review. No automatic retries.
+The draft stays on your machine until you explicitly approve sending the exact
+sanitized payload. When connected, Claude submits it directly and returns a receipt.
+It never attaches a transcript or discovers more content automatically. Changing
+the report requires a new review and approval. Reports go privately to LSA through
+Brevo, not to a public issue tracker or marketing list.
+
+Direct sending requires an LSA-issued feedback credential, saved once through
+`/jSettings`. LSA must activate the authenticated intake and durable rate-limit
+store first. The one-time connection uses a hidden Terminal prompt; never paste
+credentials into chat or use an email-provider/AI-provider key. A saved credential
+does not prove server authorization. Missing configuration blocks sending.
+
+The browser fallback is https://jarviswarm.com/feedback: choose the draft, review
+it, and click **Send privately to LSA**. Selecting the file does not upload it.
+That separate form retains Google reCAPTCHA and an optional reply-email field.
+Direct sending does not yet include a separate reply address.
+
+A receipt means the email provider accepted the message; it does not prove inbox
+delivery or human review. On uncertainty, keep the draft and report ID and contact
+LSA. Do not resend with a new ID or switch to the browser to retry. Local attempt
+records block another direct send. Server records keep hashes/status, not report
+text, for 30 days; rate limits allow five attempts per sender per one-hour window.
 
 ## Optional HUD
 
-From the jSwarm clone, preview before enabling:
+Run `/jSettings` in Claude Code and ask to enable the HUD. It shows the preview,
+asks for approval, applies the change, and verifies the renderer. If another
+status line exists, replacement needs separate approval and its prior value is
+saved. Disable through the same command to restore it. Restart Claude afterward.
+
+The initial controls are status, enable, and disable, not layout/color/widget
+customization. Settings does not install provider collectors or model routing.
+
+Terminal recovery remains available. From the jSwarm clone, preview before enabling:
 
 ```bash
 ./install.sh hud enable --dry-run
@@ -73,6 +101,9 @@ common's F-49 widget source and session/provider-quota contracts.
 
 ## Before release
 
+- Activate direct sending with expiring LSA sender digests, durable rate-limit and
+  deduplication storage, and the mail provider. Current implementation fails closed
+  until those are configured; mocked email tests do not prove production delivery.
 - Deploy the website's private form and endpoint before publishing a core release that links to it.
   The server uses the existing Brevo sender/key and Google reCAPTCHA configuration. Its default
   destination is the existing LSA inbox; an operator can set `JSWARM_FEEDBACK_RECIPIENT` to another

@@ -62,7 +62,7 @@ def main(argv=None) -> int:
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
                 handle.write(rendered)
             print(f"Draft saved: {args.output}. Nothing sent.")
-            print(f"Review the file, then choose it at {FORM_URL}. Redaction is not a privacy guarantee.")
+            print(f"Next: /jFeedback can review and send after approval when connected. Browser fallback: {FORM_URL}. Redaction is not a privacy guarantee.")
         else:
             print(rendered, end="")
         return 0
