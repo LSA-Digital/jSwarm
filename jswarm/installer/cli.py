@@ -228,7 +228,9 @@ def _install_colgrep(ctx, source: Path) -> bool:
             print(f"  colgrep: `cargo install colgrep` failed (exit {result.returncode}): {detail}")
             return False
         if ctx.dry_run:
-            binary = "colgrep"  # nothing was actually installed to verify
+            cargo_home = Path(ctx.env().get("CARGO_HOME", str(Path.home() / ".cargo")))
+            binary = str(Path(ctx.env().get("CARGO_INSTALL_ROOT", str(cargo_home))) / "bin" / "colgrep")
+            print("  colgrep: preview uses the default Cargo install location; actual registration uses the discovered binary")
         else:
             binary = _colgrep_binary()
             if not binary:
@@ -238,37 +240,9 @@ def _install_colgrep(ctx, source: Path) -> bool:
                 )
                 return False
 
-    from jswarm import paths as jswarm_paths
-    from jswarm.host import current as current_host
+    from jswarm.installer.colgrep import ensure_registration
 
-    host = current_host()
-    mcp_server = source / "jswarm" / "colgrep_mcp_server.py"
-    argv = host.mcp_add_argv("colgrep", str(jswarm_paths.python()), [str(mcp_server)])
-    print(f"  colgrep: registering the MCP server with {host.name}")
-    result = ctx.run(argv)
-    if result is not None and result.returncode != 0:
-        detail = (result.stderr or result.stdout or "").strip()[:400]
-        # `claude mcp add` exits non-zero both for a real registration failure
-        # and for "this name is already registered" -- the latter is not a
-        # failure at all, it is the idempotency signal that ColGREP is
-        # already correctly set up (a second `install --with-colgrep`, a
-        # prior partial install that got this far, or a leftover
-        # registration from outside this installer entirely). Treating it as
-        # a failure was the actual bug: it set `colgrep_ready = False`, which
-        # is exactly the flag `_cmd_install`'s `skills_need_run` checks
-        # before (re)deploying colgrep-search/code-overview, so the
-        # documented `install --with-colgrep` resume path silently skipped
-        # both skills with no error, and also never recorded "colgrep" as a
-        # completed step -- which is also why `uninstall` had nothing to undo
-        # (see `_cmd_uninstall`'s `colgrep_registered` check).
-        if "already exists" in detail.lower():
-            print(f"  colgrep: MCP server already registered ({detail})")
-        else:
-            print(f"  colgrep: MCP registration failed (exit {result.returncode}): {detail}")
-            return False
-
-    print("  colgrep: ready -- colgrep_search and colgrep_list_dev_indices are registered")
-    return True
+    return ensure_registration(ctx, source, binary)
 
 
 def _cmd_install(args: argparse.Namespace) -> int:
@@ -299,23 +273,36 @@ def _cmd_install(args: argparse.Namespace) -> int:
 
     timestamp = backup_mod.utc_timestamp()
 
-    # colgrep is optional and never gates completeness, but it runs before "skills"
+    # ColGREP is opt-in, but a requested setup must pass readiness. It runs before "skills"
     # so _install_skills knows whether ColGREP actually ended up ready --
     # installing colgrep-search/code-overview without a working ColGREP would leave
     # a silently non-functional command sitting in the user's command surface.
-    if "colgrep" in steps:
-        print("install: colgrep (already done)")
-        colgrep_ready = True
-    elif not args.with_colgrep:
+    colgrep_requested = args.with_colgrep or "colgrep" in steps or "colgrep_registered" in steps
+    if not colgrep_requested:
         print("install: colgrep")
         print("  colgrep: skipped (pass --with-colgrep to enable)")
         colgrep_ready = False
     else:
         print("install: colgrep")
         colgrep_ready = _install_colgrep(ctx, source)
-        if colgrep_ready:
+        # Registration can succeed while readiness fails. Keep its ownership
+        # recorded so uninstall can still remove it after a partial install.
+        from jswarm.installer.colgrep import owned_registration
+        from jswarm.host import current as current_host
+        try:
+            registered = current_host().mcp_registration("colgrep")
+        except ValueError:
+            registered = None
+        if registered and owned_registration(registered, source) and "colgrep_registered" not in steps:
+            steps.append("colgrep_registered")
+            _save("partial")
+        if colgrep_ready and "colgrep" not in steps:
             steps.append("colgrep")
             _save("partial")
+        if not colgrep_ready and ("colgrep" in steps or "colgrep_registered" in steps):
+            print("install: recorded ColGREP setup failed readiness; repair it before continuing.")
+            print("Next: ./install.sh install --with-colgrep   (here, in the jSwarm clone)")
+            return 1
 
     # "skills" alone is not a fine-enough marker: the first `install` (no
     # --with-colgrep) legitimately completes "skills" having deployed everything
@@ -356,6 +343,10 @@ def _cmd_install(args: argparse.Namespace) -> int:
         return 0
     if state == "complete":
         print("jSwarm installed.")
+        if colgrep_requested and not colgrep_ready:
+            print("ColGREP was requested but is not ready. Core files are installed; optional setup is incomplete.")
+            print("Next: ./install.sh install --with-colgrep   (here, in the jSwarm clone) to retry.")
+            return 1
         print("Next: ./install.sh verify   (here, in the jSwarm clone)")
         return 0
     print("install: partial (see the steps above). Re-run: ./install.sh install")
@@ -427,7 +418,16 @@ def _cmd_verify(args: argparse.Namespace) -> int:
         print("verify: some deployed artefacts are missing.")
         print("Next: ./install.sh install   (here, in the jSwarm clone) to repair them.")
         return 1
-    print("verify: install complete, all artefacts present.")
+    print("verify: all artefacts present.")
+    if "colgrep" in lock.steps_completed or "colgrep_registered" in lock.steps_completed:
+        from jswarm.installer.colgrep import verify_registration
+        from jswarm.installer.fsops import WriteContext
+        ready, detail = verify_registration(source, WriteContext(False, home).env())
+        print(f"colgrep runtime  {'ok' if ready else 'FAILED'}: {detail}")
+        if not ready:
+            print("Next: ./install.sh install --with-colgrep --dry-run, then install --with-colgrep to repair this clone's registration.")
+            return 1
+    print("verify: installation checks passed. Portal, indexed search, Jira, and the full lifecycle require separate checks.")
     print("Next: ./install.sh adopt <your repo>   (here, in the jSwarm clone)")
     return 0
 
@@ -485,12 +485,15 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
     source = jswarm_paths.jswarm_home()
     from_version = lock.public_version
     ctx = WriteContext(dry_run=args.dry_run, home=home)
+    colgrep_recorded = bool({"colgrep", "colgrep_registered"} & set(lock.steps_completed))
     to_version = _public_version(source, env=ctx.env())
     print(f"upgrade: {from_version} -> {to_version}")
 
     if args.dry_run:
-        pieces = ", ".join(["skills", "portal_config"] + (["colgrep"] if "colgrep" in lock.steps_completed else []))
+        pieces = ", ".join(["skills", "portal_config"] + (["colgrep"] if colgrep_recorded else []))
         print(f"DRY-RUN: would refresh Python dependencies, redeploy {pieces} and rewrite {lockfile.lock_path(home)}")
+        if colgrep_recorded and not _install_colgrep(ctx, source):
+            return 1
         print("Next: ./install.sh upgrade   (here, in the jSwarm clone) to apply it.")
         return 0
 
@@ -501,7 +504,11 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
         print("Next: ./install.sh install   (here, in the jSwarm clone) to repair dependencies")
         return 1
     timestamp = backup_mod.utc_timestamp()
-    colgrep_ready = "colgrep" in lock.steps_completed
+    colgrep_ready = colgrep_recorded
+    if colgrep_ready and not _install_colgrep(ctx, source):
+        print("upgrade: ColGREP repair or readiness failed; version lock and deployed skills left unchanged.")
+        print("Next: ./install.sh install --with-colgrep   (here, in the jSwarm clone) to repair it.")
+        return 1
     _install_skills(ctx, home, source, timestamp, with_colgrep=colgrep_ready)
     steps = list(lock.steps_completed)
     for step in ("venv", "skills"):
@@ -509,6 +516,8 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
             steps.append(step)
     if colgrep_ready and "skills_colgrep" not in steps:
         steps.append("skills_colgrep")
+    if colgrep_ready and "colgrep" not in steps:
+        steps.append("colgrep")
     lockfile.write(ctx, home, lockfile.Lock(public_version=to_version, installed_at=lock.installed_at, state=lock.state, steps_completed=steps))
     print(f"upgrade: done ({from_version} -> {to_version})")
     print("Next: ./install.sh verify   (here, in the jSwarm clone)")
@@ -531,12 +540,9 @@ def _cmd_uninstall(args: argparse.Namespace) -> int:
     ctx = WriteContext(dry_run=args.dry_run, home=home)
     host = current_host()
 
-    # Read before anything below removes the lock file: "colgrep" recorded
-    # as a completed step is the only record that `install` ever ran
-    # `claude mcp add` for it, so it is also the only signal `uninstall` has
-    # for whether there is a registration to undo.
+    # Keep both complete and partially registered setups removable.
     lock = lockfile.read(home)
-    colgrep_registered = bool(lock and "colgrep" in lock.steps_completed)
+    colgrep_registered = bool(lock and ({"colgrep", "colgrep_registered"} & set(lock.steps_completed)))
 
     source_skill_names: list[str] = []
     try:
@@ -595,15 +601,32 @@ def _cmd_uninstall(args: argparse.Namespace) -> int:
 
     if colgrep_registered:
         print("uninstall: colgrep MCP registration")
-        result = ctx.run(host.mcp_remove_argv("colgrep"))
+        from jswarm.installer.colgrep import owned_registration
+        try:
+            registered = host.mcp_registration("colgrep")
+        except ValueError as exc:
+            print(f"uninstall: {exc}; keeping the install record")
+            return 1
+        if registered and not owned_registration(registered, jswarm_paths.jswarm_home()):
+            print("uninstall: colgrep registration is unrelated or customized; inspect it manually. Install record kept.")
+            return 1
+        result = ctx.run(host.mcp_remove_argv("colgrep")) if registered else None
         if result is not None and result.returncode != 0:
             detail = (result.stderr or result.stdout or "").strip()[:400]
             print(
                 f"  colgrep: MCP removal failed (exit {result.returncode}): {detail}; "
                 f"remove it by hand: {host.name} mcp remove colgrep --scope user"
             )
-        else:
-            print("  colgrep: MCP registration removed")
+            print("uninstall: stopped; keeping the install record so removal can be retried.")
+            return 1
+        try:
+            remains = host.mcp_registration("colgrep") is not None
+        except ValueError:
+            remains = True
+        if remains:
+            print("uninstall: MCP removal could not be confirmed; keeping the install record for retry.")
+            return 1
+        print("  colgrep: MCP registration removed")
 
     for p in deployed:
         ctx.remove_tree(p)

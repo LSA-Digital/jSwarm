@@ -96,6 +96,30 @@ def test_search_finds_the_semantically_relevant_function(checkout):
     assert top["file"].endswith("auth.py") or "auth.py" in top["file"]
 
 
+def test_installer_module_launch_serves_a_real_indexed_search(checkout):
+    import asyncio
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+    from jswarm.installer.colgrep import desired_registration
+
+    async def search():
+        config = desired_registration(REPO_ROOT, _BINARY)
+        params = StdioServerParameters(command=config["command"], args=config["args"],
+                                       env=config["env"], cwd=checkout)
+        async with stdio_client(params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                result = await session.call_tool("colgrep_search", {
+                    "query": "authenticate a user with a password", "cwd": str(checkout), "top_k": 5,
+                })
+                assert not result.isError
+                payload = json.loads(next(block.text for block in result.content if block.type == "text"))
+                assert payload["ok"], payload
+                assert "authenticate_user" in [hit["name"] for hit in payload["results"]]
+
+    asyncio.run(asyncio.wait_for(search(), 90))
+
+
 def test_search_path_scopes_to_a_subtree(checkout):
     raw = srv.colgrep_search("anything at all", str(checkout), path="empty", top_k=5)
     payload = json.loads(raw)

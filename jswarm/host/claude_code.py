@@ -8,6 +8,7 @@ file locations, the hook interpreter, and MCP registration.
 from __future__ import annotations
 
 import shutil
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -73,8 +74,28 @@ class ClaudeCodeHost:
     def register_mcp_hint(self) -> str:
         return _MCP_HINT
 
-    def mcp_add_argv(self, name: str, command: str, args: list[str], *, scope: str = "user") -> list[str]:
-        return ["claude", "mcp", "add", "--scope", scope, name, command, *args]
+    def mcp_add_argv(self, name: str, command: str, args: list[str], *, scope: str = "user", env: dict[str, str] | None = None) -> list[str]:
+        # --env is variadic; the server name must precede it or the CLI
+        # consumes the name as another environment assignment.
+        argv = ["claude", "mcp", "add", "--scope", scope, name]
+        for key, value in (env or {}).items():
+            argv.extend(["--env", f"{key}={value}"])
+        return [*argv, *(["--"] if env else []), command, *args]
+
+    def mcp_registration(self, name: str) -> dict | None:
+        path = Path.home() / ".claude.json"
+        if not path.exists():
+            return None
+        try:
+            servers = json.loads(path.read_text()).get("mcpServers", {})
+            if not isinstance(servers, dict):
+                raise ValueError("invalid MCP map")
+            registration = servers.get(name)
+            if registration is not None and not isinstance(registration, dict):
+                raise ValueError("invalid MCP entry")
+            return registration
+        except (OSError, ValueError, AttributeError) as exc:
+            raise ValueError("cannot read user MCP configuration; inspect it before retrying") from exc
 
     def mcp_remove_argv(self, name: str, *, scope: str = "user") -> list[str]:
         return ["claude", "mcp", "remove", name, "--scope", scope]

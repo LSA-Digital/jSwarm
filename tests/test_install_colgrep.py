@@ -24,6 +24,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from tests.mcp_stub import write_claude_stub
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BASE_PATH = "/usr/bin:/bin:/usr/sbin:/sbin:" + str(REPO_ROOT / ".venv" / "bin")
@@ -49,7 +50,7 @@ def _stub_claude(bindir: Path, log: Path) -> None:
     `claude mcp add` -- see `jswarm.host.claude_code.ClaudeCodeHost.mcp_add_argv`.
     """
     bindir.mkdir(parents=True, exist_ok=True)
-    _write_stub(bindir / "claude", f'echo "$@" >> "{log}"\nexit 0')
+    write_claude_stub(bindir, log)
 
 
 def _run(args, *, home: Path, path: str, extra_env: dict | None = None):
@@ -67,7 +68,7 @@ def test_missing_rust_toolchain_is_actionable_not_a_traceback(tmp_path):
     # ColGREP-dependent skills or record a "colgrep" step.
     home = tmp_path / "home"
     r = _run(["install", "--with-colgrep"], home=home, path=BASE_PATH)
-    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.returncode == 1, r.stdout + r.stderr
     out = r.stdout + r.stderr
     assert "Traceback" not in out
     assert "Rust toolchain not found" in out
@@ -121,8 +122,9 @@ def test_real_run_installs_colgrep_registers_mcp_server_and_records_step(tmp_pat
     assert log.is_file(), "the installer never invoked the stub `claude mcp add`"
     call = log.read_text().strip()
     venv_python = str(REPO_ROOT / ".venv" / "bin" / "python")
-    mcp_server = str(REPO_ROOT / "jswarm" / "colgrep_mcp_server.py")
-    assert call == f"mcp add --scope user colgrep {venv_python} {mcp_server}"
+    assert call == (f"mcp add --scope user colgrep --env PYTHONPATH={REPO_ROOT} "
+                    f"--env COLGREP_BIN={bindir}/colgrep -- {venv_python} -m jswarm.colgrep_mcp_server")
+    assert "MCP handshake and both tools verified" in r.stdout
 
     skills = home / ".claude" / "skills"
     assert (skills / "colgrep-search" / "SKILL.md").is_file()
@@ -160,7 +162,7 @@ def test_missing_host_cli_during_mcp_registration_is_actionable_not_a_traceback(
     path = f"{bindir}:{BASE_PATH}"
 
     r = _run(["install", "--with-colgrep"], home=home, path=path)
-    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.returncode == 1, r.stdout + r.stderr
     out = r.stdout + r.stderr
     assert "Traceback" not in out
     assert "MCP registration failed" in out

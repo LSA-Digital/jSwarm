@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -151,7 +152,7 @@ class WriteContext:
         depends on inherited state to stay inside `self.home`.
         """
         prefix = "would run" if self.dry_run else "run"
-        line = f"  {prefix}: {' '.join(argv)}"
+        line = f"  {prefix}: {shlex.join(argv)}"
         self.actions.append(line)
         print(line)
         if self.dry_run:

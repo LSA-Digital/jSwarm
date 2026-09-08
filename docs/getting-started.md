@@ -108,13 +108,18 @@ This is the same `install` step, with one more flag. It:
 
 1. Checks for a Rust toolchain (`cargo` on PATH). If it's missing, it prints the
    exact fix (`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y`)
-   and stops there -- it never fails the rest of `install` over this, since ColGREP
-   is optional.
+   and leaves search disabled. The core can be installed without this option.
+   If you explicitly requested ColGREP and its setup fails, the command returns
+   nonzero and names the incomplete step; it does not claim search is ready.
 2. Installs the `colgrep` CLI with `cargo install colgrep` if it isn't already on
    PATH (or verifies the existing one).
 3. Registers `jswarm/colgrep_mcp_server.py` -- a small server bundled in this repo
    that wraps the `colgrep` CLI -- as an MCP server with Claude Code
-   (`claude mcp add --scope user colgrep -- <python> <server path>`).
+   using `<python> -m jswarm.colgrep_mcp_server`, with the clone's absolute path
+   in `PYTHONPATH` and the resolved CLI path in `COLGREP_BIN`. This works when
+   Claude starts in your application folder, not just inside the framework.
+   It performs a real MCP handshake and verifies both tool names before marking
+   search ready. It does not build an index during installation.
 4. Installs the `colgrep-search` and `code-overview` skills, which are skipped
    without this flag.
 
@@ -128,7 +133,12 @@ repository; later searches reuse it.
 
 If you already ran `install` without `--with-colgrep`, re-run it with the flag
 added -- `install` resumes from the first incomplete optional step, the same
-way it resumes any partial install.
+way it resumes any partial install. It also repairs this clone's legacy file-path
+MCP registration, even when the install lock already records ColGREP as complete.
+`upgrade` performs the same repair for installed ColGREP. Both support `--dry-run`
+and refuse to replace an unrelated or customized registration. Do not delete the
+install lock to force a repair. Restart Claude after a registration change and
+perform a real search against your application before calling search verified.
 
 ## 5. Restart Claude Code
 
@@ -141,11 +151,12 @@ commands that were just installed.
 ./install.sh verify
 ```
 
-This checks three things: the skills directory (`~/.claude/skills`) is in
-place, the portal config (`~/.jswarm/decision-review/config.json`) exists,
-and the jSwarm virtual environment's Python is present. It names exactly
-what to fix when one of them is missing. Do not continue until `verify`
-passes.
+This checks every expected skill file, the portal configuration, and the virtual
+environment's Python. When ColGREP was installed, it also checks its saved
+registration and executable, starts the server from outside the framework, and
+verifies an MCP handshake and both tools. A broken server fails verification.
+No search index is built by `verify`: indexed search, portal/browser readiness,
+Jira access, and the full lifecycle remain separate acceptance checks.
 
 ## 7. Adopt one application repository
 

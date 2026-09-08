@@ -107,7 +107,9 @@ def installed_home_with_colgrep(tmp_path_factory):
     """
     home = tmp_path_factory.mktemp("jswarm-install-home-colgrep")
     bindir = tmp_path_factory.mktemp("jswarm-install-bin")
-    for name in ("colgrep", "claude"):
+    from tests.mcp_stub import write_claude_stub
+    write_claude_stub(bindir)
+    for name in ("colgrep",):
         stub = bindir / name
         stub.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
         stub.chmod(0o755)

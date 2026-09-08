@@ -41,10 +41,14 @@ class Host(Protocol):
         """The command line that registers an MCP server with this host, for messages."""
         ...
 
-    def mcp_add_argv(self, name: str, command: str, args: list[str], *, scope: str = "user") -> list[str]:
+    def mcp_add_argv(self, name: str, command: str, args: list[str], *, scope: str = "user", env: dict[str, str] | None = None) -> list[str]:
         """The argv that registers a stdio MCP server named `name`, running
         `command args...`, with this host at the given scope.
         """
+        ...
+
+    def mcp_registration(self, name: str) -> dict | None:
+        """Read this user's registration without running it or exposing secrets."""
         ...
 
     def mcp_remove_argv(self, name: str, *, scope: str = "user") -> list[str]:

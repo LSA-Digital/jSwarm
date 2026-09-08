@@ -9,6 +9,10 @@ evidence that the full live lifecycle has been accepted.
 - Jira lifecycle operations use the active Claude Code session's authenticated
   Atlassian tools, with explicit pending requests and validated observed results.
 - ColGREP can be added after a core-only install and interrupted setup can resume.
+- ColGREP uses a directory-independent module launch. Install and upgrade repair
+  this clone's legacy MCP registration, and verify performs a real handshake.
+  Explicitly requested search failures return nonzero; failed uninstall keeps
+  the registration record for retry instead of claiming successful cleanup.
 - Local work-item slugs remain usable, including in Jira-configured projects.
 - Adoption excludes local runtime state from Git; review and commit the setup
   changes before starting the first plan.

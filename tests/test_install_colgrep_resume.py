@@ -5,16 +5,10 @@ another jSwarm session, a prior partial install, a leftover from an earlier
 `uninstall` that itself failed to clean up), silently deployed neither
 `colgrep-search` nor `code-overview`, with exit 0 and no warning.
 
-Root cause (`jswarm.installer.cli._install_colgrep`): `claude mcp add` exits
-non-zero both for a real registration failure and for "colgrep is already
-registered" -- which is not a failure, it is the idempotency signal that
-ColGREP is already correctly set up. Treating it as a failure set
-`colgrep_ready = False`, which gated the two dependent skills off even
-though colgrep itself was fine, and also meant `steps_completed` never
-recorded "colgrep" -- which is also why `uninstall` had nothing to undo (see
-`tests/test_install_colgrep_resume.py::test_uninstall_leaves_no_mcp_registration_behind`
-below, and `jswarm.installer.cli._cmd_uninstall`'s `colgrep_registered`
-check).
+`claude mcp add` reports "already registered" without proving the saved
+launcher works. Installation must inspect that entry, repair an owned
+legacy launcher, and perform a real handshake before deploying search
+skills. An unrelated entry must never be treated as success or replaced.
 
 Commit 7850ed8 added a `skills_colgrep` lock-file marker specifically so a
 resumed `install --with-colgrep` would redeploy the two skills once colgrep
@@ -25,11 +19,9 @@ path used a stub `claude` that always exits 0 for `mcp add`, so it never
 reproduced the actual failure shape the real CLI produces on an
 already-registered name, and passed the whole time regardless.
 
-This module drives `./install.sh` for real, against the real `claude` CLI
-(a stub cannot reproduce "already exists" -- it would just be told what to
-say), with `HOME` scoped to a throwaway directory so nothing here can touch
-the real machine's Claude configuration. Skips (not silently passes) when a
-real `claude` CLI a stub cannot stand in for is not available on `PATH`.
+This module drives `./install.sh` against the real `claude` CLI, with
+`HOME` scoped to a throwaway directory and `CLAUDE_CONFIG_DIR` removed.
+It skips explicitly when a real executable CLI is unavailable on PATH.
 """
 from __future__ import annotations
 
@@ -152,7 +144,7 @@ def test_with_colgrep_after_plain_install_deploys_both_skills_even_when_already_
     # with -- exactly what a prior partial/aborted colgrep setup (or this
     # same bug's uninstall side, see the sibling test below) leaves behind.
     leftover = subprocess.run(
-        [claude, "mcp", "add", "--scope", "user", "colgrep", "/usr/bin/true"],
+        [claude, "mcp", "add", "--scope", "user", "colgrep", str(REPO_ROOT / ".venv/bin/python"), str(REPO_ROOT / "jswarm/colgrep_mcp_server.py")],
         capture_output=True, text=True, timeout=20, env={"HOME": str(home), "PATH": f"{claude_dir}:{BASE_PATH}"},
     )
     assert leftover.returncode == 0, f"test setup: could not plant a leftover colgrep registration: {leftover.stdout + leftover.stderr}"
@@ -162,9 +154,8 @@ def test_with_colgrep_after_plain_install_deploys_both_skills_even_when_already_
     assert resumed.returncode == 0, resumed.stdout + resumed.stderr
     out = resumed.stdout + resumed.stderr
     assert "Traceback" not in out
-    assert "already exists" in out.lower() or "already registered" in out.lower(), (
-        f"expected the real CLI's already-registered message to surface, got:\n{out}"
-    )
+    assert "repairing this clone's MCP registration" in out
+    assert "MCP handshake and both tools verified" in out
 
     assert (skills / "colgrep-search" / "SKILL.md").is_file(), (
         f"colgrep-search was not deployed on resume even though ColGREP was already "

@@ -13,10 +13,9 @@ deploy `colgrep-search` and `code-overview` (see
 produced that state) -- `verify` never looked for those two skills by name,
 so their absence was invisible to it.
 
-This module never needs a real `claude` CLI: `verify` itself makes no
-subprocess calls, and a stub `claude` (exit 0 for `mcp add`) is enough to
-get `install --with-colgrep` to a "complete" lock state so its ColGREP-gated
-skills are the ones the missing-artifact check exercises.
+This module uses a stateful Claude CLI stub for registration and a real
+MCP handshake. The ColGREP-gated skills must exist independently of that
+connection check.
 """
 from __future__ import annotations
 
@@ -25,6 +24,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from tests.mcp_stub import write_claude_stub
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BASE_PATH = "/usr/bin:/bin:/usr/sbin:/sbin:" + str(REPO_ROOT / ".venv" / "bin")
@@ -77,7 +77,7 @@ def test_verify_fails_when_a_colgrep_gated_skill_is_missing_from_disk(tmp_path):
     home = tmp_path / "home"
     bindir = tmp_path / "bin"
     _write_stub(bindir / "colgrep", "exit 0")
-    _write_stub(bindir / "claude", "exit 0")  # stands in for a successful `mcp add`
+    write_claude_stub(bindir)
     path = f"{bindir}:{BASE_PATH}"
 
     r = _run(["install", "--with-colgrep"], home=home, path=path)
