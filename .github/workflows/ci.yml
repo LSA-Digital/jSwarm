@@ -9,6 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - uses: actions/setup-node@v4
@@ -17,6 +18,10 @@ jobs:
       # temporary homes, not authenticated lifecycle calls.
       - run: npm install -g @anthropic-ai/claude-code
       - run: python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
+      - name: Require release notes for product changes
+        env:
+          NOTES_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: .venv/bin/python -m jswarm.release_notes
       - run: .venv/bin/python -m pytest -q
       - run: .venv/bin/python -m jswarm.leakgate
       # Slow, real npm ci + astro build + live-server boot smoke test for the

@@ -1,4 +1,5 @@
 import json
+import io
 from pathlib import Path
 import subprocess
 
@@ -34,6 +35,7 @@ def checkout(tmp_path, monkeypatch):
     run(source, "config", "user.email", "upgrade-test")
     run(source, "config", "commit.gpgsign", "false")
     monkeypatch.setattr(upgrade, "ORIGINS", {str(upstream)})
+    monkeypatch.setattr(upgrade, "fetch_release_notes", lambda sha: "## v1.1.0 candidate (not released)\n\n### Added\n- A new feature.\n")
     monkeypatch.setenv("JSWARM_HOME", str(source))
     (home / ".jswarm").mkdir()
     (home / ".jswarm/install.lock.yaml").write_text("state: complete\n")
@@ -55,6 +57,8 @@ def test_check_is_read_only_and_reports_tag_separately_from_main(checkout):
     assert result["target"] == run(upstream, "rev-parse", "HEAD")
     assert result["update_available"] is True
     assert result["latest_tag"] == "v1.0.0"
+    assert result["release_notes"]["url"].endswith(result["target"] + "/CHANGELOG.md")
+    assert "candidate (not released)" in result["release_notes"]["markdown"]
     assert snapshot(source) == before
     assert not (home / "installer-calls").exists()
 
@@ -145,3 +149,68 @@ def test_git_environment_cannot_redirect_to_application(checkout, monkeypatch):
 def test_no_arguments_is_help_only(capsys):
     assert upgrade.main([]) == 0
     assert "prepare" in capsys.readouterr().out
+
+
+def test_unavailable_notes_stop_before_source_changes(checkout, monkeypatch):
+    source, upstream, home = checkout
+    before = snapshot(source)
+    def unavailable(sha):
+        raise upgrade.UpgradeError('Release notes unavailable. Try again.')
+    monkeypatch.setattr(upgrade, 'fetch_release_notes', unavailable)
+    with pytest.raises(upgrade.UpgradeError, match='Release notes unavailable'):
+        upgrade.prepare(source, run(source, 'rev-parse', 'HEAD'), run(upstream, 'rev-parse', 'HEAD'))
+    assert snapshot(source) == before
+    assert not (home / 'installer-calls').exists()
+
+
+def test_current_checkout_does_not_need_notes_download(checkout, monkeypatch):
+    source, upstream, _ = checkout
+    run(source, 'pull', '--ff-only')
+    def unexpected(sha):
+        pytest.fail('No notes download needed when source is current')
+    monkeypatch.setattr(upgrade, 'fetch_release_notes', unexpected)
+    assert upgrade.check(source)['release_notes'] is None
+
+
+def test_download_uses_exact_public_commit_and_is_bounded(monkeypatch):
+    seen = []
+    class Response(io.BytesIO):
+        def read(self, size):
+            assert size == 262145
+            return super().read(size)
+    class Opener:
+        def open(self, url, timeout):
+            seen.append((url, timeout))
+            return Response(b'## v1.1.0 candidate (not released)\n- Added a feature.\n')
+    monkeypatch.setattr(upgrade.urllib.request, 'build_opener', lambda handler: Opener())
+    assert 'Added a feature' in upgrade.fetch_release_notes('a' * 40)
+    assert seen == [(f'https://raw.githubusercontent.com/LSA-Digital/jSwarm/{"a" * 40}/CHANGELOG.md', 10)]
+
+
+@pytest.mark.parametrize('payload', [b'x' * 262145, b'\xff', b'<html>Unavailable</html>'])
+def test_invalid_notes_are_not_accepted(monkeypatch, payload):
+    class Opener:
+        def open(self, url, timeout):
+            return io.BytesIO(payload)
+    monkeypatch.setattr(upgrade.urllib.request, 'build_opener', lambda handler: Opener())
+    with pytest.raises(upgrade.UpgradeError, match='Release notes unavailable'):
+        upgrade.fetch_release_notes('a' * 40)
+
+
+def test_notes_do_not_follow_redirects_or_accept_unpinned_urls():
+    assert upgrade.NoRedirect().redirect_request(None, None, 302, None, None, 'https://other.example') is None
+    with pytest.raises(upgrade.UpgradeError, match='exact commit'):
+        upgrade.notes_url('main')
+
+
+def test_notes_diff_distinguishes_existing_from_new_changes(checkout, monkeypatch):
+    source, upstream, _ = checkout
+    (upstream / 'CHANGELOG.md').write_text('## v1.1.0 candidate (not released)\n- Existing feature.\n')
+    run(upstream, 'add', 'CHANGELOG.md')
+    run(upstream, 'commit', '-qm', 'existing release notes')
+    run(source, 'pull', '--ff-only')
+    run(upstream, 'commit', '--allow-empty', '-qm', 'another change')
+    monkeypatch.setattr(upgrade, 'fetch_release_notes', lambda sha: '## v1.1.0 candidate (not released)\n- Existing feature.\n- New fix.\n')
+    notes = upgrade.check(source)['release_notes']
+    assert '+- New fix.' in notes['changes_since_current']
+    assert '+- Existing feature.' not in notes['changes_since_current']

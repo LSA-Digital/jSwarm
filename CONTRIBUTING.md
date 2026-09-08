@@ -8,14 +8,18 @@ project's own virtual environment, never system Python:
 ```bash
 .venv/bin/python -m pytest -q
 .venv/bin/python -m jswarm.leakgate
+.venv/bin/python -m jswarm.release_notes
 ```
 
-Both must pass. The leak gate fails the build on ticket keys, internal
+All must pass. The leak gate fails the build on ticket keys, internal
 hostnames, and other markers that should never leave the repository this
 project was cut from; a clean commit introduces none of them.
 
 ## Rules
 
+- **Release notes with product changes.** Update the current candidate in
+  [CHANGELOG.md](CHANGELOG.md), including user actions and limitations. See the
+  [release process](docs/releasing.md) for required sections and publication checks.
 - **No ticket keys.** Do not reference an issue key from the private tracker
   this project was cut from in code, commits, or docs. Use a public example
   like `PS-14`, or a local slug like `add-csv-export`.
@@ -30,9 +34,9 @@ project was cut from; a clean commit introduces none of them.
 ## Reporting a bug
 
 Open an issue describing what you expected, what happened instead, and the
-exact commands you ran. Include your platform; macOS is the only supported
-platform in this release, and an issue on another platform is still
-welcome, but is not expected to be fixed.
+exact commands you ran. Include your platform and installed commit. The shell
+workflow supports macOS, Linux, and Windows through WSL2/Ubuntu, not native
+Windows shells. State whether you used a tagged release or main.
 
 ## Security issues
 

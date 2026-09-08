@@ -5,7 +5,10 @@
 If your installed skills include `/jUpgrade`, run it in Claude Code from your
 application folder. It checks the public main channel, reports your commit and
 the available commit separately from the latest release tag, and stops if already
-current. It asks before updating the source, then shows an installer dry run and
+current. Before approval, it shows release notes from the exact offered commit:
+new features, improvements, fixes, breaking changes, upgrade steps, and known
+limitations. It links the full notes and code comparison; missing notes stop the
+update. It asks before updating the source, then shows an installer dry run and
 asks again before applying and verifying the upgrade. Restart Claude afterward.
 
 The command never overwrites local edits, resets branches, or upgrades Enterprise.
@@ -38,7 +41,12 @@ If status lists local changes, stop and preserve them before continuing. Do not
 discard them or use a force reset. If you deliberately use a custom branch or a
 release tag, review its update path rather than switching it automatically.
 
-## 2. Get the latest main
+## 2. Review the notes and get the latest main
+
+Read the [main-channel release notes](https://github.com/LSA-Digital/jSwarm/blob/main/CHANGELOG.md)
+first, especially breaking changes, upgrade steps, and known limitations. For
+published versions, use [GitHub Releases](https://github.com/LSA-Digital/jSwarm/releases).
+Main-channel candidate notes describe unreleased work.
 
 For a clean checkout following the public `main` branch:
 
@@ -51,6 +59,9 @@ git switch main && git pull --ff-only origin main
 Stop if any command fails. `--ff-only` refuses to merge diverged history.
 `git pull` updates the source files; it does **not** replace the installed copies
 of your Claude skills. Review the dry run before applying the next step.
+Also read `CHANGELOG.md` in the updated clone: these are the notes belonging to
+the exact source you will install. If anything changed since your first review,
+review it now before applying the upgrade.
 
 The latest `main` includes the v1.1 feedback/HUD work. A commit on `main` is not
 a published release tag; record the commit above when reporting a problem.

@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 from pathlib import Path
 import re
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 
 from jswarm.installer.fsops import WriteContext
 from jswarm.paths import jswarm_home
@@ -21,6 +24,34 @@ ORIGINS = {
 
 class UpgradeError(RuntimeError):
     pass
+
+
+def notes_url(sha: str):
+    if not re.fullmatch(r'[a-f0-9]{40}', sha):
+        raise UpgradeError('Release notes require an exact commit hash.')
+    return f'https://raw.githubusercontent.com/LSA-Digital/jSwarm/{sha}/CHANGELOG.md'
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def fetch_release_notes(sha: str):
+    """Read public notes at the offered commit, never execute their content."""
+    url = notes_url(sha)
+    try:
+        opener = urllib.request.build_opener(NoRedirect())
+        with opener.open(url, timeout=10) as response:
+            payload = response.read(262145)
+        if len(payload) > 262144:
+            raise ValueError('Notes exceed the size limit')
+        markdown = payload.decode('utf-8')
+        if not re.search(r'^## v\d+\.\d+\.\d+', markdown, flags=re.MULTILINE):
+            raise ValueError('Missing version headings')
+        return markdown
+    except (OSError, ValueError, urllib.error.URLError) as exc:
+        raise UpgradeError(f'Release notes unavailable. Nothing was updated. Retry the check; review {url} if the problem persists.') from exc
 
 
 def environment(source: Path):
@@ -66,8 +97,18 @@ def check(source: Path):
         raise UpgradeError("Could not resolve public main. Nothing was updated.")
     versions = [tuple(map(int, match.groups())) for ref in refs
                 if (match := re.fullmatch(r"refs/tags/v(\d+)\.(\d+)\.(\d+)", ref))]
+    notes = None
+    if current != target:
+        markdown = fetch_release_notes(target)
+        previous = git(source, 'show', f'{current}:CHANGELOG.md', allowed=(0, 128))
+        notes = {'url': notes_url(target), 'markdown': markdown,
+                 'changes_since_current': ''.join(difflib.unified_diff(
+                     previous.stdout.splitlines(keepends=True), markdown.splitlines(keepends=True),
+                     fromfile='current/CHANGELOG.md', tofile='target/CHANGELOG.md')) if previous.returncode == 0 else None,
+                 'compare_url': f'https://github.com/LSA-Digital/jSwarm/compare/{current}...{target}'}
     return {"channel": "main (may contain unreleased changes)", "current": current, "target": target,
             "update_available": current != target,
+            "release_notes": notes,
             "latest_tag": "v" + ".".join(map(str, max(versions))) if versions else None,
             "note": "Different commits are not proof of a safe upgrade. Prepare checks fast-forward ancestry before changing source."}
 

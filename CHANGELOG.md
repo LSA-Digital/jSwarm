@@ -2,6 +2,8 @@
 
 ## v1.1.0 candidate (not released)
 
+### Added
+
 - `/jUpgrade` checks public main, pins the reviewed commit, previews installation,
   and upgrades/verifies after approval. Dirty, custom, and diverged checkouts stop
   without force resets. Existing installations need one manual upgrade to add it.
@@ -13,7 +15,48 @@
 - HUD quota usage/reset windows use native Claude data or session-bound provider
   snapshots. Missing, expired, and stale data are distinguished; provider collectors
   and model routing are not added to the open core by this reader.
+
+### Improved
+
+- `/jUpgrade` retrieves release notes at the exact offered commit before source
+  approval, with a notes diff and a code comparison link. Unavailable notes stop
+  the upgrade before source changes; notes are never executed as instructions.
+- Versioned notes now include upgrade steps, breaking changes, known limitations,
+  and verification. CI requires changelog changes alongside product changes;
+  maintainers still review their accuracy. See [Release process](docs/releasing.md).
+
+### Fixed
+
 - `verify` exercises a recorded HUD launcher; uninstall restores it before cleanup.
+
+### Breaking changes
+
+- None intended. `/jUpgrade` follows main, not the stable-release channel, and
+  deliberately refuses dirty checkouts, custom branches, and pinned tags.
+
+### Upgrade steps
+
+- Existing users need one [manual upgrade](docs/updating.md) to install `/jUpgrade`.
+  Review these notes and the installer dry run, apply, verify, then restart Claude Code.
+- HUD setup is optional and separate. Do not re-adopt projects or reinstall Jira.
+
+### Known limitations
+
+- This is unreleased main-channel work, not a published v1.1.0 release.
+- Private feedback submission still requires production captcha configuration and
+  a verified inbox round trip. Local report preparation does not prove delivery.
+- The HUD reader does not collect other providers' quotas. Real restarted-session
+  display and external provider snapshots still need acceptance testing.
+- Native Windows shells are unsupported. WSL2 manual acceptance remains separate
+  from automated Linux tests. Enterprise is not upgraded by the public installer.
+
+### Verification
+
+- Automated temporary-home upgrade tests exercise real Git checkouts, commit
+  pinning, approval boundaries, dirty/diverged rejection, and installer failure.
+- Release-note tests cover missing sections, product-change coverage, pinned note
+  retrieval, and stopping before source writes when notes cannot be read.
+- Passing tests are not a substitute for the remaining manual checks above.
 
 ## v1.0.0 — 2026-09-08
 
