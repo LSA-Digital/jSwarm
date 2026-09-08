@@ -9,6 +9,12 @@
 # changed, the occurrence was fixed) also fails the gate, so this list can
 # never silently rot.
 allow:
+  - path: jswarm/upgrade.py
+    pattern: '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+    reason: >-
+      Public GitHub SSH transport syntax in the exact origin allowlist, not
+      a personal email address or credential. Restricts upgrades to the public
+      LSA-Digital/jSwarm repository over GitHub HTTPS or SSH.
   - path: tests/test_feedback.py
     pattern: '\b(?:api[_-]?key|secret|token|access[_-]?token|client[_-]?secret)\b\s*[:=]\s*[''"]?[A-Za-z0-9._~+/=:\-]{20,}[''"]?'
     reason: >-

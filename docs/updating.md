@@ -1,5 +1,23 @@
 # Update jSwarm
 
+## Easiest: /jUpgrade
+
+If your installed skills include `/jUpgrade`, run it in Claude Code from your
+application folder. It checks the public main channel, reports your commit and
+the available commit separately from the latest release tag, and stops if already
+current. It asks before updating the source, then shows an installer dry run and
+asks again before applying and verifying the upgrade. Restart Claude afterward.
+
+The command never overwrites local edits, resets branches, or upgrades Enterprise.
+Pinned releases and custom branches stop for a deliberate channel choice. `main`
+can contain newer, unreleased work; it is not the stable-release channel.
+
+**Older installs do not have this command.** Use the manual steps below once,
+then restart Claude Code to make `/jUpgrade` available. If you installed a pinned
+release, explicitly choose to move to main before using that update path.
+
+## Manual update / first-time bootstrap
+
 Run these commands in **Terminal, in your jSwarm clone**, not in your application
 repository and not as slash commands inside Claude Code. The example uses the
 default `~/dev/jswarm` location; substitute your actual installation folder.

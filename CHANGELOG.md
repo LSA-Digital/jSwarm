@@ -2,6 +2,10 @@
 
 ## v1.1.0 candidate (not released)
 
+- `/jUpgrade` checks public main, pins the reviewed commit, previews installation,
+  and upgrades/verifies after approval. Dirty, custom, and diverged checkouts stop
+  without force resets. Existing installations need one manual upgrade to add it.
+
 - `/jFeedback` prepares an owner-reviewed local report for private submission to LSA.
   No public issue creation, automatic transcript upload, or background telemetry.
 - Optional `hud enable|status|disable` commands install a bundled status line, preserve

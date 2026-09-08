@@ -5,6 +5,9 @@ They are available from `main`; existing users should follow [Update jSwarm](upd
 before trying the new command or enabling the HUD. A published version tag remains separate.
 
 Contract addition: `/jFeedback` is an auxiliary public command, not a lifecycle step.
+`/jUpgrade` is also auxiliary: it checks and upgrades the public main channel with
+explicit source-update and installer-preview approvals. It does not upgrade projects
+or Enterprise; pinned tags and custom branches stop for manual channel selection.
 Personal provider-quota display is included in the public HUD; routing, account collectors,
 and enterprise governance remain separate capabilities. The private submission surface is
 `/feedback` with a POST-only `/api/feedback` endpoint on jarviswarm.com. There is no public fallback.
