@@ -427,6 +427,12 @@ def _cmd_verify(args: argparse.Namespace) -> int:
         if not ready:
             print("Next: ./install.sh install --with-colgrep --dry-run, then install --with-colgrep to repair this clone's registration.")
             return 1
+    if (home / ".jswarm/hud-install.json").exists():
+        from jswarm.installer.hud import verify as verify_hud
+        ready, detail = verify_hud()
+        print(f"hud runtime  {'ok' if ready else 'FAILED'}: {detail}")
+        if not ready:
+            return 1
     print("verify: installation checks passed. Portal, indexed search, Jira, and the full lifecycle require separate checks.")
     print("Next: ./install.sh adopt <your repo>   (here, in the jSwarm clone)")
     return 0
@@ -539,6 +545,13 @@ def _cmd_uninstall(args: argparse.Namespace) -> int:
     home = Path.home()
     ctx = WriteContext(dry_run=args.dry_run, home=home)
     host = current_host()
+    from jswarm.installer.hud import configure as configure_hud
+    if (home / ".jswarm/hud-install.json").exists():
+        try:
+            configure_hud("disable", dry_run=args.dry_run)
+        except (ValueError, OSError) as exc:
+            print(f"uninstall: stopped before cleanup; {exc}")
+            return 1
 
     # Keep both complete and partially registered setups removable.
     lock = lockfile.read(home)
@@ -656,6 +669,11 @@ def _cmd_uninstall(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_hud(args: argparse.Namespace) -> int:
+    from jswarm.installer.hud import run
+    return run(args)
+
+
 # --------------------------------------------------------------------- main
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="jswarm.installer.cli")
@@ -668,6 +686,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_install.add_argument("--with-colgrep", action="store_true")
 
     sub.add_parser("verify")
+    p_hud = sub.add_parser("hud")
+    p_hud.add_argument("action", choices=("status", "enable", "disable"), nargs="?", default="status")
+    p_hud.add_argument("--dry-run", action="store_true")
+    p_hud.add_argument("--replace-existing", action="store_true")
 
     p_adopt = sub.add_parser("adopt")
     p_adopt.add_argument("repo")
@@ -690,6 +712,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 _HANDLERS = {
+    "hud": _cmd_hud,
     "check": _cmd_check,
     "install": _cmd_install,
     "verify": _cmd_verify,

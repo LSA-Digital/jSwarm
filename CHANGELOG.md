@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.1.0 candidate (not released)
+
+- `/jFeedback` prepares an owner-reviewed local report for private submission to LSA.
+  No public issue creation, automatic transcript upload, or background telemetry.
+- Optional `hud enable|status|disable` commands install a bundled status line, preserve
+  existing Claude settings, and restore the previous status line on removal.
+- HUD quota usage/reset windows use native Claude data or session-bound provider
+  snapshots. Missing, expired, and stale data are distinguished; provider collectors
+  and model routing are not added to the open core by this reader.
+- `verify` exercises a recorded HUD launcher; uninstall restores it before cleanup.
+
 ## v1.0.0 (unreleased)
 
 The first release is being prepared as v1.0.0. Publication is pending the

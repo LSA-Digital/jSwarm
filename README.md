@@ -46,6 +46,13 @@ Claude Code is the only supported agent host, and Jira is the only tracker adapt
 See [Getting started](docs/getting-started.md#what-this-guide-supports) for
 the exact statement of what is and is not supported.
 
+## v1.1 preview: feedback and HUD
+
+The v1.1 candidate adds `/jFeedback` for private, reviewed reports to LSA and an
+optional local HUD with provider-quota usage and reset times. See
+[Feedback and HUD](docs/feedback-and-hud.md) for setup and data-source limits.
+This is not a v1.1 release announcement.
+
 ## Enterprise
 
 jSwarm is the open core: a complete way to run one work item through the

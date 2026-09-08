@@ -50,6 +50,7 @@ Usage:
   $(basename "$0") unadopt <repo-path> [--dry-run]
   $(basename "$0") upgrade [--dry-run]
   $(basename "$0") uninstall [--keep-backups] [--dry-run]
+  $(basename "$0") hud status|enable|disable [--dry-run] [--replace-existing]
   $(basename "$0") portal [--background]
   $(basename "$0") portal --stop
 
@@ -307,6 +308,11 @@ main() {
     upgrade) shift; cmd_upgrade "$@" ;;
     uninstall) shift; cmd_uninstall "$@" ;;
     portal) shift; cmd_portal "$@" ;;
+    hud)
+      shift
+      local py; py="$(resolve_py_or_empty)"; die_if_not_installed hud "$py"
+      ( cd "$JSWARM_HOME" && "$py" -m jswarm.installer.cli hud "$@" )
+      ;;
     -h|--help|help) usage ;;
     *) err "unknown command: $1"; usage; exit 2 ;;
   esac

@@ -9,6 +9,12 @@
 # changed, the occurrence was fixed) also fails the gate, so this list can
 # never silently rot.
 allow:
+  - path: tests/test_feedback.py
+    pattern: '\b(?:api[_-]?key|secret|token|access[_-]?token|client[_-]?secret)\b\s*[:=]\s*[''"]?[A-Za-z0-9._~+/=:\-]{20,}[''"]?'
+    reason: >-
+      Deliberately synthetic alphabet-and-digits token assignment verifies that
+      a feedback draft removes recognizable secrets before the user reviews it.
+      This is not a usable credential and is never sent to a service.
   - path: tests/test_release_version.py
     pattern: '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
     reason: >-
