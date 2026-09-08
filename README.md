@@ -10,11 +10,12 @@ slug and no tracker at all.
 
 ## Install
 
-The first release is **v1.0.0**. Until its release tag is published, `main` is
-a development checkout, not a released version.
+The first release is **[v1.0.0](https://github.com/LSA-Digital/jSwarm/releases/tag/v1.0.0)**.
+The commands below install that fixed release. `main` is the development channel
+and may include newer, not-yet-released features.
 
 ```bash
-git clone https://github.com/LSA-Digital/jSwarm ~/dev/jswarm && cd ~/dev/jswarm
+git clone --branch v1.0.0 https://github.com/LSA-Digital/jSwarm ~/dev/jswarm && cd ~/dev/jswarm
 ./install.sh check
 ./install.sh install
 ```
